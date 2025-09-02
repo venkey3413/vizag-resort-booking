@@ -1,18 +1,20 @@
 #!/bin/bash
-# EC2 deployment script
+# EC2 deployment script for Ubuntu
 
 # Update system
-sudo yum update -y
+sudo apt update -y
 
 # Install Node.js
-curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
-sudo yum install -y nodejs
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
 # Install PM2 for process management
 sudo npm install -g pm2
 
-# Clone repository
-git clone https://github.com/venkey3413/resort-booking-app.git
+# Clone repository (skip if already exists)
+if [ ! -d "resort-booking-app" ]; then
+    git clone https://github.com/venkey3413/resort-booking-app.git
+fi
 cd resort-booking-app
 
 # Install dependencies
