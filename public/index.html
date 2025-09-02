@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resort Booking</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Resort Booking Management</h1>
+        
+        <!-- Add Resort Form -->
+        <div class="form-section">
+            <h2>Add New Resort</h2>
+            <form id="resortForm" enctype="multipart/form-data">
+                <input type="text" id="name" placeholder="Resort Name" required>
+                <input type="number" id="price" placeholder="Price per night" required>
+                <textarea id="description" placeholder="Description" required></textarea>
+                <input type="file" id="image" accept="image/*">
+                <button type="submit">Add Resort</button>
+            </form>
+        </div>
+
+        <!-- Resorts List -->
+        <div class="resorts-section">
+            <h2>Resorts</h2>
+            <div id="resortsList"></div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Resort</h2>
+            <form id="editForm" enctype="multipart/form-data">
+                <input type="hidden" id="editId">
+                <input type="text" id="editName" placeholder="Resort Name" required>
+                <input type="number" id="editPrice" placeholder="Price per night" required>
+                <textarea id="editDescription" placeholder="Description" required></textarea>
+                <input type="file" id="editImage" accept="image/*">
+                <button type="submit">Update Resort</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
