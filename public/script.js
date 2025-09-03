@@ -57,17 +57,17 @@ function displayResorts(filteredResorts = resorts) {
     
     grid.innerHTML = filteredResorts.map(resort => `
         <div class="resort-card">
-            <div class="image-gallery">
+            <div class="image-gallery" data-resort-id="${resort.id}">
                 ${resort.images && resort.images.length > 1 ? 
                     `<div class="image-slider">
                         ${resort.images.map((img, index) => 
                             `<img src="${img}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" 
-                                 onclick="showImage(this, ${resort.id})" 
+                                 onclick="showImage(${index}, ${resort.id})" 
                                  onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`
                         ).join('')}
                         <div class="image-dots">
                             ${resort.images.map((_, index) => 
-                                `<span class="dot ${index === 0 ? 'active' : ''}" onclick="currentSlide(${index + 1}, ${resort.id})"></span>`
+                                `<span class="dot ${index === 0 ? 'active' : ''}" onclick="showImage(${index}, ${resort.id})"></span>`
                             ).join('')}
                         </div>
                     </div>` :
@@ -242,29 +242,20 @@ function setMinDate() {
 }
 
 // Image slider functions
-function showImage(img, resortId) {
-    const card = img.closest('.resort-card');
-    const images = card.querySelectorAll('.resort-image');
-    const dots = card.querySelectorAll('.dot');
+function showImage(index, resortId) {
+    const gallery = document.querySelector(`[data-resort-id="${resortId}"]`);
+    if (!gallery) return;
     
-    images.forEach(image => image.classList.remove('active'));
+    const images = gallery.querySelectorAll('.resort-image');
+    const dots = gallery.querySelectorAll('.dot');
+    
+    // Remove active class from all
+    images.forEach(img => img.classList.remove('active'));
     dots.forEach(dot => dot.classList.remove('active'));
     
-    img.classList.add('active');
-    const index = Array.from(images).indexOf(img);
+    // Add active class to selected
+    if (images[index]) images[index].classList.add('active');
     if (dots[index]) dots[index].classList.add('active');
-}
-
-function currentSlide(n, resortId) {
-    const card = document.querySelector(`[data-resort-id="${resortId}"]`) || document.querySelector('.resort-card');
-    const images = card.querySelectorAll('.resort-image');
-    const dots = card.querySelectorAll('.dot');
-    
-    images.forEach(image => image.classList.remove('active'));
-    dots.forEach(dot => dot.classList.remove('active'));
-    
-    if (images[n-1]) images[n-1].classList.add('active');
-    if (dots[n-1]) dots[n-1].classList.add('active');
 }
 
 // Close modals when clicking outside
