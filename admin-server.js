@@ -35,10 +35,18 @@ initDatabase();
 app.get('/api/resorts', async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM resorts ORDER BY id DESC');
-        const resorts = rows.map(row => ({
-            ...row,
-            amenities: JSON.parse(row.amenities || '[]')
-        }));
+        const resorts = rows.map(row => {
+            let amenities = [];
+            try {
+                amenities = JSON.parse(row.amenities || '[]');
+            } catch (e) {
+                amenities = typeof row.amenities === 'string' ? [row.amenities] : [];
+            }
+            return {
+                ...row,
+                amenities
+            };
+        });
         res.json(resorts);
     } catch (error) {
         console.error('Error fetching resorts:', error);
