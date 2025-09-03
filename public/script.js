@@ -12,8 +12,6 @@ function setupEventListeners() {
     // Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
-            if (this.getAttribute('target') === '_blank') return; // Skip external links
-            
             e.preventDefault();
             const target = this.getAttribute('href').substring(1);
             scrollToSection(target);
