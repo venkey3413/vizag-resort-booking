@@ -14,29 +14,28 @@ app.use('/uploads', express.static('uploads'));
 // Initialize database on startup
 initDatabase();
 
-// Get resorts from database
+// Get resorts from database with images
 async function getResorts() {
     try {
         const [rows] = await pool.execute('SELECT * FROM resorts ORDER BY id DESC');
-        return rows.map(row => {
-            let amenities = [];
-            let images = [];
+        
+        // Get images for each resort from separate table
+        for (let row of rows) {
+            const [imageRows] = await pool.execute(
+                'SELECT image_path FROM resort_images WHERE resort_id = ? ORDER BY image_order',
+                [row.id]
+            );
+            
+            row.images = imageRows.length > 0 ? imageRows.map(img => img.image_path) : [row.image];
+            
             try {
-                amenities = JSON.parse(row.amenities || '[]');
+                row.amenities = JSON.parse(row.amenities || '[]');
             } catch (e) {
-                amenities = typeof row.amenities === 'string' ? [row.amenities] : [];
+                row.amenities = typeof row.amenities === 'string' ? [row.amenities] : [];
             }
-            try {
-                images = JSON.parse(row.images || '["' + row.image + '"]');
-            } catch (e) {
-                images = [row.image];
-            }
-            return {
-                ...row,
-                amenities,
-                images
-            };
-        });
+        }
+        
+        return rows;
     } catch (error) {
         console.error('Error fetching resorts:', error);
         return [];

@@ -46,13 +46,24 @@ async function createTables() {
                 price INT NOT NULL,
                 description TEXT,
                 image VARCHAR(500),
-                images JSON,
                 amenities JSON,
                 rating DECIMAL(2,1) DEFAULT 0,
                 available BOOLEAN DEFAULT TRUE,
                 max_guests INT DEFAULT 10,
                 per_head_charge INT DEFAULT 300,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Resort Images table
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS resort_images (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                resort_id INT NOT NULL,
+                image_path VARCHAR(500) NOT NULL,
+                image_order INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (resort_id) REFERENCES resorts(id) ON DELETE CASCADE
             )
         `);
 
@@ -110,15 +121,33 @@ async function createTables() {
             // Column already exists
         }
 
-        // Clear existing data and insert fresh resorts
-        await connection.execute('DELETE FROM resorts');
-        await connection.execute(`
-            INSERT INTO resorts (name, location, price, description, image, images, amenities, rating, available, max_guests, per_head_charge) VALUES
-            ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5, TRUE, 8, 500),
-            ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2, TRUE, 10, 300),
-            ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Lake View", "Heritage", "Restaurant", "WiFi"]', 4.7, TRUE, 12, 400)
-        `);
-        console.log('✅ Default resorts with multiple images inserted');
+        // Insert default resorts if table is empty
+        const [rows] = await connection.execute('SELECT COUNT(*) as count FROM resorts');
+        if (rows[0].count === 0) {
+            // Insert resorts
+            await connection.execute(`
+                INSERT INTO resorts (name, location, price, description, image, amenities, rating, available, max_guests, per_head_charge) VALUES
+                ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5, TRUE, 8, 500),
+                ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2, TRUE, 10, 300),
+                ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views', '/uploads/default-resort.jpg', '["Lake View", "Heritage", "Restaurant", "WiFi"]', 4.7, TRUE, 12, 400)
+            `);
+            
+            // Insert multiple images for each resort
+            await connection.execute(`
+                INSERT INTO resort_images (resort_id, image_path, image_order) VALUES
+                (1, '/uploads/default-resort.jpg', 1),
+                (1, '/uploads/default-resort.jpg', 2),
+                (1, '/uploads/default-resort.jpg', 3),
+                (2, '/uploads/default-resort.jpg', 1),
+                (2, '/uploads/default-resort.jpg', 2),
+                (2, '/uploads/default-resort.jpg', 3),
+                (3, '/uploads/default-resort.jpg', 1),
+                (3, '/uploads/default-resort.jpg', 2),
+                (3, '/uploads/default-resort.jpg', 3)
+            `);
+            
+            console.log('✅ Default resorts with multiple images inserted');
+        }
 
     } finally {
         connection.release();
