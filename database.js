@@ -3,8 +3,8 @@ const mysql = require('mysql2/promise');
 // Database configuration
 const dbConfig = {
     host: 'localhost',
-    user: 'root',
-    password: 'password', // Change this
+    user: 'resort_user',
+    password: 'ResortPass123!',
     database: 'resort_booking'
 };
 
