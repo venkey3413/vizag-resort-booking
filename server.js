@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { pool, initDatabase } = require('./database');
+const { db, initDatabase } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,28 +14,34 @@ app.use('/uploads', express.static('uploads'));
 // Initialize database on startup
 initDatabase();
 
-// Get resorts from database with images
+// Get resorts from database
 async function getResorts() {
     try {
-        const [rows] = await pool.execute('SELECT * FROM resorts ORDER BY id DESC');
+        const rows = await db().all('SELECT * FROM resorts WHERE available = 1 ORDER BY id DESC');
         
-        // Get images for each resort from separate table
-        for (let row of rows) {
-            const [imageRows] = await pool.execute(
-                'SELECT image_path FROM resort_images WHERE resort_id = ? ORDER BY image_order',
-                [row.id]
-            );
-            
-            row.images = imageRows.length > 0 ? imageRows.map(img => img.image_path) : [row.image];
+        return rows.map(row => {
+            let amenities = [];
+            let images = [];
             
             try {
-                row.amenities = JSON.parse(row.amenities || '[]');
+                amenities = JSON.parse(row.amenities || '[]');
             } catch (e) {
-                row.amenities = typeof row.amenities === 'string' ? [row.amenities] : [];
+                amenities = [];
             }
-        }
-        
-        return rows;
+            
+            try {
+                images = JSON.parse(row.images || '[]');
+            } catch (e) {
+                images = [row.image];
+            }
+            
+            return {
+                ...row,
+                amenities,
+                images,
+                available: Boolean(row.available)
+            };
+        });
     } catch (error) {
         console.error('Error fetching resorts:', error);
         return [];
@@ -77,13 +83,13 @@ app.post('/api/bookings', async (req, res) => {
         
         const totalPrice = (basePrice + (extraGuests * perHeadCharge)) * nights;
         
-        const [result] = await pool.execute(
+        const result = await db().run(
             'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [parseInt(resortId), resort.name, guestName, email, phone, checkIn, checkOut, guestCount, totalPrice, 'confirmed']
         );
         
         const booking = {
-            id: result.insertId,
+            id: result.lastID,
             resortId: parseInt(resortId),
             resortName: resort.name,
             guestName,

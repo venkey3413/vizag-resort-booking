@@ -1,32 +1,23 @@
-const mysql = require('mysql2/promise');
+const sqlite3 = require('sqlite3').verbose();
+const { open } = require('sqlite');
 
-// Database configuration
-const dbConfig = {
-    host: 'localhost',
-    user: 'resort_user',
-    password: 'ResortPass123!',
-    database: 'resort_booking'
-};
+let db;
 
-// Create connection pool
-const pool = mysql.createPool(dbConfig);
+// Initialize SQLite database
+async function initDB() {
+    db = await open({
+        filename: './resort_booking.db',
+        driver: sqlite3.Database
+    });
+    return db;
+}
 
 // Initialize database and tables
 async function initDatabase() {
     try {
-        const connection = await mysql.createConnection({
-            host: dbConfig.host,
-            user: dbConfig.user,
-            password: dbConfig.password
-        });
-
-        // Create database if not exists
-        await connection.execute(`CREATE DATABASE IF NOT EXISTS ${dbConfig.database}`);
-        await connection.end();
-
-        // Create tables
+        await initDB();
         await createTables();
-        console.log('✅ Database initialized successfully');
+        console.log('✅ SQLite Database initialized successfully');
     } catch (error) {
         console.error('❌ Database initialization failed:', error.message);
     }
@@ -34,124 +25,60 @@ async function initDatabase() {
 
 // Create tables
 async function createTables() {
-    const connection = await pool.getConnection();
-    
     try {
         // Resorts table
-        await connection.execute(`
+        await db.exec(`
             CREATE TABLE IF NOT EXISTS resorts (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                location VARCHAR(255) NOT NULL,
-                price INT NOT NULL,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                location TEXT NOT NULL,
+                price INTEGER NOT NULL,
                 description TEXT,
-                image VARCHAR(500),
-                amenities JSON,
-                rating DECIMAL(2,1) DEFAULT 0,
-                available BOOLEAN DEFAULT TRUE,
-                max_guests INT DEFAULT 10,
-                per_head_charge INT DEFAULT 300,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-        
-        // Resort Images table
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS resort_images (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                resort_id INT NOT NULL,
-                image_path VARCHAR(500) NOT NULL,
-                image_order INT DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (resort_id) REFERENCES resorts(id) ON DELETE CASCADE
+                image TEXT,
+                images TEXT,
+                amenities TEXT,
+                rating REAL DEFAULT 0,
+                available INTEGER DEFAULT 1,
+                max_guests INTEGER DEFAULT 10,
+                per_head_charge INTEGER DEFAULT 300,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
         // Bookings table
-        await connection.execute(`
+        await db.exec(`
             CREATE TABLE IF NOT EXISTS bookings (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                resort_id INT,
-                resort_name VARCHAR(255),
-                guest_name VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                phone VARCHAR(20) NOT NULL,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                resort_id INTEGER,
+                resort_name TEXT,
+                guest_name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT NOT NULL,
                 check_in DATE NOT NULL,
                 check_out DATE NOT NULL,
-                guests INT NOT NULL,
-                total_price INT NOT NULL,
-                payment_id VARCHAR(255),
-                status VARCHAR(50) DEFAULT 'confirmed',
-                booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (resort_id) REFERENCES resorts(id) ON DELETE SET NULL
+                guests INTEGER NOT NULL,
+                total_price INTEGER NOT NULL,
+                payment_id TEXT,
+                status TEXT DEFAULT 'confirmed',
+                booking_date DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
-        // Add available column if it doesn't exist
-        try {
-            await connection.execute('ALTER TABLE resorts ADD COLUMN available BOOLEAN DEFAULT TRUE');
-        } catch (e) {
-            // Column already exists
-        }
-        
-        // Add images column if it doesn't exist
-        try {
-            await connection.execute('ALTER TABLE resorts ADD COLUMN images JSON');
-        } catch (e) {
-            // Column already exists
-        }
-        
-        // Add pricing columns if they don't exist
-        try {
-            await connection.execute('ALTER TABLE resorts ADD COLUMN max_guests INT DEFAULT 10');
-        } catch (e) {
-            // Column already exists
-        }
-        
-        try {
-            await connection.execute('ALTER TABLE resorts ADD COLUMN per_head_charge INT DEFAULT 300');
-        } catch (e) {
-            // Column already exists
-        }
-        
-        // Add payment_id column to bookings if it doesn't exist
-        try {
-            await connection.execute('ALTER TABLE bookings ADD COLUMN payment_id VARCHAR(255)');
-        } catch (e) {
-            // Column already exists
-        }
-
         // Insert default resorts if table is empty
-        const [rows] = await connection.execute('SELECT COUNT(*) as count FROM resorts');
-        if (rows[0].count === 0) {
-            // Insert resorts
-            await connection.execute(`
-                INSERT INTO resorts (name, location, price, description, image, amenities, rating, available, max_guests, per_head_charge) VALUES
-                ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5, TRUE, 8, 500),
-                ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2, TRUE, 10, 300),
-                ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views', '/uploads/default-resort.jpg', '["Lake View", "Heritage", "Restaurant", "WiFi"]', 4.7, TRUE, 12, 400)
-            `);
-            
-            // Insert multiple images for each resort
-            await connection.execute(`
-                INSERT INTO resort_images (resort_id, image_path, image_order) VALUES
-                (1, '/uploads/default-resort.jpg', 1),
-                (1, '/uploads/default-resort.jpg', 2),
-                (1, '/uploads/default-resort.jpg', 3),
-                (2, '/uploads/default-resort.jpg', 1),
-                (2, '/uploads/default-resort.jpg', 2),
-                (2, '/uploads/default-resort.jpg', 3),
-                (3, '/uploads/default-resort.jpg', 1),
-                (3, '/uploads/default-resort.jpg', 2),
-                (3, '/uploads/default-resort.jpg', 3)
+        const result = await db.get('SELECT COUNT(*) as count FROM resorts');
+        if (result.count === 0) {
+            await db.exec(`
+                INSERT INTO resorts (name, location, price, description, image, images, amenities, rating, available, max_guests, per_head_charge) VALUES
+                ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5, 1, 8, 500),
+                ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2, 1, 10, 300),
+                ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Lake View", "Heritage", "Restaurant", "WiFi"]', 4.7, 1, 12, 400)
             `);
             
             console.log('✅ Default resorts with multiple images inserted');
         }
-
-    } finally {
-        connection.release();
+    } catch (error) {
+        console.error('Error creating tables:', error);
     }
 }
 
-module.exports = { pool, initDatabase };
+module.exports = { db: () => db, initDatabase };
