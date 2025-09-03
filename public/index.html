@@ -136,6 +136,38 @@
         </div>
     </div>
 
+    <!-- Resort Details Modal -->
+    <div id="resortDetailsModal" class="modal">
+        <div class="resort-details-content">
+            <span class="close" onclick="closeResortDetails()">&times;</span>
+            <div class="resort-details-gallery">
+                <div class="main-image">
+                    <button class="nav-arrow prev-arrow" onclick="previousImage()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <img id="mainResortImage" src="" alt="">
+                    <button class="nav-arrow next-arrow" onclick="nextImage()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="image-counter">
+                        <span id="currentImageIndex">1</span> / <span id="totalImages">1</span>
+                    </div>
+                </div>
+                <div class="thumbnail-images" id="thumbnailImages"></div>
+            </div>
+            <div class="resort-details-info">
+                <h2 id="detailsResortName"></h2>
+                <p id="detailsLocation"></p>
+                <p id="detailsPrice"></p>
+                <p id="detailsDescription"></p>
+                <div id="detailsAmenities"></div>
+                <button class="book-btn" id="detailsBookBtn" onclick="openBookingFromDetails()">
+                    <i class="fas fa-calendar-check"></i> Book Now
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
