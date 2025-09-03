@@ -201,28 +201,62 @@ async function handleBooking(e) {
         guests: document.getElementById('guests').value
     };
     
-    try {
-        const response = await fetch('/api/bookings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-        
-        if (response.ok) {
-            const booking = await response.json();
-            alert(`Booking confirmed! Total: ₹${booking.totalPrice}`);
-            closeModal();
-            document.getElementById('bookingForm').reset();
-        } else {
-            const errorData = await response.json();
-            alert(errorData.error || 'Error creating booking');
+    // Get total amount for payment
+    const totalText = document.getElementById('totalAmount').textContent;
+    const totalAmount = parseInt(totalText.replace(/[^0-9]/g, ''));
+    
+    // Initialize Razorpay payment
+    const options = {
+        key: 'rzp_test_1234567890', // Replace with your Razorpay key
+        amount: totalAmount * 100, // Amount in paise
+        currency: 'INR',
+        name: 'Resort Booking',
+        description: `Booking for ${formData.guestName}`,
+        image: '/favicon.ico',
+        handler: async function(response) {
+            // Payment successful, create booking
+            formData.paymentId = response.razorpay_payment_id;
+            
+            try {
+                const bookingResponse = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (bookingResponse.ok) {
+                    const booking = await bookingResponse.json();
+                    alert(`Payment Successful! Booking confirmed. Payment ID: ${response.razorpay_payment_id}`);
+                    closeModal();
+                    document.getElementById('bookingForm').reset();
+                } else {
+                    const errorData = await bookingResponse.json();
+                    alert(errorData.error || 'Booking failed after payment');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Booking failed after payment. Contact support.');
+            }
+        },
+        prefill: {
+            name: formData.guestName,
+            email: formData.email,
+            contact: formData.phone
+        },
+        theme: {
+            color: '#667eea'
+        },
+        modal: {
+            ondismiss: function() {
+                alert('Payment cancelled');
+            }
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error creating booking');
-    }
+    };
+    
+    const rzp = new Razorpay(options);
+    rzp.open();
 }
 
 

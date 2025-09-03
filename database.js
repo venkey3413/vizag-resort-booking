@@ -69,6 +69,7 @@ async function createTables() {
                 check_out DATE NOT NULL,
                 guests INT NOT NULL,
                 total_price INT NOT NULL,
+                payment_id VARCHAR(255),
                 status VARCHAR(50) DEFAULT 'confirmed',
                 booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (resort_id) REFERENCES resorts(id) ON DELETE SET NULL
@@ -98,6 +99,13 @@ async function createTables() {
         
         try {
             await connection.execute('ALTER TABLE resorts ADD COLUMN per_head_charge INT DEFAULT 300');
+        } catch (e) {
+            // Column already exists
+        }
+        
+        // Add payment_id column to bookings if it doesn't exist
+        try {
+            await connection.execute('ALTER TABLE bookings ADD COLUMN payment_id VARCHAR(255)');
         } catch (e) {
             // Column already exists
         }

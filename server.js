@@ -79,8 +79,8 @@ app.post('/api/bookings', async (req, res) => {
         const totalPrice = (basePrice + (extraGuests * perHeadCharge)) * nights;
         
         const [result] = await pool.execute(
-            'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [parseInt(resortId), resort.name, guestName, email, phone, checkIn, checkOut, guestCount, totalPrice]
+            'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, payment_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [parseInt(resortId), resort.name, guestName, email, phone, checkIn, checkOut, guestCount, totalPrice, req.body.paymentId || null, 'confirmed']
         );
         
         const booking = {
@@ -95,6 +95,7 @@ app.post('/api/bookings', async (req, res) => {
             guests: parseInt(guests),
             totalPrice: totalPrice,
             status: 'confirmed',
+            paymentId: req.body.paymentId || null,
             bookingDate: new Date().toISOString()
         };
         
