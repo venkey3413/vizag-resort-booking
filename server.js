@@ -55,6 +55,10 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
+        if (!resort.available) {
+            return res.status(400).json({ error: 'Resort is currently unavailable for booking' });
+        }
+        
         const [result] = await pool.execute(
             'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [parseInt(resortId), resort.name, guestName, email, phone, checkIn, checkOut, parseInt(guests), resort.price * parseInt(guests)]

@@ -25,11 +25,21 @@ function displayResorts() {
     
     grid.innerHTML = resorts.map(resort => `
         <div class="resort-card">
-            <div>
-                <h4>${resort.name}</h4>
-                <p>${resort.location} - ₹${resort.price}/night</p>
+            <div class="resort-status">
+                <div>
+                    <h4>${resort.name}</h4>
+                    <p>${resort.location} - ₹${resort.price}/night</p>
+                </div>
+                <span class="status-badge ${resort.available ? 'available' : 'unavailable'}">
+                    ${resort.available ? 'Available' : 'Unavailable'}
+                </span>
             </div>
             <div class="resort-actions">
+                <button class="availability-btn ${resort.available ? 'available' : 'unavailable'}" 
+                        onclick="toggleAvailability(${resort.id}, ${!resort.available})">
+                    <i class="fas fa-${resort.available ? 'eye-slash' : 'eye'}"></i> 
+                    ${resort.available ? 'Disable' : 'Enable'}
+                </button>
                 <button class="edit-btn" onclick="openEditModal(${resort.id})">
                     <i class="fas fa-edit"></i> Edit
                 </button>
@@ -116,6 +126,28 @@ async function handleEditResort(e) {
     } catch (error) {
         console.error('Error:', error);
         alert('Error updating resort');
+    }
+}
+
+async function toggleAvailability(resortId, newAvailability) {
+    try {
+        const response = await fetch(`/api/resorts/${resortId}/availability`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ available: newAvailability })
+        });
+        
+        if (response.ok) {
+            alert(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`);
+            loadResorts();
+        } else {
+            alert('Error updating availability');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating availability');
     }
 }
 

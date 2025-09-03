@@ -108,9 +108,10 @@ body {
 .resort-actions {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
 }
 
-.edit-btn, .delete-btn {
+.edit-btn, .delete-btn, .availability-btn {
     padding: 5px 10px;
     border: none;
     border-radius: 3px;
@@ -126,6 +127,39 @@ body {
 .delete-btn {
     background: #e74c3c;
     color: white;
+}
+
+.availability-btn.available {
+    background: #27ae60;
+    color: white;
+}
+
+.availability-btn.unavailable {
+    background: #95a5a6;
+    color: white;
+}
+
+.resort-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-badge.available {
+    background: #d5f4e6;
+    color: #27ae60;
+}
+
+.status-badge.unavailable {
+    background: #fadbd8;
+    color: #e74c3c;
 }
 
 .modal {

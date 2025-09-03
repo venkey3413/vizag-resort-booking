@@ -62,8 +62,8 @@ app.post('/api/resorts', upload.single('image'), async (req, res) => {
         const image = req.file ? `/uploads/${req.file.filename}` : '/uploads/default-resort.jpg';
         
         const [result] = await pool.execute(
-            'INSERT INTO resorts (name, location, price, description, image, amenities) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description, image, JSON.stringify(amenitiesArray)]
+            'INSERT INTO resorts (name, location, price, description, image, amenities, available) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), description, image, JSON.stringify(amenitiesArray), true]
         );
         
         const newResort = {
@@ -74,7 +74,8 @@ app.post('/api/resorts', upload.single('image'), async (req, res) => {
             description,
             image,
             amenities: amenitiesArray,
-            rating: 0
+            rating: 0,
+            available: true
         };
         
         res.json(newResort);
@@ -120,13 +121,29 @@ app.put('/api/resorts/:id', upload.single('image'), async (req, res) => {
             description: description || currentResort.description,
             image,
             amenities: amenitiesArray,
-            rating: currentResort.rating
+            rating: currentResort.rating,
+            available: currentResort.available
         };
         
         res.json(updatedResort);
     } catch (error) {
         console.error('Error updating resort:', error);
         res.status(500).json({ error: 'Failed to update resort' });
+    }
+});
+
+// Toggle resort availability
+app.patch('/api/resorts/:id/availability', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const { available } = req.body;
+        
+        await pool.execute('UPDATE resorts SET available = ? WHERE id = ?', [available, id]);
+        
+        res.json({ message: 'Resort availability updated successfully' });
+    } catch (error) {
+        console.error('Error updating availability:', error);
+        res.status(500).json({ error: 'Failed to update availability' });
     }
 });
 

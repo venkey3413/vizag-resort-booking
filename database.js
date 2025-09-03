@@ -48,6 +48,7 @@ async function createTables() {
                 image VARCHAR(500),
                 amenities JSON,
                 rating DECIMAL(2,1) DEFAULT 0,
+                available BOOLEAN DEFAULT TRUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -71,13 +72,20 @@ async function createTables() {
             )
         `);
 
+        // Add available column if it doesn't exist
+        try {
+            await connection.execute('ALTER TABLE resorts ADD COLUMN available BOOLEAN DEFAULT TRUE');
+        } catch (e) {
+            // Column already exists
+        }
+
         // Insert default resorts if table is empty
         const [rows] = await connection.execute('SELECT COUNT(*) as count FROM resorts');
         if (rows[0].count === 0) {
             await connection.execute(`
-                INSERT INTO resorts (name, location, price, description, image, amenities, rating) VALUES
-                ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5),
-                ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2)
+                INSERT INTO resorts (name, location, price, description, image, amenities, rating, available) VALUES
+                ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5, TRUE),
+                ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2, TRUE)
             `);
         }
 

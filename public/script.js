@@ -66,9 +66,14 @@ function displayResorts(filteredResorts = resorts) {
                 <div class="amenities">
                     ${resort.amenities.map(amenity => `<span class="amenity">${amenity}</span>`).join('')}
                 </div>
-                <button class="book-btn" onclick="openBookingModal(${resort.id})">
-                    <i class="fas fa-calendar-check"></i> Book Now
-                </button>
+                ${resort.available ? 
+                    `<button class="book-btn" onclick="openBookingModal(${resort.id})">
+                        <i class="fas fa-calendar-check"></i> Book Now
+                    </button>` : 
+                    `<button class="book-btn unavailable" disabled>
+                        <i class="fas fa-times-circle"></i> Currently Unavailable
+                    </button>`
+                }
             </div>
         </div>
     `).join('');
@@ -174,7 +179,8 @@ async function handleBooking(e) {
             closeModal();
             document.getElementById('bookingForm').reset();
         } else {
-            alert('Error creating booking');
+            const errorData = await response.json();
+            alert(errorData.error || 'Error creating booking');
         }
     } catch (error) {
         console.error('Error:', error);
