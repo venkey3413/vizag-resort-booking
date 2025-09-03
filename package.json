@@ -5,6 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "admin": "node admin-server.js",
+    "booking": "node booking-server.js",
+    "start-all": "node start-all.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {

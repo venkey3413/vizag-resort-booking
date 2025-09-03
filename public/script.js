@@ -1,10 +1,8 @@
 let resorts = [];
-let bookings = [];
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
-    loadBookings();
     setupEventListeners();
     setMinDate();
 });
@@ -14,6 +12,8 @@ function setupEventListeners() {
     // Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
+            if (this.getAttribute('target') === '_blank') return; // Skip external links
+            
             e.preventDefault();
             const target = this.getAttribute('href').substring(1);
             scrollToSection(target);
@@ -25,9 +25,7 @@ function setupEventListeners() {
     });
 
     // Forms
-    document.getElementById('addResortForm').addEventListener('submit', handleAddResort);
     document.getElementById('bookingForm').addEventListener('submit', handleBooking);
-    document.getElementById('editResortForm').addEventListener('submit', handleEditResort);
 }
 
 // Smooth scroll to section
@@ -44,7 +42,6 @@ async function loadResorts() {
         const response = await fetch('/api/resorts');
         resorts = await response.json();
         displayResorts();
-        displayManageResorts();
         populateLocationFilter();
     } catch (error) {
         console.error('Error loading resorts:', error);
@@ -79,27 +76,7 @@ function displayResorts(filteredResorts = resorts) {
     `).join('');
 }
 
-// Display resorts in manage section
-function displayManageResorts() {
-    const grid = document.getElementById('manageResortsGrid');
-    
-    grid.innerHTML = resorts.map(resort => `
-        <div class="manage-card">
-            <div>
-                <h4>${resort.name}</h4>
-                <p>${resort.location} - ₹${resort.price}/night</p>
-            </div>
-            <div class="manage-actions">
-                <button class="edit-btn" onclick="openEditModal(${resort.id})">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="delete-btn" onclick="deleteResort(${resort.id})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
+
 
 // Populate location filter
 function populateLocationFilter() {
@@ -127,30 +104,7 @@ function filterResorts() {
     displayResorts(filtered);
 }
 
-// Handle add resort form
-async function handleAddResort(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target);
-    
-    try {
-        const response = await fetch('/api/resorts', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (response.ok) {
-            alert('Resort added successfully!');
-            e.target.reset();
-            loadResorts();
-        } else {
-            alert('Error adding resort');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error adding resort');
-    }
-}
+
 
 // Open booking modal
 function openBookingModal(resortId) {
@@ -192,7 +146,6 @@ async function handleBooking(e) {
             alert(`Booking confirmed! Total: ₹${booking.totalPrice}`);
             closeModal();
             document.getElementById('bookingForm').reset();
-            loadBookings();
         } else {
             alert('Error creating booking');
         }
@@ -202,154 +155,9 @@ async function handleBooking(e) {
     }
 }
 
-// Open edit modal
-function openEditModal(resortId) {
-    const resort = resorts.find(r => r.id === resortId);
-    if (!resort) return;
-    
-    document.getElementById('editResortId').value = resort.id;
-    document.getElementById('editName').value = resort.name;
-    document.getElementById('editLocation').value = resort.location;
-    document.getElementById('editPrice').value = resort.price;
-    document.getElementById('editDescription').value = resort.description;
-    document.getElementById('editAmenities').value = resort.amenities.join(', ');
-    
-    document.getElementById('editModal').style.display = 'block';
-}
 
-// Close edit modal
-function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-}
 
-// Handle edit resort form
-async function handleEditResort(e) {
-    e.preventDefault();
-    
-    const resortId = document.getElementById('editResortId').value;
-    const formData = new FormData();
-    
-    formData.append('name', document.getElementById('editName').value);
-    formData.append('location', document.getElementById('editLocation').value);
-    formData.append('price', document.getElementById('editPrice').value);
-    formData.append('description', document.getElementById('editDescription').value);
-    formData.append('amenities', document.getElementById('editAmenities').value);
-    
-    const imageFile = document.getElementById('editImage').files[0];
-    if (imageFile) {
-        formData.append('image', imageFile);
-    }
-    
-    try {
-        const response = await fetch(`/api/resorts/${resortId}`, {
-            method: 'PUT',
-            body: formData
-        });
-        
-        if (response.ok) {
-            alert('Resort updated successfully!');
-            closeEditModal();
-            loadResorts();
-        } else {
-            alert('Error updating resort');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error updating resort');
-    }
-}
 
-// Delete resort
-async function deleteResort(resortId) {
-    if (!confirm('Are you sure you want to delete this resort?')) return;
-    
-    try {
-        const response = await fetch(`/api/resorts/${resortId}`, {
-            method: 'DELETE'
-        });
-        
-        if (response.ok) {
-            alert('Resort deleted successfully!');
-            loadResorts();
-        } else {
-            alert('Error deleting resort');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error deleting resort');
-    }
-}
-
-// Load bookings
-async function loadBookings() {
-    try {
-        const response = await fetch('/api/bookings');
-        bookings = await response.json();
-        displayBookings();
-    } catch (error) {
-        console.error('Error loading bookings:', error);
-    }
-}
-
-// Display bookings
-function displayBookings() {
-    const container = document.getElementById('bookingsTable');
-    
-    if (bookings.length === 0) {
-        container.innerHTML = '<p>No bookings found.</p>';
-        return;
-    }
-    
-    container.innerHTML = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Booking ID</th>
-                    <th>Guest Name</th>
-                    <th>Resort</th>
-                    <th>Check-in</th>
-                    <th>Check-out</th>
-                    <th>Guests</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${bookings.map(booking => `
-                    <tr>
-                        <td>#${booking.id}</td>
-                        <td>${booking.guestName}</td>
-                        <td>${booking.resortName}</td>
-                        <td>${new Date(booking.checkIn).toLocaleDateString()}</td>
-                        <td>${new Date(booking.checkOut).toLocaleDateString()}</td>
-                        <td>${booking.guests}</td>
-                        <td>₹${booking.totalPrice}</td>
-                        <td><span style="background: #27ae60; color: white; padding: 2px 8px; border-radius: 3px;">${booking.status}</span></td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-
-// Show tab
-function showTab(tabName) {
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    // Remove active class from all tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Show selected tab
-    document.getElementById(tabName).classList.add('active');
-    
-    // Add active class to clicked button
-    event.target.classList.add('active');
-}
 
 // Set minimum date for booking
 function setMinDate() {
@@ -366,12 +174,8 @@ function setMinDate() {
 // Close modals when clicking outside
 window.onclick = function(event) {
     const bookingModal = document.getElementById('bookingModal');
-    const editModal = document.getElementById('editModal');
     
     if (event.target === bookingModal) {
         bookingModal.style.display = 'none';
-    }
-    if (event.target === editModal) {
-        editModal.style.display = 'none';
     }
 }
