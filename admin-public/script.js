@@ -85,6 +85,8 @@ function openEditModal(resortId) {
     document.getElementById('editPrice').value = resort.price;
     document.getElementById('editDescription').value = resort.description;
     document.getElementById('editAmenities').value = resort.amenities.join(', ');
+    document.getElementById('editMaxGuests').value = resort.max_guests || 10;
+    document.getElementById('editPerHeadCharge').value = resort.per_head_charge || 300;
     
     document.getElementById('editModal').style.display = 'block';
 }
@@ -104,6 +106,8 @@ async function handleEditResort(e) {
     formData.append('price', document.getElementById('editPrice').value);
     formData.append('description', document.getElementById('editDescription').value);
     formData.append('amenities', document.getElementById('editAmenities').value);
+    formData.append('maxGuests', document.getElementById('editMaxGuests').value);
+    formData.append('perHeadCharge', document.getElementById('editPerHeadCharge').value);
     
     const imageFiles = document.getElementById('editImages').files;
     for (let i = 0; i < imageFiles.length; i++) {

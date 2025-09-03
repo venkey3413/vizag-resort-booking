@@ -50,6 +50,8 @@ async function createTables() {
                 amenities JSON,
                 rating DECIMAL(2,1) DEFAULT 0,
                 available BOOLEAN DEFAULT TRUE,
+                max_guests INT DEFAULT 10,
+                per_head_charge INT DEFAULT 300,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -86,14 +88,27 @@ async function createTables() {
         } catch (e) {
             // Column already exists
         }
+        
+        // Add pricing columns if they don't exist
+        try {
+            await connection.execute('ALTER TABLE resorts ADD COLUMN max_guests INT DEFAULT 10');
+        } catch (e) {
+            // Column already exists
+        }
+        
+        try {
+            await connection.execute('ALTER TABLE resorts ADD COLUMN per_head_charge INT DEFAULT 300');
+        } catch (e) {
+            // Column already exists
+        }
 
         // Insert default resorts if table is empty
         const [rows] = await connection.execute('SELECT COUNT(*) as count FROM resorts');
         if (rows[0].count === 0) {
             await connection.execute(`
-                INSERT INTO resorts (name, location, price, description, image, amenities, rating, available) VALUES
-                ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5, TRUE),
-                ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2, TRUE)
+                INSERT INTO resorts (name, location, price, description, image, amenities, rating, available, max_guests, per_head_charge) VALUES
+                ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5, TRUE, 8, 500),
+                ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2, TRUE, 10, 300)
             `);
         }
 

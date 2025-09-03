@@ -64,15 +64,15 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', uploadMultiple, async (req, res) => {
     try {
-        const { name, location, price, description, amenities } = req.body;
+        const { name, location, price, description, amenities, maxGuests, perHeadCharge } = req.body;
         
         const amenitiesArray = amenities ? amenities.split(',').map(a => a.trim()) : [];
         const images = req.files && req.files.length > 0 ? req.files.map(file => `/uploads/${file.filename}`) : ['/uploads/default-resort.jpg'];
         const image = images[0];
         
         const [result] = await pool.execute(
-            'INSERT INTO resorts (name, location, price, description, image, images, amenities, available) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description, image, JSON.stringify(images), JSON.stringify(amenitiesArray), true]
+            'INSERT INTO resorts (name, location, price, description, image, images, amenities, available, max_guests, per_head_charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), description, image, JSON.stringify(images), JSON.stringify(amenitiesArray), true, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300]
         );
         
         const newResort = {
@@ -85,7 +85,9 @@ app.post('/api/resorts', uploadMultiple, async (req, res) => {
             amenities: amenitiesArray,
             images: images,
             rating: 0,
-            available: true
+            available: true,
+            max_guests: parseInt(maxGuests) || 10,
+            per_head_charge: parseInt(perHeadCharge) || 300
         };
         
         res.json(newResort);
@@ -98,7 +100,7 @@ app.post('/api/resorts', uploadMultiple, async (req, res) => {
 app.put('/api/resorts/:id', uploadMultiple, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, location, price, description, amenities } = req.body;
+        const { name, location, price, description, amenities, maxGuests, perHeadCharge } = req.body;
         
         // Get current resort
         const [current] = await pool.execute('SELECT * FROM resorts WHERE id = ?', [id]);
@@ -113,7 +115,7 @@ app.put('/api/resorts/:id', uploadMultiple, async (req, res) => {
         const image = images[0];
         
         await pool.execute(
-            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, images = ?, amenities = ? WHERE id = ?',
+            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, images = ?, amenities = ?, max_guests = ?, per_head_charge = ? WHERE id = ?',
             [
                 name || currentResort.name,
                 location || currentResort.location,
@@ -122,6 +124,8 @@ app.put('/api/resorts/:id', uploadMultiple, async (req, res) => {
                 image,
                 JSON.stringify(images),
                 JSON.stringify(amenitiesArray),
+                maxGuests ? parseInt(maxGuests) : currentResort.max_guests,
+                perHeadCharge ? parseInt(perHeadCharge) : currentResort.per_head_charge,
                 id
             ]
         );
@@ -136,7 +140,9 @@ app.put('/api/resorts/:id', uploadMultiple, async (req, res) => {
             amenities: amenitiesArray,
             images: images,
             rating: currentResort.rating,
-            available: currentResort.available
+            available: currentResort.available,
+            max_guests: maxGuests ? parseInt(maxGuests) : currentResort.max_guests,
+            per_head_charge: perHeadCharge ? parseInt(perHeadCharge) : currentResort.per_head_charge
         };
         
         res.json(updatedResort);
