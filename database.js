@@ -110,16 +110,15 @@ async function createTables() {
             // Column already exists
         }
 
-        // Insert default resorts if table is empty
-        const [rows] = await connection.execute('SELECT COUNT(*) as count FROM resorts');
-        if (rows[0].count === 0) {
-            await connection.execute(`
-                INSERT INTO resorts (name, location, price, description, image, images, amenities, rating, available, max_guests, per_head_charge) VALUES
-                ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views and private beach access', '/uploads/resort1-1.jpg', '["/uploads/resort1-1.jpg", "/uploads/resort1-2.jpg", "/uploads/resort1-3.jpg"]', '["Swimming Pool", "Spa", "Restaurant", "WiFi", "Private Beach"]', 4.5, TRUE, 8, 500),
-                ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views and adventure activities', '/uploads/resort1-2.jpg', '["/uploads/resort1-2.jpg", "/uploads/resort1-3.jpg", "/uploads/resort1-1.jpg"]', '["Gym", "Restaurant", "WiFi", "Parking", "Trekking"]', 4.2, TRUE, 10, 300),
-                ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views and traditional architecture', '/uploads/resort1-3.jpg', '["/uploads/resort1-3.jpg", "/uploads/resort1-1.jpg", "/uploads/resort1-2.jpg"]', '["Lake View", "Heritage", "Restaurant", "WiFi", "Boat Rides"]', 4.7, TRUE, 12, 400)
-            `);
-        }
+        // Clear existing data and insert fresh resorts
+        await connection.execute('DELETE FROM resorts');
+        await connection.execute(`
+            INSERT INTO resorts (name, location, price, description, image, images, amenities, rating, available, max_guests, per_head_charge) VALUES
+            ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Swimming Pool", "Spa", "Restaurant", "WiFi"]', 4.5, TRUE, 8, 500),
+            ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Gym", "Restaurant", "WiFi", "Parking"]', 4.2, TRUE, 10, 300),
+            ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views', '/uploads/default-resort.jpg', '["/uploads/default-resort.jpg", "/uploads/default-resort.jpg", "/uploads/default-resort.jpg"]', '["Lake View", "Heritage", "Restaurant", "WiFi"]', 4.7, TRUE, 12, 400)
+        `);
+        console.log('✅ Default resorts with multiple images inserted');
 
     } finally {
         connection.release();
