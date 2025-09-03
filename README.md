@@ -86,7 +86,3 @@ For production deployment:
 4. Use cloud storage for images (AWS S3, Cloudinary)
 5. Add email notifications for bookings
 6. Implement booking cancellation and modification
-
-## License
-
-MIT License
