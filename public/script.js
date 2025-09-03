@@ -185,6 +185,14 @@ function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
     document.getElementById('bookingForm').reset();
     document.getElementById('totalAmount').textContent = '₹0';
+    
+    // Reset submit button
+    const submitBtn = document.querySelector('.submit-btn');
+    submitBtn.innerHTML = '<i class="fas fa-credit-card"></i> Pay & Book Now';
+    submitBtn.onclick = null;
+    
+    // Clear pending booking
+    sessionStorage.removeItem('pendingBooking');
 }
 
 // Handle booking form
@@ -205,58 +213,64 @@ async function handleBooking(e) {
     const totalText = document.getElementById('totalAmount').textContent;
     const totalAmount = parseInt(totalText.replace(/[^0-9]/g, ''));
     
-    // Initialize Razorpay payment
-    const options = {
-        key: 'rzp_test_1234567890', // Replace with your Razorpay key
-        amount: totalAmount * 100, // Amount in paise
-        currency: 'INR',
-        name: 'Resort Booking',
-        description: `Booking for ${formData.guestName}`,
-        image: '/favicon.ico',
-        handler: async function(response) {
-            // Payment successful, create booking
-            formData.paymentId = response.razorpay_payment_id;
+    // Open Razorpay payment link
+    const paymentUrl = `https://razorpay.me/@venkateshsambana/${totalAmount}?title=Resort Booking - ${formData.guestName}&description=Booking for ${formData.guests} guests`;
+    
+    // Store booking data temporarily
+    sessionStorage.setItem('pendingBooking', JSON.stringify(formData));
+    
+    // Open payment in new tab
+    const paymentWindow = window.open(paymentUrl, '_blank');
+    
+    // Show payment instructions
+    alert('Complete payment in the new tab. After payment, return here and click "Confirm Booking" to finalize your reservation.');
+    
+    // Add confirm booking button
+    const submitBtn = document.querySelector('.submit-btn');
+    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Booking';
+    submitBtn.onclick = async function(e) {
+        e.preventDefault();
+        
+        const paymentId = prompt('Enter your payment transaction ID (from Razorpay):');
+        if (!paymentId) {
+            alert('Payment ID is required to confirm booking');
+            return;
+        }
+        
+        const storedBooking = JSON.parse(sessionStorage.getItem('pendingBooking'));
+        if (!storedBooking) {
+            alert('Booking data not found. Please start over.');
+            return;
+        }
+        
+        storedBooking.paymentId = paymentId;
+        
+        try {
+            const bookingResponse = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(storedBooking)
+            });
             
-            try {
-                const bookingResponse = await fetch('/api/bookings', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-                
-                if (bookingResponse.ok) {
-                    const booking = await bookingResponse.json();
-                    alert(`Payment Successful! Booking confirmed. Payment ID: ${response.razorpay_payment_id}`);
-                    closeModal();
-                    document.getElementById('bookingForm').reset();
-                } else {
-                    const errorData = await bookingResponse.json();
-                    alert(errorData.error || 'Booking failed after payment');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Booking failed after payment. Contact support.');
+            if (bookingResponse.ok) {
+                const booking = await bookingResponse.json();
+                alert(`Booking confirmed! Payment ID: ${paymentId}`);
+                sessionStorage.removeItem('pendingBooking');
+                closeModal();
+                document.getElementById('bookingForm').reset();
+                submitBtn.innerHTML = '<i class="fas fa-credit-card"></i> Pay & Book Now';
+                submitBtn.onclick = null;
+            } else {
+                const errorData = await bookingResponse.json();
+                alert(errorData.error || 'Booking confirmation failed');
             }
-        },
-        prefill: {
-            name: formData.guestName,
-            email: formData.email,
-            contact: formData.phone
-        },
-        theme: {
-            color: '#667eea'
-        },
-        modal: {
-            ondismiss: function() {
-                alert('Payment cancelled');
-            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Booking confirmation failed. Please contact support.');
         }
     };
-    
-    const rzp = new Razorpay(options);
-    rzp.open();
 }
 
 
