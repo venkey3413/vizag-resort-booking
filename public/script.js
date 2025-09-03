@@ -106,14 +106,43 @@ function filterResorts() {
 
 // Open booking modal
 function openBookingModal(resortId) {
+    const resort = resorts.find(r => r.id === resortId);
+    if (!resort) return;
+    
     const modal = document.getElementById('bookingModal');
     document.getElementById('bookingResortId').value = resortId;
+    document.getElementById('resortPrice').value = resort.price;
+    document.getElementById('modalResortName').textContent = `Book ${resort.name}`;
+    document.getElementById('pricePerNight').textContent = `₹${resort.price}`;
+    
+    calculateTotal();
     modal.style.display = 'block';
+}
+
+// Calculate total amount
+function calculateTotal() {
+    const price = parseInt(document.getElementById('resortPrice').value) || 0;
+    const guests = parseInt(document.getElementById('guests').value) || 1;
+    const checkIn = document.getElementById('checkIn').value;
+    const checkOut = document.getElementById('checkOut').value;
+    
+    let nights = 1;
+    if (checkIn && checkOut) {
+        const startDate = new Date(checkIn);
+        const endDate = new Date(checkOut);
+        const timeDiff = endDate.getTime() - startDate.getTime();
+        nights = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
+    }
+    
+    const total = price * guests * nights;
+    document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
 }
 
 // Close booking modal
 function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
+    document.getElementById('bookingForm').reset();
+    document.getElementById('totalAmount').textContent = '₹0';
 }
 
 // Handle booking form
