@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'resort-booking-app',
+    name: 'resort-booking',
     script: 'server.js',
     instances: 1,
     autorestart: true,
