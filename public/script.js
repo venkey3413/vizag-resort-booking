@@ -58,21 +58,26 @@ function displayResorts(filteredResorts = resorts) {
     grid.innerHTML = filteredResorts.map(resort => `
         <div class="resort-card">
             <div class="image-gallery" data-resort-id="${resort.id}">
-                ${resort.images && resort.images.length > 1 ? 
-                    `<div class="image-slider">
-                        ${resort.images.map((img, index) => 
-                            `<img src="${img}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" 
-                                 onclick="showImage(${index}, ${resort.id})" 
-                                 onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`
-                        ).join('')}
-                        <div class="image-dots">
-                            ${resort.images.map((_, index) => 
-                                `<span class="dot ${index === 0 ? 'active' : ''}" onclick="showImage(${index}, ${resort.id})"></span>`
+                ${(() => {
+                    const images = resort.images && Array.isArray(resort.images) ? resort.images : [resort.image];
+                    if (images.length > 1) {
+                        return `<div class="image-slider">
+                            ${images.map((img, index) => 
+                                `<img src="${img}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" 
+                                     onclick="showImage(${index}, ${resort.id})" 
+                                     onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`
                             ).join('')}
-                        </div>
-                    </div>` :
-                    `<img src="${resort.image}" alt="${resort.name}" class="resort-image" 
-                         onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`
+                            <div class="image-dots">
+                                ${images.map((_, index) => 
+                                    `<span class="dot ${index === 0 ? 'active' : ''}" onclick="showImage(${index}, ${resort.id})"></span>`
+                                ).join('')}
+                            </div>
+                        </div>`;
+                    } else {
+                        return `<img src="${images[0]}" alt="${resort.name}" class="resort-image" 
+                                     onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`;
+                    }
+                })()
                 }
             </div>
             <div class="resort-info">
