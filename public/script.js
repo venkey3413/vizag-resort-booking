@@ -240,31 +240,39 @@ function setMinDate() {
     });
 }
 
+let currentResortImages = [];
+let currentImageIndex = 0;
+
 // Open resort details modal
 function openResortDetails(resortId) {
     const resort = resorts.find(r => r.id === resortId);
     if (!resort) return;
     
     // Get all images
-    let images = [];
+    currentResortImages = [];
     if (resort.images) {
         if (typeof resort.images === 'string') {
-            try { images = JSON.parse(resort.images); } catch (e) { images = [resort.images]; }
+            try { currentResortImages = JSON.parse(resort.images); } catch (e) { currentResortImages = [resort.images]; }
         } else if (Array.isArray(resort.images)) {
-            images = resort.images;
+            currentResortImages = resort.images;
         }
     }
-    if (images.length === 0) images = [resort.image];
+    if (currentResortImages.length === 0) currentResortImages = [resort.image];
+    
+    currentImageIndex = 0;
     
     // Set main image
-    document.getElementById('mainResortImage').src = images[0];
+    updateMainImage();
     
     // Set thumbnails
     const thumbnailContainer = document.getElementById('thumbnailImages');
-    thumbnailContainer.innerHTML = images.map((img, index) => 
+    thumbnailContainer.innerHTML = currentResortImages.map((img, index) => 
         `<img src="${img}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" 
-              onclick="changeMainImage('${img}', ${index})">`
+              onclick="changeMainImage(${index})">`
     ).join('');
+    
+    // Update counters
+    document.getElementById('totalImages').textContent = currentResortImages.length;
     
     // Set resort info
     document.getElementById('detailsResortName').textContent = resort.name;
@@ -285,13 +293,33 @@ function openResortDetails(resortId) {
     document.getElementById('resortDetailsModal').style.display = 'block';
 }
 
-// Change main image in details modal
-function changeMainImage(src, index) {
-    document.getElementById('mainResortImage').src = src;
+// Update main image display
+function updateMainImage() {
+    document.getElementById('mainResortImage').src = currentResortImages[currentImageIndex];
+    document.getElementById('currentImageIndex').textContent = currentImageIndex + 1;
     
     // Update active thumbnail
-    document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
-    document.querySelectorAll('.thumbnail')[index].classList.add('active');
+    document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+        thumb.classList.toggle('active', index === currentImageIndex);
+    });
+}
+
+// Change main image in details modal
+function changeMainImage(index) {
+    currentImageIndex = index;
+    updateMainImage();
+}
+
+// Navigate to previous image
+function previousImage() {
+    currentImageIndex = currentImageIndex > 0 ? currentImageIndex - 1 : currentResortImages.length - 1;
+    updateMainImage();
+}
+
+// Navigate to next image
+function nextImage() {
+    currentImageIndex = currentImageIndex < currentResortImages.length - 1 ? currentImageIndex + 1 : 0;
+    updateMainImage();
 }
 
 // Close resort details modal

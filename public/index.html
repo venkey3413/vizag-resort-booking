@@ -110,7 +110,16 @@
             <span class="close" onclick="closeResortDetails()">&times;</span>
             <div class="resort-details-gallery">
                 <div class="main-image">
+                    <button class="nav-arrow prev-arrow" onclick="previousImage()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                     <img id="mainResortImage" src="" alt="">
+                    <button class="nav-arrow next-arrow" onclick="nextImage()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="image-counter">
+                        <span id="currentImageIndex">1</span> / <span id="totalImages">1</span>
+                    </div>
                 </div>
                 <div class="thumbnail-images" id="thumbnailImages"></div>
             </div>
