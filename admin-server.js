@@ -27,6 +27,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+const uploadMultiple = multer({ storage: storage }).array('images', 10);
 
 // Initialize database on startup
 initDatabase();
@@ -37,14 +38,21 @@ app.get('/api/resorts', async (req, res) => {
         const [rows] = await pool.execute('SELECT * FROM resorts ORDER BY id DESC');
         const resorts = rows.map(row => {
             let amenities = [];
+            let images = [];
             try {
                 amenities = JSON.parse(row.amenities || '[]');
             } catch (e) {
                 amenities = typeof row.amenities === 'string' ? [row.amenities] : [];
             }
+            try {
+                images = JSON.parse(row.images || '["' + row.image + '"]');
+            } catch (e) {
+                images = [row.image];
+            }
             return {
                 ...row,
-                amenities
+                amenities,
+                images
             };
         });
         res.json(resorts);
@@ -54,16 +62,17 @@ app.get('/api/resorts', async (req, res) => {
     }
 });
 
-app.post('/api/resorts', upload.single('image'), async (req, res) => {
+app.post('/api/resorts', uploadMultiple, async (req, res) => {
     try {
         const { name, location, price, description, amenities } = req.body;
         
         const amenitiesArray = amenities ? amenities.split(',').map(a => a.trim()) : [];
-        const image = req.file ? `/uploads/${req.file.filename}` : '/uploads/default-resort.jpg';
+        const images = req.files && req.files.length > 0 ? req.files.map(file => `/uploads/${file.filename}`) : ['/uploads/default-resort.jpg'];
+        const image = images[0];
         
         const [result] = await pool.execute(
-            'INSERT INTO resorts (name, location, price, description, image, amenities, available) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description, image, JSON.stringify(amenitiesArray), true]
+            'INSERT INTO resorts (name, location, price, description, image, images, amenities, available) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), description, image, JSON.stringify(images), JSON.stringify(amenitiesArray), true]
         );
         
         const newResort = {
@@ -74,6 +83,7 @@ app.post('/api/resorts', upload.single('image'), async (req, res) => {
             description,
             image,
             amenities: amenitiesArray,
+            images: images,
             rating: 0,
             available: true
         };
@@ -85,7 +95,7 @@ app.post('/api/resorts', upload.single('image'), async (req, res) => {
     }
 });
 
-app.put('/api/resorts/:id', upload.single('image'), async (req, res) => {
+app.put('/api/resorts/:id', uploadMultiple, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         const { name, location, price, description, amenities } = req.body;
@@ -98,16 +108,19 @@ app.put('/api/resorts/:id', upload.single('image'), async (req, res) => {
         
         const currentResort = current[0];
         const amenitiesArray = amenities ? amenities.split(',').map(a => a.trim()) : JSON.parse(currentResort.amenities || '[]');
-        const image = req.file ? `/uploads/${req.file.filename}` : currentResort.image;
+        const newImages = req.files && req.files.length > 0 ? req.files.map(file => `/uploads/${file.filename}`) : null;
+        const images = newImages || JSON.parse(currentResort.images || '["' + currentResort.image + '"]');
+        const image = images[0];
         
         await pool.execute(
-            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, amenities = ? WHERE id = ?',
+            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, images = ?, amenities = ? WHERE id = ?',
             [
                 name || currentResort.name,
                 location || currentResort.location,
                 price ? parseInt(price) : currentResort.price,
                 description || currentResort.description,
                 image,
+                JSON.stringify(images),
                 JSON.stringify(amenitiesArray),
                 id
             ]
@@ -121,6 +134,7 @@ app.put('/api/resorts/:id', upload.single('image'), async (req, res) => {
             description: description || currentResort.description,
             image,
             amenities: amenitiesArray,
+            images: images,
             rating: currentResort.rating,
             available: currentResort.available
         };

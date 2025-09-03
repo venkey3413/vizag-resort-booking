@@ -20,14 +20,21 @@ async function getResorts() {
         const [rows] = await pool.execute('SELECT * FROM resorts ORDER BY id DESC');
         return rows.map(row => {
             let amenities = [];
+            let images = [];
             try {
                 amenities = JSON.parse(row.amenities || '[]');
             } catch (e) {
                 amenities = typeof row.amenities === 'string' ? [row.amenities] : [];
             }
+            try {
+                images = JSON.parse(row.images || '["' + row.image + '"]');
+            } catch (e) {
+                images = [row.image];
+            }
             return {
                 ...row,
-                amenities
+                amenities,
+                images
             };
         });
     } catch (error) {

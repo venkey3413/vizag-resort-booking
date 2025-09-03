@@ -46,6 +46,7 @@ async function createTables() {
                 price INT NOT NULL,
                 description TEXT,
                 image VARCHAR(500),
+                images JSON,
                 amenities JSON,
                 rating DECIMAL(2,1) DEFAULT 0,
                 available BOOLEAN DEFAULT TRUE,
@@ -75,6 +76,13 @@ async function createTables() {
         // Add available column if it doesn't exist
         try {
             await connection.execute('ALTER TABLE resorts ADD COLUMN available BOOLEAN DEFAULT TRUE');
+        } catch (e) {
+            // Column already exists
+        }
+        
+        // Add images column if it doesn't exist
+        try {
+            await connection.execute('ALTER TABLE resorts ADD COLUMN images JSON');
         } catch (e) {
             // Column already exists
         }

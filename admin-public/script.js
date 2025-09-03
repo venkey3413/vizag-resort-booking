@@ -105,9 +105,9 @@ async function handleEditResort(e) {
     formData.append('description', document.getElementById('editDescription').value);
     formData.append('amenities', document.getElementById('editAmenities').value);
     
-    const imageFile = document.getElementById('editImage').files[0];
-    if (imageFile) {
-        formData.append('image', imageFile);
+    const imageFiles = document.getElementById('editImages').files;
+    for (let i = 0; i < imageFiles.length; i++) {
+        formData.append('images', imageFiles[i]);
     }
     
     try {

@@ -57,7 +57,24 @@ function displayResorts(filteredResorts = resorts) {
     
     grid.innerHTML = filteredResorts.map(resort => `
         <div class="resort-card">
-            <img src="${resort.image}" alt="${resort.name}" class="resort-image" onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">
+            <div class="image-gallery">
+                ${resort.images && resort.images.length > 1 ? 
+                    `<div class="image-slider">
+                        ${resort.images.map((img, index) => 
+                            `<img src="${img}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" 
+                                 onclick="showImage(this, ${resort.id})" 
+                                 onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`
+                        ).join('')}
+                        <div class="image-dots">
+                            ${resort.images.map((_, index) => 
+                                `<span class="dot ${index === 0 ? 'active' : ''}" onclick="currentSlide(${index + 1}, ${resort.id})"></span>`
+                            ).join('')}
+                        </div>
+                    </div>` :
+                    `<img src="${resort.image}" alt="${resort.name}" class="resort-image" 
+                         onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`
+                }
+            </div>
             <div class="resort-info">
                 <h3>${resort.name}</h3>
                 <p class="resort-location"><i class="fas fa-map-marker-alt"></i> ${resort.location}</p>
@@ -202,6 +219,32 @@ function setMinDate() {
     document.getElementById('checkIn').addEventListener('change', function() {
         document.getElementById('checkOut').min = this.value;
     });
+}
+
+// Image slider functions
+function showImage(img, resortId) {
+    const card = img.closest('.resort-card');
+    const images = card.querySelectorAll('.resort-image');
+    const dots = card.querySelectorAll('.dot');
+    
+    images.forEach(image => image.classList.remove('active'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    img.classList.add('active');
+    const index = Array.from(images).indexOf(img);
+    if (dots[index]) dots[index].classList.add('active');
+}
+
+function currentSlide(n, resortId) {
+    const card = document.querySelector(`[data-resort-id="${resortId}"]`) || document.querySelector('.resort-card');
+    const images = card.querySelectorAll('.resort-image');
+    const dots = card.querySelectorAll('.dot');
+    
+    images.forEach(image => image.classList.remove('active'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    if (images[n-1]) images[n-1].classList.add('active');
+    if (dots[n-1]) dots[n-1].classList.add('active');
 }
 
 // Close modals when clicking outside

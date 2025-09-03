@@ -42,8 +42,9 @@
                     <input type="text" name="amenities" placeholder="Swimming Pool, Spa, WiFi">
                 </div>
                 <div class="form-group">
-                    <label>Resort Image</label>
-                    <input type="file" name="image" accept="image/*">
+                    <label>Resort Images (Multiple)</label>
+                    <input type="file" name="images" accept="image/*" multiple>
+                    <small>Hold Ctrl/Cmd to select multiple images</small>
                 </div>
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-plus"></i> Add Resort
@@ -84,8 +85,9 @@
                     <input type="text" id="editAmenities">
                 </div>
                 <div class="form-group">
-                    <label>Resort Image</label>
-                    <input type="file" id="editImage" accept="image/*">
+                    <label>Resort Images (Multiple)</label>
+                    <input type="file" id="editImages" accept="image/*" multiple>
+                    <small>Hold Ctrl/Cmd to select multiple images</small>
                 </div>
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-save"></i> Update Resort
