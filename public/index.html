@@ -3,44 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resort Booking</title>
+    <title>Resort Booking - Find Your Perfect Getaway</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>Resort Booking Management</h1>
-        
-        <!-- Add Resort Form -->
-        <div class="form-section">
-            <h2>Add New Resort</h2>
-            <form id="resortForm" enctype="multipart/form-data">
-                <input type="text" id="name" placeholder="Resort Name" required>
-                <input type="number" id="price" placeholder="Price per night" required>
-                <textarea id="description" placeholder="Description" required></textarea>
-                <input type="file" id="image" accept="image/*">
-                <button type="submit">Add Resort</button>
-            </form>
-        </div>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1><i class="fas fa-umbrella-beach"></i> Resort Booking</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#resorts" class="nav-link">Resorts</a>
+                <a href="#admin" class="nav-link">Admin</a>
+            </div>
+        </nav>
+    </header>
 
-        <!-- Resorts List -->
-        <div class="resorts-section">
-            <h2>Resorts</h2>
-            <div id="resortsList"></div>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Find Your Perfect Resort</h1>
+            <p>Discover amazing resorts and book your dream vacation</p>
+            <button class="cta-btn" onclick="scrollToSection('resorts')">
+                <i class="fas fa-search"></i> Explore Resorts
+            </button>
+        </div>
+    </section>
+
+    <!-- Resorts Section -->
+    <section id="resorts" class="resorts-section">
+        <div class="container">
+            <h2>Available Resorts</h2>
+            <div class="search-filter">
+                <input type="text" id="searchInput" placeholder="Search resorts..." onkeyup="filterResorts()">
+                <select id="locationFilter" onchange="filterResorts()">
+                    <option value="">All Locations</option>
+                </select>
+            </div>
+            <div id="resortsGrid" class="resorts-grid"></div>
+        </div>
+    </section>
+
+    <!-- Admin Section -->
+    <section id="admin" class="admin-section">
+        <div class="container">
+            <h2>Admin Panel</h2>
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="showTab('add-resort')">Add Resort</button>
+                <button class="tab-btn" onclick="showTab('manage-resorts')">Manage Resorts</button>
+                <button class="tab-btn" onclick="showTab('bookings')">Bookings</button>
+            </div>
+
+            <!-- Add Resort Tab -->
+            <div id="add-resort" class="tab-content active">
+                <form id="addResortForm" class="resort-form">
+                    <div class="form-group">
+                        <label>Resort Name</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price per Night (₹)</label>
+                        <input type="number" name="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Amenities (comma separated)</label>
+                        <input type="text" name="amenities" placeholder="Swimming Pool, Spa, WiFi">
+                    </div>
+                    <div class="form-group">
+                        <label>Resort Image</label>
+                        <input type="file" name="image" accept="image/*">
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-plus"></i> Add Resort
+                    </button>
+                </form>
+            </div>
+
+            <!-- Manage Resorts Tab -->
+            <div id="manage-resorts" class="tab-content">
+                <div id="manageResortsGrid" class="manage-grid"></div>
+            </div>
+
+            <!-- Bookings Tab -->
+            <div id="bookings" class="tab-content">
+                <div id="bookingsTable" class="bookings-table"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Book Resort</h2>
+            <form id="bookingForm">
+                <input type="hidden" id="bookingResortId">
+                <div class="form-group">
+                    <label>Guest Name</label>
+                    <input type="text" id="guestName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="phone" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Check-in Date</label>
+                        <input type="date" id="checkIn" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Check-out Date</label>
+                        <input type="date" id="checkOut" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Number of Guests</label>
+                    <input type="number" id="guests" min="1" value="1" required>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-calendar-check"></i> Book Now
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- Edit Modal -->
+    <!-- Edit Resort Modal -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" onclick="closeEditModal()">&times;</span>
             <h2>Edit Resort</h2>
-            <form id="editForm" enctype="multipart/form-data">
-                <input type="hidden" id="editId">
-                <input type="text" id="editName" placeholder="Resort Name" required>
-                <input type="number" id="editPrice" placeholder="Price per night" required>
-                <textarea id="editDescription" placeholder="Description" required></textarea>
-                <input type="file" id="editImage" accept="image/*">
-                <button type="submit">Update Resort</button>
+            <form id="editResortForm">
+                <input type="hidden" id="editResortId">
+                <div class="form-group">
+                    <label>Resort Name</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="editLocation" required>
+                </div>
+                <div class="form-group">
+                    <label>Price per Night (₹)</label>
+                    <input type="number" id="editPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="editDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Amenities (comma separated)</label>
+                    <input type="text" id="editAmenities">
+                </div>
+                <div class="form-group">
+                    <label>Resort Image</label>
+                    <input type="file" id="editImage" accept="image/*">
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> Update Resort
+                </button>
             </form>
         </div>
     </div>
