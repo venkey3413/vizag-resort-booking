@@ -214,7 +214,7 @@ async function handleBooking(e) {
     const totalAmount = parseInt(totalText.replace(/[^0-9]/g, ''));
     
     // Open Razorpay payment link
-    const paymentUrl = `https://razorpay.me/@venkateshsambana/${totalAmount}?title=Resort Booking - ${formData.guestName}&description=Booking for ${formData.guests} guests`;
+    const paymentUrl = `https://rzp.io/l/venkateshsambana`;
     
     // Store booking data temporarily
     sessionStorage.setItem('pendingBooking', JSON.stringify(formData));
@@ -223,7 +223,7 @@ async function handleBooking(e) {
     const paymentWindow = window.open(paymentUrl, '_blank');
     
     // Show payment instructions
-    alert('Complete payment in the new tab. After payment, return here and click "Confirm Booking" to finalize your reservation.');
+    alert(`Please pay ₹${totalAmount.toLocaleString()} using the payment link. After payment, return here and click "Confirm Booking" to finalize your reservation.`);
     
     // Add confirm booking button
     const submitBtn = document.querySelector('.submit-btn');
