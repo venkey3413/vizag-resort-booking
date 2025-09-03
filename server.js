@@ -18,10 +18,18 @@ initDatabase();
 async function getResorts() {
     try {
         const [rows] = await pool.execute('SELECT * FROM resorts ORDER BY id DESC');
-        return rows.map(row => ({
-            ...row,
-            amenities: JSON.parse(row.amenities || '[]')
-        }));
+        return rows.map(row => {
+            let amenities = [];
+            try {
+                amenities = JSON.parse(row.amenities || '[]');
+            } catch (e) {
+                amenities = typeof row.amenities === 'string' ? [row.amenities] : [];
+            }
+            return {
+                ...row,
+                amenities
+            };
+        });
     } catch (error) {
         console.error('Error fetching resorts:', error);
         return [];
