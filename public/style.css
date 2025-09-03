@@ -148,10 +148,14 @@ section {
 .resort-card {
     background: white;
     border-radius: 15px;
-    overflow: hidden;
     box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
     position: relative;
+}
+
+.resort-card .image-gallery {
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
 }
 
 .resort-card:hover {
@@ -296,6 +300,8 @@ section {
     position: absolute;
     bottom: 10px;
     width: 100%;
+    z-index: 10;
+    background: linear-gradient(transparent, rgba(0,0,0,0.3));
 }
 
 .dot {
