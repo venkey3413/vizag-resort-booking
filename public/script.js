@@ -185,14 +185,6 @@ function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
     document.getElementById('bookingForm').reset();
     document.getElementById('totalAmount').textContent = '₹0';
-    
-    // Reset submit button
-    const submitBtn = document.querySelector('.submit-btn');
-    submitBtn.innerHTML = '<i class="fas fa-credit-card"></i> Pay & Book Now';
-    submitBtn.onclick = null;
-    
-    // Clear pending booking
-    sessionStorage.removeItem('pendingBooking');
 }
 
 // Handle booking form
@@ -209,68 +201,28 @@ async function handleBooking(e) {
         guests: document.getElementById('guests').value
     };
     
-    // Get total amount for payment
-    const totalText = document.getElementById('totalAmount').textContent;
-    const totalAmount = parseInt(totalText.replace(/[^0-9]/g, ''));
-    
-    // Open Razorpay payment link
-    const paymentUrl = `https://rzp.io/l/venkateshsambana`;
-    
-    // Store booking data temporarily
-    sessionStorage.setItem('pendingBooking', JSON.stringify(formData));
-    
-    // Open payment in new tab
-    const paymentWindow = window.open(paymentUrl, '_blank');
-    
-    // Show payment instructions
-    alert(`Please pay ₹${totalAmount.toLocaleString()} using the payment link. After payment, return here and click "Confirm Booking" to finalize your reservation.`);
-    
-    // Add confirm booking button
-    const submitBtn = document.querySelector('.submit-btn');
-    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Booking';
-    submitBtn.onclick = async function(e) {
-        e.preventDefault();
+    try {
+        const response = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
         
-        const paymentId = prompt('Enter your payment transaction ID (from Razorpay):');
-        if (!paymentId) {
-            alert('Payment ID is required to confirm booking');
-            return;
+        if (response.ok) {
+            const booking = await response.json();
+            alert(`Booking confirmed! Total: ₹${booking.totalPrice}`);
+            closeModal();
+            document.getElementById('bookingForm').reset();
+        } else {
+            const errorData = await response.json();
+            alert(errorData.error || 'Error creating booking');
         }
-        
-        const storedBooking = JSON.parse(sessionStorage.getItem('pendingBooking'));
-        if (!storedBooking) {
-            alert('Booking data not found. Please start over.');
-            return;
-        }
-        
-        storedBooking.paymentId = paymentId;
-        
-        try {
-            const bookingResponse = await fetch('/api/bookings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(storedBooking)
-            });
-            
-            if (bookingResponse.ok) {
-                const booking = await bookingResponse.json();
-                alert(`Booking confirmed! Payment ID: ${paymentId}`);
-                sessionStorage.removeItem('pendingBooking');
-                closeModal();
-                document.getElementById('bookingForm').reset();
-                submitBtn.innerHTML = '<i class="fas fa-credit-card"></i> Pay & Book Now';
-                submitBtn.onclick = null;
-            } else {
-                const errorData = await bookingResponse.json();
-                alert(errorData.error || 'Booking confirmation failed');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Booking confirmation failed. Please contact support.');
-        }
-    };
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error creating booking');
+    }
 }
 
 
