@@ -58,47 +58,19 @@ function displayResorts(filteredResorts = resorts) {
     
     grid.innerHTML = filteredResorts.map(resort => `
         <div class="resort-card">
-            <div class="image-gallery" data-resort-id="${resort.id}">
+            <div class="image-gallery" onclick="openResortDetails(${resort.id})" style="cursor: pointer;">
+                <img src="${resort.image}" alt="${resort.name}" class="resort-image" 
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">
                 ${(() => {
-                    console.log(`Resort ${resort.id} images:`, resort.images); // Debug log
                     let images = [];
-                    
-                    // Handle different image data formats
                     if (resort.images) {
                         if (typeof resort.images === 'string') {
-                            try {
-                                images = JSON.parse(resort.images);
-                            } catch (e) {
-                                images = [resort.images];
-                            }
+                            try { images = JSON.parse(resort.images); } catch (e) { images = [resort.images]; }
                         } else if (Array.isArray(resort.images)) {
                             images = resort.images;
-                        } else {
-                            images = [resort.image];
                         }
-                    } else {
-                        images = [resort.image];
                     }
-                    
-                    console.log(`Processed images for resort ${resort.id}:`, images); // Debug log
-                    
-                    if (images.length > 1) {
-                        return `<div class="image-slider">
-                            ${images.map((img, index) => 
-                                `<img src="${img}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" 
-                                     onclick="showImage(${index}, ${resort.id})" style="cursor: pointer;"
-                                     onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`
-                            ).join('')}
-                            <div class="image-dots">
-                                ${images.map((_, index) => 
-                                    `<span class="dot ${index === 0 ? 'active' : ''}" onclick="showImage(${index}, ${resort.id})" style="cursor: pointer;"></span>`
-                                ).join('')}
-                            </div>
-                        </div>`;
-                    } else {
-                        return `<img src="${images[0]}" alt="${resort.name}" class="resort-image" 
-                                     onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`;
-                    }
+                    return images.length > 1 ? `<div class="image-count">+${images.length - 1}</div>` : '';
                 })()
                 }
             </div>
@@ -268,41 +240,81 @@ function setMinDate() {
     });
 }
 
-// Image slider functions
-function showImage(index, resortId) {
-    console.log(`Showing image ${index} for resort ${resortId}`); // Debug log
+// Open resort details modal
+function openResortDetails(resortId) {
+    const resort = resorts.find(r => r.id === resortId);
+    if (!resort) return;
     
-    const gallery = document.querySelector(`[data-resort-id="${resortId}"]`);
-    if (!gallery) {
-        console.log('Gallery not found for resort', resortId);
-        return;
+    // Get all images
+    let images = [];
+    if (resort.images) {
+        if (typeof resort.images === 'string') {
+            try { images = JSON.parse(resort.images); } catch (e) { images = [resort.images]; }
+        } else if (Array.isArray(resort.images)) {
+            images = resort.images;
+        }
     }
+    if (images.length === 0) images = [resort.image];
     
-    const images = gallery.querySelectorAll('.resort-image');
-    const dots = gallery.querySelectorAll('.dot');
+    // Set main image
+    document.getElementById('mainResortImage').src = images[0];
     
-    console.log(`Found ${images.length} images and ${dots.length} dots`); // Debug log
+    // Set thumbnails
+    const thumbnailContainer = document.getElementById('thumbnailImages');
+    thumbnailContainer.innerHTML = images.map((img, index) => 
+        `<img src="${img}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" 
+              onclick="changeMainImage('${img}', ${index})">`
+    ).join('');
     
-    // Remove active class from all
-    images.forEach(img => img.classList.remove('active'));
-    dots.forEach(dot => dot.classList.remove('active'));
+    // Set resort info
+    document.getElementById('detailsResortName').textContent = resort.name;
+    document.getElementById('detailsLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${resort.location}`;
+    document.getElementById('detailsPrice').textContent = `₹${resort.price}/night`;
+    document.getElementById('detailsDescription').textContent = resort.description;
+    document.getElementById('detailsAmenities').innerHTML = resort.amenities.map(amenity => 
+        `<span class="amenity">${amenity}</span>`
+    ).join('');
     
-    // Add active class to selected
-    if (images[index]) {
-        images[index].classList.add('active');
-        console.log(`Activated image ${index}`);
-    }
-    if (dots[index]) {
-        dots[index].classList.add('active');
-        console.log(`Activated dot ${index}`);
-    }
+    // Set book button
+    document.getElementById('detailsBookBtn').onclick = () => {
+        closeResortDetails();
+        openBookingModal(resortId);
+    };
+    
+    // Show modal
+    document.getElementById('resortDetailsModal').style.display = 'block';
+}
+
+// Change main image in details modal
+function changeMainImage(src, index) {
+    document.getElementById('mainResortImage').src = src;
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+    document.querySelectorAll('.thumbnail')[index].classList.add('active');
+}
+
+// Close resort details modal
+function closeResortDetails() {
+    document.getElementById('resortDetailsModal').style.display = 'none';
+}
+
+// Open booking from details
+function openBookingFromDetails() {
+    const resortId = parseInt(document.getElementById('detailsBookBtn').getAttribute('data-resort-id'));
+    closeResortDetails();
+    openBookingModal(resortId);
 }
 
 // Close modals when clicking outside
 window.onclick = function(event) {
     const bookingModal = document.getElementById('bookingModal');
+    const detailsModal = document.getElementById('resortDetailsModal');
     
     if (event.target === bookingModal) {
         bookingModal.style.display = 'none';
+    }
+    if (event.target === detailsModal) {
+        detailsModal.style.display = 'none';
     }
 }
