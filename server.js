@@ -66,17 +66,17 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(400).json({ error: 'Resort is currently unavailable for booking' });
         }
         
-        // Calculate total with per-head pricing
+        // Calculate total with per-head pricing (charge only after 10 guests)
         const basePrice = resort.price;
         const perHeadCharge = resort.per_head_charge || 300;
         const guestCount = parseInt(guests);
-        const additionalGuests = Math.max(0, guestCount - 1);
+        const extraGuests = Math.max(0, guestCount - 10);
         
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
         const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24)));
         
-        const totalPrice = (basePrice + (additionalGuests * perHeadCharge)) * nights;
+        const totalPrice = (basePrice + (extraGuests * perHeadCharge)) * nights;
         
         const [result] = await pool.execute(
             'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',

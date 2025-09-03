@@ -72,7 +72,7 @@ app.post('/api/resorts', uploadMultiple, async (req, res) => {
         
         const [result] = await pool.execute(
             'INSERT INTO resorts (name, location, price, description, image, images, amenities, available, max_guests, per_head_charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description, image, JSON.stringify(images), JSON.stringify(amenitiesArray), true, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300]
+            [name, location, parseInt(price), description, image, JSON.stringify(images), JSON.stringify(amenitiesArray), true, parseInt(maxGuests) || 20, parseInt(perHeadCharge) || 300]
         );
         
         const newResort = {
@@ -86,7 +86,7 @@ app.post('/api/resorts', uploadMultiple, async (req, res) => {
             images: images,
             rating: 0,
             available: true,
-            max_guests: parseInt(maxGuests) || 10,
+            max_guests: parseInt(maxGuests) || 20,
             per_head_charge: parseInt(perHeadCharge) || 300
         };
         
@@ -124,7 +124,7 @@ app.put('/api/resorts/:id', uploadMultiple, async (req, res) => {
                 image,
                 JSON.stringify(images),
                 JSON.stringify(amenitiesArray),
-                maxGuests ? parseInt(maxGuests) : currentResort.max_guests,
+                maxGuests ? parseInt(maxGuests) : (currentResort.max_guests || 20),
                 perHeadCharge ? parseInt(perHeadCharge) : currentResort.per_head_charge,
                 id
             ]
@@ -141,7 +141,7 @@ app.put('/api/resorts/:id', uploadMultiple, async (req, res) => {
             images: images,
             rating: currentResort.rating,
             available: currentResort.available,
-            max_guests: maxGuests ? parseInt(maxGuests) : currentResort.max_guests,
+            max_guests: maxGuests ? parseInt(maxGuests) : (currentResort.max_guests || 20),
             per_head_charge: perHeadCharge ? parseInt(perHeadCharge) : currentResort.per_head_charge
         };
         

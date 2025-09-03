@@ -85,7 +85,7 @@ function openEditModal(resortId) {
     document.getElementById('editPrice').value = resort.price;
     document.getElementById('editDescription').value = resort.description;
     document.getElementById('editAmenities').value = resort.amenities.join(', ');
-    document.getElementById('editMaxGuests').value = resort.max_guests || 10;
+    document.getElementById('editMaxGuests').value = resort.max_guests || 20;
     document.getElementById('editPerHeadCharge').value = resort.per_head_charge || 300;
     
     document.getElementById('editModal').style.display = 'block';

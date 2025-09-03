@@ -139,9 +139,10 @@ function openBookingModal(resortId) {
     
     // Set max guests limit
     const guestsInput = document.getElementById('guests');
-    const maxGuests = resort.max_guests || 10;
+    const maxGuests = resort.max_guests || 20;
     guestsInput.max = maxGuests;
     document.getElementById('maxGuestsCount').textContent = maxGuests;
+    document.getElementById('perHeadCharge').textContent = resort.per_head_charge || 300;
     
     calculateTotal();
     modal.style.display = 'block';
@@ -167,11 +168,15 @@ function calculateTotal() {
         nights = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
     }
     
-    // Base price + (additional guests * per head charge) * nights
-    const additionalGuests = Math.max(0, guests - 1);
-    const total = (basePrice + (additionalGuests * perHeadCharge)) * nights;
+    // Base price covers up to 10 guests, charge extra for guests above 10
+    const extraGuests = Math.max(0, guests - 10);
+    const total = (basePrice + (extraGuests * perHeadCharge)) * nights;
     
-    document.getElementById('pricePerNight').textContent = `₹${basePrice} + ₹${perHeadCharge}/extra person`;
+    if (guests <= 10) {
+        document.getElementById('pricePerNight').textContent = `₹${basePrice} (up to 10 guests)`;
+    } else {
+        document.getElementById('pricePerNight').textContent = `₹${basePrice} + ₹${perHeadCharge} × ${extraGuests} extra guests`;
+    }
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
 }
 
