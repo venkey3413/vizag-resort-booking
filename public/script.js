@@ -39,6 +39,7 @@ async function loadResorts() {
     try {
         const response = await fetch('/api/resorts');
         resorts = await response.json();
+        console.log('Loaded resorts:', resorts); // Debug log
         displayResorts();
         populateLocationFilter();
     } catch (error) {
@@ -59,17 +60,38 @@ function displayResorts(filteredResorts = resorts) {
         <div class="resort-card">
             <div class="image-gallery" data-resort-id="${resort.id}">
                 ${(() => {
-                    const images = resort.images && Array.isArray(resort.images) ? resort.images : [resort.image];
+                    console.log(`Resort ${resort.id} images:`, resort.images); // Debug log
+                    let images = [];
+                    
+                    // Handle different image data formats
+                    if (resort.images) {
+                        if (typeof resort.images === 'string') {
+                            try {
+                                images = JSON.parse(resort.images);
+                            } catch (e) {
+                                images = [resort.images];
+                            }
+                        } else if (Array.isArray(resort.images)) {
+                            images = resort.images;
+                        } else {
+                            images = [resort.image];
+                        }
+                    } else {
+                        images = [resort.image];
+                    }
+                    
+                    console.log(`Processed images for resort ${resort.id}:`, images); // Debug log
+                    
                     if (images.length > 1) {
                         return `<div class="image-slider">
                             ${images.map((img, index) => 
                                 `<img src="${img}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" 
-                                     onclick="showImage(${index}, ${resort.id})" 
+                                     onclick="showImage(${index}, ${resort.id})" style="cursor: pointer;"
                                      onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">`
                             ).join('')}
                             <div class="image-dots">
                                 ${images.map((_, index) => 
-                                    `<span class="dot ${index === 0 ? 'active' : ''}" onclick="showImage(${index}, ${resort.id})"></span>`
+                                    `<span class="dot ${index === 0 ? 'active' : ''}" onclick="showImage(${index}, ${resort.id})" style="cursor: pointer;"></span>`
                                 ).join('')}
                             </div>
                         </div>`;
@@ -248,19 +270,32 @@ function setMinDate() {
 
 // Image slider functions
 function showImage(index, resortId) {
+    console.log(`Showing image ${index} for resort ${resortId}`); // Debug log
+    
     const gallery = document.querySelector(`[data-resort-id="${resortId}"]`);
-    if (!gallery) return;
+    if (!gallery) {
+        console.log('Gallery not found for resort', resortId);
+        return;
+    }
     
     const images = gallery.querySelectorAll('.resort-image');
     const dots = gallery.querySelectorAll('.dot');
+    
+    console.log(`Found ${images.length} images and ${dots.length} dots`); // Debug log
     
     // Remove active class from all
     images.forEach(img => img.classList.remove('active'));
     dots.forEach(dot => dot.classList.remove('active'));
     
     // Add active class to selected
-    if (images[index]) images[index].classList.add('active');
-    if (dots[index]) dots[index].classList.add('active');
+    if (images[index]) {
+        images[index].classList.add('active');
+        console.log(`Activated image ${index}`);
+    }
+    if (dots[index]) {
+        dots[index].classList.add('active');
+        console.log(`Activated dot ${index}`);
+    }
 }
 
 // Close modals when clicking outside
