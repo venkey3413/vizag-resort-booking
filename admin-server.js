@@ -59,15 +59,19 @@ app.post('/api/resorts', async (req, res) => {
     try {
         const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
+        if (!name || !location || !price) {
+            return res.status(400).json({ error: 'Name, location, and price are required' });
+        }
+        
         const result = await db().run(
-            'INSERT INTO resorts (name, location, price, description, images, videos, amenities, max_guests, per_head_charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300]
+            'INSERT INTO resorts (name, location, price, description, images, videos, amenities, available, max_guests, per_head_charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300]
         );
         
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
         console.error('Error adding resort:', error);
-        res.status(500).json({ error: 'Failed to add resort' });
+        res.status(500).json({ error: 'Failed to add resort: ' + error.message });
     }
 });
 
