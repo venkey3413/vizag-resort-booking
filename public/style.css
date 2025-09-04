@@ -260,11 +260,19 @@ section {
 }
 
 .resort-image {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: all 0.5s ease;
     cursor: pointer;
+    opacity: 0;
+}
+
+.resort-image.active {
+    opacity: 1;
 }
 
 .resort-card:hover .resort-image {
