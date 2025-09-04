@@ -246,16 +246,16 @@ async function handleBooking(e) {
         
         if (response.ok) {
             const booking = await response.json();
-            alert(`🎉 Booking confirmed! Total: ₹${booking.totalPrice.toLocaleString()}\n\nYOUR BOOKING DETAILS WILL BE SHARED TO YOUR WHATSAPP NUMBER.`);
+            alert(`🎉 BOOKING CONFIRMED!\n\nTotal Amount: ₹${booking.totalPrice.toLocaleString()}\n\nYOUR BOOKING DETAILS WILL BE SHARED TO YOUR WHATSAPP NUMBER.\n\nThank you for choosing us!`);
             closeModal();
             document.getElementById('bookingForm').reset();
         } else {
             const errorData = await response.json();
-            alert(errorData.error || 'Error creating booking');
+            alert('Booking failed. Please try again.');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error creating booking');
+        alert('Booking failed. Please check your connection and try again.');
     }
 }
 
