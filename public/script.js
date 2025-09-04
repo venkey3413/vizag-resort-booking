@@ -59,20 +59,13 @@ function displayResorts(filteredResorts = resorts) {
     grid.innerHTML = filteredResorts.map(resort => `
         <div class="resort-card">
             <div class="image-gallery" onclick="openResortDetails(${resort.id})" style="cursor: pointer;">
-                <img src="${resort.image}" alt="${resort.name}" class="resort-image" 
-                     onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 200\"><rect fill=\"%23ecf0f1\" width=\"400\" height=\"200\"/><text x=\"200\" y=\"100\" text-anchor=\"middle\" fill=\"%237f8c8d\" font-size=\"16\">Resort Image</text></svg>'">
-                ${(() => {
-                    let images = [];
-                    if (resort.images) {
-                        if (typeof resort.images === 'string') {
-                            try { images = JSON.parse(resort.images); } catch (e) { images = [resort.images]; }
-                        } else if (Array.isArray(resort.images)) {
-                            images = resort.images;
-                        }
+                <img src="${(() => {
+                    if (resort.images && resort.images.length > 0) {
+                        return resort.images[0];
                     }
-                    return images.length > 1 ? `<div class="image-count">+${images.length - 1}</div>` : '';
-                })()
-                }
+                    return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect fill="%23ecf0f1" width="400" height="200"/><text x="200" y="100" text-anchor="middle" fill="%237f8c8d" font-size="16">No Image</text></svg>';
+                })()}" alt="${resort.name}" class="resort-image">
+                ${resort.images && resort.images.length > 1 ? `<div class="image-count">+${resort.images.length - 1}</div>` : ''}
             </div>
             <div class="resort-info">
                 <h3>${resort.name}</h3>
@@ -250,14 +243,11 @@ function openResortDetails(resortId) {
     
     // Get all images
     currentResortImages = [];
-    if (resort.images) {
-        if (typeof resort.images === 'string') {
-            try { currentResortImages = JSON.parse(resort.images); } catch (e) { currentResortImages = [resort.images]; }
-        } else if (Array.isArray(resort.images)) {
-            currentResortImages = resort.images;
-        }
+    if (resort.images && Array.isArray(resort.images) && resort.images.length > 0) {
+        currentResortImages = resort.images;
+    } else {
+        currentResortImages = ['data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect fill="%23ecf0f1" width="400" height="200"/><text x="200" y="100" text-anchor="middle" fill="%237f8c8d" font-size="16">No Image Available</text></svg>'];
     }
-    if (currentResortImages.length === 0) currentResortImages = [resort.image];
     
     currentImageIndex = 0;
     
