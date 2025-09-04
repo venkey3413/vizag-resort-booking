@@ -397,7 +397,8 @@ section {
     background: white;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
+    position: relative;
 }
 
 .resort-info-panel h2 {
@@ -427,6 +428,13 @@ section {
 
 .resort-info-panel .amenities {
     margin-bottom: 2rem;
+}
+
+.resort-info-panel .book-btn {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    z-index: 10;
 }
 
 /* Forms */
