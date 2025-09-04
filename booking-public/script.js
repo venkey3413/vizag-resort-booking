@@ -44,14 +44,14 @@ function displayBookings() {
                 ${bookings.map(booking => `
                     <tr>
                         <td>#${booking.id}</td>
-                        <td>${booking.guestName}</td>
-                        <td>${booking.resortName}</td>
+                        <td>${booking.guest_name}</td>
+                        <td>${booking.resort_name}</td>
                         <td>${booking.email}</td>
                         <td>${booking.phone}</td>
-                        <td>${new Date(booking.checkIn).toLocaleDateString()}</td>
-                        <td>${new Date(booking.checkOut).toLocaleDateString()}</td>
+                        <td>${new Date(booking.check_in).toLocaleDateString()}</td>
+                        <td>${new Date(booking.check_out).toLocaleDateString()}</td>
                         <td>${booking.guests}</td>
-                        <td>₹${booking.totalPrice}</td>
+                        <td>₹${booking.total_price ? booking.total_price.toLocaleString() : '0'}</td>
                         <td><span class="status">${booking.status}</span></td>
                         <td>
                             <button class="delete-btn" onclick="deleteBooking(${booking.id})">
@@ -67,7 +67,7 @@ function displayBookings() {
 
 function updateStats() {
     const totalBookings = bookings.length;
-    const totalRevenue = bookings.reduce((sum, booking) => sum + booking.totalPrice, 0);
+    const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.total_price || 0), 0);
     
     document.getElementById('totalBookings').textContent = totalBookings;
     document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
