@@ -37,7 +37,7 @@ function displayResorts() {
             </div>
             <div class="resort-media">
                 ${resort.images && resort.images.length > 0 ? 
-                    `<img src="${resort.images[0]}" alt="${resort.name}" style="width:100px;height:60px;object-fit:cover;">` : 
+                    `<img src="${resort.images[0]}" alt="${resort.name}" style="width:100px;height:60px;object-fit:cover;" onerror="this.style.display='none'">` : 
                     '<div style="width:100px;height:60px;background:#eee;display:flex;align-items:center;justify-content:center;">No Image</div>'
                 }
                 <small>${resort.images ? resort.images.length : 0} images, ${resort.videos ? resort.videos.length : 0} videos</small>
@@ -59,41 +59,16 @@ function displayResorts() {
     `).join('');
 }
 
-async function uploadFiles(files) {
-    if (!files || files.length === 0) return [];
-    
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-        formData.append('media', files[i]);
-    }
-    
-    try {
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            return result.urls || [];
-        } else {
-            throw new Error('Upload failed');
-        }
-    } catch (error) {
-        console.error('Upload error:', error);
-        alert('Error uploading files: ' + error.message);
-        return [];
-    }
-}
-
 async function handleAddResort(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
-    const imageFiles = formData.getAll('images');
     
-    // Upload images to S3 first
-    const imageUrls = await uploadFiles(imageFiles);
+    // Parse URLs from textarea
+    const imageUrls = formData.get('imageUrls') ? 
+        formData.get('imageUrls').split('\n').map(url => url.trim()).filter(url => url) : [];
+    const videoUrls = formData.get('videoUrls') ? 
+        formData.get('videoUrls').split('\n').map(url => url.trim()).filter(url => url) : [];
     
     const resortData = {
         name: formData.get('name'),
@@ -104,7 +79,7 @@ async function handleAddResort(e) {
         maxGuests: parseInt(formData.get('maxGuests')) || 10,
         perHeadCharge: parseInt(formData.get('perHeadCharge')) || 300,
         images: imageUrls,
-        videos: []
+        videos: videoUrls
     };
     
     try {
@@ -142,6 +117,8 @@ function openEditModal(resortId) {
     document.getElementById('editAmenities').value = resort.amenities ? resort.amenities.join(', ') : '';
     document.getElementById('editMaxGuests').value = resort.max_guests || 10;
     document.getElementById('editPerHeadCharge').value = resort.per_head_charge || 300;
+    document.getElementById('editImageUrls').value = resort.images ? resort.images.join('\n') : '';
+    document.getElementById('editVideoUrls').value = resort.videos ? resort.videos.join('\n') : '';
     
     document.getElementById('editModal').style.display = 'block';
 }
@@ -154,15 +131,12 @@ async function handleEditResort(e) {
     e.preventDefault();
     
     const resortId = document.getElementById('editResortId').value;
-    const imageFiles = document.getElementById('editImages').files;
     
-    // Upload new images if any
-    const newImageUrls = await uploadFiles(imageFiles);
-    
-    // Get current resort to preserve existing images
-    const currentResort = resorts.find(r => r.id == resortId);
-    const existingImages = currentResort ? (currentResort.images || []) : [];
-    const allImages = [...existingImages, ...newImageUrls];
+    // Parse URLs from textarea
+    const imageUrls = document.getElementById('editImageUrls').value ? 
+        document.getElementById('editImageUrls').value.split('\n').map(url => url.trim()).filter(url => url) : [];
+    const videoUrls = document.getElementById('editVideoUrls').value ? 
+        document.getElementById('editVideoUrls').value.split('\n').map(url => url.trim()).filter(url => url) : [];
     
     const resortData = {
         name: document.getElementById('editName').value,
@@ -172,8 +146,8 @@ async function handleEditResort(e) {
         amenities: document.getElementById('editAmenities').value.split(',').map(a => a.trim()).filter(a => a),
         maxGuests: parseInt(document.getElementById('editMaxGuests').value) || 10,
         perHeadCharge: parseInt(document.getElementById('editPerHeadCharge').value) || 300,
-        images: allImages,
-        videos: currentResort ? (currentResort.videos || []) : []
+        images: imageUrls,
+        videos: videoUrls
     };
     
     try {

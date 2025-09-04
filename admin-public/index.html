@@ -10,7 +10,7 @@
 <body>
     <header class="header">
         <h1><i class="fas fa-cog"></i> Resort Admin Panel</h1>
-        <p>Manage resorts with S3 media storage</p>
+        <p>Manage resorts - Upload files to S3 manually and add URLs</p>
     </header>
 
     <div class="container">
@@ -53,9 +53,14 @@
                     <input type="text" name="amenities" placeholder="Swimming Pool, Spa, WiFi, Restaurant">
                 </div>
                 <div class="form-group">
-                    <label>Resort Images (Upload to S3)</label>
-                    <input type="file" name="images" accept="image/*" multiple>
-                    <small><i class="fas fa-cloud-upload-alt"></i> Files will be uploaded to S3 bucket: resort3413</small>
+                    <label>Image URLs (one per line)</label>
+                    <textarea name="imageUrls" rows="3" placeholder="https://resort3413.s3.amazonaws.com/public/images/image1.jpg
+https://resort3413.s3.amazonaws.com/public/images/image2.jpg"></textarea>
+                    <small><i class="fas fa-info-circle"></i> Upload files to S3 manually, then paste URLs here</small>
+                </div>
+                <div class="form-group">
+                    <label>Video URLs (one per line)</label>
+                    <textarea name="videoUrls" rows="2" placeholder="https://resort3413.s3.amazonaws.com/public/videos/tour.mp4"></textarea>
                 </div>
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-plus"></i> Add Resort
@@ -106,9 +111,12 @@
                     <input type="text" id="editAmenities">
                 </div>
                 <div class="form-group">
-                    <label>Add More Images (Upload to S3)</label>
-                    <input type="file" id="editImages" accept="image/*" multiple>
-                    <small><i class="fas fa-info-circle"></i> New images will be added to existing ones</small>
+                    <label>Image URLs (one per line)</label>
+                    <textarea id="editImageUrls" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Video URLs (one per line)</label>
+                    <textarea id="editVideoUrls" rows="2"></textarea>
                 </div>
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-save"></i> Update Resort
