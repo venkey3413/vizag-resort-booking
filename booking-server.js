@@ -18,6 +18,11 @@ initDatabase().then(() => {
     console.error('❌ Booking server database error:', err);
 });
 
+// Test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Booking server is working', dbReady });
+});
+
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
     try {
@@ -25,6 +30,7 @@ app.get('/api/bookings', async (req, res) => {
             return res.status(503).json({ error: 'Database not ready' });
         }
         const bookings = await db().all('SELECT * FROM bookings ORDER BY booking_date DESC');
+        console.log('Found bookings:', bookings.length);
         res.json(bookings);
     } catch (error) {
         console.error('Error fetching bookings:', error);
