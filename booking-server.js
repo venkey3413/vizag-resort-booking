@@ -10,11 +10,20 @@ app.use(express.json());
 app.use(express.static('booking-public'));
 
 // Initialize database on startup
-initDatabase();
+let dbReady = false;
+initDatabase().then(() => {
+    dbReady = true;
+    console.log('✅ Booking server database ready');
+}).catch(err => {
+    console.error('❌ Booking server database error:', err);
+});
 
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
     try {
+        if (!dbReady) {
+            return res.status(503).json({ error: 'Database not ready' });
+        }
         const bookings = await db().all('SELECT * FROM bookings ORDER BY booking_date DESC');
         res.json(bookings);
     } catch (error) {
