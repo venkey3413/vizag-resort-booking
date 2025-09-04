@@ -616,6 +616,29 @@ section {
     animation: modalSlideIn 0.4s ease-out;
 }
 
+.resort-details-content .close {
+    position: absolute;
+    right: 2rem;
+    top: 2rem;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #fff;
+    background: rgba(0,0,0,0.7);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.resort-details-content .close:hover {
+    background: rgba(239, 68, 68, 0.9);
+    transform: rotate(90deg) scale(1.1);
+}
+
 .resort-details-layout {
     display: grid;
     grid-template-columns: 2fr 1fr;
