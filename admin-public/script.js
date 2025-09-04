@@ -29,10 +29,18 @@ function displayResorts() {
                 <div>
                     <h4>${resort.name}</h4>
                     <p>${resort.location} - ₹${resort.price}/night</p>
+                    <small>Max: ${resort.max_guests} guests, Extra: ₹${resort.per_head_charge}/head</small>
                 </div>
                 <span class="status-badge ${resort.available ? 'available' : 'unavailable'}">
                     ${resort.available ? 'Available' : 'Unavailable'}
                 </span>
+            </div>
+            <div class="resort-media">
+                ${resort.images && resort.images.length > 0 ? 
+                    `<img src="${resort.images[0]}" alt="${resort.name}" style="width:100px;height:60px;object-fit:cover;">` : 
+                    '<div style="width:100px;height:60px;background:#eee;display:flex;align-items:center;justify-content:center;">No Image</div>'
+                }
+                <small>${resort.images ? resort.images.length : 0} images, ${resort.videos ? resort.videos.length : 0} videos</small>
             </div>
             <div class="resort-actions">
                 <button class="availability-btn ${resort.available ? 'available' : 'unavailable'}" 
@@ -51,15 +59,61 @@ function displayResorts() {
     `).join('');
 }
 
+async function uploadFiles(files) {
+    if (!files || files.length === 0) return [];
+    
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append('media', files[i]);
+    }
+    
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            return result.urls || [];
+        } else {
+            throw new Error('Upload failed');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        alert('Error uploading files: ' + error.message);
+        return [];
+    }
+}
+
 async function handleAddResort(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
+    const imageFiles = formData.getAll('images');
+    
+    // Upload images to S3 first
+    const imageUrls = await uploadFiles(imageFiles);
+    
+    const resortData = {
+        name: formData.get('name'),
+        location: formData.get('location'),
+        price: parseInt(formData.get('price')),
+        description: formData.get('description'),
+        amenities: formData.get('amenities') ? formData.get('amenities').split(',').map(a => a.trim()) : [],
+        maxGuests: parseInt(formData.get('maxGuests')) || 10,
+        perHeadCharge: parseInt(formData.get('perHeadCharge')) || 300,
+        images: imageUrls,
+        videos: []
+    };
     
     try {
         const response = await fetch('/api/resorts', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(resortData)
         });
         
         if (response.ok) {
@@ -67,11 +121,12 @@ async function handleAddResort(e) {
             e.target.reset();
             loadResorts();
         } else {
-            alert('Error adding resort');
+            const error = await response.json();
+            alert('Error adding resort: ' + (error.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error adding resort');
+        alert('Error adding resort: ' + error.message);
     }
 }
 
@@ -84,8 +139,8 @@ function openEditModal(resortId) {
     document.getElementById('editLocation').value = resort.location;
     document.getElementById('editPrice').value = resort.price;
     document.getElementById('editDescription').value = resort.description;
-    document.getElementById('editAmenities').value = resort.amenities.join(', ');
-    document.getElementById('editMaxGuests').value = resort.max_guests || 20;
+    document.getElementById('editAmenities').value = resort.amenities ? resort.amenities.join(', ') : '';
+    document.getElementById('editMaxGuests').value = resort.max_guests || 10;
     document.getElementById('editPerHeadCharge').value = resort.per_head_charge || 300;
     
     document.getElementById('editModal').style.display = 'block';
@@ -99,25 +154,35 @@ async function handleEditResort(e) {
     e.preventDefault();
     
     const resortId = document.getElementById('editResortId').value;
-    const formData = new FormData();
-    
-    formData.append('name', document.getElementById('editName').value);
-    formData.append('location', document.getElementById('editLocation').value);
-    formData.append('price', document.getElementById('editPrice').value);
-    formData.append('description', document.getElementById('editDescription').value);
-    formData.append('amenities', document.getElementById('editAmenities').value);
-    formData.append('maxGuests', document.getElementById('editMaxGuests').value);
-    formData.append('perHeadCharge', document.getElementById('editPerHeadCharge').value);
-    
     const imageFiles = document.getElementById('editImages').files;
-    for (let i = 0; i < imageFiles.length; i++) {
-        formData.append('images', imageFiles[i]);
-    }
+    
+    // Upload new images if any
+    const newImageUrls = await uploadFiles(imageFiles);
+    
+    // Get current resort to preserve existing images
+    const currentResort = resorts.find(r => r.id == resortId);
+    const existingImages = currentResort ? (currentResort.images || []) : [];
+    const allImages = [...existingImages, ...newImageUrls];
+    
+    const resortData = {
+        name: document.getElementById('editName').value,
+        location: document.getElementById('editLocation').value,
+        price: parseInt(document.getElementById('editPrice').value),
+        description: document.getElementById('editDescription').value,
+        amenities: document.getElementById('editAmenities').value.split(',').map(a => a.trim()).filter(a => a),
+        maxGuests: parseInt(document.getElementById('editMaxGuests').value) || 10,
+        perHeadCharge: parseInt(document.getElementById('editPerHeadCharge').value) || 300,
+        images: allImages,
+        videos: currentResort ? (currentResort.videos || []) : []
+    };
     
     try {
         const response = await fetch(`/api/resorts/${resortId}`, {
             method: 'PUT',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(resortData)
         });
         
         if (response.ok) {
@@ -125,11 +190,12 @@ async function handleEditResort(e) {
             closeEditModal();
             loadResorts();
         } else {
-            alert('Error updating resort');
+            const error = await response.json();
+            alert('Error updating resort: ' + (error.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error updating resort');
+        alert('Error updating resort: ' + error.message);
     }
 }
 

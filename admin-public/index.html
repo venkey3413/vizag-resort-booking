@@ -10,6 +10,7 @@
 <body>
     <header class="header">
         <h1><i class="fas fa-cog"></i> Resort Admin Panel</h1>
+        <p>Manage resorts with S3 media storage</p>
     </header>
 
     <div class="container">
@@ -22,39 +23,39 @@
             <h2>Add New Resort</h2>
             <form id="addResortForm" class="resort-form">
                 <div class="form-group">
-                    <label>Resort Name</label>
+                    <label>Resort Name *</label>
                     <input type="text" name="name" required>
                 </div>
                 <div class="form-group">
-                    <label>Location</label>
+                    <label>Location *</label>
                     <input type="text" name="location" required>
                 </div>
                 <div class="form-group">
-                    <label>Price per Night (₹)</label>
+                    <label>Price per Night (₹) *</label>
                     <input type="number" name="price" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Max Guests</label>
-                        <input type="number" name="maxGuests" min="10" max="50" value="20" required>
+                        <input type="number" name="maxGuests" min="1" max="50" value="10" required>
                     </div>
                     <div class="form-group">
                         <label>Per Head Charge (₹)</label>
-                        <input type="number" name="perHeadCharge" min="200" max="1000" value="300" required>
+                        <input type="number" name="perHeadCharge" min="100" max="1000" value="300" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Description</label>
+                    <label>Description *</label>
                     <textarea name="description" rows="3" required></textarea>
                 </div>
                 <div class="form-group">
                     <label>Amenities (comma separated)</label>
-                    <input type="text" name="amenities" placeholder="Swimming Pool, Spa, WiFi">
+                    <input type="text" name="amenities" placeholder="Swimming Pool, Spa, WiFi, Restaurant">
                 </div>
                 <div class="form-group">
-                    <label>Resort Images (Multiple)</label>
+                    <label>Resort Images (Upload to S3)</label>
                     <input type="file" name="images" accept="image/*" multiple>
-                    <small>Hold Ctrl/Cmd to select multiple images</small>
+                    <small><i class="fas fa-cloud-upload-alt"></i> Files will be uploaded to S3 bucket: resort3413</small>
                 </div>
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-plus"></i> Add Resort
@@ -89,11 +90,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Max Guests</label>
-                        <input type="number" id="editMaxGuests" min="10" max="50" required>
+                        <input type="number" id="editMaxGuests" min="1" max="50" required>
                     </div>
                     <div class="form-group">
                         <label>Per Head Charge (₹)</label>
-                        <input type="number" id="editPerHeadCharge" min="200" max="1000" required>
+                        <input type="number" id="editPerHeadCharge" min="100" max="1000" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -105,9 +106,9 @@
                     <input type="text" id="editAmenities">
                 </div>
                 <div class="form-group">
-                    <label>Resort Images (Multiple)</label>
+                    <label>Add More Images (Upload to S3)</label>
                     <input type="file" id="editImages" accept="image/*" multiple>
-                    <small>Hold Ctrl/Cmd to select multiple images</small>
+                    <small><i class="fas fa-info-circle"></i> New images will be added to existing ones</small>
                 </div>
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-save"></i> Update Resort
