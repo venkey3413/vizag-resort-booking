@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { db, initDatabase } = require('./database');
+const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
+const { upload } = require('./s3-config');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,23 +24,23 @@ async function getResorts() {
         return rows.map(row => {
             let amenities = [];
             let images = [];
+            let videos = [];
             
             try {
                 amenities = JSON.parse(row.amenities || '[]');
+                images = JSON.parse(row.images || '[]');
+                videos = JSON.parse(row.videos || '[]');
             } catch (e) {
                 amenities = [];
-            }
-            
-            try {
-                images = JSON.parse(row.images || '[]');
-            } catch (e) {
-                images = [row.image];
+                images = [];
+                videos = [];
             }
             
             return {
                 ...row,
                 amenities,
                 images,
+                videos,
                 available: Boolean(row.available)
             };
         });
@@ -50,16 +52,44 @@ async function getResorts() {
 
 // API Routes
 
+// Upload media files to S3
+app.post('/api/upload', upload.array('media', 10), (req, res) => {
+    try {
+        const fileUrls = req.files.map(file => file.location);
+        res.json({ urls: fileUrls });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
+
 // Get all resorts
 app.get('/api/resorts', async (req, res) => {
     const resorts = await getResorts();
     res.json(resorts);
 });
 
+// Add new resort
+app.post('/api/resorts', async (req, res) => {
+    try {
+        const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
+        
+        const result = await db().run(
+            'INSERT INTO resorts (name, location, price, description, images, videos, amenities, max_guests, per_head_charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, location, price, description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), maxGuests || 10, perHeadCharge || 300]
+        );
+        
+        res.json({ id: result.lastID, message: 'Resort added successfully' });
+    } catch (error) {
+        console.error('Error adding resort:', error);
+        res.status(500).json({ error: 'Failed to add resort' });
+    }
+});
+
 // Book a resort
 app.post('/api/bookings', async (req, res) => {
     try {
-        const { resortId, guestName, email, phone, checkIn, checkOut, guests } = req.body;
+        const { resortId, guestName, email, phone, checkIn, checkOut, guests, paymentId } = req.body;
         
         const resorts = await getResorts();
         const resort = resorts.find(r => r.id === parseInt(resortId));
@@ -71,7 +101,7 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(400).json({ error: 'Resort is currently unavailable for booking' });
         }
         
-        // Calculate total with per-head pricing (charge only after 10 guests)
+        // Calculate total with per-head pricing
         const basePrice = resort.price;
         const perHeadCharge = resort.per_head_charge || 300;
         const guestCount = parseInt(guests);
@@ -83,13 +113,29 @@ app.post('/api/bookings', async (req, res) => {
         
         const totalPrice = (basePrice + (extraGuests * perHeadCharge)) * nights;
         
-        const result = await db().run(
-            'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [parseInt(resortId), resort.name, guestName, email, phone, checkIn, checkOut, guestCount, totalPrice, 'confirmed']
+        // Create booking
+        const bookingResult = await db().run(
+            'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, payment_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [parseInt(resortId), resort.name, guestName, email, phone, checkIn, checkOut, guestCount, totalPrice, paymentId, 'confirmed']
         );
         
+        const bookingId = bookingResult.lastID;
+        
+        // Add transaction record
+        await addTransaction(bookingId, paymentId, totalPrice, 'online', 'completed');
+        
+        // Add booking history
+        await addBookingHistory(bookingId, 'booking_created', {
+            guestName,
+            email,
+            checkIn,
+            checkOut,
+            guests: guestCount,
+            totalPrice
+        });
+        
         const booking = {
-            id: result.lastID,
+            id: bookingId,
             resortId: parseInt(resortId),
             resortName: resort.name,
             guestName,
@@ -97,8 +143,9 @@ app.post('/api/bookings', async (req, res) => {
             phone,
             checkIn,
             checkOut,
-            guests: parseInt(guests),
-            totalPrice: totalPrice,
+            guests: guestCount,
+            totalPrice,
+            paymentId,
             status: 'confirmed',
             bookingDate: new Date().toISOString()
         };
@@ -110,8 +157,41 @@ app.post('/api/bookings', async (req, res) => {
     }
 });
 
+// Get booking history
+app.get('/api/bookings', async (req, res) => {
+    try {
+        const bookings = await db().all(`
+            SELECT b.*, bh.action, bh.details, bh.created_at as history_date
+            FROM bookings b
+            LEFT JOIN booking_history bh ON b.id = bh.booking_id
+            ORDER BY b.booking_date DESC, bh.created_at DESC
+        `);
+        res.json(bookings);
+    } catch (error) {
+        console.error('Error fetching bookings:', error);
+        res.status(500).json({ error: 'Failed to fetch bookings' });
+    }
+});
+
+// Get transaction history
+app.get('/api/transactions', async (req, res) => {
+    try {
+        const transactions = await db().all(`
+            SELECT t.*, b.guest_name, b.resort_name
+            FROM transactions t
+            JOIN bookings b ON t.booking_id = b.id
+            ORDER BY t.transaction_date DESC
+        `);
+        res.json(transactions);
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+});
+
 app.listen(PORT, () => {
-    console.log(`Main App running on http://localhost:${PORT}`);
-    console.log(`Admin Panel: http://localhost:3001`);
-    console.log(`Booking History: http://localhost:3002`);
+    console.log(`🚀 Resort Booking Server running on http://localhost:${PORT}`);
+    console.log(`📊 Admin Panel: http://localhost:3001`);
+    console.log(`📋 Booking History: http://localhost:3002`);
+    console.log(`☁️  S3 Bucket: ${process.env.S3_BUCKET}`);
 });
