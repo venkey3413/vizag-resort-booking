@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { pool, initDatabase } = require('./database');
+const { db, initDatabase } = require('./database');
 
 const app = express();
 const PORT = 3002;
@@ -12,55 +12,21 @@ app.use(express.static('booking-public'));
 // Initialize database on startup
 initDatabase();
 
-// API Routes
-app.post('/api/bookings', async (req, res) => {
-    try {
-        const { resortId, resortName, guestName, email, phone, checkIn, checkOut, guests, totalPrice } = req.body;
-        
-        const [result] = await pool.execute(
-            'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [parseInt(resortId), resortName, guestName, email, phone, checkIn, checkOut, parseInt(guests), totalPrice]
-        );
-        
-        const booking = {
-            id: result.insertId,
-            resortId: parseInt(resortId),
-            resortName,
-            guestName,
-            email,
-            phone,
-            checkIn,
-            checkOut,
-            guests: parseInt(guests),
-            totalPrice,
-            status: 'confirmed',
-            bookingDate: new Date().toISOString()
-        };
-        
-        res.json(booking);
-    } catch (error) {
-        console.error('Error creating booking:', error);
-        res.status(500).json({ error: 'Failed to create booking' });
-    }
-});
-
+// Get all bookings with history
 app.get('/api/bookings', async (req, res) => {
     try {
-        const [rows] = await pool.execute('SELECT * FROM bookings ORDER BY id DESC');
-        const bookings = rows.map(row => ({
-            id: row.id,
-            resortId: row.resort_id,
-            resortName: row.resort_name,
-            guestName: row.guest_name,
-            email: row.email,
-            phone: row.phone,
-            checkIn: row.check_in,
-            checkOut: row.check_out,
-            guests: row.guests,
-            totalPrice: row.total_price,
-            status: row.status,
-            bookingDate: row.booking_date
-        }));
+        const bookings = await db().all(`
+            SELECT b.*, 
+                   bh.action, 
+                   bh.details, 
+                   bh.created_at as history_date,
+                   t.payment_method,
+                   t.status as payment_status
+            FROM bookings b
+            LEFT JOIN booking_history bh ON b.id = bh.booking_id
+            LEFT JOIN transactions t ON b.id = t.booking_id
+            ORDER BY b.booking_date DESC, bh.created_at DESC
+        `);
         res.json(bookings);
     } catch (error) {
         console.error('Error fetching bookings:', error);
@@ -68,13 +34,30 @@ app.get('/api/bookings', async (req, res) => {
     }
 });
 
+// Get transactions
+app.get('/api/transactions', async (req, res) => {
+    try {
+        const transactions = await db().all(`
+            SELECT t.*, b.guest_name, b.resort_name
+            FROM transactions t
+            JOIN bookings b ON t.booking_id = b.id
+            ORDER BY t.transaction_date DESC
+        `);
+        res.json(transactions);
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+});
+
+// Delete booking
 app.delete('/api/bookings/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         
-        const [result] = await pool.execute('DELETE FROM bookings WHERE id = ?', [id]);
+        const result = await db().run('DELETE FROM bookings WHERE id = ?', [id]);
         
-        if (result.affectedRows === 0) {
+        if (result.changes === 0) {
             return res.status(404).json({ error: 'Booking not found' });
         }
         
@@ -86,5 +69,5 @@ app.delete('/api/bookings/:id', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Booking Service running on http://localhost:${PORT}`);
+    console.log(`📋 Booking History Server running on http://localhost:${PORT}`);
 });
