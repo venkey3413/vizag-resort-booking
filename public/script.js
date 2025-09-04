@@ -1,32 +1,26 @@
 let resorts = [];
 
-// Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     setupEventListeners();
     setMinDate();
 });
 
-// Setup event listeners
 function setupEventListeners() {
-    // Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const target = this.getAttribute('href').substring(1);
             scrollToSection(target);
             
-            // Update active nav link
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             this.classList.add('active');
         });
     });
 
-    // Forms
     document.getElementById('bookingForm').addEventListener('submit', handleBooking);
 }
 
-// Smooth scroll to section
 function scrollToSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -34,12 +28,10 @@ function scrollToSection(sectionId) {
     }
 }
 
-// Load resorts from API
 async function loadResorts() {
     try {
         const response = await fetch('/api/resorts');
         resorts = await response.json();
-        console.log('Loaded resorts:', resorts); // Debug log
         displayResorts();
         populateLocationFilter();
     } catch (error) {
@@ -47,30 +39,46 @@ async function loadResorts() {
     }
 }
 
-// Display resorts in grid
 function displayResorts(filteredResorts = resorts) {
     const grid = document.getElementById('resortsGrid');
     
     if (filteredResorts.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">No resorts found.</p>';
+        grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: white; font-size: 1.2rem;">No resorts found.</p>';
         return;
     }
     
     grid.innerHTML = filteredResorts.map(resort => `
-        <div class="resort-card">
-            <div class="image-gallery" onclick="openResortDetails(${resort.id})" style="cursor: pointer;">
-                <img src="${(() => {
-                    if (resort.images && resort.images.length > 0) {
-                        return resort.images[0];
-                    }
-                    return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect fill="%23ecf0f1" width="400" height="200"/><text x="200" y="100" text-anchor="middle" fill="%237f8c8d" font-size="16">No Image</text></svg>';
-                })()}" alt="${resort.name}" class="resort-image">
-                ${resort.images && resort.images.length > 1 ? `<div class="image-count">+${resort.images.length - 1}</div>` : ''}
+        <div class="resort-card" data-resort-id="${resort.id}">
+            <div class="image-gallery">
+                <div class="image-slider" onclick="openResortDetails(${resort.id})">
+                    ${(() => {
+                        if (resort.images && resort.images.length > 0) {
+                            return resort.images.map((img, index) => 
+                                `<img src="${img}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}">`
+                            ).join('');
+                        }
+                        return '<img src="data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 200\\"><rect fill=\\"%23ecf0f1\\" width=\\"400\\" height=\\"200\\"/><text x=\\"200\\" y=\\"100\\" text-anchor=\\"middle\\" fill=\\"%237f8c8d\\" font-size=\\"16\\">No Image</text></svg>" alt="${resort.name}" class="resort-image active">';
+                    })()}
+                </div>
+                ${resort.images && resort.images.length > 1 ? `
+                    <button class="image-navigation prev-nav" onclick="changeCardImage(${resort.id}, -1, event)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="image-navigation next-nav" onclick="changeCardImage(${resort.id}, 1, event)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="image-dots">
+                        ${resort.images.map((_, index) => 
+                            `<span class="dot ${index === 0 ? 'active' : ''}" onclick="setCardImage(${resort.id}, ${index}, event)"></span>`
+                        ).join('')}
+                    </div>
+                    <div class="image-count">${resort.images.length} photos</div>
+                ` : ''}
             </div>
             <div class="resort-info">
                 <h3>${resort.name}</h3>
                 <p class="resort-location"><i class="fas fa-map-marker-alt"></i> ${resort.location}</p>
-                <p class="resort-price">₹${resort.price}/night</p>
+                <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
                 <p class="resort-description">${resort.description}</p>
                 <div class="amenities">
                     ${resort.amenities.map(amenity => `<span class="amenity">${amenity}</span>`).join('')}
@@ -88,9 +96,44 @@ function displayResorts(filteredResorts = resorts) {
     `).join('');
 }
 
+// Inline image browsing functions
+function changeCardImage(resortId, direction, event) {
+    event.stopPropagation();
+    const card = document.querySelector(`[data-resort-id="${resortId}"]`);
+    const images = card.querySelectorAll('.resort-image');
+    const dots = card.querySelectorAll('.dot');
+    
+    let currentIndex = 0;
+    images.forEach((img, index) => {
+        if (img.classList.contains('active')) {
+            currentIndex = index;
+        }
+        img.classList.remove('active');
+    });
+    
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    currentIndex += direction;
+    if (currentIndex >= images.length) currentIndex = 0;
+    if (currentIndex < 0) currentIndex = images.length - 1;
+    
+    images[currentIndex].classList.add('active');
+    dots[currentIndex].classList.add('active');
+}
 
+function setCardImage(resortId, index, event) {
+    event.stopPropagation();
+    const card = document.querySelector(`[data-resort-id="${resortId}"]`);
+    const images = card.querySelectorAll('.resort-image');
+    const dots = card.querySelectorAll('.dot');
+    
+    images.forEach(img => img.classList.remove('active'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    images[index].classList.add('active');
+    dots[index].classList.add('active');
+}
 
-// Populate location filter
 function populateLocationFilter() {
     const filter = document.getElementById('locationFilter');
     const locations = [...new Set(resorts.map(resort => resort.location))];
@@ -99,7 +142,6 @@ function populateLocationFilter() {
         locations.map(location => `<option value="${location}">${location}</option>`).join('');
 }
 
-// Filter resorts
 function filterResorts() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const locationFilter = document.getElementById('locationFilter').value;
@@ -116,9 +158,6 @@ function filterResorts() {
     displayResorts(filtered);
 }
 
-
-
-// Open booking modal
 function openBookingModal(resortId) {
     const resort = resorts.find(r => r.id === resortId);
     if (!resort) return;
@@ -127,9 +166,8 @@ function openBookingModal(resortId) {
     document.getElementById('bookingResortId').value = resortId;
     document.getElementById('resortPrice').value = resort.price;
     document.getElementById('modalResortName').textContent = `Book ${resort.name}`;
-    document.getElementById('pricePerNight').textContent = `₹${resort.price}`;
+    document.getElementById('pricePerNight').textContent = `₹${resort.price.toLocaleString()}`;
     
-    // Set max guests limit
     const guestsInput = document.getElementById('guests');
     const maxGuests = resort.max_guests || 20;
     guestsInput.max = maxGuests;
@@ -140,7 +178,6 @@ function openBookingModal(resortId) {
     modal.style.display = 'block';
 }
 
-// Calculate total amount
 function calculateTotal() {
     const resortId = parseInt(document.getElementById('bookingResortId').value);
     const resort = resorts.find(r => r.id === resortId);
@@ -160,26 +197,23 @@ function calculateTotal() {
         nights = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
     }
     
-    // Base price covers up to 10 guests, charge extra for guests above 10
     const extraGuests = Math.max(0, guests - 10);
     const total = (basePrice + (extraGuests * perHeadCharge)) * nights;
     
     if (guests <= 10) {
-        document.getElementById('pricePerNight').textContent = `₹${basePrice} (up to 10 guests)`;
+        document.getElementById('pricePerNight').textContent = `₹${basePrice.toLocaleString()} (up to 10 guests)`;
     } else {
-        document.getElementById('pricePerNight').textContent = `₹${basePrice} + ₹${perHeadCharge} × ${extraGuests} extra guests`;
+        document.getElementById('pricePerNight').textContent = `₹${basePrice.toLocaleString()} + ₹${perHeadCharge.toLocaleString()} × ${extraGuests} extra guests`;
     }
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
 }
 
-// Close booking modal
 function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
     document.getElementById('bookingForm').reset();
     document.getElementById('totalAmount').textContent = '₹0';
 }
 
-// Handle booking form
 async function handleBooking(e) {
     e.preventDefault();
     
@@ -204,7 +238,7 @@ async function handleBooking(e) {
         
         if (response.ok) {
             const booking = await response.json();
-            alert(`Booking confirmed! Total: ₹${booking.totalPrice}`);
+            alert(`🎉 Booking confirmed! Total: ₹${booking.totalPrice.toLocaleString()}`);
             closeModal();
             document.getElementById('bookingForm').reset();
         } else {
@@ -217,17 +251,11 @@ async function handleBooking(e) {
     }
 }
 
-
-
-
-
-// Set minimum date for booking
 function setMinDate() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('checkIn').min = today;
     document.getElementById('checkOut').min = today;
     
-    // Update checkout min date when checkin changes
     document.getElementById('checkIn').addEventListener('change', function() {
         document.getElementById('checkOut').min = this.value;
     });
@@ -236,12 +264,10 @@ function setMinDate() {
 let currentResortImages = [];
 let currentImageIndex = 0;
 
-// Open resort details modal
 function openResortDetails(resortId) {
     const resort = resorts.find(r => r.id === resortId);
     if (!resort) return;
     
-    // Get all images
     currentResortImages = [];
     if (resort.images && Array.isArray(resort.images) && resort.images.length > 0) {
         currentResortImages = resort.images;
@@ -250,81 +276,65 @@ function openResortDetails(resortId) {
     }
     
     currentImageIndex = 0;
-    
-    // Set main image
     updateMainImage();
     
-    // Set thumbnails
     const thumbnailContainer = document.getElementById('thumbnailImages');
     thumbnailContainer.innerHTML = currentResortImages.map((img, index) => 
         `<img src="${img}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" 
               onclick="changeMainImage(${index})">`
     ).join('');
     
-    // Update counters
     document.getElementById('totalImages').textContent = currentResortImages.length;
-    
-    // Set resort info
     document.getElementById('detailsResortName').textContent = resort.name;
     document.getElementById('detailsLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${resort.location}`;
-    document.getElementById('detailsPrice').textContent = `₹${resort.price}/night`;
+    document.getElementById('detailsPrice').textContent = `₹${resort.price.toLocaleString()}/night`;
     document.getElementById('detailsDescription').textContent = resort.description;
     document.getElementById('detailsAmenities').innerHTML = resort.amenities.map(amenity => 
         `<span class="amenity">${amenity}</span>`
     ).join('');
     
-    // Set book button
     document.getElementById('detailsBookBtn').onclick = () => {
         closeResortDetails();
         openBookingModal(resortId);
     };
     
-    // Show modal
     document.getElementById('resortDetailsModal').style.display = 'block';
 }
 
-// Update main image display
 function updateMainImage() {
     document.getElementById('mainResortImage').src = currentResortImages[currentImageIndex];
     document.getElementById('currentImageIndex').textContent = currentImageIndex + 1;
     
-    // Update active thumbnail
     document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
         thumb.classList.toggle('active', index === currentImageIndex);
     });
 }
 
-// Change main image in details modal
 function changeMainImage(index) {
     currentImageIndex = index;
     updateMainImage();
 }
 
-// Navigate to previous image
 function previousImage() {
     currentImageIndex = currentImageIndex > 0 ? currentImageIndex - 1 : currentResortImages.length - 1;
     updateMainImage();
 }
 
-// Navigate to next image
 function nextImage() {
     currentImageIndex = currentImageIndex < currentResortImages.length - 1 ? currentImageIndex + 1 : 0;
     updateMainImage();
 }
 
-// Close resort details modal
 function closeResortDetails() {
     document.getElementById('resortDetailsModal').style.display = 'none';
 }
 
-// Open booking from details
 function openBookingFromDetails() {
     const resortId = parseInt(document.getElementById('detailsBookBtn').getAttribute('data-resort-id'));
     closeResortDetails();
     openBookingModal(resortId);
 }
 
-// Close modals when clicking outside
 window.onclick = function(event) {
     const bookingModal = document.getElementById('bookingModal');
     const detailsModal = document.getElementById('resortDetailsModal');
