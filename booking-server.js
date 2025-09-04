@@ -12,41 +12,25 @@ app.use(express.static('booking-public'));
 // Initialize database on startup
 initDatabase();
 
-// Get all bookings with history
+// Get all bookings
 app.get('/api/bookings', async (req, res) => {
     try {
-        const bookings = await db().all(`
-            SELECT b.*, 
-                   bh.action, 
-                   bh.details, 
-                   bh.created_at as history_date,
-                   t.payment_method,
-                   t.status as payment_status
-            FROM bookings b
-            LEFT JOIN booking_history bh ON b.id = bh.booking_id
-            LEFT JOIN transactions t ON b.id = t.booking_id
-            ORDER BY b.booking_date DESC, bh.created_at DESC
-        `);
+        const bookings = await db().all('SELECT * FROM bookings ORDER BY booking_date DESC');
         res.json(bookings);
     } catch (error) {
         console.error('Error fetching bookings:', error);
-        res.status(500).json({ error: 'Failed to fetch bookings' });
+        res.status(500).json({ error: 'Failed to fetch bookings: ' + error.message });
     }
 });
 
 // Get transactions
 app.get('/api/transactions', async (req, res) => {
     try {
-        const transactions = await db().all(`
-            SELECT t.*, b.guest_name, b.resort_name
-            FROM transactions t
-            JOIN bookings b ON t.booking_id = b.id
-            ORDER BY t.transaction_date DESC
-        `);
+        const transactions = await db().all('SELECT * FROM transactions ORDER BY transaction_date DESC');
         res.json(transactions);
     } catch (error) {
         console.error('Error fetching transactions:', error);
-        res.status(500).json({ error: 'Failed to fetch transactions' });
+        res.status(500).json({ error: 'Failed to fetch transactions: ' + error.message });
     }
 });
 
