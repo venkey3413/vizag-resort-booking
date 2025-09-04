@@ -217,11 +217,19 @@ function closeModal() {
 async function handleBooking(e) {
     e.preventDefault();
     
+    const phoneInput = document.getElementById('phone').value;
+    
+    // Validate phone number
+    if (!/^[0-9]{10}$/.test(phoneInput)) {
+        alert('Please enter a valid 10-digit mobile number');
+        return;
+    }
+    
     const formData = {
         resortId: document.getElementById('bookingResortId').value,
         guestName: document.getElementById('guestName').value,
         email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
+        phone: '+91' + phoneInput,
         checkIn: document.getElementById('checkIn').value,
         checkOut: document.getElementById('checkOut').value,
         guests: document.getElementById('guests').value
@@ -238,7 +246,7 @@ async function handleBooking(e) {
         
         if (response.ok) {
             const booking = await response.json();
-            alert(`🎉 Booking confirmed! Total: ₹${booking.totalPrice.toLocaleString()}`);
+            alert(`🎉 Booking confirmed! Total: ₹${booking.totalPrice.toLocaleString()}\n\nYOUR BOOKING DETAILS WILL BE SHARED TO YOUR WHATSAPP NUMBER.`);
             closeModal();
             document.getElementById('bookingForm').reset();
         } else {
@@ -258,6 +266,16 @@ function setMinDate() {
     
     document.getElementById('checkIn').addEventListener('change', function() {
         document.getElementById('checkOut').min = this.value;
+    });
+    
+    // Phone number validation
+    document.getElementById('phone').addEventListener('input', function(e) {
+        // Only allow numbers
+        this.value = this.value.replace(/[^0-9]/g, '');
+        // Limit to 10 digits
+        if (this.value.length > 10) {
+            this.value = this.value.slice(0, 10);
+        }
     });
 }
 
