@@ -1,9 +1,8 @@
+require('dotenv').config();
 const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const cors = require('cors');
-const { pool, initDatabase } = require('./database');
+const { db, initDatabase } = require('./database');
+const { upload } = require('./s3-config');
 
 const app = express();
 const PORT = 3001;
@@ -11,23 +10,6 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('admin-public'));
-app.use('/uploads', express.static('uploads'));
-
-if (!fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads');
-}
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({ storage: storage });
-const uploadMultiple = multer({ storage: storage }).array('images', 10);
 
 // Initialize database on startup
 initDatabase();
@@ -35,24 +17,25 @@ initDatabase();
 // API Routes
 app.get('/api/resorts', async (req, res) => {
     try {
-        const [rows] = await pool.execute('SELECT * FROM resorts ORDER BY id DESC');
+        const rows = await db().all('SELECT * FROM resorts ORDER BY id DESC');
         const resorts = rows.map(row => {
             let amenities = [];
             let images = [];
+            let videos = [];
             try {
                 amenities = JSON.parse(row.amenities || '[]');
+                images = JSON.parse(row.images || '[]');
+                videos = JSON.parse(row.videos || '[]');
             } catch (e) {
-                amenities = typeof row.amenities === 'string' ? [row.amenities] : [];
-            }
-            try {
-                images = JSON.parse(row.images || '["' + row.image + '"]');
-            } catch (e) {
-                images = [row.image];
+                amenities = [];
+                images = [];
+                videos = [];
             }
             return {
                 ...row,
                 amenities,
-                images
+                images,
+                videos
             };
         });
         res.json(resorts);
@@ -62,103 +45,55 @@ app.get('/api/resorts', async (req, res) => {
     }
 });
 
-app.post('/api/resorts', uploadMultiple, async (req, res) => {
+app.post('/api/upload', upload.array('media', 10), (req, res) => {
     try {
-        const { name, location, price, description, amenities, maxGuests, perHeadCharge } = req.body;
+        const fileUrls = req.files.map(file => file.location);
+        res.json({ urls: fileUrls });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
+
+app.post('/api/resorts', async (req, res) => {
+    try {
+        const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
-        const amenitiesArray = amenities ? amenities.split(',').map(a => a.trim()) : [];
-        const images = req.files && req.files.length > 0 ? req.files.map(file => `/uploads/${file.filename}`) : ['/uploads/default-resort.jpg'];
-        const image = images[0];
-        
-        const [result] = await pool.execute(
-            'INSERT INTO resorts (name, location, price, description, image, images, amenities, available, max_guests, per_head_charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description, image, JSON.stringify(images), JSON.stringify(amenitiesArray), true, parseInt(maxGuests) || 20, parseInt(perHeadCharge) || 300]
+        const result = await db().run(
+            'INSERT INTO resorts (name, location, price, description, images, videos, amenities, max_guests, per_head_charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300]
         );
         
-        const newResort = {
-            id: result.insertId,
-            name,
-            location,
-            price: parseInt(price),
-            description,
-            image,
-            amenities: amenitiesArray,
-            images: images,
-            rating: 0,
-            available: true,
-            max_guests: parseInt(maxGuests) || 20,
-            per_head_charge: parseInt(perHeadCharge) || 300
-        };
-        
-        res.json(newResort);
+        res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
         console.error('Error adding resort:', error);
         res.status(500).json({ error: 'Failed to add resort' });
     }
 });
 
-app.put('/api/resorts/:id', uploadMultiple, async (req, res) => {
+app.put('/api/resorts/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, location, price, description, amenities, maxGuests, perHeadCharge } = req.body;
+        const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
-        // Get current resort
-        const [current] = await pool.execute('SELECT * FROM resorts WHERE id = ?', [id]);
-        if (current.length === 0) {
-            return res.status(404).json({ error: 'Resort not found' });
-        }
-        
-        const currentResort = current[0];
-        const amenitiesArray = amenities ? amenities.split(',').map(a => a.trim()) : JSON.parse(currentResort.amenities || '[]');
-        const newImages = req.files && req.files.length > 0 ? req.files.map(file => `/uploads/${file.filename}`) : null;
-        const images = newImages || JSON.parse(currentResort.images || '["' + currentResort.image + '"]');
-        const image = images[0];
-        
-        await pool.execute(
-            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, images = ?, amenities = ?, max_guests = ?, per_head_charge = ? WHERE id = ?',
-            [
-                name || currentResort.name,
-                location || currentResort.location,
-                price ? parseInt(price) : currentResort.price,
-                description || currentResort.description,
-                image,
-                JSON.stringify(images),
-                JSON.stringify(amenitiesArray),
-                maxGuests ? parseInt(maxGuests) : (currentResort.max_guests || 20),
-                perHeadCharge ? parseInt(perHeadCharge) : currentResort.per_head_charge,
-                id
-            ]
+        await db().run(
+            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, images = ?, videos = ?, amenities = ?, max_guests = ?, per_head_charge = ? WHERE id = ?',
+            [name, location, parseInt(price), description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, id]
         );
         
-        const updatedResort = {
-            id,
-            name: name || currentResort.name,
-            location: location || currentResort.location,
-            price: price ? parseInt(price) : currentResort.price,
-            description: description || currentResort.description,
-            image,
-            amenities: amenitiesArray,
-            images: images,
-            rating: currentResort.rating,
-            available: currentResort.available,
-            max_guests: maxGuests ? parseInt(maxGuests) : (currentResort.max_guests || 20),
-            per_head_charge: perHeadCharge ? parseInt(perHeadCharge) : currentResort.per_head_charge
-        };
-        
-        res.json(updatedResort);
+        res.json({ message: 'Resort updated successfully' });
     } catch (error) {
         console.error('Error updating resort:', error);
         res.status(500).json({ error: 'Failed to update resort' });
     }
 });
 
-// Toggle resort availability
 app.patch('/api/resorts/:id/availability', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         const { available } = req.body;
         
-        await pool.execute('UPDATE resorts SET available = ? WHERE id = ?', [available, id]);
+        await db().run('UPDATE resorts SET available = ? WHERE id = ?', [available ? 1 : 0, id]);
         
         res.json({ message: 'Resort availability updated successfully' });
     } catch (error) {
@@ -171,9 +106,9 @@ app.delete('/api/resorts/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         
-        const [result] = await pool.execute('DELETE FROM resorts WHERE id = ?', [id]);
+        const result = await db().run('DELETE FROM resorts WHERE id = ?', [id]);
         
-        if (result.affectedRows === 0) {
+        if (result.changes === 0) {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
@@ -185,5 +120,5 @@ app.delete('/api/resorts/:id', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Admin Panel running on http://localhost:${PORT}`);
+    console.log(`🔧 Admin Panel running on http://localhost:${PORT}`);
 });
