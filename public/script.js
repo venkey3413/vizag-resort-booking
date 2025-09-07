@@ -360,7 +360,7 @@ function openBookingFromDetails() {
 
 // Logo rotation function
 function rotateLogo() {
-    const logo = document.querySelector('.logo-image');
+    const logo = document.querySelector('.brand-logo');
     logo.classList.add('rotating');
     
     setTimeout(() => {
