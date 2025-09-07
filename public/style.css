@@ -47,9 +47,9 @@ body {
     align-items: center;
     gap: 0.3rem;
     background: linear-gradient(135deg, #ff6b35, #f7931e);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
 }
 
 .brand-logo {
@@ -84,10 +84,10 @@ body {
 .brand-letter, .brand-text {
     color: #fff;
     font-weight: 800;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-family: 'Poppins', sans-serif;
-    letter-spacing: 1px;
-    text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .brand-letter {
