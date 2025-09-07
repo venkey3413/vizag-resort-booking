@@ -39,31 +39,28 @@ body {
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px 20px;
-    min-height: 80px;
+    padding: 0 20px;
 }
 
 .nav-brand {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    width: 100%;
+    gap: 1rem;
 }
 
 .logo-image {
-    width: 150px;
-    height: 150px;
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
-    filter: drop-shadow(0 8px 25px rgba(0,0,0,0.3));
-    background: none;
-    border: none;
-    object-fit: contain;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    background: transparent;
 }
 
 .logo-image:hover {
     transform: scale(1.1);
-    filter: drop-shadow(0 12px 30px rgba(0,0,0,0.4)) brightness(1.1);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
 }
 
 .logo-image.rotating {
