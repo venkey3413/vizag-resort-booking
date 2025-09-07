@@ -45,7 +45,11 @@ body {
 .nav-brand {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.3rem;
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
 }
 
 .brand-logo {
@@ -87,11 +91,11 @@ body {
 }
 
 .brand-letter {
-    margin-right: 0.5rem;
+    margin-right: 0.2rem;
 }
 
 .brand-text {
-    margin-left: 0.5rem;
+    margin-left: 0.2rem;
 }
 
 .nav-links {
