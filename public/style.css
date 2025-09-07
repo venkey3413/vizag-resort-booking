@@ -436,6 +436,31 @@ section {
     box-shadow: none;
 }
 
+.policy-link {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.pdf-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.pdf-link:hover {
+    color: #5a67d8;
+    background: rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+}
+
 /* Enhanced Modal */
 .modal {
     display: none;
