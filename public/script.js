@@ -88,7 +88,7 @@ function displayResorts(filteredResorts = resorts) {
                         <i class="fas fa-calendar-check"></i> Book Now
                     </button>
                     <div class="policy-link">
-                        <a href="cancellation-policy.pdf" target="_blank" class="pdf-link">
+                        <a href="Booking cancellation_policy.pdf" target="_blank" class="pdf-link">
                             <i class="fas fa-file-pdf"></i> Cancellation Policy
                         </a>
                     </div>` : 
