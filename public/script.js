@@ -203,13 +203,18 @@ function calculateTotal() {
     }
     
     const extraGuests = Math.max(0, guests - 10);
-    const total = (basePrice + (extraGuests * perHeadCharge)) * nights;
+    const bookingAmount = (basePrice + (extraGuests * perHeadCharge)) * nights;
+    const platformFee = Math.round(bookingAmount * 0.015); // 1.5% platform fee
+    const total = bookingAmount + platformFee;
     
     if (guests <= 10) {
         document.getElementById('pricePerNight').textContent = `₹${basePrice.toLocaleString()} (up to 10 guests)`;
     } else {
         document.getElementById('pricePerNight').textContent = `₹${basePrice.toLocaleString()} + ₹${perHeadCharge.toLocaleString()} × ${extraGuests} extra guests`;
     }
+    
+    document.getElementById('bookingAmount').textContent = `₹${bookingAmount.toLocaleString()}`;
+    document.getElementById('platformFee').textContent = `₹${platformFee.toLocaleString()}`;
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
 }
 
