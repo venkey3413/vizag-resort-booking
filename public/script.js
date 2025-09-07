@@ -358,6 +358,16 @@ function openBookingFromDetails() {
     openBookingModal(resortId);
 }
 
+// Logo rotation function
+function rotateLogo() {
+    const logo = document.querySelector('.logo-image');
+    logo.classList.add('rotating');
+    
+    setTimeout(() => {
+        logo.classList.remove('rotating');
+    }, 600);
+}
+
 window.onclick = function(event) {
     const bookingModal = document.getElementById('bookingModal');
     const detailsModal = document.getElementById('resortDetailsModal');
