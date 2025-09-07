@@ -47,19 +47,19 @@ body {
     align-items: center;
     gap: 0.3rem;
     background: linear-gradient(135deg, #ff6b35, #f7931e);
-    padding: 0.8rem 1.5rem;
-    border-radius: 25px;
-    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
 }
 
 .brand-logo {
-    width: 60px;
-    height: 60px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 25px rgba(102,126,234,0.4);
-    border: 3px solid rgba(255,255,255,0.3);
+    box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+    border: 2px solid rgba(255,255,255,0.3);
     object-fit: cover;
     filter: brightness(1.05);
 }
@@ -84,10 +84,10 @@ body {
 .brand-letter, .brand-text {
     color: #fff;
     font-weight: 800;
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-family: 'Poppins', sans-serif;
-    letter-spacing: 2px;
-    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    letter-spacing: 1px;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.3);
 }
 
 .brand-letter {
