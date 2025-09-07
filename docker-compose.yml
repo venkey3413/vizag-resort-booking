@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  main-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.main
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    volumes:
+      - ./resort_booking.db:/app/resort_booking.db
+    restart: unless-stopped
+
+  admin-panel:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    volumes:
+      - ./resort_booking.db:/app/resort_booking.db
+    restart: unless-stopped
+
+  booking-history:
+    build:
+      context: .
+      dockerfile: Dockerfile.booking
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    volumes:
+      - ./resort_booking.db:/app/resort_booking.db
+    restart: unless-stopped
