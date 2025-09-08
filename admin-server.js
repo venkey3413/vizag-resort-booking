@@ -3,14 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const AWS = require('aws-sdk');
 const { db, initDatabase } = require('./database');
 const { upload } = require('./s3-config');
-
-// Configure AWS Lambda
-const lambda = new AWS.Lambda({
-    region: process.env.AWS_REGION || 'us-east-1'
-});
 
 const app = express();
 const server = http.createServer(app);

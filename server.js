@@ -3,14 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const AWS = require('aws-sdk');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
 const { upload } = require('./s3-config');
-
-// Configure AWS Lambda
-const lambda = new AWS.Lambda({
-    region: process.env.AWS_REGION || 'us-east-1'
-});
 
 const app = express();
 const server = http.createServer(app);
@@ -173,8 +167,7 @@ app.post('/api/bookings', async (req, res) => {
             bookingDate: new Date().toISOString()
         };
         
-        // Trigger Lambda function to update other services
-        await triggerLambda('booking-created', booking);
+        // Booking created - sync handled by API Gateway
         
         res.json(booking);
     } catch (error) {
@@ -224,18 +217,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Lambda trigger function
-async function triggerLambda(action, data) {
-    try {
-        const params = {
-            FunctionName: 'booking-trigger',
-            Payload: JSON.stringify({ action, data })
-        };
-        await lambda.invoke(params).promise();
-    } catch (error) {
-        console.error('Lambda trigger error:', error);
-    }
-}
+
 
 // Sync endpoints for API Gateway
 app.post('/api/sync/booking-created', (req, res) => {
@@ -312,5 +294,5 @@ server.listen(PORT, () => {
     console.log(`📊 Admin Panel: http://localhost:3001`);
     console.log(`📋 Booking History: http://localhost:3002`);
     console.log(`☁️  S3 Bucket: ${process.env.S3_BUCKET}`);
-    console.log(`⚡ Lambda triggers enabled`);
+    console.log(`🌐 API Gateway sync enabled`);
 });
