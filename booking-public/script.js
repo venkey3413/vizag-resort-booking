@@ -7,35 +7,25 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeSocket() {
-    // Connect directly to main server for booking events
-    socket = io('http://localhost:3000', {
-        transports: ['websocket', 'polling']
-    });
+    // Polling for real-time updates every 3 seconds
+    setInterval(() => {
+        loadBookings();
+    }, 3000);
     
-    socket.on('connect', () => {
-        console.log('Connected to main server for real-time updates');
-    });
-    
-    socket.on('bookingCreated', (booking) => {
-        console.log('New booking received:', booking);
-        bookings.unshift(booking);
-        displayBookings();
-        updateStats();
-    });
-    
-    socket.on('bookingDeleted', (data) => {
-        bookings = bookings.filter(b => b.id !== data.id);
-        displayBookings();
-        updateStats();
-    });
+    console.log('Real-time polling enabled - updates every 3 seconds');
 }
 
 async function loadBookings() {
     try {
         const response = await fetch('/api/bookings');
-        bookings = await response.json();
-        displayBookings();
-        updateStats();
+        const newBookings = await response.json();
+        
+        // Only update if data changed
+        if (JSON.stringify(newBookings) !== JSON.stringify(bookings)) {
+            bookings = newBookings;
+            displayBookings();
+            updateStats();
+        }
     } catch (error) {
         console.error('Error loading bookings:', error);
     }
