@@ -1,10 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 const { db, initDatabase } = require('./database');
 const { upload } = require('./s3-config');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 const PORT = 3001;
 
 app.use(cors());
@@ -68,6 +77,11 @@ app.post('/api/resorts', async (req, res) => {
             [name, location, parseInt(price), description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300]
         );
         
+        const newResort = { id: result.lastID, name, location, price: parseInt(price), description, images, videos, amenities };
+        
+        // Broadcast to all connected clients
+        io.emit('resortAdded', newResort);
+        
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
         console.error('Error adding resort:', error);
@@ -85,6 +99,9 @@ app.put('/api/resorts/:id', async (req, res) => {
             [name, location, parseInt(price), description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, id]
         );
         
+        // Broadcast to all connected clients
+        io.emit('resortUpdated', { id, name, location, price: parseInt(price), description, images, videos, amenities });
+        
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
         console.error('Error updating resort:', error);
@@ -98,6 +115,9 @@ app.patch('/api/resorts/:id/availability', async (req, res) => {
         const { available } = req.body;
         
         await db().run('UPDATE resorts SET available = ? WHERE id = ?', [available ? 1 : 0, id]);
+        
+        // Broadcast to all connected clients
+        io.emit('resortAvailabilityUpdated', { id, available });
         
         res.json({ message: 'Resort availability updated successfully' });
     } catch (error) {
@@ -116,6 +136,9 @@ app.delete('/api/resorts/:id', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
+        // Broadcast to all connected clients
+        io.emit('resortDeleted', { id });
+        
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
         console.error('Error deleting resort:', error);
@@ -123,6 +146,16 @@ app.delete('/api/resorts/:id', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('Admin client connected:', socket.id);
+    
+    socket.on('disconnect', () => {
+        console.log('Admin client disconnected:', socket.id);
+    });
+});
+
+server.listen(PORT, () => {
     console.log(`🔧 Admin Panel running on http://localhost:${PORT}`);
+    console.log(`🔗 WebSocket enabled for real-time updates`);
 });

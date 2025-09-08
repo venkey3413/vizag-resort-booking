@@ -1,8 +1,26 @@
 let bookings = [];
+let socket;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
+    initializeSocket();
 });
+
+function initializeSocket() {
+    socket = io('http://localhost:3000');
+    
+    socket.on('bookingCreated', (booking) => {
+        bookings.unshift(booking);
+        displayBookings();
+        updateStats();
+    });
+    
+    socket.on('bookingDeleted', (data) => {
+        bookings = bookings.filter(b => b.id !== data.id);
+        displayBookings();
+        updateStats();
+    });
+}
 
 async function loadBookings() {
     try {

@@ -1,10 +1,45 @@
 let resorts = [];
+let socket;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     setupEventListeners();
     setMinDate();
+    initializeSocket();
 });
+
+function initializeSocket() {
+    socket = io();
+    
+    socket.on('resortAdded', (resort) => {
+        resorts.unshift(resort);
+        displayResorts();
+        populateLocationFilter();
+    });
+    
+    socket.on('resortUpdated', (updatedResort) => {
+        const index = resorts.findIndex(r => r.id === updatedResort.id);
+        if (index !== -1) {
+            resorts[index] = { ...resorts[index], ...updatedResort };
+            displayResorts();
+            populateLocationFilter();
+        }
+    });
+    
+    socket.on('resortDeleted', (data) => {
+        resorts = resorts.filter(r => r.id !== data.id);
+        displayResorts();
+        populateLocationFilter();
+    });
+    
+    socket.on('resortAvailabilityUpdated', (data) => {
+        const resort = resorts.find(r => r.id === data.id);
+        if (resort) {
+            resort.available = data.available;
+            displayResorts();
+        }
+    });
+}
 
 function setupEventListeners() {
     document.querySelectorAll('.nav-link').forEach(link => {

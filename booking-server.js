@@ -1,9 +1,18 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 const PORT = 3002;
 
 app.use(cors());
@@ -72,6 +81,9 @@ app.delete('/api/bookings/:id', async (req, res) => {
             return res.status(404).json({ error: 'Booking not found' });
         }
         
+        // Broadcast to all connected clients
+        io.emit('bookingDeleted', { id });
+        
         res.json({ message: 'Booking deleted successfully' });
     } catch (error) {
         console.error('Error deleting booking:', error);
@@ -79,10 +91,20 @@ app.delete('/api/bookings/:id', async (req, res) => {
     }
 });
 
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('Booking client connected:', socket.id);
+    
+    socket.on('disconnect', () => {
+        console.log('Booking client disconnected:', socket.id);
+    });
+});
+
 // Initialize and start server
 initDB().then(() => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`📋 Booking History Server running on http://localhost:${PORT}`);
+        console.log(`🔗 WebSocket enabled for real-time updates`);
     });
 }).catch(error => {
     console.error('Failed to start booking server:', error);

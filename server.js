@@ -1,10 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
 const { upload } = require('./s3-config');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -156,6 +165,10 @@ app.post('/api/bookings', async (req, res) => {
             bookingDate: new Date().toISOString()
         };
         
+        // Broadcast to all connected clients
+        io.emit('bookingCreated', booking);
+        io.emit('resortUpdate', { resortId: parseInt(resortId), action: 'booking_created' });
+        
         res.json(booking);
     } catch (error) {
         console.error('Error creating booking:', error);
@@ -195,9 +208,19 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+    
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+server.listen(PORT, () => {
     console.log(`🚀 Resort Booking Server running on http://localhost:${PORT}`);
     console.log(`📊 Admin Panel: http://localhost:3001`);
     console.log(`📋 Booking History: http://localhost:3002`);
     console.log(`☁️  S3 Bucket: ${process.env.S3_BUCKET}`);
+    console.log(`🔗 WebSocket enabled for real-time updates`);
 });
