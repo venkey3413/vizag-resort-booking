@@ -250,6 +250,18 @@ app.post('/api/sync/resort-updated', (req, res) => {
     res.json({ success: true });
 });
 
+app.post('/api/sync/resort-added', (req, res) => {
+    console.log('Resort added sync received:', req.body);
+    io.emit('resortAdded', req.body);
+    res.json({ success: true });
+});
+
+app.post('/api/sync/resort-updated', (req, res) => {
+    console.log('Resort update sync received:', req.body);
+    io.emit('resortUpdated', req.body);
+    res.json({ success: true });
+});
+
 app.post('/api/sync/resort-deleted', (req, res) => {
     console.log('Resort delete sync received:', req.body);
     io.emit('resortDeleted', req.body);

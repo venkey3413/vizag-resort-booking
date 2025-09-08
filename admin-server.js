@@ -85,8 +85,8 @@ app.post('/api/resorts', async (req, res) => {
         
         const newResort = { id: result.lastID, name, location, price: parseInt(price), description, images, videos, amenities };
         
-        // Trigger Lambda function to update other services
-        await triggerLambda('resort-added', newResort);
+        // Sync with other services via API Gateway
+        await syncServices('resort-added', newResort);
         
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
@@ -107,8 +107,8 @@ app.put('/api/resorts/:id', async (req, res) => {
         
         const updatedResort = { id, name, location, price: parseInt(price), description, images, videos, amenities };
         
-        // Trigger Lambda function to update other services
-        await triggerLambda('resort-updated', updatedResort);
+        // Sync with other services via API Gateway
+        await syncServices('resort-updated', updatedResort);
         
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
@@ -144,8 +144,8 @@ app.delete('/api/resorts/:id', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Trigger Lambda function to update other services
-        await triggerLambda('resort-deleted', { id });
+        // Sync with other services via API Gateway
+        await syncServices('resort-deleted', { id });
         
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
@@ -163,16 +163,23 @@ io.on('connection', (socket) => {
     });
 });
 
-// Lambda trigger function
-async function triggerLambda(action, data) {
+// Direct service sync function
+async function syncServices(action, data) {
     try {
-        const params = {
-            FunctionName: 'admin-trigger',
-            Payload: JSON.stringify({ action, data })
-        };
-        await lambda.invoke(params).promise();
+        const services = [
+            'http://localhost:3000', // Main Website
+            'http://localhost:3002'  // Booking History
+        ];
+        
+        const promises = services.map(service => 
+            axios.post(`${service}/api/sync/${action.replace('-', '-')}`, data)
+                .catch(e => console.log(`Sync to ${service} failed:`, e.message))
+        );
+        
+        await Promise.all(promises);
+        console.log(`Synced ${action} to all services`);
     } catch (error) {
-        console.error('Lambda trigger error:', error);
+        console.error('Service sync error:', error);
     }
 }
 
