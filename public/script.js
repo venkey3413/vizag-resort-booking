@@ -53,11 +53,16 @@ function displayResorts(filteredResorts = resorts) {
                 <div class="image-slider" onclick="openResortDetails(${resort.id})">
                     ${(() => {
                         if (resort.images && resort.images.length > 0) {
-                            return resort.images.map((img, index) => 
-                                `<img src="${img}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}">`
-                            ).join('');
+                            return resort.images.map((media, index) => {
+                                const isVideo = media.toLowerCase().includes('.mp4') || media.toLowerCase().includes('.mov') || media.toLowerCase().includes('.avi') || media.toLowerCase().includes('.webm');
+                                if (isVideo) {
+                                    return `<video src="${media}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" controls muted loop preload="metadata"></video>`;
+                                } else {
+                                    return `<img src="${media}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}">`;
+                                }
+                            }).join('');
                         }
-                        return '<img src="data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 200\\"><rect fill=\\"%23ecf0f1\\" width=\\"400\\" height=\\"200\\"/><text x=\\"200\\" y=\\"100\\" text-anchor=\\"middle\\" fill=\\"%237f8c8d\\" font-size=\\"16\\">No Image</text></svg>" alt="${resort.name}" class="resort-image active">';
+                        return '<img src="data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 200\\"><rect fill=\\"%23ecf0f1\\" width=\\"400\\" height=\\"200\\"/><text x=\\"200\\" y=\\"100\\" text-anchor=\\"middle\\" fill=\\"%237f8c8d\\" font-size=\\"16\\">No Media</text></svg>" alt="${resort.name}" class="resort-image active">';
                     })()}
                 </div>
                 ${resort.images && resort.images.length > 1 ? `
@@ -72,7 +77,7 @@ function displayResorts(filteredResorts = resorts) {
                             `<span class="dot ${index === 0 ? 'active' : ''}" onclick="setCardImage(${resort.id}, ${index}, event)"></span>`
                         ).join('')}
                     </div>
-                    <div class="image-count">${resort.images.length} photos</div>
+                    <div class="image-count">${resort.images.length} media</div>
                 ` : ''}
             </div>
             <div class="resort-info">
@@ -307,10 +312,14 @@ function openResortDetails(resortId) {
     updateMainImage();
     
     const thumbnailContainer = document.getElementById('thumbnailImages');
-    thumbnailContainer.innerHTML = currentResortImages.map((img, index) => 
-        `<img src="${img}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" 
-              onclick="changeMainImage(${index})">`
-    ).join('');
+    thumbnailContainer.innerHTML = currentResortImages.map((media, index) => {
+        const isVideo = media.toLowerCase().includes('.mp4') || media.toLowerCase().includes('.mov') || media.toLowerCase().includes('.avi') || media.toLowerCase().includes('.webm');
+        if (isVideo) {
+            return `<video src="${media}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" muted preload="metadata"></video>`;
+        } else {
+            return `<img src="${media}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})">`;
+        }
+    }).join('');
     
     document.getElementById('totalImages').textContent = currentResortImages.length;
     document.getElementById('detailsResortName').textContent = resort.name;
@@ -330,7 +339,16 @@ function openResortDetails(resortId) {
 }
 
 function updateMainImage() {
-    document.getElementById('mainResortImage').src = currentResortImages[currentImageIndex];
+    const mainElement = document.getElementById('mainResortImage');
+    const currentMedia = currentResortImages[currentImageIndex];
+    const isVideo = currentMedia.toLowerCase().includes('.mp4') || currentMedia.toLowerCase().includes('.mov') || currentMedia.toLowerCase().includes('.avi') || currentMedia.toLowerCase().includes('.webm');
+    
+    if (isVideo) {
+        mainElement.outerHTML = `<video id="mainResortImage" src="${currentMedia}" class="main-resort-image" controls muted loop preload="metadata"></video>`;
+    } else {
+        mainElement.outerHTML = `<img id="mainResortImage" src="${currentMedia}" alt="" class="main-resort-image">`;
+    }
+    
     document.getElementById('currentImageIndex').textContent = currentImageIndex + 1;
     
     document.querySelectorAll('.thumbnail').forEach((thumb, index) => {

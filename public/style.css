@@ -325,6 +325,20 @@ section {
     opacity: 1;
 }
 
+/* Video specific styles */
+video.resort-image {
+    background: #000;
+}
+
+video.resort-image::-webkit-media-controls {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+video.resort-image:hover::-webkit-media-controls {
+    opacity: 1;
+}
+
 .resort-card:hover .resort-image {
     transform: scale(1.1);
 }
@@ -797,7 +811,8 @@ section {
     min-height: 80px;
 }
 
-.thumbnail-images img {
+.thumbnail-images img,
+.thumbnail-images video {
     width: 80px;
     height: 80px;
     object-fit: cover;
@@ -809,10 +824,16 @@ section {
 }
 
 .thumbnail-images img:hover,
-.thumbnail-images img.active {
+.thumbnail-images img.active,
+.thumbnail-images video:hover,
+.thumbnail-images video.active {
     opacity: 1;
     border-color: #667eea;
     transform: scale(1.1);
+}
+
+.thumbnail-images video {
+    background: #000;
 }
 
 .resort-info-panel {
