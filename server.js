@@ -10,9 +10,11 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+        origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+        methods: ["GET", "POST"],
+        credentials: true
+    },
+    transports: ['websocket', 'polling']
 });
 const PORT = process.env.PORT || 3000;
 

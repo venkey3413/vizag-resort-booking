@@ -7,12 +7,17 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeSocket() {
-    socket = io();
+    // Connect directly to main server for booking events
+    socket = io('http://localhost:3000', {
+        transports: ['websocket', 'polling']
+    });
     
-    // Listen to main server events via cross-server communication
-    const mainSocket = io('http://localhost:3000');
+    socket.on('connect', () => {
+        console.log('Connected to main server for real-time updates');
+    });
     
-    mainSocket.on('bookingCreated', (booking) => {
+    socket.on('bookingCreated', (booking) => {
+        console.log('New booking received:', booking);
         bookings.unshift(booking);
         displayBookings();
         updateStats();
