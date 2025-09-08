@@ -7,12 +7,22 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeSocket() {
-    // Polling for real-time updates every 3 seconds
-    setInterval(() => {
-        loadBookings();
-    }, 3000);
+    socket = io();
     
-    console.log('Real-time polling enabled - updates every 3 seconds');
+    socket.on('booking-created', (booking) => {
+        console.log('New booking received:', booking);
+        bookings.unshift(booking);
+        displayBookings();
+        updateStats();
+    });
+    
+    socket.on('booking-deleted', (data) => {
+        bookings = bookings.filter(b => b.id !== data.id);
+        displayBookings();
+        updateStats();
+    });
+    
+    console.log('Connected to API Gateway events');
 }
 
 async function loadBookings() {

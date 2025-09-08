@@ -237,14 +237,22 @@ async function triggerLambda(action, data) {
     }
 }
 
-// Lambda update endpoint
-app.post('/api/lambda-update', (req, res) => {
-    const { action, data } = req.body;
-    console.log('Lambda update received:', action, data);
-    
-    // Broadcast to connected clients
-    io.emit(action, data);
-    
+// Sync endpoints for API Gateway
+app.post('/api/sync/booking-created', (req, res) => {
+    console.log('Booking sync received:', req.body);
+    io.emit('bookingCreated', req.body);
+    res.json({ success: true });
+});
+
+app.post('/api/sync/resort-updated', (req, res) => {
+    console.log('Resort update sync received:', req.body);
+    io.emit('resortUpdated', req.body);
+    res.json({ success: true });
+});
+
+app.post('/api/sync/resort-deleted', (req, res) => {
+    console.log('Resort delete sync received:', req.body);
+    io.emit('resortDeleted', req.body);
     res.json({ success: true });
 });
 
