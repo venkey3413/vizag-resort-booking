@@ -256,6 +256,17 @@ app.post('/api/sync/resort-deleted', (req, res) => {
     res.json({ success: true });
 });
 
+// Proxy routes to API Gateway
+app.post('/api/gateway/booking', async (req, res) => {
+    try {
+        const axios = require('axios');
+        const response = await axios.post('http://localhost:4000/api/gateway/booking', req.body);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 server.listen(PORT, () => {
     console.log(`🚀 Resort Booking Server running on http://localhost:${PORT}`);
     console.log(`📊 Admin Panel: http://localhost:3001`);

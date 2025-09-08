@@ -195,6 +195,36 @@ app.post('/api/sync/resort-deleted', (req, res) => {
     res.json({ success: true });
 });
 
+// Proxy routes to API Gateway
+const axios = require('axios');
+
+app.post('/api/gateway/resort', async (req, res) => {
+    try {
+        const response = await axios.post('http://localhost:4000/api/gateway/resort', req.body);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/api/gateway/resort/:id', async (req, res) => {
+    try {
+        const response = await axios.put(`http://localhost:4000/api/gateway/resort/${req.params.id}`, req.body);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/gateway/resort/:id', async (req, res) => {
+    try {
+        const response = await axios.delete(`http://localhost:4000/api/gateway/resort/${req.params.id}`);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 server.listen(PORT, () => {
     console.log(`🔧 Admin Panel running on http://localhost:${PORT}`);
     console.log(`⚡ Lambda triggers enabled`);
