@@ -291,7 +291,7 @@ async function handleBooking(e) {
     
     try {
         // Create Razorpay order
-        const orderResponse = await fetch('http://localhost:4000/api/payment/create-order', {
+        const orderResponse = await fetch('/api/payment/create-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -315,7 +315,7 @@ async function handleBooking(e) {
             handler: async function(response) {
                 // Payment successful - verify and create booking
                 try {
-                    const verifyResponse = await fetch('http://localhost:4000/api/payment/verify-and-book', {
+                    const verifyResponse = await fetch('/api/payment/verify-and-book', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
