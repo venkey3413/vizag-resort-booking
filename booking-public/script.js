@@ -7,9 +7,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeSocket() {
-    socket = io('http://localhost:3000');
+    socket = io();
     
-    socket.on('bookingCreated', (booking) => {
+    // Listen to main server events via cross-server communication
+    const mainSocket = io('http://localhost:3000');
+    
+    mainSocket.on('bookingCreated', (booking) => {
         bookings.unshift(booking);
         displayBookings();
         updateStats();
