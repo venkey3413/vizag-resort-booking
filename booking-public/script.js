@@ -117,6 +117,7 @@ async function deleteBooking(bookingId) {
     if (!confirm('Are you sure you want to delete this booking?')) return;
     
     try {
+        // Delete directly from booking service (no gateway needed for internal operations)
         const response = await fetch(`/api/bookings/${bookingId}`, {
             method: 'DELETE'
         });

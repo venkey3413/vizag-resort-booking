@@ -83,7 +83,7 @@ async function handleAddResort(e) {
     };
     
     try {
-        const response = await fetch('/api/resorts', {
+        const response = await fetch('http://localhost:4000/api/gateway/resort', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -151,7 +151,7 @@ async function handleEditResort(e) {
     };
     
     try {
-        const response = await fetch(`/api/resorts/${resortId}`, {
+        const response = await fetch(`http://localhost:4000/api/gateway/resort/${resortId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -199,7 +199,7 @@ async function deleteResort(resortId) {
     if (!confirm('Are you sure you want to delete this resort?')) return;
     
     try {
-        const response = await fetch(`/api/resorts/${resortId}`, {
+        const response = await fetch(`http://localhost:4000/api/gateway/resort/${resortId}`, {
             method: 'DELETE'
         });
         
