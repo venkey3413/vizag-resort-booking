@@ -286,7 +286,7 @@ async function handleBooking(e) {
     };
     
     try {
-        const response = await fetch('/api/bookings', {
+        const response = await fetch('http://localhost:4000/api/gateway/booking', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
