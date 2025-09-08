@@ -83,7 +83,19 @@ app.post('/api/resorts', async (req, res) => {
             [name, location, parseInt(price), description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300]
         );
         
-        const newResort = { id: result.lastID, name, location, price: parseInt(price), description, images, videos, amenities };
+        const newResort = { 
+            id: result.lastID, 
+            name, 
+            location, 
+            price: parseInt(price), 
+            description, 
+            images, 
+            videos, 
+            amenities,
+            available: true,
+            max_guests: parseInt(maxGuests) || 10,
+            per_head_charge: parseInt(perHeadCharge) || 300
+        };
         
         // Sync with other services via API Gateway
         await syncServices('resort-added', newResort);
