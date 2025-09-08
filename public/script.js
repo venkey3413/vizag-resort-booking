@@ -290,6 +290,8 @@ async function handleBooking(e) {
     const totalAmount = parseInt(totalAmountText.replace(/[^0-9]/g, ''));
     
     try {
+        console.log('Creating payment order for amount:', totalAmount);
+        
         // Create Razorpay order
         const orderResponse = await fetch('/api/payment/create-order', {
             method: 'POST',
@@ -302,7 +304,16 @@ async function handleBooking(e) {
             })
         });
         
+        console.log('Order response status:', orderResponse.status);
+        
+        if (!orderResponse.ok) {
+            const errorText = await orderResponse.text();
+            console.error('Order creation failed:', errorText);
+            throw new Error(`Order creation failed: ${errorText}`);
+        }
+        
         const orderData = await orderResponse.json();
+        console.log('Order data received:', orderData);
         
         // Initialize Razorpay payment
         const options = {
@@ -360,8 +371,8 @@ async function handleBooking(e) {
         rzp.open();
         
     } catch (error) {
-        console.error('Error:', error);
-        alert('Payment initialization failed. Please try again.');
+        console.error('Payment initialization error:', error);
+        alert(`Payment initialization failed: ${error.message}. Please try again.`);
     }
 }
 

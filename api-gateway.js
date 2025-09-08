@@ -137,12 +137,21 @@ app.post('/api/payment/create-order', async (req, res) => {
     try {
         const { amount, currency = 'INR', receipt } = req.body;
         
+        console.log('Creating Razorpay order:', { amount, currency, receipt });
+        console.log('Razorpay key configured:', !!process.env.RAZORPAY_KEY_ID);
+        
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            throw new Error('Razorpay keys not configured');
+        }
+        
         const order = await razorpay.orders.create({
             amount: amount * 100, // Convert to paise
             currency,
             receipt,
             payment_capture: 1
         });
+        
+        console.log('Razorpay order created:', order.id);
         
         res.json({
             orderId: order.id,
@@ -151,6 +160,7 @@ app.post('/api/payment/create-order', async (req, res) => {
             key: process.env.RAZORPAY_KEY_ID
         });
     } catch (error) {
+        console.error('Razorpay order creation error:', error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -283,10 +283,17 @@ app.post('/api/gateway/booking', async (req, res) => {
 app.post('/api/payment/create-order', async (req, res) => {
     try {
         const axios = require('axios');
+        console.log('Proxying payment order request:', req.body);
         const response = await axios.post('http://localhost:4000/api/payment/create-order', req.body);
+        console.log('Gateway response:', response.data);
         res.json(response.data);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Payment proxy error:', error.message);
+        if (error.response) {
+            res.status(error.response.status).json(error.response.data);
+        } else {
+            res.status(500).json({ error: error.message });
+        }
     }
 });
 
