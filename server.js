@@ -137,8 +137,11 @@ app.post('/api/bookings', async (req, res) => {
             totalPrice
         });
         
+        const bookingReference = `RB${String(bookingId).padStart(4, '0')}`;
+        
         const booking = {
             id: bookingId,
+            bookingReference,
             resortId: parseInt(resortId),
             resortName: resort.name,
             guestName,

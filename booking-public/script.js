@@ -19,50 +19,64 @@ function displayBookings() {
     const container = document.getElementById('bookingsTable');
     
     if (bookings.length === 0) {
-        container.innerHTML = '<p>No bookings found.</p>';
+        container.innerHTML = '<p class="no-bookings">No bookings found.</p>';
         return;
     }
     
-    container.innerHTML = `
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Guest Name</th>
-                    <th>Resort</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Check-in</th>
-                    <th>Check-out</th>
-                    <th>Guests</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${bookings.map(booking => `
-                    <tr>
-                        <td>#${booking.id}</td>
-                        <td>${booking.guest_name}</td>
-                        <td>${booking.resort_name}</td>
-                        <td>${booking.email}</td>
-                        <td>${booking.phone}</td>
-                        <td>${new Date(booking.check_in).toLocaleDateString()}</td>
-                        <td>${new Date(booking.check_out).toLocaleDateString()}</td>
-                        <td>${booking.guests}</td>
-                        <td>₹${booking.total_price ? booking.total_price.toLocaleString() : '0'}</td>
-                        <td><span class="status">${booking.status}</span></td>
-                        <td>
-                            <button class="delete-btn" onclick="deleteBooking(${booking.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+    container.innerHTML = bookings.map(booking => {
+        const bookingDate = new Date(booking.booking_date || Date.now());
+        const checkIn = new Date(booking.check_in);
+        const checkOut = new Date(booking.check_out);
+        const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+        const bookingId = `RB${String(booking.id).padStart(4, '0')}`;
+        
+        return `
+            <div class="invoice-card">
+                <div class="invoice-header">
+                    <div class="invoice-title">
+                        <h3><i class="fas fa-receipt"></i> BOOKING INVOICE</h3>
+                        <span class="booking-id">${bookingId}</span>
+                    </div>
+                    <div class="invoice-date">
+                        <p>Date: ${bookingDate.toLocaleDateString()}</p>
+                        <span class="status-badge status-${booking.status}">${booking.status.toUpperCase()}</span>
+                    </div>
+                </div>
+                
+                <div class="invoice-body">
+                    <div class="guest-info">
+                        <h4><i class="fas fa-user"></i> Guest Information</h4>
+                        <p><strong>Name:</strong> ${booking.guest_name}</p>
+                        <p><strong>Email:</strong> ${booking.email}</p>
+                        <p><strong>Phone:</strong> ${booking.phone}</p>
+                    </div>
+                    
+                    <div class="booking-details">
+                        <h4><i class="fas fa-hotel"></i> Booking Details</h4>
+                        <p><strong>Resort:</strong> ${booking.resort_name}</p>
+                        <p><strong>Check-in:</strong> ${checkIn.toLocaleDateString()}</p>
+                        <p><strong>Check-out:</strong> ${checkOut.toLocaleDateString()}</p>
+                        <p><strong>Nights:</strong> ${nights}</p>
+                        <p><strong>Guests:</strong> ${booking.guests}</p>
+                    </div>
+                </div>
+                
+                <div class="invoice-footer">
+                    <div class="total-amount">
+                        <h3>Total Amount: ₹${booking.total_price ? booking.total_price.toLocaleString() : '0'}</h3>
+                    </div>
+                    <div class="invoice-actions">
+                        <button class="print-btn" onclick="printInvoice('${bookingId}')">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button class="delete-btn" onclick="deleteBooking(${booking.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function updateStats() {
@@ -90,5 +104,30 @@ async function deleteBooking(bookingId) {
     } catch (error) {
         console.error('Error:', error);
         alert('Error deleting booking');
+    }
+}
+
+function printInvoice(bookingId) {
+    const invoiceCard = document.querySelector(`[data-booking-id="${bookingId}"]`);
+    if (invoiceCard) {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Invoice ${bookingId}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .invoice-card { border: 1px solid #ddd; padding: 20px; }
+                        .invoice-header { border-bottom: 2px solid #333; padding-bottom: 10px; }
+                        .total-amount { font-size: 1.2em; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    ${invoiceCard.innerHTML}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
     }
 }
