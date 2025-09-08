@@ -84,6 +84,9 @@ function displayBookings() {
                         <p><strong>Check-out:</strong> ${checkOut.toLocaleDateString()}</p>
                         <p><strong>Nights:</strong> ${nights}</p>
                         <p><strong>Guests:</strong> ${booking.guests}</p>
+                        ${booking.utr_number ? `<p><strong>UTR Number:</strong> ${booking.utr_number}</p>` : ''}
+                        ${booking.payment_id ? `<p><strong>Payment ID:</strong> ${booking.payment_id}</p>` : ''}
+                        <p><strong>Payment Status:</strong> <span class="payment-status-${booking.payment_status || 'pending'}">${(booking.payment_status || 'pending').toUpperCase()}</span></p>
                     </div>
                 </div>
                 

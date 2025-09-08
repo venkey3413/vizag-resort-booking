@@ -285,27 +285,83 @@ async function handleBooking(e) {
         guests: document.getElementById('guests').value
     };
     
+    // Get total amount
+    const totalAmountText = document.getElementById('totalAmount').textContent;
+    const totalAmount = parseInt(totalAmountText.replace(/[^0-9]/g, ''));
+    
     try {
-        const response = await fetch('/api/gateway/booking', {
+        // Create Razorpay order
+        const orderResponse = await fetch('http://localhost:4000/api/payment/create-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify({
+                amount: totalAmount,
+                receipt: `booking_${Date.now()}`
+            })
         });
         
-        if (response.ok) {
-            const booking = await response.json();
-            alert(`🎉 BOOKING CONFIRMED!\n\nTotal Amount: ₹${booking.totalPrice.toLocaleString()}\n\nYOUR BOOKING DETAILS WILL BE SHARED TO YOUR WHATSAPP NUMBER.\n\nThank you for choosing us!`);
-            closeModal();
-            document.getElementById('bookingForm').reset();
-        } else {
-            const errorData = await response.json();
-            alert('Booking failed. Please try again.');
-        }
+        const orderData = await orderResponse.json();
+        
+        // Initialize Razorpay payment
+        const options = {
+            key: orderData.key,
+            amount: orderData.amount,
+            currency: orderData.currency,
+            name: 'Resort Booking',
+            description: 'Resort Booking Payment',
+            order_id: orderData.orderId,
+            handler: async function(response) {
+                // Payment successful - verify and create booking
+                try {
+                    const verifyResponse = await fetch('http://localhost:4000/api/payment/verify-and-book', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            paymentId: response.razorpay_payment_id,
+                            orderId: response.razorpay_order_id,
+                            signature: response.razorpay_signature,
+                            bookingData: formData
+                        })
+                    });
+                    
+                    const result = await verifyResponse.json();
+                    
+                    if (result.success) {
+                        alert(`🎉 PAYMENT SUCCESSFUL!\n\nBooking Confirmed\nUTR Number: ${result.utrNumber}\nAmount: ₹${totalAmount.toLocaleString()}\n\nBooking details will be shared to your WhatsApp.`);
+                        closeModal();
+                        document.getElementById('bookingForm').reset();
+                    } else {
+                        alert('Payment verification failed. Please contact support.');
+                    }
+                } catch (error) {
+                    alert('Payment verification failed. Please contact support.');
+                }
+            },
+            prefill: {
+                name: formData.guestName,
+                email: formData.email,
+                contact: formData.phone
+            },
+            theme: {
+                color: '#667eea'
+            },
+            modal: {
+                ondismiss: function() {
+                    alert('Payment cancelled. Please try again.');
+                }
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+        
     } catch (error) {
         console.error('Error:', error);
-        alert('Booking failed. Please check your connection and try again.');
+        alert('Payment initialization failed. Please try again.');
     }
 }
 

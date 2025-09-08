@@ -169,6 +169,21 @@ body {
     color: white;
 }
 
+.payment-status-success {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.payment-status-failed {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.payment-status-pending {
+    color: #f39c12;
+    font-weight: bold;
+}
+
 .invoice-body {
     padding: 2rem;
     display: grid;

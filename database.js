@@ -59,6 +59,9 @@ async function createTables() {
                 guests INTEGER NOT NULL,
                 total_price INTEGER NOT NULL,
                 payment_id TEXT,
+                order_id TEXT,
+                utr_number TEXT,
+                payment_status TEXT DEFAULT 'pending',
                 status TEXT DEFAULT 'confirmed',
                 booking_date DATETIME DEFAULT CURRENT_TIMESTAMP
             )

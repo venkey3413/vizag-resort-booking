@@ -1,6 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const Razorpay = require('razorpay');
+require('dotenv').config();
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 const app = express();
 const PORT = 4000;
@@ -122,6 +130,93 @@ app.get('/', (req, res) => {
             'GET /health': 'Health check'
         }
     });
+});
+
+// Create Razorpay order
+app.post('/api/payment/create-order', async (req, res) => {
+    try {
+        const { amount, currency = 'INR', receipt } = req.body;
+        
+        const order = await razorpay.orders.create({
+            amount: amount * 100, // Convert to paise
+            currency,
+            receipt,
+            payment_capture: 1
+        });
+        
+        res.json({
+            orderId: order.id,
+            amount: order.amount,
+            currency: order.currency,
+            key: process.env.RAZORPAY_KEY_ID
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Verify payment and create booking
+app.post('/api/payment/verify-and-book', async (req, res) => {
+    try {
+        const { paymentId, orderId, signature, bookingData } = req.body;
+        
+        // Verify payment signature
+        const crypto = require('crypto');
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(orderId + '|' + paymentId)
+            .digest('hex');
+        
+        let paymentStatus = 'failed';
+        let utrNumber = null;
+        
+        if (expectedSignature === signature) {
+            // Payment successful
+            paymentStatus = 'success';
+            utrNumber = `UTR${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+            
+            // Create booking with payment details
+            bookingData.paymentId = paymentId;
+            bookingData.orderId = orderId;
+            bookingData.utrNumber = utrNumber;
+            bookingData.paymentStatus = paymentStatus;
+            
+            const bookingResponse = await axios.post(`${SERVICES.main}/api/bookings`, bookingData);
+            
+            // Transform and sync booking data
+            const transformedBooking = {
+                id: bookingResponse.data.id,
+                resort_id: bookingResponse.data.resortId,
+                resort_name: bookingResponse.data.resortName,
+                guest_name: bookingResponse.data.guestName,
+                email: bookingResponse.data.email,
+                phone: bookingResponse.data.phone,
+                check_in: bookingResponse.data.checkIn,
+                check_out: bookingResponse.data.checkOut,
+                guests: bookingResponse.data.guests,
+                total_price: bookingResponse.data.totalPrice,
+                payment_id: paymentId,
+                order_id: orderId,
+                utr_number: utrNumber,
+                payment_status: paymentStatus,
+                status: 'confirmed',
+                booking_date: bookingResponse.data.bookingDate
+            };
+            
+            // Notify other services
+            await Promise.all([
+                axios.post(`${SERVICES.admin}/api/sync/booking-created`, transformedBooking).catch(e => console.log('Admin sync failed:', e.message)),
+                axios.post(`${SERVICES.booking}/api/sync/booking-created`, transformedBooking).catch(e => console.log('Booking sync failed:', e.message))
+            ]);
+            
+            res.json({ success: true, booking: bookingResponse.data, utrNumber, paymentStatus });
+        } else {
+            // Payment failed
+            res.json({ success: false, message: 'Payment verification failed', paymentStatus: 'failed' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message, paymentStatus: 'failed' });
+    }
 });
 
 // Health check
