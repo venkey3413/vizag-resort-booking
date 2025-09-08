@@ -24,10 +24,27 @@ app.post('/api/gateway/booking', async (req, res) => {
         // Create booking in main service
         const bookingResponse = await axios.post(`${SERVICES.main}/api/bookings`, req.body);
         
-        // Notify other services
+        // Transform booking data for database schema
+        const transformedBooking = {
+            id: bookingResponse.data.id,
+            resort_id: bookingResponse.data.resortId,
+            resort_name: bookingResponse.data.resortName,
+            guest_name: bookingResponse.data.guestName,
+            email: bookingResponse.data.email,
+            phone: bookingResponse.data.phone,
+            check_in: bookingResponse.data.checkIn,
+            check_out: bookingResponse.data.checkOut,
+            guests: bookingResponse.data.guests,
+            total_price: bookingResponse.data.totalPrice,
+            payment_id: bookingResponse.data.paymentId,
+            status: bookingResponse.data.status,
+            booking_date: bookingResponse.data.bookingDate
+        };
+        
+        // Notify other services with transformed data
         await Promise.all([
-            axios.post(`${SERVICES.admin}/api/sync/booking-created`, bookingResponse.data).catch(e => console.log('Admin sync failed:', e.message)),
-            axios.post(`${SERVICES.booking}/api/sync/booking-created`, bookingResponse.data).catch(e => console.log('Booking sync failed:', e.message))
+            axios.post(`${SERVICES.admin}/api/sync/booking-created`, transformedBooking).catch(e => console.log('Admin sync failed:', e.message)),
+            axios.post(`${SERVICES.booking}/api/sync/booking-created`, transformedBooking).catch(e => console.log('Booking sync failed:', e.message))
         ]);
         
         res.json(bookingResponse.data);
