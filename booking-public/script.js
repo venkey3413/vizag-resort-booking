@@ -135,26 +135,46 @@ async function deleteBooking(bookingId) {
 }
 
 function printInvoice(bookingId) {
-    const invoiceCard = document.querySelector(`[data-booking-id="${bookingId}"]`);
-    if (invoiceCard) {
+    // Find the invoice card containing this booking ID
+    const invoiceCards = document.querySelectorAll('.invoice-card');
+    let targetCard = null;
+    
+    invoiceCards.forEach(card => {
+        const cardBookingId = card.querySelector('.booking-id');
+        if (cardBookingId && cardBookingId.textContent === bookingId) {
+            targetCard = card;
+        }
+    });
+    
+    if (targetCard) {
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
             <html>
                 <head>
                     <title>Invoice ${bookingId}</title>
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .invoice-card { border: 1px solid #ddd; padding: 20px; }
-                        .invoice-header { border-bottom: 2px solid #333; padding-bottom: 10px; }
-                        .total-amount { font-size: 1.2em; font-weight: bold; }
+                        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+                        .invoice-card { border: 2px solid #333; padding: 20px; max-width: 800px; }
+                        .invoice-header { border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+                        .invoice-title h3 { margin: 0; font-size: 1.5em; }
+                        .booking-id { background: #333; color: white; padding: 8px 15px; border-radius: 5px; font-weight: bold; }
+                        .invoice-body { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px; }
+                        .guest-info h4, .booking-details h4 { border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 15px; }
+                        .guest-info p, .booking-details p { margin: 8px 0; }
+                        .invoice-footer { border-top: 2px solid #333; padding-top: 15px; text-align: center; }
+                        .total-amount h3 { font-size: 1.5em; color: #27ae60; margin: 0; }
+                        .invoice-actions { display: none; }
+                        @media print { .invoice-actions { display: none !important; } }
                     </style>
                 </head>
                 <body>
-                    ${invoiceCard.innerHTML}
+                    ${targetCard.innerHTML}
                 </body>
             </html>
         `);
         printWindow.document.close();
         printWindow.print();
+    } else {
+        alert('Invoice not found for printing');
     }
 }
