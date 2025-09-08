@@ -88,6 +88,22 @@ app.delete('/api/gateway/resort/:id', async (req, res) => {
     }
 });
 
+// Root route
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'Resort Booking API Gateway',
+        version: '1.0.0',
+        services: SERVICES,
+        endpoints: {
+            'POST /api/gateway/booking': 'Create booking',
+            'POST /api/gateway/resort': 'Add resort',
+            'PUT /api/gateway/resort/:id': 'Update resort',
+            'DELETE /api/gateway/resort/:id': 'Delete resort',
+            'GET /health': 'Health check'
+        }
+    });
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'API Gateway running', services: SERVICES });
