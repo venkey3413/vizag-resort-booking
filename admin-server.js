@@ -3,8 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
+const AWS = require('aws-sdk');
 const { db, initDatabase } = require('./database');
 const { upload } = require('./s3-config');
+
+// Configure AWS Lambda
+const lambda = new AWS.Lambda({
+    region: process.env.AWS_REGION || 'us-east-1'
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -79,8 +85,8 @@ app.post('/api/resorts', async (req, res) => {
         
         const newResort = { id: result.lastID, name, location, price: parseInt(price), description, images, videos, amenities };
         
-        // Broadcast to all connected clients
-        io.emit('resortAdded', newResort);
+        // Trigger Lambda function to update other services
+        await triggerLambda('resort-added', newResort);
         
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
@@ -99,8 +105,10 @@ app.put('/api/resorts/:id', async (req, res) => {
             [name, location, parseInt(price), description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, id]
         );
         
-        // Broadcast to all connected clients
-        io.emit('resortUpdated', { id, name, location, price: parseInt(price), description, images, videos, amenities });
+        const updatedResort = { id, name, location, price: parseInt(price), description, images, videos, amenities };
+        
+        // Trigger Lambda function to update other services
+        await triggerLambda('resort-updated', updatedResort);
         
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
@@ -136,8 +144,8 @@ app.delete('/api/resorts/:id', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Broadcast to all connected clients
-        io.emit('resortDeleted', { id });
+        // Trigger Lambda function to update other services
+        await triggerLambda('resort-deleted', { id });
         
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
@@ -155,7 +163,31 @@ io.on('connection', (socket) => {
     });
 });
 
+// Lambda trigger function
+async function triggerLambda(action, data) {
+    try {
+        const params = {
+            FunctionName: 'admin-trigger',
+            Payload: JSON.stringify({ action, data })
+        };
+        await lambda.invoke(params).promise();
+    } catch (error) {
+        console.error('Lambda trigger error:', error);
+    }
+}
+
+// Lambda update endpoint
+app.post('/api/lambda-update', (req, res) => {
+    const { action, data } = req.body;
+    console.log('Lambda update received:', action, data);
+    
+    // Broadcast to connected clients
+    io.emit(action, data);
+    
+    res.json({ success: true });
+});
+
 server.listen(PORT, () => {
     console.log(`🔧 Admin Panel running on http://localhost:${PORT}`);
-    console.log(`🔗 WebSocket enabled for real-time updates`);
+    console.log(`⚡ Lambda triggers enabled`);
 });

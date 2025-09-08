@@ -102,9 +102,20 @@ io.on('connection', (socket) => {
 
 // Initialize and start server
 initDB().then(() => {
+        // Lambda update endpoint
+    app.post('/api/lambda-update', (req, res) => {
+        const { action, data } = req.body;
+        console.log('Lambda update received:', action, data);
+        
+        // Broadcast to connected clients
+        io.emit(action, data);
+        
+        res.json({ success: true });
+    });
+    
     server.listen(PORT, () => {
         console.log(`📋 Booking History Server running on http://localhost:${PORT}`);
-        console.log(`🔗 WebSocket enabled for real-time updates`);
+        console.log(`⚡ Lambda updates enabled`);
     });
 }).catch(error => {
     console.error('Failed to start booking server:', error);

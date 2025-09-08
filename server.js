@@ -3,8 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
+const AWS = require('aws-sdk');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
 const { upload } = require('./s3-config');
+
+// Configure AWS Lambda
+const lambda = new AWS.Lambda({
+    region: process.env.AWS_REGION || 'us-east-1'
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -167,9 +173,8 @@ app.post('/api/bookings', async (req, res) => {
             bookingDate: new Date().toISOString()
         };
         
-        // Broadcast to all connected clients
-        io.emit('bookingCreated', booking);
-        io.emit('resortUpdate', { resortId: parseInt(resortId), action: 'booking_created' });
+        // Trigger Lambda function to update other services
+        await triggerLambda('booking-created', booking);
         
         res.json(booking);
     } catch (error) {
@@ -219,10 +224,34 @@ io.on('connection', (socket) => {
     });
 });
 
+// Lambda trigger function
+async function triggerLambda(action, data) {
+    try {
+        const params = {
+            FunctionName: 'booking-trigger',
+            Payload: JSON.stringify({ action, data })
+        };
+        await lambda.invoke(params).promise();
+    } catch (error) {
+        console.error('Lambda trigger error:', error);
+    }
+}
+
+// Lambda update endpoint
+app.post('/api/lambda-update', (req, res) => {
+    const { action, data } = req.body;
+    console.log('Lambda update received:', action, data);
+    
+    // Broadcast to connected clients
+    io.emit(action, data);
+    
+    res.json({ success: true });
+});
+
 server.listen(PORT, () => {
     console.log(`🚀 Resort Booking Server running on http://localhost:${PORT}`);
     console.log(`📊 Admin Panel: http://localhost:3001`);
     console.log(`📋 Booking History: http://localhost:3002`);
     console.log(`☁️  S3 Bucket: ${process.env.S3_BUCKET}`);
-    console.log(`🔗 WebSocket enabled for real-time updates`);
+    console.log(`⚡ Lambda triggers enabled`);
 });
