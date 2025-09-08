@@ -290,89 +290,27 @@ async function handleBooking(e) {
     const totalAmount = parseInt(totalAmountText.replace(/[^0-9]/g, ''));
     
     try {
-        console.log('Creating payment order for amount:', totalAmount);
-        
-        // Create Razorpay order
-        const orderResponse = await fetch('/api/payment/create-order', {
+        // Direct booking without payment gateway for now
+        const response = await fetch('/api/gateway/booking', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                amount: totalAmount,
-                receipt: `booking_${Date.now()}`
-            })
+            body: JSON.stringify(formData)
         });
         
-        console.log('Order response status:', orderResponse.status);
-        
-        if (!orderResponse.ok) {
-            const errorText = await orderResponse.text();
-            console.error('Order creation failed:', errorText);
-            throw new Error(`Order creation failed: ${errorText}`);
+        if (response.ok) {
+            const booking = await response.json();
+            alert(`🎉 BOOKING CONFIRMED!\n\nBooking ID: RB${String(booking.id).padStart(4, '0')}\nTotal Amount: ₹${booking.totalPrice.toLocaleString()}\n\nBooking details will be shared to your WhatsApp number.\n\nThank you for choosing us!`);
+            closeModal();
+            document.getElementById('bookingForm').reset();
+        } else {
+            const errorData = await response.json();
+            alert('Booking failed. Please try again.');
         }
-        
-        const orderData = await orderResponse.json();
-        console.log('Order data received:', orderData);
-        
-        // Initialize Razorpay payment
-        const options = {
-            key: orderData.key,
-            amount: orderData.amount,
-            currency: orderData.currency,
-            name: 'Resort Booking',
-            description: 'Resort Booking Payment',
-            order_id: orderData.orderId,
-            handler: async function(response) {
-                // Payment successful - verify and create booking
-                try {
-                    const verifyResponse = await fetch('/api/payment/verify-and-book', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            paymentId: response.razorpay_payment_id,
-                            orderId: response.razorpay_order_id,
-                            signature: response.razorpay_signature,
-                            bookingData: formData
-                        })
-                    });
-                    
-                    const result = await verifyResponse.json();
-                    
-                    if (result.success) {
-                        alert(`🎉 PAYMENT SUCCESSFUL!\n\nBooking Confirmed\nUTR Number: ${result.utrNumber}\nAmount: ₹${totalAmount.toLocaleString()}\n\nBooking details will be shared to your WhatsApp.`);
-                        closeModal();
-                        document.getElementById('bookingForm').reset();
-                    } else {
-                        alert('Payment verification failed. Please contact support.');
-                    }
-                } catch (error) {
-                    alert('Payment verification failed. Please contact support.');
-                }
-            },
-            prefill: {
-                name: formData.guestName,
-                email: formData.email,
-                contact: formData.phone
-            },
-            theme: {
-                color: '#667eea'
-            },
-            modal: {
-                ondismiss: function() {
-                    alert('Payment cancelled. Please try again.');
-                }
-            }
-        };
-        
-        const rzp = new Razorpay(options);
-        rzp.open();
-        
     } catch (error) {
-        console.error('Payment initialization error:', error);
-        alert(`Payment initialization failed: ${error.message}. Please try again.`);
+        console.error('Error:', error);
+        alert('Booking failed. Please check your connection and try again.');
     }
 }
 
