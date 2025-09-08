@@ -36,10 +36,13 @@ async function getResorts() {
                 videos = [];
             }
             
+            // Combine images and videos into single media array
+            const allMedia = [...images, ...videos];
+            
             return {
                 ...row,
                 amenities,
-                images,
+                images: allMedia, // Frontend expects 'images' field
                 videos,
                 available: Boolean(row.available)
             };
