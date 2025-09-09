@@ -1,9 +1,21 @@
 let resorts = [];
+let csrfToken = '';
 
 document.addEventListener('DOMContentLoaded', function() {
+    getCSRFToken();
     loadResorts();
     setupEventListeners();
 });
+
+async function getCSRFToken() {
+    try {
+        const response = await fetch('/api/csrf-token');
+        const data = await response.json();
+        csrfToken = data.token;
+    } catch (error) {
+        console.error('Error getting CSRF token:', error);
+    }
+}
 
 function setupEventListeners() {
     document.getElementById('addResortForm').addEventListener('submit', handleAddResort);
@@ -20,43 +32,84 @@ async function loadResorts() {
     }
 }
 
+function sanitizeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        padding: 12px 20px; border-radius: 4px; color: white;
+        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+
+function showConfirmation(message) {
+    return new Promise(resolve => {
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center';
+        modal.innerHTML = `<div style="background:white;padding:20px;border-radius:8px;text-align:center"><p>${message}</p><button onclick="this.parentElement.parentElement.remove();resolve(true)" style="margin:5px;padding:8px 16px;background:#f44336;color:white;border:none;border-radius:4px">Yes</button><button onclick="this.parentElement.parentElement.remove();resolve(false)" style="margin:5px;padding:8px 16px;background:#ccc;border:none;border-radius:4px">No</button></div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('button').onclick = () => { modal.remove(); resolve(true); };
+        modal.querySelector('button:last-child').onclick = () => { modal.remove(); resolve(false); };
+    });
+}
+
 function displayResorts() {
     const grid = document.getElementById('resortsGrid');
     
-    grid.innerHTML = resorts.map(resort => `
+    grid.innerHTML = resorts.map(resort => {
+        const safeName = sanitizeHtml(resort.name || '');
+        const safeLocation = sanitizeHtml(resort.location || '');
+        const safePrice = parseInt(resort.price) || 0;
+        const safeMaxGuests = parseInt(resort.max_guests) || 0;
+        const safePerHeadCharge = parseInt(resort.per_head_charge) || 0;
+        const safeId = parseInt(resort.id) || 0;
+        const isAvailable = Boolean(resort.available);
+        
+        return `
         <div class="resort-card">
             <div class="resort-status">
                 <div>
-                    <h4>${resort.name}</h4>
-                    <p>${resort.location} - ₹${resort.price}/night</p>
-                    <small>Max: ${resort.max_guests} guests, Extra: ₹${resort.per_head_charge}/head</small>
+                    <h4>${safeName}</h4>
+                    <p>${safeLocation} - ₹${safePrice}/night</p>
+                    <small>Max: ${safeMaxGuests} guests, Extra: ₹${safePerHeadCharge}/head</small>
                 </div>
-                <span class="status-badge ${resort.available ? 'available' : 'unavailable'}">
-                    ${resort.available ? 'Available' : 'Unavailable'}
+                <span class="status-badge ${isAvailable ? 'available' : 'unavailable'}">
+                    ${isAvailable ? 'Available' : 'Unavailable'}
                 </span>
             </div>
             <div class="resort-media">
                 ${resort.images && resort.images.length > 0 ? 
-                    `<img src="${resort.images[0]}" alt="${resort.name}" style="width:100px;height:60px;object-fit:cover;" onerror="this.style.display='none'">` : 
+                    `<img src="${sanitizeHtml(resort.images[0])}" alt="${safeName}" style="width:100px;height:60px;object-fit:cover;" onerror="this.style.display='none'">` : 
                     '<div style="width:100px;height:60px;background:#eee;display:flex;align-items:center;justify-content:center;">No Image</div>'
                 }
                 <small>${resort.images ? resort.images.length : 0} images, ${resort.videos ? resort.videos.length : 0} videos</small>
             </div>
             <div class="resort-actions">
-                <button class="availability-btn ${resort.available ? 'available' : 'unavailable'}" 
-                        onclick="toggleAvailability(${resort.id}, ${!resort.available})">
-                    <i class="fas fa-${resort.available ? 'eye-slash' : 'eye'}"></i> 
-                    ${resort.available ? 'Disable' : 'Enable'}
+                <button class="availability-btn ${isAvailable ? 'available' : 'unavailable'}" 
+                        onclick="toggleAvailability(${safeId}, ${!isAvailable})">
+                    <i class="fas fa-${isAvailable ? 'eye-slash' : 'eye'}"></i> 
+                    ${isAvailable ? 'Disable' : 'Enable'}
                 </button>
-                <button class="edit-btn" onclick="openEditModal(${resort.id})">
+                <button class="edit-btn" onclick="openEditModal(${safeId})">
                     <i class="fas fa-edit"></i> Edit
                 </button>
-                <button class="delete-btn" onclick="deleteResort(${resort.id})">
+                <button class="delete-btn" onclick="deleteResort(${safeId})">
                     <i class="fas fa-trash"></i> Delete
                 </button>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 async function handleAddResort(e) {
@@ -86,22 +139,26 @@ async function handleAddResort(e) {
         const response = await fetch('/api/gateway/resort', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
             },
             body: JSON.stringify(resortData)
         });
         
         if (response.ok) {
-            alert('Resort added successfully!');
+            console.log('Resort added successfully!');
+            showNotification('Resort added successfully!', 'success');
             e.target.reset();
             loadResorts();
         } else {
             const error = await response.json();
-            alert('Error adding resort: ' + (error.error || 'Unknown error'));
+            console.error('Error adding resort:', error.error || 'Unknown error');
+            showNotification('Error adding resort: ' + (error.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error adding resort: ' + error.message);
+        console.error('Error adding resort:', error.message);
+        showNotification('Error adding resort: ' + error.message, 'error');
     }
 }
 
@@ -154,22 +211,26 @@ async function handleEditResort(e) {
         const response = await fetch(`/api/gateway/resort/${resortId}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
             },
             body: JSON.stringify(resortData)
         });
         
         if (response.ok) {
-            alert('Resort updated successfully!');
+            console.log('Resort updated successfully!');
+            showNotification('Resort updated successfully!', 'success');
             closeEditModal();
             loadResorts();
         } else {
             const error = await response.json();
-            alert('Error updating resort: ' + (error.error || 'Unknown error'));
+            console.error('Error updating resort:', error.error || 'Unknown error');
+            showNotification('Error updating resort: ' + (error.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error updating resort: ' + error.message);
+        console.error('Error updating resort:', error.message);
+        showNotification('Error updating resort: ' + error.message, 'error');
     }
 }
 
@@ -178,40 +239,50 @@ async function toggleAvailability(resortId, newAvailability) {
         const response = await fetch(`/api/resorts/${resortId}/availability`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
             },
             body: JSON.stringify({ available: newAvailability })
         });
         
         if (response.ok) {
-            alert(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`);
+            console.log(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`);
+            showNotification(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`, 'success');
             loadResorts();
         } else {
-            alert('Error updating availability');
+            console.error('Error updating availability');
+            showNotification('Error updating availability', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error updating availability');
+        console.error('Error updating availability');
+        showNotification('Error updating availability', 'error');
     }
 }
 
 async function deleteResort(resortId) {
-    if (!confirm('Are you sure you want to delete this resort?')) return;
+    if (!await showConfirmation('Are you sure you want to delete this resort?')) return;
     
     try {
         const response = await fetch(`/api/gateway/resort/${resortId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-Token': csrfToken
+            }
         });
         
         if (response.ok) {
-            alert('Resort deleted successfully!');
+            console.log('Resort deleted successfully!');
+            showNotification('Resort deleted successfully!', 'success');
             loadResorts();
         } else {
-            alert('Error deleting resort');
+            console.error('Error deleting resort');
+            showNotification('Error deleting resort', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error deleting resort');
+        console.error('Error deleting resort');
+        showNotification('Error deleting resort', 'error');
     }
 }
 

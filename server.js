@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
+const csrf = require('csurf');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
 const { upload } = require('./s3-config');
 
@@ -19,10 +20,27 @@ const io = socketIo(server, {
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
+
+const csrfProtection = csrf({ cookie: true });
+
+function requireAuth(req, res, next) {
+    const token = req.headers.authorization;
+    if (!token) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    next();
+}
+
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+    res.json({ token: req.csrfToken() });
+});
 
 // Initialize database on startup
 initDatabase();
@@ -84,7 +102,7 @@ app.get('/api/resorts', async (req, res) => {
 });
 
 // Add new resort
-app.post('/api/resorts', async (req, res) => {
+app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
     try {
         const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
@@ -101,7 +119,7 @@ app.post('/api/resorts', async (req, res) => {
 });
 
 // Book a resort
-app.post('/api/bookings', async (req, res) => {
+app.post('/api/bookings', csrfProtection, async (req, res) => {
     try {
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, paymentId } = req.body;
         
@@ -221,7 +239,7 @@ io.on('connection', (socket) => {
 
 // Sync endpoints for API Gateway
 app.post('/api/sync/booking-created', (req, res) => {
-    console.log('Booking sync received:', req.body);
+    console.log('Booking sync received:', JSON.stringify({ id: req.body.id, status: req.body.status }));
     io.emit('bookingCreated', req.body);
     res.json({ success: true });
 });
@@ -265,9 +283,9 @@ app.post('/api/gateway/booking', async (req, res) => {
 app.post('/api/payment/create-order', async (req, res) => {
     try {
         const axios = require('axios');
-        console.log('Proxying payment order request:', req.body);
+        console.log('Proxying payment order request:', JSON.stringify({ timestamp: new Date().toISOString() }));
         const response = await axios.post('http://localhost:4000/api/payment/create-order', req.body);
-        console.log('Gateway response:', response.data);
+        console.log('Gateway response:', JSON.stringify({ timestamp: new Date().toISOString() }));
         res.json(response.data);
     } catch (error) {
         console.error('Payment proxy error:', error.message);

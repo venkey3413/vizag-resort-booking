@@ -271,11 +271,11 @@ async function handleBooking(e) {
     
     // Validate phone number
     if (!/^[0-9]{10}$/.test(phoneInput)) {
-        alert('Please enter a valid 10-digit mobile number');
+        showNotification('Please enter a valid 10-digit mobile number', 'error');
         return;
     }
     
-    const formData = {
+    const bookingData = {
         resortId: document.getElementById('bookingResortId').value,
         guestName: document.getElementById('guestName').value,
         email: document.getElementById('email').value,
@@ -290,28 +290,137 @@ async function handleBooking(e) {
     const totalAmount = parseInt(totalAmountText.replace(/[^0-9]/g, ''));
     
     try {
-        // Direct booking without payment gateway for now
-        const response = await fetch('/api/gateway/booking', {
+        // Create payment order
+        const orderResponse = await fetch('/api/payment/create-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify({
+                amount: totalAmount,
+                bookingData: bookingData
+            })
         });
         
-        if (response.ok) {
-            const booking = await response.json();
-            alert(`🎉 BOOKING CONFIRMED!\n\nBooking ID: RB${String(booking.id).padStart(4, '0')}\nTotal Amount: ₹${booking.totalPrice.toLocaleString()}\n\nBooking details will be shared to your WhatsApp number.\n\nThank you for choosing us!`);
+        if (!orderResponse.ok) {
+            const error = await orderResponse.json();
+            showNotification('Payment setup failed: ' + error.error, 'error');
+            return;
+        }
+        
+        const orderData = await orderResponse.json();
+        
+        // Initialize Razorpay payment
+        const options = {
+            key: orderData.keyId,
+            amount: orderData.amount,
+            currency: orderData.currency,
+            name: 'Vizag Resort Booking',
+            description: `Booking for ${bookingData.guestName}`,
+            order_id: orderData.orderId,
+            handler: async function(response) {
+                await verifyPaymentAndBook(response, bookingData);
+            },
+            prefill: {
+                name: bookingData.guestName,
+                email: bookingData.email,
+                contact: bookingData.phone
+            },
+            theme: {
+                color: '#2c3e50'
+            },
+            modal: {
+                ondismiss: function() {
+                    showNotification('Payment cancelled', 'error');
+                }
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Payment setup failed. Please try again.', 'error');
+    }
+}
+
+async function verifyPaymentAndBook(paymentResponse, bookingData) {
+    try {
+        const verifyResponse = await fetch('/api/payment/verify-and-book', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                paymentId: paymentResponse.razorpay_payment_id,
+                orderId: paymentResponse.razorpay_order_id,
+                signature: paymentResponse.razorpay_signature,
+                bookingData: bookingData
+            })
+        });
+        
+        const result = await verifyResponse.json();
+        
+        if (result.success) {
+            showNotification(`🎉 PAYMENT SUCCESSFUL!\n\nBooking ID: RB${String(result.booking.id).padStart(4, '0')}\nUTR: ${result.utrNumber}\nAmount: ₹${result.booking.totalPrice.toLocaleString()}\n\nBooking confirmed!`, 'success');
             closeModal();
             document.getElementById('bookingForm').reset();
         } else {
-            const errorData = await response.json();
-            alert('Booking failed. Please try again.');
+            showNotification('Payment verification failed: ' + result.error, 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Booking failed. Please check your connection and try again.');
+        console.error('Payment verification error:', error);
+        showNotification('Payment verification failed. Please contact support.', 'error');
     }
+}
+
+// Custom notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-message">${message}</span>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+        </div>
+    `;
+    
+    // Add styles if not already present
+    if (!document.getElementById('notification-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'notification-styles';
+        styles.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                max-width: 400px;
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            }
+            .notification.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+            .notification.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+            .notification.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+            .notification-content { display: flex; justify-content: space-between; align-items: flex-start; }
+            .notification-message { flex: 1; white-space: pre-line; }
+            .notification-close { background: none; border: none; font-size: 20px; cursor: pointer; margin-left: 10px; }
+            @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
 }
 
 function setMinDate() {
@@ -442,3 +551,28 @@ window.onclick = function(event) {
         detailsModal.style.display = 'none';
     }
 }
+
+// Load Razorpay script
+function loadRazorpayScript() {
+    return new Promise((resolve) => {
+        if (window.Razorpay) {
+            resolve(true);
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+}
+
+// Initialize Razorpay on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadRazorpayScript().then(loaded => {
+        if (!loaded) {
+            console.error('Failed to load Razorpay script');
+        }
+    });
+});

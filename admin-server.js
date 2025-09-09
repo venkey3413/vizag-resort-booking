@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
+const csrf = require('csurf');
 const { db, initDatabase } = require('./database');
 const { upload } = require('./s3-config');
 
@@ -16,9 +17,41 @@ const io = socketIo(server, {
 });
 const PORT = 3001;
 
-app.use(cors());
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3001'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static('admin-public'));
+
+const csrfProtection = csrf({ cookie: true });
+
+function requireAuth(req, res, next) {
+    const token = req.headers.authorization;
+    if (!token || !token.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const jwt = token.substring(7);
+    if (jwt.length < 10 || !jwt.includes('.') || jwt.split('.').length !== 3) {
+        return res.status(401).json({ error: 'Invalid token format' });
+    }
+    
+    try {
+        const payload = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64').toString());
+        if (!payload.exp || payload.exp < Date.now() / 1000) {
+            return res.status(401).json({ error: 'Token expired' });
+        }
+    } catch (e) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    next();
+}
+
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+    res.json({ token: req.csrfToken() });
+});
 
 // Initialize database on startup
 initDatabase();
@@ -54,7 +87,7 @@ app.get('/api/resorts', async (req, res) => {
     }
 });
 
-app.post('/api/upload', upload.array('media', 10), (req, res) => {
+app.post('/api/upload', csrfProtection, requireAuth, upload.array('media', 10), (req, res) => {
     try {
         const fileUrls = req.files.map(file => file.location);
         res.json({ urls: fileUrls });
@@ -64,7 +97,7 @@ app.post('/api/upload', upload.array('media', 10), (req, res) => {
     }
 });
 
-app.post('/api/resorts', async (req, res) => {
+app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
     try {
         const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
@@ -101,7 +134,7 @@ app.post('/api/resorts', async (req, res) => {
     }
 });
 
-app.put('/api/resorts/:id', async (req, res) => {
+app.put('/api/resorts/:id', csrfProtection, requireAuth, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
@@ -140,7 +173,7 @@ app.patch('/api/resorts/:id/availability', async (req, res) => {
     }
 });
 
-app.delete('/api/resorts/:id', async (req, res) => {
+app.delete('/api/resorts/:id', csrfProtection, requireAuth, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         
@@ -191,19 +224,19 @@ async function syncServices(action, data) {
 
 // Sync endpoints for API Gateway
 app.post('/api/sync/booking-created', (req, res) => {
-    console.log('Booking sync received:', req.body);
+    console.log('Booking sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
     io.emit('bookingCreated', req.body);
     res.json({ success: true });
 });
 
 app.post('/api/sync/resort-updated', (req, res) => {
-    console.log('Resort update sync received:', req.body);
+    console.log('Resort update sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
     io.emit('resortUpdated', req.body);
     res.json({ success: true });
 });
 
 app.post('/api/sync/resort-deleted', (req, res) => {
-    console.log('Resort delete sync received:', req.body);
+    console.log('Resort delete sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
     io.emit('resortDeleted', req.body);
     res.json({ success: true });
 });

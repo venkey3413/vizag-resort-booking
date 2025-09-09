@@ -10,7 +10,7 @@ function initializeSocket() {
     socket = io();
     
     socket.on('booking-created', (booking) => {
-        console.log('New booking received:', booking);
+        console.log('New booking received:', JSON.stringify({ id: booking.id, timestamp: new Date().toISOString() }));
         bookings.unshift(booking);
         displayBookings();
         updateStats();
@@ -121,19 +121,25 @@ async function deleteBooking(bookingId) {
     
     try {
         // Delete directly from booking service (no gateway needed for internal operations)
+        const csrfResponse = await fetch('/api/csrf-token');
+        const csrfData = await csrfResponse.json();
+        
         const response = await fetch(`/api/bookings/${bookingId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-Token': csrfData.token
+            }
         });
         
         if (response.ok) {
-            alert('Booking deleted successfully!');
+            console.log('Booking deleted successfully!');
             loadBookings();
         } else {
-            alert('Error deleting booking');
+            console.error('Error deleting booking');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error deleting booking');
+        console.error('Error deleting booking');
     }
 }
 
@@ -178,6 +184,6 @@ function printInvoice(bookingId) {
         printWindow.document.close();
         printWindow.print();
     } else {
-        alert('Invoice not found for printing');
+        console.error('Invoice not found for printing');
     }
 }

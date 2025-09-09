@@ -15,12 +15,12 @@ const upload = multer({
         contentType: multerS3.AUTO_CONTENT_TYPE,
         key: function (req, file, cb) {
             const folder = file.mimetype.startsWith('video/') ? 'videos' : 'images';
-            const fileName = `public/${folder}/${Date.now()}-${file.originalname}`;
+            const fileName = `public/${folder}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${file.originalname}`;
             cb(null, fileName);
         }
     }),
     limits: {
-        fileSize: 100 * 1024 * 1024 // 100MB
+        fileSize: 8 * 1024 * 1024 // 8MB
     },
     fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif|mp4|avi|mov|wmv/;

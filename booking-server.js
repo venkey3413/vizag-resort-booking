@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
+const csrf = require('csurf');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 
@@ -15,9 +16,26 @@ const io = socketIo(server, {
 });
 const PORT = 3002;
 
-app.use(cors());
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3002'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static('booking-public'));
+
+const csrfProtection = csrf({ cookie: true });
+
+function requireAuth(req, res, next) {
+    const token = req.headers.authorization;
+    if (!token) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    next();
+}
+
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+    res.json({ token: req.csrfToken() });
+});
 
 let db;
 
@@ -69,7 +87,7 @@ app.get('/api/transactions', async (req, res) => {
 });
 
 // Delete booking
-app.delete('/api/bookings/:id', async (req, res) => {
+app.delete('/api/bookings/:id', csrfProtection, requireAuth, async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });
@@ -103,32 +121,26 @@ io.on('connection', (socket) => {
 // Initialize and start server
 initDB().then(() => {
         // Sync endpoints for API Gateway
-    app.post('/api/sync/booking-created', (req, res) => {
-        console.log('Booking sync received:', req.body);
+    app.post('/api/sync/booking-created', requireAuth, (req, res) => {
+        console.log('Booking sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
         io.emit('booking-created', req.body);
         res.json({ success: true });
     });
     
-    app.post('/api/sync/resort-updated', (req, res) => {
-        console.log('Resort update sync received:', req.body);
+    app.post('/api/sync/resort-updated', requireAuth, (req, res) => {
+        console.log('Resort update sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
         io.emit('resort-updated', req.body);
         res.json({ success: true });
     });
     
-    app.post('/api/sync/resort-added', (req, res) => {
-        console.log('Resort added sync received:', req.body);
+    app.post('/api/sync/resort-added', requireAuth, (req, res) => {
+        console.log('Resort added sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
         io.emit('resort-added', req.body);
         res.json({ success: true });
     });
     
-    app.post('/api/sync/resort-updated', (req, res) => {
-        console.log('Resort update sync received:', req.body);
-        io.emit('resort-updated', req.body);
-        res.json({ success: true });
-    });
-    
-    app.post('/api/sync/resort-deleted', (req, res) => {
-        console.log('Resort delete sync received:', req.body);
+    app.post('/api/sync/resort-deleted', requireAuth, (req, res) => {
+        console.log('Resort delete sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
         io.emit('resort-deleted', req.body);
         res.json({ success: true });
     });
