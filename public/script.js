@@ -9,36 +9,42 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeSocket() {
-    socket = io();
-    
-    socket.on('resortAdded', (resort) => {
-        resorts.unshift(resort);
-        displayResorts();
-        populateLocationFilter();
-    });
-    
-    socket.on('resortUpdated', (updatedResort) => {
-        const index = resorts.findIndex(r => r.id === updatedResort.id);
-        if (index !== -1) {
-            resorts[index] = { ...resorts[index], ...updatedResort };
-            displayResorts();
-            populateLocationFilter();
+    try {
+        if (typeof io !== 'undefined') {
+            socket = io();
+            
+            socket.on('resortAdded', (resort) => {
+                resorts.unshift(resort);
+                displayResorts();
+                populateLocationFilter();
+            });
+            
+            socket.on('resortUpdated', (updatedResort) => {
+                const index = resorts.findIndex(r => r.id === updatedResort.id);
+                if (index !== -1) {
+                    resorts[index] = { ...resorts[index], ...updatedResort };
+                    displayResorts();
+                    populateLocationFilter();
+                }
+            });
+            
+            socket.on('resortDeleted', (data) => {
+                resorts = resorts.filter(r => r.id !== data.id);
+                displayResorts();
+                populateLocationFilter();
+            });
+            
+            socket.on('resortAvailabilityUpdated', (data) => {
+                const resort = resorts.find(r => r.id === data.id);
+                if (resort) {
+                    resort.available = data.available;
+                    displayResorts();
+                }
+            });
         }
-    });
-    
-    socket.on('resortDeleted', (data) => {
-        resorts = resorts.filter(r => r.id !== data.id);
-        displayResorts();
-        populateLocationFilter();
-    });
-    
-    socket.on('resortAvailabilityUpdated', (data) => {
-        const resort = resorts.find(r => r.id === data.id);
-        if (resort) {
-            resort.available = data.available;
-            displayResorts();
-        }
-    });
+    } catch (error) {
+        console.log('Socket.IO not available, continuing without real-time updates');
+    }
 }
 
 function setupEventListeners() {
