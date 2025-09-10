@@ -430,12 +430,31 @@ function showNotification(message, type = 'info') {
 }
 
 function setMinDate() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('checkIn').min = today;
-    document.getElementById('checkOut').min = today;
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Set default check-in time to 11:00 AM today
+    const checkInDefault = `${todayStr}T11:00`;
+    document.getElementById('checkIn').value = checkInDefault;
+    document.getElementById('checkIn').min = checkInDefault;
+    
+    // Set default check-out time to 9:00 AM next day
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const checkOutDefault = `${tomorrowStr}T09:00`;
+    document.getElementById('checkOut').value = checkOutDefault;
+    document.getElementById('checkOut').min = checkOutDefault;
     
     document.getElementById('checkIn').addEventListener('change', function() {
-        document.getElementById('checkOut').min = this.value;
+        const checkInDate = new Date(this.value);
+        const nextDay = new Date(checkInDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const minCheckOut = `${nextDay.toISOString().split('T')[0]}T09:00`;
+        document.getElementById('checkOut').min = minCheckOut;
+        if (new Date(document.getElementById('checkOut').value) <= checkInDate) {
+            document.getElementById('checkOut').value = minCheckOut;
+        }
     });
     
     // Phone number validation
