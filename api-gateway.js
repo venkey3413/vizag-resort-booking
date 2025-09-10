@@ -180,13 +180,12 @@ app.post('/api/payment/create-order', async (req, res) => {
             return res.status(400).json({ error: 'Invalid phone format' });
         }
         
-        // Validate dates
+        // Basic date validation
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
-        const today = new Date();
         
-        if (checkInDate < today || checkOutDate <= checkInDate) {
-            return res.status(400).json({ error: 'Invalid dates' });
+        if (checkOutDate <= checkInDate) {
+            return res.status(400).json({ error: 'Check-out must be after check-in' });
         }
         
         const receipt = `booking_${Date.now()}_${resortId}`;
