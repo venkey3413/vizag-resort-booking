@@ -8,13 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function getCSRFToken() {
-    try {
-        const response = await fetch('/api/csrf-token');
-        const data = await response.json();
-        csrfToken = data.token;
-    } catch (error) {
-        console.error('Error getting CSRF token:', error);
-    }
+    // CSRF disabled, set empty token
+    csrfToken = '';
 }
 
 function setupEventListeners() {
@@ -239,8 +234,7 @@ async function toggleAvailability(resortId, newAvailability) {
         const response = await fetch(`/api/resorts/${resortId}/availability`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ available: newAvailability })
         });
@@ -248,6 +242,15 @@ async function toggleAvailability(resortId, newAvailability) {
         if (response.ok) {
             console.log(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`);
             showNotification(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`, 'success');
+            
+            // Update local data immediately for instant UI update
+            const resort = resorts.find(r => r.id === resortId);
+            if (resort) {
+                resort.available = newAvailability;
+                displayResorts();
+            }
+            
+            // Also reload from server to ensure sync
             loadResorts();
         } else {
             console.error('Error updating availability');
