@@ -8,8 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function getCSRFToken() {
-    // CSRF disabled, set empty token
-    csrfToken = '';
+    try {
+        const response = await fetch('/api/csrf-token');
+        const data = await response.json();
+        csrfToken = data.token;
+    } catch (error) {
+        console.error('Error getting CSRF token:', error);
+    }
 }
 
 function setupEventListeners() {
