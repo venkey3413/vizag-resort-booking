@@ -28,7 +28,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-const csrfProtection = csrf({ cookie: true });
+// const csrfProtection = csrf({ cookie: true });
 
 function requireAuth(req, res, next) {
     const token = req.headers.authorization;
@@ -38,9 +38,9 @@ function requireAuth(req, res, next) {
     next();
 }
 
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-    res.json({ token: req.csrfToken() });
-});
+// app.get('/api/csrf-token', csrfProtection, (req, res) => {
+//     res.json({ token: req.csrfToken() });
+// });
 
 // Service endpoints
 const SERVICES = {
@@ -50,7 +50,7 @@ const SERVICES = {
 };
 
 // Gateway routes - broadcast to all services
-app.post('/api/gateway/booking', csrfProtection, async (req, res) => {
+app.post('/api/gateway/booking', async (req, res) => {
     try {
         // Create booking in main service
         const bookingResponse = await axios.post(`${SERVICES.main}/api/bookings`, req.body);
@@ -84,7 +84,7 @@ app.post('/api/gateway/booking', csrfProtection, async (req, res) => {
     }
 });
 
-app.post('/api/gateway/resort', csrfProtection, requireAuth, async (req, res) => {
+app.post('/api/gateway/resort', requireAuth, async (req, res) => {
     try {
         // Create/update resort in admin service
         const resortResponse = await axios.post(`${SERVICES.admin}/api/resorts`, req.body);
@@ -101,7 +101,7 @@ app.post('/api/gateway/resort', csrfProtection, requireAuth, async (req, res) =>
     }
 });
 
-app.put('/api/gateway/resort/:id', csrfProtection, requireAuth, async (req, res) => {
+app.put('/api/gateway/resort/:id', requireAuth, async (req, res) => {
     try {
         const id = req.params.id;
         
@@ -120,7 +120,7 @@ app.put('/api/gateway/resort/:id', csrfProtection, requireAuth, async (req, res)
     }
 });
 
-app.delete('/api/gateway/resort/:id', csrfProtection, requireAuth, async (req, res) => {
+app.delete('/api/gateway/resort/:id', requireAuth, async (req, res) => {
     try {
         const id = req.params.id;
         
@@ -156,7 +156,7 @@ app.get('/', (req, res) => {
 });
 
 // Create Razorpay order with validation
-app.post('/api/payment/create-order', csrfProtection, async (req, res) => {
+app.post('/api/payment/create-order', async (req, res) => {
     try {
         const { amount, bookingData } = req.body;
         
@@ -211,7 +211,7 @@ app.post('/api/payment/create-order', csrfProtection, async (req, res) => {
 });
 
 // Verify payment and create booking with enhanced security
-app.post('/api/payment/verify-and-book', csrfProtection, async (req, res) => {
+app.post('/api/payment/verify-and-book', async (req, res) => {
     try {
         const { paymentId, orderId, signature, bookingData } = req.body;
         
