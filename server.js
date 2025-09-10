@@ -48,7 +48,7 @@ initDatabase();
 // Get resorts from database
 async function getResorts() {
     try {
-        const rows = await db().all('SELECT * FROM resorts WHERE available = 1 ORDER BY id DESC');
+        const rows = await db().all('SELECT * FROM resorts ORDER BY id DESC');
         
         return rows.map(row => {
             let amenities = [];
