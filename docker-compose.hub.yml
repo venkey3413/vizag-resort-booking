@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   main:
-    image: your-dockerhub-username/vizag-resort-main:latest
+    image: venkateshsambana/vizag-resort-main:latest
     ports:
       - "3000:3000"
     environment:
@@ -13,7 +13,7 @@ services:
       - gateway
 
   admin:
-    image: your-dockerhub-username/vizag-resort-admin:latest
+    image: venkateshsambana/vizag-resort-admin:latest
     ports:
       - "3001:3001"
     environment:
@@ -24,7 +24,7 @@ services:
       - gateway
 
   booking:
-    image: your-dockerhub-username/vizag-resort-booking:latest
+    image: venkateshsambana/vizag-resort-booking:latest
     ports:
       - "3002:3002"
     environment:
@@ -35,7 +35,7 @@ services:
       - gateway
 
   gateway:
-    image: your-dockerhub-username/vizag-resort-gateway:latest
+    image: venkateshsambana/vizag-resort-gateway:latest
     ports:
       - "4000:4000"
     environment:
