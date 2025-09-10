@@ -91,7 +91,7 @@ function displayResorts() {
             </div>
             <div class="resort-actions">
                 <button class="availability-btn ${isAvailable ? 'available' : 'unavailable'}" 
-                        onclick="toggleAvailability(${safeId}, ${!isAvailable})">
+                        onclick="toggleAvailability(${safeId}, ${!isAvailable}); return false;">
                     <i class="fas fa-${isAvailable ? 'eye-slash' : 'eye'}"></i> 
                     ${isAvailable ? 'Disable' : 'Enable'}
                 </button>
