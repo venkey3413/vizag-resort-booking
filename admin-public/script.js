@@ -230,6 +230,8 @@ async function handleEditResort(e) {
 }
 
 async function toggleAvailability(resortId, newAvailability) {
+    console.log(`Toggling resort ${resortId} to ${newAvailability}`);
+    
     try {
         const response = await fetch(`/api/resorts/${resortId}/availability`, {
             method: 'PATCH',
@@ -239,6 +241,8 @@ async function toggleAvailability(resortId, newAvailability) {
             body: JSON.stringify({ available: newAvailability })
         });
         
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
             console.log(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`);
             showNotification(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`, 'success');
@@ -246,20 +250,22 @@ async function toggleAvailability(resortId, newAvailability) {
             // Update local data immediately for instant UI update
             const resort = resorts.find(r => r.id === resortId);
             if (resort) {
+                console.log('Updating local resort data');
                 resort.available = newAvailability;
                 displayResorts();
+            } else {
+                console.log('Resort not found in local data');
             }
             
             // Also reload from server to ensure sync
-            loadResorts();
+            setTimeout(() => loadResorts(), 100);
         } else {
-            console.error('Error updating availability');
+            console.error('Error updating availability, status:', response.status);
             showNotification('Error updating availability', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        console.error('Error updating availability');
-        showNotification('Error updating availability', 'error');
+        showNotification('Error updating availability: ' + error.message, 'error');
     }
 }
 
