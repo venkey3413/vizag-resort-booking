@@ -80,8 +80,8 @@ function displayBookings() {
                     <div class="booking-details">
                         <h4><i class="fas fa-hotel"></i> Booking Details</h4>
                         <p><strong>Resort:</strong> ${booking.resort_name}</p>
-                        <p><strong>Check-in:</strong> ${checkIn.toLocaleDateString()}</p>
-                        <p><strong>Check-out:</strong> ${checkOut.toLocaleDateString()}</p>
+                        <p><strong>Check-in:</strong> ${checkIn.toLocaleDateString()} at ${checkIn.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                        <p><strong>Check-out:</strong> ${checkOut.toLocaleDateString()} at ${checkOut.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                         <p><strong>Nights:</strong> ${nights}</p>
                         <p><strong>Guests:</strong> ${booking.guests}</p>
                         ${booking.utr_number ? `<p><strong>UTR Number:</strong> ${booking.utr_number}</p>` : ''}
