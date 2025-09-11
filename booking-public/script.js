@@ -127,15 +127,8 @@ async function deleteBooking(bookingId) {
     if (!confirm('Are you sure you want to delete this booking?')) return;
     
     try {
-        // Delete directly from booking service (no gateway needed for internal operations)
-        const csrfResponse = await fetch('/api/csrf-token');
-        const csrfData = await csrfResponse.json();
-        
         const response = await fetch(`/api/bookings/${bookingId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-Token': csrfData.token
-            }
+            method: 'DELETE'
         });
         
         if (response.ok) {
@@ -146,7 +139,6 @@ async function deleteBooking(bookingId) {
         }
     } catch (error) {
         console.error('Error:', error);
-        console.error('Error deleting booking');
     }
 }
 

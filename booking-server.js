@@ -98,7 +98,7 @@ app.get('/api/transactions', async (req, res) => {
 });
 
 // Delete booking
-app.delete('/api/bookings/:id', csrfProtection, requireAuth, async (req, res) => {
+app.delete('/api/bookings/:id', requireAuth, async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });
@@ -110,7 +110,6 @@ app.delete('/api/bookings/:id', csrfProtection, requireAuth, async (req, res) =>
             return res.status(404).json({ error: 'Booking not found' });
         }
         
-        // Broadcast to all connected clients
         io.emit('bookingDeleted', { id });
         
         res.json({ message: 'Booking deleted successfully' });

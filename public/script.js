@@ -302,17 +302,13 @@ async function handleBooking(e) {
         return;
     }
     
-    // Ensure fixed times are set
-    const checkInDate = document.getElementById('checkIn').value.split('T')[0];
-    const checkOutDate = document.getElementById('checkOut').value.split('T')[0];
-    
     const bookingData = {
         resortId: document.getElementById('bookingResortId').value,
         guestName: document.getElementById('guestName').value,
         email: document.getElementById('email').value,
         phone: '+91' + phoneInput,
-        checkIn: `${checkInDate}T11:00`,
-        checkOut: `${checkOutDate}T09:00`,
+        checkIn: document.getElementById('checkIn').value + 'T11:00',
+        checkOut: document.getElementById('checkOut').value + 'T09:00',
         guests: document.getElementById('guests').value,
         paymentId: 'CASH_' + Date.now()
     };
@@ -401,42 +397,30 @@ function setMinDate() {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     
-    // Fixed times: Check-in 11:00 AM, Check-out 9:00 AM
-    const checkInDefault = `${todayStr}T11:00`;
-    document.getElementById('checkIn').value = checkInDefault;
-    document.getElementById('checkIn').min = checkInDefault;
+    // Set date inputs (no time selection)
+    document.getElementById('checkIn').value = todayStr;
+    document.getElementById('checkIn').min = todayStr;
     
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
-    const checkOutDefault = `${tomorrowStr}T09:00`;
-    document.getElementById('checkOut').value = checkOutDefault;
-    document.getElementById('checkOut').min = checkOutDefault;
+    document.getElementById('checkOut').value = tomorrowStr;
+    document.getElementById('checkOut').min = tomorrowStr;
     
-    // Disable time selection - only allow date changes
-    document.getElementById('checkIn').addEventListener('input', function() {
-        const selectedDate = this.value.split('T')[0];
-        this.value = `${selectedDate}T11:00`;
-        
+    document.getElementById('checkIn').addEventListener('change', function() {
         const checkInDate = new Date(this.value);
         const nextDay = new Date(checkInDate);
         nextDay.setDate(nextDay.getDate() + 1);
-        const minCheckOut = `${nextDay.toISOString().split('T')[0]}T09:00`;
+        const minCheckOut = nextDay.toISOString().split('T')[0];
         document.getElementById('checkOut').min = minCheckOut;
-        if (new Date(document.getElementById('checkOut').value) <= checkInDate) {
+        if (document.getElementById('checkOut').value <= this.value) {
             document.getElementById('checkOut').value = minCheckOut;
         }
-        
         validateBookingDates();
     });
     
-    document.getElementById('checkOut').addEventListener('input', function() {
-        const selectedDate = this.value.split('T')[0];
-        this.value = `${selectedDate}T09:00`;
-        validateBookingDates();
-    });
+    document.getElementById('checkOut').addEventListener('change', validateBookingDates);
     
-    // Phone validation
     document.getElementById('phone').addEventListener('input', function(e) {
         this.value = this.value.replace(/[^0-9]/g, '');
         if (this.value.length > 10) {
