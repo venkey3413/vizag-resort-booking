@@ -27,8 +27,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
+app.use(require('cookie-parser')());
+app.use(require('express-session')({
+    secret: 'resort-booking-secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
 
-const csrfProtection = csrf({ cookie: true });
+const csrfProtection = csrf({ cookie: false });
 
 function requireAuth(req, res, next) {
     // Skip auth for internal service-to-service calls
