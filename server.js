@@ -350,7 +350,7 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
                     </div>
                     
                     <div class="footer">
-                        <p>📞 Contact: +91 8341674465 | 📧 vizagresortbooking@gmail.com</p>
+                        <p>📧 vizagresortbooking@gmail.com</p>
                         <p>Thank you for choosing our resort. We look forward to hosting you!</p>
                     </div>
                 </div>
