@@ -98,7 +98,7 @@ app.get('/api/transactions', async (req, res) => {
 });
 
 // Delete booking
-app.delete('/api/bookings/:id', requireAuth, async (req, res) => {
+app.delete('/api/bookings/:id', async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });
