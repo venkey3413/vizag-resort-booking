@@ -1,0 +1,23 @@
+.map-btn {
+    display: inline-block;
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.map-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+.map-section {
+    margin-top: 10px;
+}

@@ -137,6 +137,13 @@ function displayResorts(filteredResorts = resorts) {
                 <div class="amenities">
                     ${resort.amenities.map(amenity => `<span class="amenity">${amenity}</span>`).join('')}
                 </div>
+                ${resort.map_link ? `
+                    <div class="map-section">
+                        <a href="${resort.map_link}" target="_blank" class="map-btn">
+                            <i class="fas fa-map-marker-alt"></i> View on Google Maps
+                        </a>
+                    </div>
+                ` : ''}
                 ${resort.available ? 
                     `<button class="book-btn" onclick="openBookingModal(${resort.id})">
                         <i class="fas fa-calendar-check"></i> Book Now
