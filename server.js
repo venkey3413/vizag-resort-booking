@@ -258,6 +258,16 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
             console.log('Booking sync error:', e.message);
         }
         
+        // Send booking confirmation email
+        try {
+            const { sendBookingConfirmation } = require('./email-service');
+            await sendBookingConfirmation(booking, resort);
+            console.log('Booking confirmation email sent to:', email);
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError.message);
+            // Don't fail the booking if email fails
+        }
+        
         // Emit real-time update
         io.emit('bookingCreated', booking);
         
