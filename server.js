@@ -106,10 +106,29 @@ app.post('/api/upload', upload.array('media', 10), (req, res) => {
     }
 });
 
-// Get all resorts
+// Get all resorts with availability
 app.get('/api/resorts', async (req, res) => {
-    const resorts = await getResorts();
-    res.json(resorts);
+    try {
+        const resorts = await getResorts();
+        
+        // Get booked dates for each resort
+        for (let resort of resorts) {
+            const bookedDates = await db().all(
+                'SELECT check_in, check_out FROM bookings WHERE resort_id = ? AND status = "confirmed"',
+                [resort.id]
+            );
+            
+            resort.bookedDates = bookedDates.map(booking => ({
+                checkIn: booking.check_in,
+                checkOut: booking.check_out
+            }));
+        }
+        
+        res.json(resorts);
+    } catch (error) {
+        console.error('Error fetching resorts:', error);
+        res.status(500).json({ error: 'Failed to fetch resorts' });
+    }
 });
 
 // Add new resort

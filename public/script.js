@@ -224,8 +224,38 @@ function openBookingModal(resortId) {
     guestsInput.max = maxGuests;
     document.getElementById('maxGuestsCount').textContent = maxGuests;
     
+    // Show booked dates info
+    showBookedDatesInfo(resort);
+    
     calculateTotal();
+    validateBookingDates();
     modal.style.display = 'block';
+}
+
+function showBookedDatesInfo(resort) {
+    let infoDiv = document.getElementById('bookedDatesInfo');
+    if (!infoDiv) {
+        infoDiv = document.createElement('div');
+        infoDiv.id = 'bookedDatesInfo';
+        infoDiv.style.cssText = 'background: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 0.9em;';
+        
+        const form = document.getElementById('bookingForm');
+        const firstInput = form.querySelector('input');
+        form.insertBefore(infoDiv, firstInput);
+    }
+    
+    if (resort.bookedDates && resort.bookedDates.length > 0) {
+        const bookedRanges = resort.bookedDates.map(booking => {
+            const checkIn = new Date(booking.checkIn).toLocaleDateString();
+            const checkOut = new Date(booking.checkOut).toLocaleDateString();
+            return `${checkIn} to ${checkOut}`;
+        }).join(', ');
+        
+        infoDiv.innerHTML = `<i class="fas fa-info-circle"></i> <strong>Unavailable dates:</strong> ${bookedRanges}`;
+        infoDiv.style.display = 'block';
+    } else {
+        infoDiv.style.display = 'none';
+    }
 }
 
 function calculateTotal() {
@@ -390,7 +420,12 @@ function setMinDate() {
         if (new Date(document.getElementById('checkOut').value) <= checkInDate) {
             document.getElementById('checkOut').value = minCheckOut;
         }
+        
+        // Check availability for selected dates
+        validateBookingDates();
     });
+    
+    document.getElementById('checkOut').addEventListener('change', validateBookingDates);
     
     // Phone number validation
     document.getElementById('phone').addEventListener('input', function(e) {
@@ -401,6 +436,54 @@ function setMinDate() {
             this.value = this.value.slice(0, 10);
         }
     });
+}
+
+function validateBookingDates() {
+    const resortId = parseInt(document.getElementById('bookingResortId').value);
+    const checkIn = document.getElementById('checkIn').value;
+    const checkOut = document.getElementById('checkOut').value;
+    
+    if (!resortId || !checkIn || !checkOut) return;
+    
+    const resort = resorts.find(r => r.id === resortId);
+    if (!resort || !resort.bookedDates) return;
+    
+    const selectedCheckIn = new Date(checkIn);
+    const selectedCheckOut = new Date(checkOut);
+    
+    // Check if selected dates overlap with booked dates
+    const isOverlapping = resort.bookedDates.some(booking => {
+        const bookedCheckIn = new Date(booking.checkIn);
+        const bookedCheckOut = new Date(booking.checkOut);
+        
+        return (selectedCheckIn < bookedCheckOut && selectedCheckOut > bookedCheckIn);
+    });
+    
+    const submitBtn = document.querySelector('#bookingForm button[type="submit"]');
+    const warningDiv = document.getElementById('dateWarning') || createWarningDiv();
+    
+    if (isOverlapping) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Selected dates are not available. Please choose different dates.';
+        warningDiv.style.display = 'block';
+    } else {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        warningDiv.style.display = 'none';
+    }
+}
+
+function createWarningDiv() {
+    const warningDiv = document.createElement('div');
+    warningDiv.id = 'dateWarning';
+    warningDiv.style.cssText = 'background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; display: none;';
+    
+    const form = document.getElementById('bookingForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    form.insertBefore(warningDiv, submitBtn);
+    
+    return warningDiv;
 }
 
 let currentResortImages = [];
