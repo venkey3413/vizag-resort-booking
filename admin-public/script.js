@@ -9,11 +9,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function getCSRFToken() {
     try {
-        const response = await fetch('/api/csrf-token');
+        const response = await fetch('/api/csrf-token', {
+            credentials: 'include'
+        });
         const data = await response.json();
         csrfToken = data.token;
+        console.log('CSRF token obtained successfully');
     } catch (error) {
         console.error('Error getting CSRF token:', error);
+        csrfToken = '';
     }
 }
 
@@ -142,6 +146,7 @@ async function handleAddResort(e) {
                 'Content-Type': 'application/json',
                 'X-CSRF-Token': csrfToken
             },
+            credentials: 'include',
             body: JSON.stringify(resortData)
         });
         
@@ -214,6 +219,7 @@ async function handleEditResort(e) {
                 'Content-Type': 'application/json',
                 'X-CSRF-Token': csrfToken
             },
+            credentials: 'include',
             body: JSON.stringify(resortData)
         });
         
@@ -284,7 +290,8 @@ async function deleteResort(resortId) {
             method: 'DELETE',
             headers: {
                 'X-CSRF-Token': csrfToken
-            }
+            },
+            credentials: 'include'
         });
         
         if (response.ok) {
