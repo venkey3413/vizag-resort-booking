@@ -260,12 +260,39 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
         
         // Send booking confirmation email
         try {
-            const { sendBookingConfirmation } = require('./email-service');
-            await sendBookingConfirmation(booking, resort);
+            const nodemailer = require('nodemailer');
+            
+            const transporter = nodemailer.createTransporter({
+                service: 'gmail',
+                auth: {
+                    user: 'vizagresortbooking@gmail.com',
+                    pass: process.env.GMAIL_APP_PASSWORD
+                }
+            });
+            
+            const emailHtml = `
+                <h2>🏨 Booking Confirmation - ${bookingReference}</h2>
+                <p>Dear ${guestName},</p>
+                <p>Your booking is confirmed!</p>
+                <p><strong>Resort:</strong> ${resort.name}</p>
+                <p><strong>Check-in:</strong> ${checkIn} at 11:00 AM</p>
+                <p><strong>Check-out:</strong> ${checkOut} at 9:00 AM</p>
+                <p><strong>Guests:</strong> ${guestCount}</p>
+                <p><strong>Total:</strong> ₹${totalPrice}</p>
+                <p><a href="https://wa.me/918341674465?text=Hi,%20I%20want%20to%20make%20payment%20for%20booking%20${bookingReference}">Pay Now via WhatsApp</a></p>
+                <p>Contact: +91 8341674465 | vizagresortbooking@gmail.com</p>
+            `;
+            
+            await transporter.sendMail({
+                from: 'vizagresortbooking@gmail.com',
+                to: email,
+                subject: `Booking Confirmation - ${bookingReference}`,
+                html: emailHtml
+            });
+            
             console.log('Booking confirmation email sent to:', email);
         } catch (emailError) {
             console.error('Email sending failed:', emailError.message);
-            // Don't fail the booking if email fails
         }
         
         // Emit real-time update
