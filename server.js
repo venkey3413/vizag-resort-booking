@@ -163,6 +163,25 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
             return res.status(400).json({ error: 'Resort is currently unavailable for booking' });
         }
         
+        // Check for overlapping bookings
+        const selectedCheckIn = new Date(checkIn);
+        const selectedCheckOut = new Date(checkOut);
+        
+        const existingBookings = await db().all(
+            'SELECT check_in, check_out FROM bookings WHERE resort_id = ? AND status = "confirmed"',
+            [parseInt(resortId)]
+        );
+        
+        const isOverlapping = existingBookings.some(booking => {
+            const bookedCheckIn = new Date(booking.check_in);
+            const bookedCheckOut = new Date(booking.check_out);
+            return (selectedCheckIn < bookedCheckOut && selectedCheckOut > bookedCheckIn);
+        });
+        
+        if (isOverlapping) {
+            return res.status(400).json({ error: 'Selected dates are not available. Please choose different dates.' });
+        }
+        
         // Calculate total price
         const basePrice = resort.price;
         const guestCount = parseInt(guests);
