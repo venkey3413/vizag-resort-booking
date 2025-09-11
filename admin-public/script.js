@@ -140,13 +140,11 @@ async function handleAddResort(e) {
     };
     
     try {
-        const response = await fetch('/api/gateway/resort', {
+        const response = await fetch('/api/resorts', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
+                'Content-Type': 'application/json'
             },
-            credentials: 'include',
             body: JSON.stringify(resortData)
         });
         
@@ -213,13 +211,11 @@ async function handleEditResort(e) {
     };
     
     try {
-        const response = await fetch(`/api/gateway/resort/${resortId}`, {
+        const response = await fetch(`/api/resorts/${resortId}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
+                'Content-Type': 'application/json'
             },
-            credentials: 'include',
             body: JSON.stringify(resortData)
         });
         
@@ -247,10 +243,8 @@ async function toggleAvailability(resortId, newAvailability) {
         const response = await fetch(`/api/resorts/${resortId}/availability`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
+                'Content-Type': 'application/json'
             },
-            credentials: 'include',
             body: JSON.stringify({ available: newAvailability })
         });
         
@@ -286,12 +280,8 @@ async function deleteResort(resortId) {
     if (!await showConfirmation('Are you sure you want to delete this resort?')) return;
     
     try {
-        const response = await fetch(`/api/gateway/resort/${resortId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-Token': csrfToken
-            },
-            credentials: 'include'
+        const response = await fetch(`/api/resorts/${resortId}`, {
+            method: 'DELETE'
         });
         
         if (response.ok) {
