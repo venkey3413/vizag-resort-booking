@@ -280,98 +280,35 @@ async function handleBooking(e) {
         phone: '+91' + phoneInput,
         checkIn: document.getElementById('checkIn').value,
         checkOut: document.getElementById('checkOut').value,
-        guests: document.getElementById('guests').value
+        guests: document.getElementById('guests').value,
+        paymentId: 'CASH_' + Date.now()
     };
     
-    // Get total amount
-    const totalAmountText = document.getElementById('totalAmount').textContent;
-    const totalAmount = parseInt(totalAmountText.replace(/[^0-9]/g, ''));
-    
     try {
-        // Create payment order
-        const orderResponse = await fetch('/api/payment/create-order', {
+        const response = await fetch('/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                amount: totalAmount,
-                bookingData: bookingData
-            })
+            body: JSON.stringify(bookingData)
         });
         
-        if (!orderResponse.ok) {
-            const error = await orderResponse.json();
-            showNotification('Payment setup failed: ' + error.error, 'error');
-            return;
-        }
-        
-        const orderData = await orderResponse.json();
-        
-        // Initialize Razorpay payment
-        const options = {
-            key: orderData.keyId,
-            amount: orderData.amount,
-            currency: orderData.currency,
-            name: 'Vizag Resort Booking',
-            description: `Booking for ${bookingData.guestName}`,
-            order_id: orderData.orderId,
-            handler: async function(response) {
-                await verifyPaymentAndBook(response, bookingData);
-            },
-            prefill: {
-                name: bookingData.guestName,
-                email: bookingData.email,
-                contact: bookingData.phone
-            },
-            theme: {
-                color: '#2c3e50'
-            },
-            modal: {
-                ondismiss: function() {
-                    showNotification('Payment cancelled', 'error');
-                }
-            }
-        };
-        
-        const rzp = new Razorpay(options);
-        rzp.open();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification('Payment setup failed. Please try again.', 'error');
-    }
-}
-
-async function verifyPaymentAndBook(paymentResponse, bookingData) {
-    try {
-        const verifyResponse = await fetch('/api/payment/verify-and-book', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                paymentId: paymentResponse.razorpay_payment_id,
-                orderId: paymentResponse.razorpay_order_id,
-                signature: paymentResponse.razorpay_signature,
-                bookingData: bookingData
-            })
-        });
-        
-        const result = await verifyResponse.json();
-        
-        if (result.success) {
-            showNotification(`🎉 PAYMENT SUCCESSFUL!\n\nBooking ID: RB${String(result.booking.id).padStart(4, '0')}\nUTR: ${result.utrNumber}\nAmount: ₹${result.booking.totalPrice.toLocaleString()}\n\nBooking confirmed!`, 'success');
+        if (response.ok) {
+            const booking = await response.json();
+            showNotification(`Booking confirmed!\n\nBooking ID: RB${String(booking.id).padStart(4, '0')}\nTotal: ₹${booking.totalPrice.toLocaleString()}\n\nPlease pay at the resort.`, 'success');
             closeModal();
             document.getElementById('bookingForm').reset();
         } else {
-            showNotification('Payment verification failed: ' + result.error, 'error');
+            const error = await response.json();
+            showNotification('Booking failed: ' + error.error, 'error');
         }
     } catch (error) {
-        console.error('Payment verification error:', error);
-        showNotification('Payment verification failed. Please contact support.', 'error');
+        console.error('Error:', error);
+        showNotification('Booking failed. Please try again.', 'error');
     }
 }
+
+
 
 // Custom notification system
 function showNotification(message, type = 'info') {
