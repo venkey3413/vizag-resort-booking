@@ -6,7 +6,7 @@ const socketIo = require('socket.io');
 const csrf = require('csurf');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
 const { upload } = require('./s3-config');
-const { startBackupSchedule } = require('./backup-service');
+// const { startBackupSchedule } = require('./backup-service');
 
 const app = express();
 const server = http.createServer(app);
@@ -58,7 +58,7 @@ app.get('/api/csrf-token', csrfProtection, (req, res) => {
 initDatabase();
 
 // Start backup schedule
-startBackupSchedule();
+// startBackupSchedule();
 
 // Get resorts from database
 async function getResorts() {
