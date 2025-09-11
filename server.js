@@ -349,7 +349,6 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
                             <a href="https://wa.me/918341674465?text=Hi,%20I%20want%20to%20make%20payment%20for%20booking%20${bookingReference}%20-%20Amount:%20₹${totalPrice}" class="payment-btn">
                                 💳 Pay Now via WhatsApp
                             </a>
-                            ${invoiceUrl ? `<br><br><a href="${invoiceUrl}" target="_blank" style="color: #007bff; text-decoration: none;">📄 Download Invoice PDF</a>` : ''}
                         </div>
                         
                         <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;">
