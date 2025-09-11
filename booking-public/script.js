@@ -9,8 +9,15 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeSocket() {
     socket = io();
     
+    socket.on('bookingCreated', (booking) => {
+        console.log('New booking received:', booking.id);
+        bookings.unshift(booking);
+        displayBookings();
+        updateStats();
+    });
+    
     socket.on('booking-created', (booking) => {
-        console.log('New booking received:', JSON.stringify({ id: booking.id, timestamp: new Date().toISOString() }));
+        console.log('New booking received (alt):', booking.id);
         bookings.unshift(booking);
         displayBookings();
         updateStats();
