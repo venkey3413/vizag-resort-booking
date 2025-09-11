@@ -182,7 +182,27 @@ app.post('/api/bookings', async (req, res) => {
             bookingDate: new Date().toISOString()
         };
         
-        // Booking created - sync handled by API Gateway
+        // Broadcast to booking history service
+        try {
+            const axios = require('axios');
+            await axios.post('http://localhost:3002/api/sync/booking-created', {
+                id: bookingId,
+                resort_id: parseInt(resortId),
+                resort_name: resort.name,
+                guest_name: guestName,
+                email,
+                phone,
+                check_in: checkIn,
+                check_out: checkOut,
+                guests: guestCount,
+                total_price: totalPrice,
+                payment_id: paymentId,
+                status: 'confirmed',
+                booking_date: new Date().toISOString()
+            }).catch(e => console.log('Booking sync failed:', e.message));
+        } catch (e) {
+            console.log('Booking sync error:', e.message);
+        }
         
         res.json(booking);
     } catch (error) {
