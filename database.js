@@ -41,9 +41,17 @@ async function createTables() {
                 available INTEGER DEFAULT 1,
                 max_guests INTEGER DEFAULT 10,
                 per_head_charge INTEGER DEFAULT 300,
+                map_link TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
+        
+        // Add map_link column if it doesn't exist
+        try {
+            await db.exec(`ALTER TABLE resorts ADD COLUMN map_link TEXT`);
+        } catch (err) {
+            // Column already exists, ignore error
+        }
 
         // Bookings table
         await db.exec(`
