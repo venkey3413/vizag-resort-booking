@@ -117,8 +117,11 @@ app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
             per_head_charge: parseInt(perHeadCharge) || 300
         };
         
-        // Sync with other services via API Gateway
+        // Real-time sync to main website
         await syncServices('resort-added', newResort);
+        
+        // Emit real-time update to admin clients
+        io.emit('resortAdded', newResort);
         
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
@@ -139,8 +142,11 @@ app.put('/api/resorts/:id', csrfProtection, requireAuth, async (req, res) => {
         
         const updatedResort = { id, name, location, price: parseInt(price), description, images, videos, amenities };
         
-        // Sync with other services via API Gateway
+        // Real-time sync to main website
         await syncServices('resort-updated', updatedResort);
+        
+        // Emit real-time update to admin clients
+        io.emit('resortUpdated', updatedResort);
         
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
@@ -176,8 +182,11 @@ app.delete('/api/resorts/:id', csrfProtection, requireAuth, async (req, res) => 
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Sync with other services via API Gateway
+        // Real-time sync to main website
         await syncServices('resort-deleted', { id });
+        
+        // Emit real-time update to admin clients
+        io.emit('resortDeleted', { id });
         
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {

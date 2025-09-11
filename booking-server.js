@@ -136,26 +136,35 @@ initDB().then(() => {
         if (!req.headers['x-internal-service']) {
             return res.status(403).json({ error: 'Internal service calls only' });
         }
-        console.log('Booking sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
-        io.emit('booking-created', req.body);
+        console.log('Booking sync received:', req.body.id);
+        io.emit('bookingCreated', req.body);
         res.json({ success: true });
     });
     
-    app.post('/api/sync/resort-updated', requireAuth, (req, res) => {
-        console.log('Resort update sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
-        io.emit('resort-updated', req.body);
+    app.post('/api/sync/resort-updated', (req, res) => {
+        if (!req.headers['x-internal-service']) {
+            return res.status(403).json({ error: 'Internal service calls only' });
+        }
+        console.log('Resort update sync received');
+        io.emit('resortUpdated', req.body);
         res.json({ success: true });
     });
     
-    app.post('/api/sync/resort-added', requireAuth, (req, res) => {
-        console.log('Resort added sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
-        io.emit('resort-added', req.body);
+    app.post('/api/sync/resort-added', (req, res) => {
+        if (!req.headers['x-internal-service']) {
+            return res.status(403).json({ error: 'Internal service calls only' });
+        }
+        console.log('Resort added sync received');
+        io.emit('resortAdded', req.body);
         res.json({ success: true });
     });
     
-    app.post('/api/sync/resort-deleted', requireAuth, (req, res) => {
-        console.log('Resort delete sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
-        io.emit('resort-deleted', req.body);
+    app.post('/api/sync/resort-deleted', (req, res) => {
+        if (!req.headers['x-internal-service']) {
+            return res.status(403).json({ error: 'Internal service calls only' });
+        }
+        console.log('Resort deleted sync received');
+        io.emit('resortDeleted', req.body);
         res.json({ success: true });
     });
     

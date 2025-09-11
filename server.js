@@ -196,7 +196,7 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
             bookingDate: new Date().toISOString()
         };
         
-        // Broadcast to booking history service
+        // Real-time sync to booking history service
         try {
             const axios = require('axios');
             await axios.post('http://localhost:3002/api/sync/booking-created', {
@@ -219,6 +219,9 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
         } catch (e) {
             console.log('Booking sync error:', e.message);
         }
+        
+        // Emit real-time update
+        io.emit('bookingCreated', booking);
         
         res.json(booking);
     } catch (error) {
