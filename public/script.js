@@ -128,7 +128,10 @@ function displayResorts(filteredResorts = resorts) {
             </div>
             <div class="resort-info">
                 <h3>${resort.name}</h3>
-                <p class="resort-location"><i class="fas fa-map-marker-alt"></i> ${resort.location}</p>
+                <p class="resort-location">
+                    <i class="fas fa-map-marker-alt"></i> ${resort.location}
+                    ${resort.map_link ? `<a href="${resort.map_link}" target="_blank" class="map-link"><i class="fas fa-external-link-alt"></i> View on Map</a>` : ''}
+                </p>
                 <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
                 <p class="resort-description">${resort.description}</p>
                 <div class="amenities">
@@ -511,7 +514,10 @@ function openResortDetails(resortId) {
     
     document.getElementById('totalImages').textContent = currentResortImages.length;
     document.getElementById('detailsResortName').textContent = resort.name;
-    document.getElementById('detailsLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${resort.location}`;
+    document.getElementById('detailsLocation').innerHTML = `
+        <i class="fas fa-map-marker-alt"></i> ${resort.location}
+        ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="map-link"><i class="fas fa-external-link-alt"></i> View on Google Maps</a>` : ''}
+    `;
     document.getElementById('detailsPrice').textContent = `₹${resort.price.toLocaleString()}/night`;
     document.getElementById('detailsDescription').textContent = resort.description;
     document.getElementById('detailsAmenities').innerHTML = resort.amenities.map(amenity => 

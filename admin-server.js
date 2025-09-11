@@ -99,8 +99,8 @@ app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
         }
         
         const result = await db().run(
-            'INSERT INTO resorts (name, location, price, description, images, videos, amenities, available, max_guests, per_head_charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300]
+            'INSERT INTO resorts (name, location, price, description, images, videos, amenities, available, max_guests, per_head_charge, map_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, req.body.mapLink || '']
         );
         
         const newResort = { 
@@ -136,8 +136,8 @@ app.put('/api/resorts/:id', csrfProtection, requireAuth, async (req, res) => {
         const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
         await db().run(
-            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, images = ?, videos = ?, amenities = ?, max_guests = ?, per_head_charge = ? WHERE id = ?',
-            [name, location, parseInt(price), description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, id]
+            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, images = ?, videos = ?, amenities = ?, max_guests = ?, per_head_charge = ?, map_link = ? WHERE id = ?',
+            [name, location, parseInt(price), description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, req.body.mapLink || '', id]
         );
         
         const updatedResort = { id, name, location, price: parseInt(price), description, images, videos, amenities };

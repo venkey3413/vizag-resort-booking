@@ -136,7 +136,8 @@ async function handleAddResort(e) {
         maxGuests: parseInt(formData.get('maxGuests')) || 10,
         perHeadCharge: parseInt(formData.get('perHeadCharge')) || 300,
         images: imageUrls,
-        videos: videoUrls
+        videos: videoUrls,
+        mapLink: formData.get('mapLink') || ''
     };
     
     try {
@@ -181,6 +182,7 @@ function openEditModal(resortId) {
     document.getElementById('editPerHeadCharge').value = resort.per_head_charge || 300;
     document.getElementById('editImageUrls').value = resort.images ? resort.images.join('\n') : '';
     document.getElementById('editVideoUrls').value = resort.videos ? resort.videos.join('\n') : '';
+    document.getElementById('editMapLink').value = resort.map_link || '';
     
     document.getElementById('editModal').style.display = 'block';
 }
@@ -209,7 +211,8 @@ async function handleEditResort(e) {
         maxGuests: parseInt(document.getElementById('editMaxGuests').value) || 10,
         perHeadCharge: parseInt(document.getElementById('editPerHeadCharge').value) || 300,
         images: imageUrls,
-        videos: videoUrls
+        videos: videoUrls,
+        mapLink: document.getElementById('editMapLink').value || ''
     };
     
     try {
