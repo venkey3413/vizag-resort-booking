@@ -223,7 +223,6 @@ function openBookingModal(resortId) {
     const maxGuests = resort.max_guests || 20;
     guestsInput.max = maxGuests;
     document.getElementById('maxGuestsCount').textContent = maxGuests;
-    document.getElementById('perHeadCharge').textContent = resort.per_head_charge || 300;
     
     calculateTotal();
     modal.style.display = 'block';
@@ -235,7 +234,6 @@ function calculateTotal() {
     if (!resort) return;
     
     const basePrice = resort.price;
-    const perHeadCharge = resort.per_head_charge || 300;
     const guests = parseInt(document.getElementById('guests').value) || 1;
     const checkIn = document.getElementById('checkIn').value;
     const checkOut = document.getElementById('checkOut').value;
@@ -248,17 +246,11 @@ function calculateTotal() {
         nights = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
     }
     
-    const extraGuests = Math.max(0, guests - 10);
-    const bookingAmount = (basePrice + (extraGuests * perHeadCharge)) * nights;
+    const bookingAmount = basePrice * nights;
     const platformFee = Math.round(bookingAmount * 0.015); // 1.5% platform fee
     const total = bookingAmount + platformFee;
     
-    if (guests <= 10) {
-        document.getElementById('pricePerNight').textContent = `₹${basePrice.toLocaleString()} (up to 10 guests)`;
-    } else {
-        document.getElementById('pricePerNight').textContent = `₹${basePrice.toLocaleString()} + ₹${perHeadCharge.toLocaleString()} × ${extraGuests} extra guests`;
-    }
-    
+    document.getElementById('pricePerNight').textContent = `₹${basePrice.toLocaleString()} per night`;
     document.getElementById('bookingAmount').textContent = `₹${bookingAmount.toLocaleString()}`;
     document.getElementById('platformFee').textContent = `₹${platformFee.toLocaleString()}`;
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
