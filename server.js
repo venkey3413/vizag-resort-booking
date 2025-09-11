@@ -297,7 +297,7 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
                     
                     <div class="content">
                         <p>Dear <strong>${guestName}</strong>,</p>
-                        <p>Thank you for choosing our resort! Your booking has been confirmed successfully.</p>
+                        <p><strong>Thank you for choosing our resort! Your booking has been done to confirm the booking you need to pay within 2 hours.</strong></p>
                         
                         <div class="booking-details">
                             <h3>📋 Booking Details</h3>
