@@ -1,23 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const Razorpay = require('razorpay');
 const csrf = require('csurf');
-const PaymentService = require('./payment-service');
 require('dotenv').config();
-
-// Initialize Razorpay
-if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-    console.error('RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be set');
-    process.exit(1);
-}
-
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
-
-const paymentService = new PaymentService();
 
 const app = express();
 const PORT = 4000;
@@ -155,139 +140,9 @@ app.get('/', (req, res) => {
     });
 });
 
-// Create Razorpay order with validation
-app.post('/api/payment/create-order', async (req, res) => {
-    try {
-        const { amount, bookingData } = req.body;
-        
-        // Validate amount
-        if (!amount || amount <= 0 || amount > 500000) {
-            return res.status(400).json({ error: 'Invalid amount' });
-        }
-        
-        // Validate booking data
-        const { resortId, guestName, email, phone, checkIn, checkOut, guests } = bookingData;
-        
-        if (!resortId || !guestName || !email || !phone || !checkIn || !checkOut || !guests) {
-            return res.status(400).json({ error: 'Missing required booking information' });
-        }
-        
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ error: 'Invalid email format' });
-        }
-        
-        // Validate phone format
-        if (!/^\+91[0-9]{10}$/.test(phone)) {
-            return res.status(400).json({ error: 'Invalid phone format' });
-        }
-        
-        // Basic date validation
-        const checkInDate = new Date(checkIn);
-        const checkOutDate = new Date(checkOut);
-        
-        if (checkOutDate <= checkInDate) {
-            return res.status(400).json({ error: 'Check-out must be after check-in' });
-        }
-        
-        const receipt = `booking_${Date.now()}_${resortId}`;
-        const orderResult = await paymentService.createOrder(amount, 'INR', receipt);
-        
-        if (!orderResult.success) {
-            return res.status(500).json({ error: orderResult.error });
-        }
-        
-        res.json({
-            orderId: orderResult.orderId,
-            amount: orderResult.amount,
-            currency: orderResult.currency,
-            keyId: process.env.RAZORPAY_KEY_ID
-        });
-    } catch (error) {
-        console.error('Payment order creation error:', error.message);
-        res.status(500).json({ error: 'Failed to create payment order' });
-    }
-});
 
-// Verify payment and create booking with enhanced security
-app.post('/api/payment/verify-and-book', async (req, res) => {
-    try {
-        const { paymentId, orderId, signature, bookingData } = req.body;
-        
-        // Validate required fields
-        if (!paymentId || !orderId || !signature || !bookingData) {
-            return res.status(400).json({ error: 'Missing required payment data' });
-        }
-        
-        // Verify payment signature using service
-        const isValidPayment = paymentService.verifyPayment(orderId, paymentId, signature);
-        
-        if (!isValidPayment) {
-            return res.status(400).json({ error: 'Invalid payment signature', paymentStatus: 'failed' });
-        }
-        
-        // Get payment details from Razorpay
-        const paymentDetails = await paymentService.getPaymentDetails(paymentId);
-        
-        if (!paymentDetails.success || paymentDetails.payment.status !== 'captured') {
-            return res.status(400).json({ error: 'Payment not successful', paymentStatus: 'failed' });
-        }
-        
-        // Generate UTR number
-        const utrNumber = `UTR${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-        
-        // Create booking with payment details
-        const enhancedBookingData = {
-            ...bookingData,
-            paymentId,
-            orderId,
-            utrNumber,
-            paymentStatus: 'completed',
-            paymentMethod: paymentDetails.payment.method
-        };
-        
-        const bookingResponse = await axios.post(`${SERVICES.main}/api/bookings`, enhancedBookingData);
-        
-        // Transform and sync booking data
-        const transformedBooking = {
-            id: bookingResponse.data.id,
-            resort_id: bookingResponse.data.resortId,
-            resort_name: bookingResponse.data.resortName,
-            guest_name: bookingResponse.data.guestName,
-            email: bookingResponse.data.email,
-            phone: bookingResponse.data.phone,
-            check_in: bookingResponse.data.checkIn,
-            check_out: bookingResponse.data.checkOut,
-            guests: bookingResponse.data.guests,
-            total_price: bookingResponse.data.totalPrice,
-            payment_id: paymentId,
-            order_id: orderId,
-            utr_number: utrNumber,
-            payment_status: 'completed',
-            payment_method: paymentDetails.payment.method,
-            status: 'confirmed',
-            booking_date: bookingResponse.data.bookingDate
-        };
-        
-        // Notify other services
-        await Promise.all([
-            axios.post(`${SERVICES.admin}/api/sync/booking-created`, transformedBooking).catch(e => console.log('Admin sync failed:', e.message)),
-            axios.post(`${SERVICES.booking}/api/sync/booking-created`, transformedBooking).catch(e => console.log('Booking sync failed:', e.message))
-        ]);
-        
-        res.json({ 
-            success: true, 
-            booking: bookingResponse.data, 
-            utrNumber, 
-            paymentStatus: 'completed',
-            paymentMethod: paymentDetails.payment.method
-        });
-    } catch (error) {
-        console.error('Payment verification error:', error.message);
-        res.status(500).json({ error: 'Payment verification failed', paymentStatus: 'failed' });
-    }
-});
+
+
 
 // Health check
 app.get('/health', (req, res) => {

@@ -279,33 +279,7 @@ app.post('/api/gateway/booking', async (req, res) => {
     }
 });
 
-// Payment proxy routes
-app.post('/api/payment/create-order', async (req, res) => {
-    try {
-        const axios = require('axios');
-        console.log('Proxying payment order request:', JSON.stringify({ timestamp: new Date().toISOString() }));
-        const response = await axios.post('http://localhost:4000/api/payment/create-order', req.body);
-        console.log('Gateway response:', JSON.stringify({ timestamp: new Date().toISOString() }));
-        res.json(response.data);
-    } catch (error) {
-        console.error('Payment proxy error:', error.message);
-        if (error.response) {
-            res.status(error.response.status).json(error.response.data);
-        } else {
-            res.status(500).json({ error: error.message });
-        }
-    }
-});
 
-app.post('/api/payment/verify-and-book', async (req, res) => {
-    try {
-        const axios = require('axios');
-        const response = await axios.post('http://localhost:4000/api/payment/verify-and-book', req.body);
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 server.listen(PORT, () => {
     console.log(`🚀 Resort Booking Server running on http://localhost:${PORT}`);
