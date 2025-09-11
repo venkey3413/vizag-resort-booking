@@ -297,19 +297,22 @@ async function handleBooking(e) {
     
     const phoneInput = document.getElementById('phone').value;
     
-    // Validate phone number
     if (!/^[0-9]{10}$/.test(phoneInput)) {
         showNotification('Please enter a valid 10-digit mobile number', 'error');
         return;
     }
+    
+    // Ensure fixed times are set
+    const checkInDate = document.getElementById('checkIn').value.split('T')[0];
+    const checkOutDate = document.getElementById('checkOut').value.split('T')[0];
     
     const bookingData = {
         resortId: document.getElementById('bookingResortId').value,
         guestName: document.getElementById('guestName').value,
         email: document.getElementById('email').value,
         phone: '+91' + phoneInput,
-        checkIn: document.getElementById('checkIn').value,
-        checkOut: document.getElementById('checkOut').value,
+        checkIn: `${checkInDate}T11:00`,
+        checkOut: `${checkOutDate}T09:00`,
         guests: document.getElementById('guests').value,
         paymentId: 'CASH_' + Date.now()
     };
@@ -398,12 +401,11 @@ function setMinDate() {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     
-    // Set default check-in time to 11:00 AM today
+    // Fixed times: Check-in 11:00 AM, Check-out 9:00 AM
     const checkInDefault = `${todayStr}T11:00`;
     document.getElementById('checkIn').value = checkInDefault;
     document.getElementById('checkIn').min = checkInDefault;
     
-    // Set default check-out time to 9:00 AM next day
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
@@ -411,7 +413,11 @@ function setMinDate() {
     document.getElementById('checkOut').value = checkOutDefault;
     document.getElementById('checkOut').min = checkOutDefault;
     
-    document.getElementById('checkIn').addEventListener('change', function() {
+    // Disable time selection - only allow date changes
+    document.getElementById('checkIn').addEventListener('input', function() {
+        const selectedDate = this.value.split('T')[0];
+        this.value = `${selectedDate}T11:00`;
+        
         const checkInDate = new Date(this.value);
         const nextDay = new Date(checkInDate);
         nextDay.setDate(nextDay.getDate() + 1);
@@ -421,17 +427,18 @@ function setMinDate() {
             document.getElementById('checkOut').value = minCheckOut;
         }
         
-        // Check availability for selected dates
         validateBookingDates();
     });
     
-    document.getElementById('checkOut').addEventListener('change', validateBookingDates);
+    document.getElementById('checkOut').addEventListener('input', function() {
+        const selectedDate = this.value.split('T')[0];
+        this.value = `${selectedDate}T09:00`;
+        validateBookingDates();
+    });
     
-    // Phone number validation
+    // Phone validation
     document.getElementById('phone').addEventListener('input', function(e) {
-        // Only allow numbers
         this.value = this.value.replace(/[^0-9]/g, '');
-        // Limit to 10 digits
         if (this.value.length > 10) {
             this.value = this.value.slice(0, 10);
         }
