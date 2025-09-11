@@ -285,11 +285,17 @@ async function handleBooking(e) {
     };
     
     try {
+        // Get CSRF token first
+        const csrfResponse = await fetch('/api/csrf-token', { credentials: 'include' });
+        const csrfData = await csrfResponse.json();
+        
         const response = await fetch('/api/bookings', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfData.token
             },
+            credentials: 'include',
             body: JSON.stringify(bookingData)
         });
         

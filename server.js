@@ -28,16 +28,23 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 
-// const csrfProtection = csrf({ cookie: true });
+const csrfProtection = csrf({ cookie: true });
 
 function requireAuth(req, res, next) {
-    // Temporarily disabled for testing
+    // Skip auth for internal service-to-service calls
+    if (req.headers['x-internal-service']) {
+        return next();
+    }
+    const token = req.headers.authorization;
+    if (!token) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
     next();
 }
 
-// app.get('/api/csrf-token', csrfProtection, (req, res) => {
-//     res.json({ token: req.csrfToken() });
-// });
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+    res.json({ token: req.csrfToken() });
+});
 
 // Initialize database on startup
 initDatabase();
@@ -99,7 +106,7 @@ app.get('/api/resorts', async (req, res) => {
 });
 
 // Add new resort
-app.post('/api/resorts', requireAuth, async (req, res) => {
+app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
     try {
         const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
@@ -116,7 +123,7 @@ app.post('/api/resorts', requireAuth, async (req, res) => {
 });
 
 // Book a resort
-app.post('/api/bookings', async (req, res) => {
+app.post('/api/bookings', csrfProtection, async (req, res) => {
     try {
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, paymentId } = req.body;
         
@@ -199,6 +206,8 @@ app.post('/api/bookings', async (req, res) => {
                 payment_id: paymentId,
                 status: 'confirmed',
                 booking_date: new Date().toISOString()
+            }, {
+                headers: { 'x-internal-service': 'main-server' }
             }).catch(e => console.log('Booking sync failed:', e.message));
         } catch (e) {
             console.log('Booking sync error:', e.message);
@@ -254,8 +263,11 @@ io.on('connection', (socket) => {
 
 
 
-// Sync endpoints for API Gateway
+// Sync endpoints for API Gateway (internal calls only)
 app.post('/api/sync/booking-created', (req, res) => {
+    if (!req.headers['x-internal-service']) {
+        return res.status(403).json({ error: 'Internal service calls only' });
+    }
     console.log('Booking sync received:', JSON.stringify({ id: req.body.id, status: req.body.status }));
     io.emit('bookingCreated', req.body);
     res.json({ success: true });

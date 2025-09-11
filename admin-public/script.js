@@ -241,8 +241,10 @@ async function toggleAvailability(resortId, newAvailability) {
         const response = await fetch(`/api/resorts/${resortId}/availability`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
             },
+            credentials: 'include',
             body: JSON.stringify({ available: newAvailability })
         });
         
