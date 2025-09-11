@@ -41,6 +41,11 @@ function initializeSocket() {
                     displayResorts();
                 }
             });
+            
+            socket.on('bookingDeleted', (data) => {
+                console.log('Booking deleted, refreshing resort availability');
+                loadResorts(); // Reload resorts to update availability
+            });
         }
     } catch (error) {
         console.log('Socket.IO not available, continuing without real-time updates');

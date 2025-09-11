@@ -326,6 +326,15 @@ app.post('/api/sync/resort-deleted', (req, res) => {
     res.json({ success: true });
 });
 
+app.post('/api/sync/booking-deleted', (req, res) => {
+    if (!req.headers['x-internal-service']) {
+        return res.status(403).json({ error: 'Internal service calls only' });
+    }
+    console.log('Booking deletion sync received:', req.body.id);
+    io.emit('bookingDeleted', req.body);
+    res.json({ success: true });
+});
+
 // Proxy routes to API Gateway
 app.post('/api/gateway/booking', async (req, res) => {
     try {

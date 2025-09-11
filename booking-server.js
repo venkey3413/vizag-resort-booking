@@ -110,7 +110,23 @@ app.delete('/api/bookings/:id', async (req, res) => {
             return res.status(404).json({ error: 'Booking not found' });
         }
         
+        // Get booking details before deletion for real-time sync
+        const deletedBooking = await db.get('SELECT * FROM bookings WHERE id = ?', [id]);
+        
         io.emit('bookingDeleted', { id });
+        
+        // Sync with main server to update availability
+        try {
+            const axios = require('axios');
+            await axios.post('http://localhost:3000/api/sync/booking-deleted', {
+                id,
+                resort_id: deletedBooking?.resort_id
+            }, {
+                headers: { 'x-internal-service': 'booking-server' }
+            }).catch(e => console.log('Booking deletion sync failed:', e.message));
+        } catch (e) {
+            console.log('Booking deletion sync error:', e.message);
+        }
         
         res.json({ message: 'Booking deleted successfully' });
     } catch (error) {
