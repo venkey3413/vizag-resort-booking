@@ -262,7 +262,7 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
         try {
             const nodemailer = require('nodemailer');
             
-            const transporter = nodemailer.createTransporter({
+            const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
                     user: 'vizagresortbooking@gmail.com',
