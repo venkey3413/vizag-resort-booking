@@ -1,10 +1,10 @@
-const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+const nodemailer = require('nodemailer');
 
-const sesClient = new SESClient({
-    region: process.env.AWS_REGION || 'ap-south-1',
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+const transporter = nodemailer.createTransporter({
+    service: 'gmail',
+    auth: {
+        user: 'vizagresortbooking@gmail.com',
+        pass: process.env.GMAIL_APP_PASSWORD
     }
 });
 
@@ -96,30 +96,17 @@ async function sendBookingConfirmation(booking, resort) {
     </html>
     `;
 
-    const params = {
-        Source: 'vizagresortbooking@gmail.com',
-        Destination: {
-            ToAddresses: [booking.email]
-        },
-        Message: {
-            Subject: {
-                Data: `Booking Confirmation - ${booking.bookingReference} | ${resort.name}`,
-                Charset: 'UTF-8'
-            },
-            Body: {
-                Html: {
-                    Data: emailHtml,
-                    Charset: 'UTF-8'
-                }
-            }
-        }
+    const mailOptions = {
+        from: 'vizagresortbooking@gmail.com',
+        to: booking.email,
+        subject: `Booking Confirmation - ${booking.bookingReference} | ${resort.name}`,
+        html: emailHtml
     };
 
     try {
-        const command = new SendEmailCommand(params);
-        const result = await sesClient.send(command);
-        console.log('Booking confirmation email sent:', result.MessageId);
-        return { success: true, messageId: result.MessageId };
+        const result = await transporter.sendMail(mailOptions);
+        console.log('Booking confirmation email sent:', result.messageId);
+        return { success: true, messageId: result.messageId };
     } catch (error) {
         console.error('Error sending email:', error);
         return { success: false, error: error.message };
