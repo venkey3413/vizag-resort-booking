@@ -776,7 +776,7 @@ video.resort-image:hover::-webkit-media-controls {
     color: white;
     padding: 8px 12px;
     border: none;
-    border-radius: 15px;
+    border-radius: 6px;
     cursor: pointer;
     width: 100%;
     font-size: 0.95rem;
@@ -784,6 +784,7 @@ video.resort-image:hover::-webkit-media-controls {
     transition: all 0.4s ease;
     box-shadow: 0 8px 25px rgba(238, 90, 36, 0.4);
     font-family: 'Poppins', sans-serif;
+    display: inline-block;
 }
 
 .book-btn:hover {
@@ -817,9 +818,10 @@ video.resort-image:hover::-webkit-media-controls {
     align-items: center;
     gap: 0.2rem;
     padding: 4px 8px;
-    border-radius: 10px;
+    border-radius: 6px;
     transition: all 0.3s ease;
     background: rgba(102, 126, 234, 0.1);
+    width: auto;
 }
 
 .pdf-link:hover {
