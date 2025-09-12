@@ -111,16 +111,27 @@ app.patch('/api/bookings/:id/payment', async (req, res) => {
         // Generate and upload invoice to S3 when payment is marked as completed
         if (payment_status === 'completed') {
             try {
+                console.log('Generating invoice for booking:', bookingId);
                 const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [bookingId]);
-                const resort = await db.get('SELECT * FROM resorts WHERE id = ?', [booking.resort_id]);
+                console.log('Booking found:', !!booking);
                 
-                if (booking && resort) {
-                    const { generateInvoicePDF } = require('./invoice-service');
-                    const invoiceUrl = await generateInvoicePDF(booking, resort);
-                    console.log('Invoice uploaded to S3:', invoiceUrl);
+                if (booking) {
+                    const resort = await db.get('SELECT * FROM resorts WHERE id = ?', [booking.resort_id]);
+                    console.log('Resort found:', !!resort);
+                    
+                    if (resort) {
+                        const { generateInvoicePDF } = require('./invoice-service');
+                        const invoiceUrl = await generateInvoicePDF(booking, resort);
+                        console.log('Invoice uploaded to S3:', invoiceUrl);
+                    } else {
+                        console.error('Resort not found for booking:', booking.resort_id);
+                    }
+                } else {
+                    console.error('Booking not found:', bookingId);
                 }
             } catch (invoiceError) {
                 console.error('Invoice generation failed:', invoiceError.message);
+                console.error('Full error:', invoiceError);
             }
         }
         
