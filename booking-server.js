@@ -108,12 +108,28 @@ app.patch('/api/bookings/:id/payment', async (req, res) => {
             [payment_status, bookingId]
         );
         
+        // Generate and upload invoice to S3 when payment is marked as completed
+        if (payment_status === 'completed') {
+            try {
+                const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [bookingId]);
+                const resort = await db.get('SELECT * FROM resorts WHERE id = ?', [booking.resort_id]);
+                
+                if (booking && resort) {
+                    const { generateInvoicePDF } = require('./invoice-service');
+                    const invoiceUrl = await generateInvoicePDF(booking, resort);
+                    console.log('Invoice uploaded to S3:', invoiceUrl);
+                }
+            } catch (invoiceError) {
+                console.error('Invoice generation failed:', invoiceError.message);
+            }
+        }
+        
         res.json({ success: true });
     } catch (error) {
         console.error('Error updating payment status:', error);
         res.status(500).json({ error: 'Failed to update payment status' });
     }
-});
+};
 
 // Delete booking
 app.delete('/api/bookings/:id', async (req, res) => {
