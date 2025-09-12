@@ -6,7 +6,114 @@ document.addEventListener('DOMContentLoaded', function() {
     loadDashboard();
     loadResorts();
     setupEventListeners();
+    initCalendar();
 });
+
+let currentDate = new Date();
+let calendarBookings = [];
+
+function initCalendar() {
+    loadCalendarData();
+    renderCalendar();
+}
+
+async function loadCalendarData() {
+    try {
+        const response = await fetch('/api/calendar/bookings');
+        calendarBookings = await response.json();
+        renderCalendar();
+    } catch (error) {
+        console.error('Error loading calendar data:', error);
+    }
+}
+
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // Update month header
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+    document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    
+    const calendarDays = document.getElementById('calendarDays');
+    calendarDays.innerHTML = '';
+    
+    // Previous month days
+    for (let i = firstDay - 1; i >= 0; i--) {
+        const day = daysInPrevMonth - i;
+        const dayElement = createDayElement(day, true, year, month - 1);
+        calendarDays.appendChild(dayElement);
+    }
+    
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = createDayElement(day, false, year, month);
+        calendarDays.appendChild(dayElement);
+    }
+    
+    // Next month days
+    const totalCells = calendarDays.children.length;
+    const remainingCells = 42 - totalCells; // 6 rows × 7 days
+    for (let day = 1; day <= remainingCells; day++) {
+        const dayElement = createDayElement(day, true, year, month + 1);
+        calendarDays.appendChild(dayElement);
+    }
+}
+
+function createDayElement(day, isOtherMonth, year, month) {
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day';
+    if (isOtherMonth) dayElement.classList.add('other-month');
+    
+    const today = new Date();
+    if (!isOtherMonth && day === today.getDate() && 
+        month === today.getMonth() && year === today.getFullYear()) {
+        dayElement.classList.add('today');
+    }
+    
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    
+    // Get bookings for this date
+    const dayBookings = calendarBookings.filter(booking => {
+        const checkIn = booking.check_in;
+        const checkOut = booking.check_out;
+        return dateStr >= checkIn && dateStr <= checkOut;
+    });
+    
+    const checkIns = calendarBookings.filter(b => b.check_in === dateStr);
+    const checkOuts = calendarBookings.filter(b => b.check_out === dateStr);
+    
+    dayElement.innerHTML = `
+        <div class="day-number">${day}</div>
+        <div class="booking-indicators">
+            ${checkIns.map(() => '<span class="booking-dot checkin"></span>').join('')}
+            ${checkOuts.map(() => '<span class="booking-dot checkout"></span>').join('')}
+        </div>
+        ${dayBookings.length > 0 ? `<div class="booking-count">${dayBookings.length} booking${dayBookings.length > 1 ? 's' : ''}</div>` : ''}
+    `;
+    
+    if (dayBookings.length > 0) {
+        dayElement.title = dayBookings.map(b => `${b.guest_name} - ${b.resort_name}`).join('\n');
+    }
+    
+    return dayElement;
+}
+
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
 
 let dashboardData = {};
 

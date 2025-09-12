@@ -409,6 +409,33 @@ app.get('/api/export/:type', async (req, res) => {
     }
 });
 
+// Calendar bookings endpoint
+app.get('/api/calendar/bookings', async (req, res) => {
+    try {
+        const bookings = await db().all(`
+            SELECT 
+                b.id,
+                b.guest_name,
+                b.check_in,
+                b.check_out,
+                b.guests,
+                b.payment_status,
+                r.name as resort_name,
+                r.location
+            FROM bookings b
+            JOIN resorts r ON b.resort_id = r.id
+            WHERE b.check_in >= date('now', '-30 days')
+            AND b.check_in <= date('now', '+90 days')
+            ORDER BY b.check_in
+        `);
+        
+        res.json(bookings);
+    } catch (error) {
+        console.error('Error fetching calendar bookings:', error);
+        res.status(500).json({ error: 'Failed to fetch calendar data' });
+    }
+});
+
 // Sync endpoints for API Gateway
 app.post('/api/sync/booking-created', (req, res) => {
     console.log('Booking sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));

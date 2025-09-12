@@ -76,8 +76,51 @@
             </div>
         </div>
         
+        <div id="calendar" class="tab-content">
+            <h2>Booking Calendar</h2>
+            
+            <div class="calendar-controls">
+                <button onclick="previousMonth()" class="calendar-nav">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h3 id="currentMonth">January 2024</h3>
+                <button onclick="nextMonth()" class="calendar-nav">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <div class="calendar-grid">
+                <div class="calendar-header">
+                    <div class="day-header">Sun</div>
+                    <div class="day-header">Mon</div>
+                    <div class="day-header">Tue</div>
+                    <div class="day-header">Wed</div>
+                    <div class="day-header">Thu</div>
+                    <div class="day-header">Fri</div>
+                    <div class="day-header">Sat</div>
+                </div>
+                <div id="calendarDays" class="calendar-days"></div>
+            </div>
+            
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #27ae60;"></div>
+                    <span>Available</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f39c12;"></div>
+                    <span>Booked</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e74c3c;"></div>
+                    <span>Check-out</span>
+                </div>
+            </div>
+        </div>
+        
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="tab-btn" onclick="showTab('calendar')">Calendar</button>
             <button class="tab-btn" onclick="showTab('add-resort')">Add Resort</button>
             <button class="tab-btn" onclick="showTab('manage-resorts')">Manage Resorts</button>
             <button class="tab-btn" onclick="showTab('discount-codes')">Discount Codes</button>
