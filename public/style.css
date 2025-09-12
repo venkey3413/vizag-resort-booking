@@ -1104,12 +1104,14 @@ video.resort-image:hover::-webkit-media-controls {
 }
 
 .resort-info-panel {
-    padding: 3rem;
+    padding: 2rem;
     background: white;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     position: relative;
+    overflow-y: auto;
+    max-height: 100%;
 }
 
 .resort-info-panel h2 {
@@ -1149,9 +1151,11 @@ video.resort-image:hover::-webkit-media-controls {
 
 .resort-info-panel .book-btn {
     position: sticky;
-    bottom: 0;
+    bottom: 1rem;
     margin-top: auto;
     z-index: 10;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
 }
 
 /* Responsive Design */
