@@ -440,13 +440,6 @@ async function handleAddResort(e) {
     submitBtn.disabled = true;
     
     try {
-        // Get CSRF token first
-        const csrfResponse = await fetch('/api/csrf-token', { credentials: 'include' });
-        if (!csrfResponse.ok) {
-            throw new Error('Failed to get CSRF token');
-        }
-        const csrfData = await csrfResponse.json();
-        
         const formData = new FormData(e.target);
     
     // Parse URLs from textarea
@@ -559,14 +552,10 @@ async function handleEditResort(e) {
     };
     
     try {
-        // Get fresh CSRF token
-        await getCSRFToken();
-        
         const response = await fetch(`/api/resorts/${resortId}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
+                'Content-Type': 'application/json'
             },
             credentials: 'include',
             body: JSON.stringify(resortData)
@@ -596,8 +585,7 @@ async function toggleAvailability(resortId, newAvailability) {
         const response = await fetch(`/api/resorts/${resortId}/availability`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
+                'Content-Type': 'application/json'
             },
             credentials: 'include',
             body: JSON.stringify({ available: newAvailability })
@@ -638,7 +626,7 @@ async function deleteResort(resortId) {
         const response = await fetch(`/api/resorts/${resortId}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRF-Token': csrfToken
+                'Content-Type': 'application/json'
             },
             credentials: 'include'
         });
