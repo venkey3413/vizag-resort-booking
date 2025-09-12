@@ -64,11 +64,40 @@ function setupEventListeners() {
             
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             this.classList.add('active');
+            
+            // Close mobile menu after clicking
+            closeMobileMenu();
         });
     });
 
     document.getElementById('bookingForm').addEventListener('submit', handleBooking);
 }
+
+function toggleMobileMenu() {
+    const navLinks = document.querySelector('.nav-links');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    
+    navLinks.classList.toggle('active');
+    toggle.classList.toggle('active');
+}
+
+function closeMobileMenu() {
+    const navLinks = document.querySelector('.nav-links');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    
+    navLinks.classList.remove('active');
+    toggle.classList.remove('active');
+}
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', function(e) {
+    const navLinks = document.querySelector('.nav-links');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    
+    if (!toggle.contains(e.target) && !navLinks.contains(e.target)) {
+        closeMobileMenu();
+    }
+});
 
 function scrollToSection(sectionId) {
     const section = document.getElementById(sectionId);
