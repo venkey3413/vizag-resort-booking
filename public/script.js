@@ -1003,8 +1003,14 @@ let currentResortImages = [];
 let currentImageIndex = 0;
 
 function openResortDetails(resortId) {
+    console.log('Opening resort details for ID:', resortId);
     const resort = resorts.find(r => r.id === resortId);
-    if (!resort) return;
+    if (!resort) {
+        console.log('Resort not found!');
+        return;
+    }
+    
+    console.log('Resort found:', resort.name);
     
     currentResortImages = [];
     if (resort.images && Array.isArray(resort.images) && resort.images.length > 0) {
@@ -1017,33 +1023,49 @@ function openResortDetails(resortId) {
     updateMainImage();
     
     const thumbnailContainer = document.getElementById('thumbnailImages');
-    thumbnailContainer.innerHTML = currentResortImages.map((media, index) => {
-        const isVideo = media.toLowerCase().includes('.mp4') || media.toLowerCase().includes('.mov') || media.toLowerCase().includes('.avi') || media.toLowerCase().includes('.webm');
-        if (isVideo) {
-            return `<video src="${media}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" muted preload="metadata"></video>`;
-        } else {
-            return `<img src="${media}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" loading="lazy">`;
-        }
-    }).join('');
+    if (thumbnailContainer) {
+        thumbnailContainer.innerHTML = currentResortImages.map((media, index) => {
+            const isVideo = media.toLowerCase().includes('.mp4') || media.toLowerCase().includes('.mov') || media.toLowerCase().includes('.avi') || media.toLowerCase().includes('.webm');
+            if (isVideo) {
+                return `<video src="${media}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" muted preload="metadata"></video>`;
+            } else {
+                return `<img src="${media}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" loading="lazy">`;
+            }
+        }).join('');
+    }
     
-    document.getElementById('totalImages').textContent = currentResortImages.length;
-    document.getElementById('detailsResortName').textContent = resort.name;
-    document.getElementById('detailsLocation').innerHTML = `
-        <i class="fas fa-map-marker-alt"></i> ${resort.location}
-        ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="map-link"><i class="fas fa-external-link-alt"></i> View on Google Maps</a>` : ''}
-    `;
-    document.getElementById('detailsPrice').textContent = `₹${resort.price.toLocaleString()}/night`;
-    document.getElementById('detailsDescription').textContent = resort.description;
-    document.getElementById('detailsAmenities').innerHTML = resort.amenities.map(amenity => 
-        `<span class="amenity">${amenity}</span>`
-    ).join('');
-    
-    document.getElementById('detailsBookBtn').onclick = () => {
-        closeResortDetails();
-        openBookingModal(resortId);
+    const elements = {
+        totalImages: document.getElementById('totalImages'),
+        detailsResortName: document.getElementById('detailsResortName'),
+        detailsLocation: document.getElementById('detailsLocation'),
+        detailsPrice: document.getElementById('detailsPrice'),
+        detailsDescription: document.getElementById('detailsDescription'),
+        detailsAmenities: document.getElementById('detailsAmenities')
     };
     
-    document.getElementById('resortDetailsModal').style.display = 'block';
+    if (elements.totalImages) elements.totalImages.textContent = currentResortImages.length;
+    if (elements.detailsResortName) elements.detailsResortName.textContent = resort.name;
+    if (elements.detailsLocation) {
+        elements.detailsLocation.innerHTML = `
+            <i class="fas fa-map-marker-alt"></i> ${resort.location}
+            ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="map-link"><i class="fas fa-external-link-alt"></i> View on Google Maps</a>` : ''}
+        `;
+    }
+    if (elements.detailsPrice) elements.detailsPrice.textContent = `₹${resort.price.toLocaleString()}/night`;
+    if (elements.detailsDescription) elements.detailsDescription.textContent = resort.description;
+    if (elements.detailsAmenities) {
+        elements.detailsAmenities.innerHTML = resort.amenities.map(amenity => 
+            `<span class="amenity">${amenity}</span>`
+        ).join('');
+    }
+    
+    const modal = document.getElementById('resortDetailsModal');
+    if (modal) {
+        console.log('Showing modal');
+        modal.style.display = 'block';
+    } else {
+        console.log('Modal not found!');
+    }
 }
 
 function updateMainImage() {
