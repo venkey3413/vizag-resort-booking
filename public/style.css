@@ -486,6 +486,8 @@ section {
     font-size: 0.9rem;
     margin-top: 10px;
     transition: all 0.3s ease;
+    display: inline-block;
+    float: left;
 }
 
 .review-btn:hover {
@@ -681,7 +683,6 @@ video.resort-image:hover::-webkit-media-controls {
 
 .resort-info {
     padding: 2rem;
-    text-align: center;
 }
 
 .resort-info h3 {
@@ -807,10 +808,9 @@ video.resort-image:hover::-webkit-media-controls {
 }
 
 .policy-link {
-    text-align: center;
     margin-top: 1rem;
-    display: flex;
-    justify-content: center;
+    display: inline-block;
+    float: right;
 }
 
 .pdf-link {
