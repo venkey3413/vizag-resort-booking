@@ -778,7 +778,7 @@ video.resort-image:hover::-webkit-media-controls {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    width: 100%;
+    width: auto;
     font-size: 0.95rem;
     font-weight: 600;
     transition: all 0.4s ease;
@@ -1198,6 +1198,8 @@ video.resort-image:hover::-webkit-media-controls {
     background: linear-gradient(135deg, #ff6b6b, #ee5a24) !important;
     box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
     flex-shrink: 0;
+    width: auto !important;
+    display: inline-block !important;
 }
 
 /* Responsive Design */
