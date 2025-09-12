@@ -216,6 +216,9 @@ async function handleEditResort(e) {
     };
     
     try {
+        // Get fresh CSRF token
+        await getCSRFToken();
+        
         const response = await fetch(`/api/resorts/${resortId}`, {
             method: 'PUT',
             headers: {

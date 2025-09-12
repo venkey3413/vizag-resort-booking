@@ -102,6 +102,11 @@ function displayBookings() {
                         <h3>Total Amount: ₹${booking.total_price ? booking.total_price.toLocaleString() : '0'}</h3>
                     </div>
                     <div class="invoice-actions">
+                        ${booking.payment_status === 'pending' ? `
+                            <button class="payment-btn" onclick="markPaymentComplete(${booking.id})">
+                                <i class="fas fa-check-circle"></i> Mark Paid
+                            </button>
+                        ` : ''}
                         <button class="print-btn" onclick="printInvoice('${bookingId}')">
                             <i class="fas fa-print"></i> Print
                         </button>
@@ -121,6 +126,29 @@ function updateStats() {
     
     document.getElementById('totalBookings').textContent = totalBookings;
     document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
+}
+
+async function markPaymentComplete(bookingId) {
+    if (!confirm('Mark this payment as completed?')) return;
+    
+    try {
+        const response = await fetch(`/api/bookings/${bookingId}/payment`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ payment_status: 'completed' })
+        });
+        
+        if (response.ok) {
+            console.log('Payment marked as completed!');
+            loadBookings();
+        } else {
+            console.error('Error updating payment status');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
 }
 
 async function deleteBooking(bookingId) {

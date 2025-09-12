@@ -97,6 +97,24 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
+// Update payment status
+app.patch('/api/bookings/:id/payment', async (req, res) => {
+    try {
+        const { payment_status } = req.body;
+        const bookingId = req.params.id;
+        
+        await db.run(
+            'UPDATE bookings SET payment_status = ? WHERE id = ?',
+            [payment_status, bookingId]
+        );
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        res.status(500).json({ error: 'Failed to update payment status' });
+    }
+});
+
 // Delete booking
 app.delete('/api/bookings/:id', async (req, res) => {
     try {
