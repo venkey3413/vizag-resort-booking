@@ -847,8 +847,18 @@ async function handleBooking(e) {
             showNotification('Booking failed: ' + errorMessage, 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        showNotification('Network error. Please check your connection and try again.', 'error');
+        console.error('Booking error details:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        
+        let errorMessage = 'Network error. Please check your connection and try again.';
+        if (error.message && error.message.includes('Failed to fetch')) {
+            errorMessage = 'Connection failed. Please check if the server is running.';
+        } else if (error.message) {
+            errorMessage = 'Error: ' + error.message;
+        }
+        
+        showNotification(errorMessage, 'error');
     } finally {
         // Reset button state
         submitBtn.innerHTML = originalText;
