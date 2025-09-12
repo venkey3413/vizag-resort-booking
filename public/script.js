@@ -828,7 +828,7 @@ async function handleBooking(e) {
             const booking = await response.json();
             const bookingId = booking.id || booking.bookingId || 'Unknown';
             const totalPrice = booking.totalPrice || booking.total_price || 0;
-            showNotification(`Booking confirmed!\n\nBooking ID: RB${String(bookingId).padStart(4, '0')}\nTotal: ₹${totalPrice.toLocaleString()}\n\nPlease pay at the resort.`, 'success');
+            showNotification(`Booking confirmed!\n\nBooking ID: RB${String(bookingId).padStart(4, '0')}\nTotal: ₹${totalPrice.toLocaleString()}\n\nPay via WhatsApp now!`, 'success');
             closeModal();
             document.getElementById('bookingForm').reset();
             appliedDiscount = null;
