@@ -497,6 +497,10 @@ async function handleAddResort(e) {
         console.error('Error:', error);
         console.error('Error adding resort:', error.message);
         showNotification('Error adding resort: ' + error.message, 'error');
+    } finally {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 }
 
