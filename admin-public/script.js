@@ -131,6 +131,10 @@ async function handleAddResort(e) {
         name: formData.get('name'),
         location: formData.get('location'),
         price: parseInt(formData.get('price')),
+        peakPrice: parseInt(formData.get('peakPrice')) || null,
+        offPeakPrice: parseInt(formData.get('offPeakPrice')) || null,
+        peakStart: formData.get('peakStart') || null,
+        peakEnd: formData.get('peakEnd') || null,
         description: formData.get('description'),
         amenities: formData.get('amenities') ? formData.get('amenities').split(',').map(a => a.trim()) : [],
         maxGuests: parseInt(formData.get('maxGuests')) || 10,
@@ -183,6 +187,10 @@ function openEditModal(resortId) {
     document.getElementById('editImageUrls').value = resort.images ? resort.images.join('\n') : '';
     document.getElementById('editVideoUrls').value = resort.videos ? resort.videos.join('\n') : '';
     document.getElementById('editMapLink').value = resort.map_link || '';
+    document.getElementById('editPeakPrice').value = resort.peak_price || '';
+    document.getElementById('editOffPeakPrice').value = resort.off_peak_price || '';
+    document.getElementById('editPeakStart').value = resort.peak_season_start || '';
+    document.getElementById('editPeakEnd').value = resort.peak_season_end || '';
     
     document.getElementById('editModal').style.display = 'block';
 }
@@ -206,6 +214,10 @@ async function handleEditResort(e) {
         name: document.getElementById('editName').value,
         location: document.getElementById('editLocation').value,
         price: parseInt(document.getElementById('editPrice').value),
+        peakPrice: parseInt(document.getElementById('editPeakPrice').value) || null,
+        offPeakPrice: parseInt(document.getElementById('editOffPeakPrice').value) || null,
+        peakStart: document.getElementById('editPeakStart').value || null,
+        peakEnd: document.getElementById('editPeakEnd').value || null,
         description: document.getElementById('editDescription').value,
         amenities: document.getElementById('editAmenities').value.split(',').map(a => a.trim()).filter(a => a),
         maxGuests: parseInt(document.getElementById('editMaxGuests').value) || 10,
