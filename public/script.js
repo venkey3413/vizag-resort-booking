@@ -829,13 +829,22 @@ async function handleBooking(e) {
         
         if (response.ok) {
             const booking = await response.json();
-            showNotification(`Booking confirmed!\n\nBooking ID: RB${String(booking.id).padStart(4, '0')}\nTotal: ₹${booking.totalPrice.toLocaleString()}\n\nPlease pay at the resort.`, 'success');
+            const bookingId = booking.id || booking.bookingId || 'Unknown';
+            const totalPrice = booking.totalPrice || booking.total_price || 0;
+            showNotification(`Booking confirmed!\n\nBooking ID: RB${String(bookingId).padStart(4, '0')}\nTotal: ₹${totalPrice.toLocaleString()}\n\nPlease pay at the resort.`, 'success');
             closeModal();
             document.getElementById('bookingForm').reset();
             appliedDiscount = null;
         } else {
-            const error = await response.json();
-            showNotification('Booking failed: ' + (error.error || 'Please try again'), 'error');
+            const errorText = await response.text();
+            let errorMessage = 'Please try again';
+            try {
+                const error = JSON.parse(errorText);
+                errorMessage = error.error || errorMessage;
+            } catch (e) {
+                errorMessage = errorText || errorMessage;
+            }
+            showNotification('Booking failed: ' + errorMessage, 'error');
         }
     } catch (error) {
         console.error('Error:', error);
