@@ -434,7 +434,20 @@ function displayResorts() {
 async function handleAddResort(e) {
     e.preventDefault();
     
-    const formData = new FormData(e.target);
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Adding...';
+    submitBtn.disabled = true;
+    
+    try {
+        // Get CSRF token first
+        const csrfResponse = await fetch('/api/csrf-token', { credentials: 'include' });
+        if (!csrfResponse.ok) {
+            throw new Error('Failed to get CSRF token');
+        }
+        const csrfData = await csrfResponse.json();
+        
+        const formData = new FormData(e.target);
     
     // Parse URLs from textarea
     const imageUrls = formData.get('imageUrls') ? 
@@ -464,7 +477,7 @@ async function handleAddResort(e) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
+                'X-CSRF-Token': csrfData.token
             },
             credentials: 'include',
             body: JSON.stringify(resortData)

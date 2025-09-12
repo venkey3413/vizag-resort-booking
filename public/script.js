@@ -812,6 +812,9 @@ async function handleBooking(e) {
     try {
         // Get CSRF token first
         const csrfResponse = await fetch('/api/csrf-token', { credentials: 'include' });
+        if (!csrfResponse.ok) {
+            throw new Error('Failed to get CSRF token');
+        }
         const csrfData = await csrfResponse.json();
         
         const response = await fetch('/api/bookings', {
