@@ -61,7 +61,17 @@
             </div>
             
             <div class="recent-bookings">
-                <h3>Recent Bookings</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Recent Bookings</h3>
+                    <div class="export-buttons">
+                        <button onclick="exportData('bookings', 'csv')" class="export-btn">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button onclick="exportData('bookings', 'excel')" class="export-btn">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                    </div>
+                </div>
                 <div id="recentBookingsList" class="bookings-list"></div>
             </div>
         </div>
@@ -150,7 +160,17 @@ https://resort3413.s3.amazonaws.com/public/images/image2.jpg"></textarea>
         </div>
 
         <div id="manage-resorts" class="tab-content">
-            <h2>Manage Resorts</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Manage Resorts</h2>
+                <div class="export-buttons">
+                    <button onclick="exportData('resorts', 'csv')" class="export-btn">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
+                    <button onclick="exportData('resorts', 'excel')" class="export-btn">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
             <div id="resortsGrid" class="resorts-grid"></div>
         </div>
 

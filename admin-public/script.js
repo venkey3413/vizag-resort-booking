@@ -106,6 +106,35 @@ function updateRevenueChart() {
     });
 }
 
+async function exportData(type, format) {
+    try {
+        const response = await fetch(`/api/export/${type}?format=${format}`);
+        
+        if (!response.ok) {
+            throw new Error('Export failed');
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        const timestamp = new Date().toISOString().split('T')[0];
+        const extension = format === 'excel' ? 'xlsx' : 'csv';
+        a.download = `${type}-${timestamp}.${extension}`;
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showNotification(`${type} exported successfully!`, 'success');
+    } catch (error) {
+        console.error('Export error:', error);
+        showNotification('Export failed. Please try again.', 'error');
+    }
+}
+
 async function getCSRFToken() {
     try {
         const response = await fetch('/api/csrf-token', {

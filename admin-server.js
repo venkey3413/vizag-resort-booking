@@ -317,6 +317,98 @@ app.post('/api/discount-codes', csrfProtection, requireAuth, async (req, res) =>
     }
 });
 
+// Export data endpoints
+app.get('/api/export/:type', async (req, res) => {
+    try {
+        const { type } = req.params;
+        const { format } = req.query;
+        
+        let data = [];
+        let filename = '';
+        
+        if (type === 'bookings') {
+            data = await db().all(`
+                SELECT 
+                    b.id,
+                    b.guest_name,
+                    b.email,
+                    b.phone,
+                    r.name as resort_name,
+                    r.location,
+                    b.check_in,
+                    b.check_out,
+                    b.guests,
+                    b.total_price,
+                    b.payment_status,
+                    b.booking_date
+                FROM bookings b
+                JOIN resorts r ON b.resort_id = r.id
+                ORDER BY b.booking_date DESC
+            `);
+            filename = 'bookings';
+        } else if (type === 'resorts') {
+            data = await db().all(`
+                SELECT 
+                    id,
+                    name,
+                    location,
+                    price,
+                    peak_price,
+                    off_peak_price,
+                    max_guests,
+                    per_head_charge,
+                    available,
+                    created_at
+                FROM resorts
+                ORDER BY created_at DESC
+            `);
+            filename = 'resorts';
+        } else {
+            return res.status(400).json({ error: 'Invalid export type' });
+        }
+        
+        if (format === 'csv') {
+            // Simple CSV generation
+            if (data.length === 0) {
+                return res.status(404).json({ error: 'No data to export' });
+            }
+            
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(row => 
+                Object.values(row).map(value => 
+                    typeof value === 'string' && value.includes(',') 
+                        ? `"${value}"` 
+                        : value
+                ).join(',')
+            );
+            
+            const csv = [headers, ...rows].join('\n');
+            
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', `attachment; filename=${filename}.csv`);
+            res.send(csv);
+        } else if (format === 'excel') {
+            // Simple Excel-like format (actually CSV with .xlsx extension)
+            if (data.length === 0) {
+                return res.status(404).json({ error: 'No data to export' });
+            }
+            
+            const headers = Object.keys(data[0]).join('\t');
+            const rows = data.map(row => Object.values(row).join('\t'));
+            const tsv = [headers, ...rows].join('\n');
+            
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename=${filename}.xlsx`);
+            res.send(tsv);
+        } else {
+            res.status(400).json({ error: 'Invalid format. Use csv or excel' });
+        }
+    } catch (error) {
+        console.error('Export error:', error);
+        res.status(500).json({ error: 'Export failed' });
+    }
+});
+
 // Sync endpoints for API Gateway
 app.post('/api/sync/booking-created', (req, res) => {
     console.log('Booking sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
