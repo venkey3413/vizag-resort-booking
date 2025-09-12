@@ -80,6 +80,7 @@ async function loadResorts() {
         resorts = await response.json();
         displayResorts();
         populateLocationFilter();
+        populateAmenityFilter();
     } catch (error) {
         console.error('Error loading resorts:', error);
     }
@@ -208,20 +209,71 @@ function populateLocationFilter() {
         locations.map(location => `<option value="${location}">${location}</option>`).join('');
 }
 
+function populateAmenityFilter() {
+    const filter = document.getElementById('amenityFilter');
+    const allAmenities = new Set();
+    
+    resorts.forEach(resort => {
+        if (resort.amenities && Array.isArray(resort.amenities)) {
+            resort.amenities.forEach(amenity => allAmenities.add(amenity));
+        }
+    });
+    
+    const amenities = Array.from(allAmenities).sort();
+    filter.innerHTML = '<option value="">All Amenities</option>' + 
+        amenities.map(amenity => `<option value="${amenity}">${amenity}</option>`).join('');
+}
+
 function filterResorts() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const locationFilter = document.getElementById('locationFilter').value;
+    const priceFilter = document.getElementById('priceFilter').value;
+    const amenityFilter = document.getElementById('amenityFilter').value;
+    const guestFilter = document.getElementById('guestFilter').value;
     
     const filtered = resorts.filter(resort => {
+        // Search filter
         const matchesSearch = resort.name.toLowerCase().includes(searchTerm) || 
                             resort.location.toLowerCase().includes(searchTerm) ||
                             resort.description.toLowerCase().includes(searchTerm);
+        
+        // Location filter
         const matchesLocation = !locationFilter || resort.location === locationFilter;
         
-        return matchesSearch && matchesLocation;
+        // Price filter
+        let matchesPrice = true;
+        if (priceFilter) {
+            const [minPrice, maxPrice] = priceFilter.split('-').map(Number);
+            matchesPrice = resort.price >= minPrice && resort.price <= maxPrice;
+        }
+        
+        // Amenity filter
+        const matchesAmenity = !amenityFilter || 
+            (resort.amenities && resort.amenities.includes(amenityFilter));
+        
+        // Guest capacity filter
+        let matchesGuests = true;
+        if (guestFilter) {
+            const [minGuests, maxGuests] = guestFilter.split('-').map(Number);
+            const resortCapacity = resort.max_guests || 10;
+            matchesGuests = resortCapacity >= minGuests && 
+                          (maxGuests === 999 || resortCapacity <= maxGuests);
+        }
+        
+        return matchesSearch && matchesLocation && matchesPrice && 
+               matchesAmenity && matchesGuests;
     });
     
     displayResorts(filtered);
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('locationFilter').value = '';
+    document.getElementById('priceFilter').value = '';
+    document.getElementById('amenityFilter').value = '';
+    document.getElementById('guestFilter').value = '';
+    displayResorts(resorts);
 }
 
 function openBookingModal(resortId) {
