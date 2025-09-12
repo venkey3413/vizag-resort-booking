@@ -480,15 +480,16 @@ section {
     background: #28a745;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
+    padding: 6px 10px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     margin-top: 0;
     transition: all 0.3s ease;
     display: inline-block;
     float: left;
     line-height: 1;
+    font-weight: 500;
 }
 
 .review-btn:hover {
