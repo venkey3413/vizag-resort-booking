@@ -103,56 +103,7 @@ body {
     gap: 2rem;
 }
 
-@media (max-width: 768px) {
-    .navbar {
-        padding: 0 1rem;
-    }
-    
-    .nav-brand {
-        flex-shrink: 0;
-    }
-    
-    .nav-links {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background: rgba(255,255,255,0.98);
-        backdrop-filter: blur(10px);
-        flex-direction: column;
-        padding: 20px 0;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        transform: translateY(-100%);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-        gap: 0;
-    }
-    
-    .nav-links.active {
-        transform: translateY(0);
-        opacity: 1;
-        visibility: visible;
-    }
-    
-    .nav-link {
-        color: #333;
-        padding: 15px 30px;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
-        text-align: center;
-        border-radius: 0;
-    }
-    
-    .nav-link:hover, .nav-link.active {
-        color: #667eea;
-        background: rgba(102, 126, 234, 0.1);
-        transform: none;
-    }
-    
-    .nav-link:last-child {
-        border-bottom: none;
-    }
-}
+
 
 .nav-link {
     color: rgba(255,255,255,0.9);
@@ -387,6 +338,16 @@ section {
         display: flex;
     }
     
+    .navbar {
+        padding: 0 1rem;
+        position: relative;
+    }
+    
+    .nav-brand {
+        flex-shrink: 0;
+        z-index: 1001;
+    }
+    
     .nav-links {
         position: absolute;
         top: 100%;
@@ -401,6 +362,8 @@ section {
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s ease;
+        gap: 0;
+        z-index: 1000;
     }
     
     .nav-links.active {
@@ -410,9 +373,18 @@ section {
     }
     
     .nav-link {
+        color: #333 !important;
         padding: 15px 30px;
         border-bottom: 1px solid rgba(0,0,0,0.1);
         text-align: center;
+        border-radius: 0 !important;
+        background: transparent !important;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+        color: #667eea !important;
+        background: rgba(102, 126, 234, 0.1) !important;
+        transform: none !important;
     }
     
     .nav-link:last-child {
