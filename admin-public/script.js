@@ -465,28 +465,26 @@ async function handleAddResort(e) {
         mapLink: formData.get('mapLink') || ''
     };
     
-    try {
-        const response = await fetch('/api/resorts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(resortData)
-        });
-        
-        if (response.ok) {
-            console.log('Resort added successfully!');
-            showNotification('Resort added successfully!', 'success');
-            e.target.reset();
-            loadResorts();
-        } else {
-            const error = await response.json();
-            console.error('Error adding resort:', error.error || 'Unknown error');
-            showNotification('Error adding resort: ' + (error.error || 'Unknown error'), 'error');
-        }
+    const response = await fetch('/api/resorts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(resortData)
+    });
+    
+    if (response.ok) {
+        console.log('Resort added successfully!');
+        showNotification('Resort added successfully!', 'success');
+        e.target.reset();
+        loadResorts();
+    } else {
+        const error = await response.json();
+        console.error('Error adding resort:', error.error || 'Unknown error');
+        showNotification('Error adding resort: ' + (error.error || 'Unknown error'), 'error');
+    }
     } catch (error) {
-        console.error('Error:', error);
         console.error('Error adding resort:', error.message);
         showNotification('Error adding resort: ' + error.message, 'error');
     } finally {
