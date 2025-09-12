@@ -1104,7 +1104,7 @@ video.resort-image:hover::-webkit-media-controls {
 }
 
 .resort-info-panel {
-    padding: 2rem;
+    padding: 2rem 2rem 1rem 2rem;
     background: white;
     display: flex;
     flex-direction: column;
@@ -1151,8 +1151,9 @@ video.resort-image:hover::-webkit-media-controls {
 
 .resort-info-panel .book-btn {
     position: sticky;
-    bottom: 1rem;
+    bottom: 0;
     margin-top: auto;
+    margin-bottom: 0;
     z-index: 10;
     background: linear-gradient(135deg, #ff6b6b, #ee5a24);
     box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
