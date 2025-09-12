@@ -408,17 +408,17 @@ function displayResorts(filteredResorts = resorts) {
                     </div>
                 ` : ''}
                 ${resort.available ? 
-                    `<div class="policy-link">
-                        <a href="Booking cancellation_policy.pdf" target="_blank" class="pdf-link">
-                            <i class="fas fa-file-pdf"></i> Cancellation Policy
-                        </a>
-                    </div>
+                    `<button class="book-btn" onclick="openBookingModal(${resort.id})">
+                        <i class="fas fa-calendar-check"></i> Book Now
+                    </button>
                     <button class="review-btn" onclick="openReviewModal(${resort.id})">
                         <i class="fas fa-star"></i> Write Review
                     </button>
-                    <button class="book-btn" onclick="openBookingModal(${resort.id})">
-                        <i class="fas fa-calendar-check"></i> Book Now
-                    </button>` : 
+                    <div class="policy-link">
+                        <a href="Booking cancellation_policy.pdf" target="_blank" class="pdf-link">
+                            <i class="fas fa-file-pdf"></i> Cancellation Policy
+                        </a>
+                    </div>` : 
                     `<button class="book-btn unavailable" disabled>
                         <i class="fas fa-times-circle"></i> Currently Unavailable
                     </button>
