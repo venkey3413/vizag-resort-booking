@@ -694,11 +694,13 @@ video.resort-image:hover::-webkit-media-controls {
     background: linear-gradient(45deg, #8B4513 0%, #A0522D 25%, #CD853F 50%, #D2691E 75%, #8B4513 100%);
     background-size: 200% 200%;
     animation: woodGrain 3s ease-in-out infinite;
-    padding: 12px 20px;
-    border-radius: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
     position: relative;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2);
     border: 2px solid #654321;
+    display: inline-block;
+    width: auto;
 }
 
 @keyframes woodGrain {
