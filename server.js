@@ -168,8 +168,14 @@ app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
     }
 });
 
+// Test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Server is working', timestamp: new Date().toISOString() });
+});
+
 // Book a resort
 app.post('/api/bookings', async (req, res) => {
+    console.log('Booking request received:', req.body);
     try {
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, paymentId } = req.body;
         
