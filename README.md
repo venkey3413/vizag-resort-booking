@@ -1,88 +1,119 @@
-# Resort Booking Web Application
+# Resort Booking System
 
-A comprehensive resort booking website with admin panel for managing resorts and bookings.
+A complete resort booking management system with real-time updates, email notifications, and admin panel.
 
 ## Features
 
-- **User Features:**
-  - Browse available resorts with images and details
-  - Search and filter resorts by location
-  - Book resorts with guest information
-  - Responsive design for all devices
+- 🏨 **Resort Management** - Add, edit, delete resorts with images and videos
+- 📅 **Real-time Booking** - Instant availability updates and booking confirmations
+- 📧 **Email Notifications** - Automatic booking confirmations via Gmail
+- 🗺️ **Google Maps Integration** - Location links for each resort
+- 📊 **Admin Panel** - Complete resort and booking management
+- 📋 **Booking History** - Track all bookings and invoices
+- 🔄 **Database Backup** - Daily automatic backups to AWS S3
+- 📄 **PDF Invoices** - Professional invoices stored in S3
+- 🔒 **Security** - CSRF protection and session management
 
-- **Admin Features:**
-  - Add new resorts with image upload
-  - Edit existing resort information
-  - Delete resorts
-  - View all bookings
-  - Manage resort amenities and pricing
+## Quick Deployment
 
-## Setup Instructions
-
-1. Install Node.js from https://nodejs.org/
-
-2. Install dependencies:
+### Option 1: One-Command Deploy
 ```bash
+git clone https://github.com/venkey3413/vizag-resort-booking.git
+cd vizag-resort-booking
+chmod +x deploy.sh
+./deploy.sh
+```
+
+### Option 2: Manual Setup
+```bash
+# Install dependencies
+sudo apt update
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sudo npm install -g pm2
+
+# Clone and setup
+git clone https://github.com/venkey3413/vizag-resort-booking.git
+cd vizag-resort-booking
 npm install
+
+# Create .env file
+nano .env
 ```
 
-3. Start the server:
+## Environment Configuration
+
+Create `.env` file with:
 ```bash
-npm start
+GMAIL_APP_PASSWORD=your-16-character-gmail-app-password
+AWS_ACCESS_KEY_ID=your-aws-access-key-id
+AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
+AWS_REGION=ap-south-1
+S3_BUCKET=resort3413
 ```
 
-4. Open your browser and go to `http://localhost:3000`
+## Start Services
 
-## API Endpoints
-
-- `GET /api/resorts` - Get all resorts
-- `POST /api/resorts` - Add new resort (with image upload)
-- `PUT /api/resorts/:id` - Update resort (with image upload)
-- `DELETE /api/resorts/:id` - Delete resort
-- `POST /api/bookings` - Create new booking
-- `GET /api/bookings` - Get all bookings
-
-## File Structure
-
-```
-resort-booking-app/
-├── server.js              # Express server with API endpoints
-├── package.json           # Dependencies and scripts
-├── public/                # Static frontend files
-│   ├── index.html        # Main HTML file
-│   ├── style.css         # CSS styling
-│   └── script.js         # JavaScript functionality
-├── uploads/              # Uploaded images storage
-└── README.md            # This file
+```bash
+pm2 start server.js --name "main-server"
+pm2 start admin-server.js --name "admin-server"
+pm2 start booking-server.js --name "booking-server"
+pm2 save
+pm2 startup
 ```
 
-## Technologies Used
+## Access Applications
 
-- **Backend:** Node.js, Express.js, Multer (file uploads)
-- **Frontend:** HTML5, CSS3, JavaScript (ES6+)
-- **Storage:** File system (images), In-memory (data)
-- **Styling:** CSS Grid, Flexbox, Font Awesome icons
+- **Main Website:** `http://your-ec2-ip:3000`
+- **Admin Panel:** `http://your-ec2-ip:3001`
+- **Booking History:** `http://your-ec2-ip:3002`
 
-## Usage
+## Security Group Settings
 
-### For Customers:
-1. Browse resorts on the homepage
-2. Use search and location filters
-3. Click "Book Now" on any resort
-4. Fill in booking details and submit
+Allow inbound traffic on ports:
+- 22 (SSH)
+- 3000 (Main Website)
+- 3001 (Admin Panel)
+- 3002 (Booking History)
 
-### For Administrators:
-1. Navigate to the Admin section
-2. Use "Add Resort" tab to add new resorts
-3. Use "Manage Resorts" tab to edit/delete existing resorts
-4. Use "Bookings" tab to view all customer bookings
+## Gmail Setup
 
-## Production Deployment
+1. Enable 2-Factor Authentication in Gmail
+2. Generate App Password: Gmail → Security → App passwords
+3. Use 16-character password in .env file
 
-For production deployment:
-1. Use a proper database (MongoDB, PostgreSQL)
-2. Implement user authentication
-3. Add payment gateway integration
-4. Use cloud storage for images (AWS S3, Cloudinary)
-5. Add email notifications for bookings
-6. Implement booking cancellation and modification
+## AWS S3 Setup
+
+1. Create S3 bucket (e.g., resort3413)
+2. Create IAM user with S3 permissions
+3. Generate Access Key and Secret Key
+4. Add credentials to .env file
+
+## Google Drive Images
+
+Convert Google Drive links:
+- Original: `https://drive.google.com/file/d/FILE_ID/view`
+- Use: `https://drive.google.com/uc?id=FILE_ID`
+
+## Commands
+
+```bash
+# Check status
+pm2 status
+
+# View logs
+pm2 logs
+
+# Restart services
+pm2 restart all
+
+# Stop services
+pm2 stop all
+
+# Manual backup
+node -e "require('./backup-service').manualBackup()"
+```
+
+## Support
+
+For issues or questions, contact: vizagresortbooking@gmail.com
