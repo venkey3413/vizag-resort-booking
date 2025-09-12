@@ -42,8 +42,15 @@ function requireAuth(req, res, next) {
     next();
 }
 
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-    res.json({ token: req.csrfToken() });
+app.get('/api/csrf-token', (req, res) => {
+    try {
+        const token = require('crypto').randomBytes(32).toString('hex');
+        req.session.csrfToken = token;
+        res.json({ token: token });
+    } catch (error) {
+        console.error('CSRF token error:', error);
+        res.status(500).json({ error: 'Failed to generate CSRF token' });
+    }
 });
 
 // Initialize database on startup
@@ -156,7 +163,12 @@ app.post('/api/upload', csrfProtection, requireAuth, upload.array('media', 10), 
     }
 });
 
-app.post('/api/resorts', async (req, res) => {
+app.post('/api/resorts', (req, res, next) => {
+    if (!req.headers['x-csrf-token']) {
+        return res.status(403).json({ error: 'CSRF token required' });
+    }
+    next();
+}, async (req, res) => {
     try {
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
