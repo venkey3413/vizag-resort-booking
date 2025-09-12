@@ -169,13 +169,7 @@ app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
 });
 
 // Book a resort
-app.post('/api/bookings', (req, res, next) => {
-    // Skip CSRF for now, add custom validation
-    if (!req.headers['x-csrf-token']) {
-        return res.status(403).json({ error: 'CSRF token required' });
-    }
-    next();
-}, async (req, res) => {
+app.post('/api/bookings', async (req, res) => {
     try {
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, paymentId } = req.body;
         
