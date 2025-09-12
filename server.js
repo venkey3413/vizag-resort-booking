@@ -115,7 +115,7 @@ app.get('/api/resorts', async (req, res) => {
     try {
         const resorts = await getResorts();
         
-        // Get booked dates for each resort
+        // Get booked dates and reviews for each resort
         for (let resort of resorts) {
             const bookedDates = await db().all(
                 'SELECT check_in, check_out FROM bookings WHERE resort_id = ? AND status = "confirmed"',
@@ -126,6 +126,15 @@ app.get('/api/resorts', async (req, res) => {
                 checkIn: booking.check_in,
                 checkOut: booking.check_out
             }));
+            
+            // Get average rating and review count
+            const reviewStats = await db().get(
+                'SELECT AVG(rating) as avg_rating, COUNT(*) as review_count FROM reviews WHERE resort_id = ? AND approved = 1',
+                [resort.id]
+            );
+            
+            resort.rating = reviewStats.avg_rating || 0;
+            resort.review_count = reviewStats.review_count || 0;
         }
         
         res.json(resorts);
@@ -426,6 +435,43 @@ app.get('/api/transactions', async (req, res) => {
     } catch (error) {
         console.error('Error fetching transactions:', error);
         res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+});
+
+// Discount code validation
+app.get('/api/discount-codes/validate/:code', async (req, res) => {
+    try {
+        const { code } = req.params;
+        const discount = await db().get(
+            'SELECT * FROM discount_codes WHERE code = ? AND active = 1 AND (valid_until IS NULL OR valid_until >= date("now")) AND (max_uses IS NULL OR used_count < max_uses)',
+            [code.toUpperCase()]
+        );
+        
+        if (discount) {
+            res.json({ valid: true, discount });
+        } else {
+            res.json({ valid: false, message: 'Invalid or expired discount code' });
+        }
+    } catch (error) {
+        console.error('Error validating discount code:', error);
+        res.status(500).json({ error: 'Failed to validate discount code' });
+    }
+});
+
+// Submit review
+app.post('/api/reviews', async (req, res) => {
+    try {
+        const { resortId, guestName, rating, reviewText } = req.body;
+        
+        const result = await db().run(
+            'INSERT INTO reviews (resort_id, guest_name, rating, review_text) VALUES (?, ?, ?, ?)',
+            [resortId, guestName, rating, reviewText || '']
+        );
+        
+        res.json({ id: result.lastID, message: 'Review submitted successfully' });
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        res.status(500).json({ error: 'Failed to submit review' });
     }
 });
 
