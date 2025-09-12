@@ -397,6 +397,44 @@ section {
     }
 }
 
+/* Image Optimization */
+.resort-image {
+    background: #f0f0f0;
+    transition: opacity 0.3s ease;
+}
+
+.resort-image[loading="lazy"] {
+    opacity: 0;
+}
+
+.resort-image[loading="lazy"].loaded {
+    opacity: 1;
+}
+
+.thumbnail {
+    transition: opacity 0.3s ease;
+}
+
+.thumbnail[loading="lazy"] {
+    opacity: 0;
+}
+
+.thumbnail[loading="lazy"].loaded {
+    opacity: 1;
+}
+
+.main-resort-image {
+    transition: opacity 0.3s ease;
+}
+
+.main-resort-image[loading="lazy"] {
+    opacity: 0;
+}
+
+.main-resort-image[loading="lazy"].loaded {
+    opacity: 1;
+}
+
 /* Resorts Grid */
 .resorts-grid {
     display: grid;

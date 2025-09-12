@@ -99,6 +99,58 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Image optimization - lazy loading handler
+document.addEventListener('DOMContentLoaded', function() {
+    // Add load event listeners to all lazy images
+    function handleImageLoad() {
+        document.addEventListener('load', function(e) {
+            if (e.target.tagName === 'IMG' && e.target.hasAttribute('loading')) {
+                e.target.classList.add('loaded');
+            }
+        }, true);
+        
+        // Handle images that are already loaded
+        document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+            if (img.complete) {
+                img.classList.add('loaded');
+            } else {
+                img.addEventListener('load', function() {
+                    this.classList.add('loaded');
+                });
+            }
+        });
+    }
+    
+    handleImageLoad();
+    
+    // Re-run when new images are added (for dynamic content)
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        const lazyImages = node.querySelectorAll ? node.querySelectorAll('img[loading="lazy"]') : [];
+                        lazyImages.forEach(img => {
+                            if (img.complete) {
+                                img.classList.add('loaded');
+                            } else {
+                                img.addEventListener('load', function() {
+                                    this.classList.add('loaded');
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
+
 function scrollToSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -182,7 +234,7 @@ function displayResorts(filteredResorts = resorts) {
                                 if (isVideo) {
                                     return `<video src="${media}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" controls muted loop preload="metadata"></video>`;
                                 } else {
-                                    return `<img src="${media}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 200\\"><rect fill=\\"%23ecf0f1\\" width=\\"400\\" height=\\"200\\"/><text x=\\"200\\" y=\\"100\\" text-anchor=\\"middle\\" fill=\\"%237f8c8d\\" font-size=\\"16\\">Image Error</text></svg>'">`;
+                                    return `<img src="${media}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 200\\"><rect fill=\\"%23ecf0f1\\" width=\\"400\\" height=\\"200\\"/><text x=\\"200\\" y=\\"100\\" text-anchor=\\"middle\\" fill=\\"%237f8c8d\\" font-size=\\"16\\">Image Error</text></svg>'">`;
                                 }
                             }).join('');
                         }
@@ -810,7 +862,7 @@ function openResortDetails(resortId) {
         if (isVideo) {
             return `<video src="${media}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" muted preload="metadata"></video>`;
         } else {
-            return `<img src="${media}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})">`;
+            return `<img src="${media}" alt="${resort.name}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" loading="lazy">`;
         }
     }).join('');
     
@@ -842,7 +894,7 @@ function updateMainImage() {
     if (isVideo) {
         mainElement.outerHTML = `<video id="mainResortImage" src="${currentMedia}" class="main-resort-image" controls muted loop preload="metadata"></video>`;
     } else {
-        mainElement.outerHTML = `<img id="mainResortImage" src="${currentMedia}" alt="" class="main-resort-image">`;
+        mainElement.outerHTML = `<img id="mainResortImage" src="${currentMedia}" alt="" class="main-resort-image" loading="lazy">`;
     }
     
     document.getElementById('currentImageIndex').textContent = currentImageIndex + 1;
