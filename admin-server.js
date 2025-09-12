@@ -49,6 +49,72 @@ app.get('/api/csrf-token', csrfProtection, (req, res) => {
 // Initialize database on startup
 initDatabase();
 
+// Analytics dashboard endpoint
+app.get('/api/analytics/dashboard', async (req, res) => {
+    try {
+        if (!db()) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        // Total resorts
+        const totalResorts = await db().get('SELECT COUNT(*) as count FROM resorts');
+        
+        // Total bookings
+        const totalBookings = await db().get('SELECT COUNT(*) as count FROM bookings');
+        
+        // Total revenue
+        const totalRevenue = await db().get('SELECT SUM(total_price) as revenue FROM bookings WHERE payment_status = "completed"');
+        
+        // Today's bookings
+        const today = new Date().toISOString().split('T')[0];
+        const todayBookings = await db().get('SELECT COUNT(*) as count FROM bookings WHERE DATE(booking_date) = ?', [today]);
+        
+        // Location stats
+        const locationStats = await db().all(`
+            SELECT r.location, COUNT(b.id) as count 
+            FROM resorts r 
+            LEFT JOIN bookings b ON r.id = b.resort_id 
+            GROUP BY r.location 
+            ORDER BY count DESC 
+            LIMIT 5
+        `);
+        
+        // Recent bookings
+        const recentBookings = await db().all(`
+            SELECT b.guest_name, b.total_price, r.name as resort_name, b.booking_date
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            ORDER BY b.booking_date DESC 
+            LIMIT 5
+        `);
+        
+        // Monthly revenue (last 6 months)
+        const monthlyRevenue = await db().all(`
+            SELECT 
+                strftime('%Y-%m', booking_date) as month,
+                SUM(total_price) as revenue
+            FROM bookings 
+            WHERE payment_status = 'completed'
+            AND booking_date >= date('now', '-6 months')
+            GROUP BY strftime('%Y-%m', booking_date)
+            ORDER BY month
+        `);
+        
+        res.json({
+            totalResorts: totalResorts.count,
+            totalBookings: totalBookings.count,
+            totalRevenue: totalRevenue.revenue || 0,
+            todayBookings: todayBookings.count,
+            locationStats,
+            recentBookings,
+            monthlyRevenue
+        });
+    } catch (error) {
+        console.error('Error fetching analytics:', error);
+        res.status(500).json({ error: 'Failed to fetch analytics data' });
+    }
+});
+
 // API Routes
 app.get('/api/resorts', async (req, res) => {
     try {
@@ -92,15 +158,15 @@ app.post('/api/upload', csrfProtection, requireAuth, upload.array('media', 10), 
 
 app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
     try {
-        const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
+        const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
         if (!name || !location || !price) {
             return res.status(400).json({ error: 'Name, location, and price are required' });
         }
         
         const result = await db().run(
-            'INSERT INTO resorts (name, location, price, description, images, videos, amenities, available, max_guests, per_head_charge, map_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, req.body.mapLink || '']
+            'INSERT INTO resorts (name, location, price, peak_price, off_peak_price, peak_season_start, peak_season_end, description, images, videos, amenities, available, max_guests, per_head_charge, map_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), peakPrice ? parseInt(peakPrice) : null, offPeakPrice ? parseInt(offPeakPrice) : null, peakStart || null, peakEnd || null, description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, req.body.mapLink || '']
         );
         
         const newResort = { 
@@ -133,11 +199,11 @@ app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
 app.put('/api/resorts/:id', csrfProtection, requireAuth, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
+        const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
         await db().run(
-            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, images = ?, videos = ?, amenities = ?, max_guests = ?, per_head_charge = ?, map_link = ? WHERE id = ?',
-            [name, location, parseInt(price), description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, req.body.mapLink || '', id]
+            'UPDATE resorts SET name = ?, location = ?, price = ?, peak_price = ?, off_peak_price = ?, peak_season_start = ?, peak_season_end = ?, description = ?, images = ?, videos = ?, amenities = ?, max_guests = ?, per_head_charge = ?, map_link = ? WHERE id = ?',
+            [name, location, parseInt(price), peakPrice ? parseInt(peakPrice) : null, offPeakPrice ? parseInt(offPeakPrice) : null, peakStart || null, peakEnd || null, description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, req.body.mapLink || '', id]
         );
         
         const updatedResort = { id, name, location, price: parseInt(price), description, images, videos, amenities };
@@ -223,6 +289,33 @@ async function syncServices(action, data) {
         console.error('Service sync error:', error);
     }
 }
+
+// Discount codes API
+app.get('/api/discount-codes', async (req, res) => {
+    try {
+        const codes = await db().all('SELECT * FROM discount_codes ORDER BY created_at DESC');
+        res.json(codes);
+    } catch (error) {
+        console.error('Error fetching discount codes:', error);
+        res.status(500).json({ error: 'Failed to fetch discount codes' });
+    }
+});
+
+app.post('/api/discount-codes', csrfProtection, requireAuth, async (req, res) => {
+    try {
+        const { code, discountType, discountValue, minAmount, maxUses, validUntil } = req.body;
+        
+        const result = await db().run(
+            'INSERT INTO discount_codes (code, discount_type, discount_value, min_amount, max_uses, valid_until) VALUES (?, ?, ?, ?, ?, ?)',
+            [code, discountType, discountValue, minAmount || 0, maxUses || null, validUntil || null]
+        );
+        
+        res.json({ id: result.lastID, message: 'Discount code created successfully' });
+    } catch (error) {
+        console.error('Error creating discount code:', error);
+        res.status(500).json({ error: 'Failed to create discount code' });
+    }
+});
 
 // Sync endpoints for API Gateway
 app.post('/api/sync/booking-created', (req, res) => {
