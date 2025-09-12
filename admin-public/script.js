@@ -7,7 +7,33 @@ document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     setupEventListeners();
     initCalendar();
+    setupSocketIO();
 });
+
+// Socket.IO setup for real-time updates
+function setupSocketIO() {
+    const socket = io();
+    
+    socket.on('connect', () => {
+        console.log('Admin panel connected to server');
+    });
+    
+    socket.on('bookingCreated', (booking) => {
+        console.log('New booking received:', booking);
+        showNotification(`New booking: ${booking.guest_name} - ${booking.resort_name}`, 'success');
+        loadDashboard(); // Reload dashboard data
+        loadCalendarData(); // Reload calendar
+    });
+    
+    socket.on('dashboardReload', (data) => {
+        console.log('Dashboard reload requested:', data.reason);
+        loadDashboard();
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('Admin panel disconnected from server');
+    });
+}
 
 let currentDate = new Date();
 let calendarBookings = [];

@@ -273,6 +273,9 @@ app.delete('/api/resorts/:id', async (req, res) => {
 io.on('connection', (socket) => {
     console.log('Admin client connected:', socket.id);
     
+    // Send current dashboard data on connect
+    socket.emit('dashboardUpdate', 'connected');
+    
     socket.on('disconnect', () => {
         console.log('Admin client disconnected:', socket.id);
     });
@@ -446,8 +449,16 @@ app.get('/api/calendar/bookings', async (req, res) => {
 
 // Sync endpoints for API Gateway
 app.post('/api/sync/booking-created', (req, res) => {
-    console.log('Booking sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
+    console.log('Booking sync received:', JSON.stringify({ id: req.body.id, guest: req.body.guest_name }));
+    
+    // Emit booking created event
     io.emit('bookingCreated', req.body);
+    
+    // Trigger dashboard reload
+    setTimeout(() => {
+        io.emit('dashboardReload', { reason: 'new_booking' });
+    }, 1000);
+    
     res.json({ success: true });
 });
 
