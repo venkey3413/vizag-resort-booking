@@ -142,6 +142,22 @@ async function createTables() {
             )
         `);
 
+        // Reviews table
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                booking_id INTEGER,
+                resort_id INTEGER NOT NULL,
+                guest_name TEXT NOT NULL,
+                rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+                review_text TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                approved INTEGER DEFAULT 0,
+                FOREIGN KEY (booking_id) REFERENCES bookings(id),
+                FOREIGN KEY (resort_id) REFERENCES resorts(id)
+            )
+        `);
+
         // Insert default resorts if table is empty
         const result = await db.get('SELECT COUNT(*) as count FROM resorts');
         if (result.count === 0) {

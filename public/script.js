@@ -151,6 +151,135 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Review system functions
+function generateStarRating(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    let stars = '';
+    
+    // Full stars
+    for (let i = 0; i < fullStars; i++) {
+        stars += '<span class="stars">★</span>';
+    }
+    
+    // Half star
+    if (hasHalfStar) {
+        stars += '<span class="stars">☆</span>';
+    }
+    
+    // Empty stars
+    for (let i = 0; i < emptyStars; i++) {
+        stars += '<span class="stars" style="color: #ddd;">★</span>';
+    }
+    
+    return stars;
+}
+
+function openReviewModal(resortId) {
+    const resort = resorts.find(r => r.id === resortId);
+    if (!resort) return;
+    
+    document.getElementById('reviewResortId').value = resortId;
+    document.getElementById('reviewerName').value = '';
+    document.getElementById('reviewText').value = '';
+    document.getElementById('selectedRating').value = '';
+    
+    // Reset star rating
+    document.querySelectorAll('.star').forEach(star => {
+        star.classList.remove('active');
+    });
+    
+    document.getElementById('reviewModal').style.display = 'block';
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').style.display = 'none';
+}
+
+// Star rating interaction
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star');
+    
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            document.getElementById('selectedRating').value = rating;
+            
+            // Update visual state
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        });
+        
+        star.addEventListener('mouseover', function() {
+            const rating = parseInt(this.dataset.rating);
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = '#ddd';
+                }
+            });
+        });
+    });
+    
+    document.getElementById('starRating').addEventListener('mouseleave', function() {
+        const selectedRating = parseInt(document.getElementById('selectedRating').value) || 0;
+        stars.forEach((s, index) => {
+            if (index < selectedRating) {
+                s.style.color = '#ffc107';
+            } else {
+                s.style.color = '#ddd';
+            }
+        });
+    });
+    
+    // Review form submission
+    document.getElementById('reviewForm').addEventListener('submit', handleReviewSubmission);
+});
+
+async function handleReviewSubmission(e) {
+    e.preventDefault();
+    
+    const reviewData = {
+        resortId: document.getElementById('reviewResortId').value,
+        guestName: document.getElementById('reviewerName').value,
+        rating: document.getElementById('selectedRating').value,
+        reviewText: document.getElementById('reviewText').value
+    };
+    
+    if (!reviewData.rating) {
+        showNotification('Please select a rating', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/reviews', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reviewData)
+        });
+        
+        if (response.ok) {
+            showNotification('Thank you for your review! It will be published after approval.', 'success');
+            closeReviewModal();
+        } else {
+            const error = await response.json();
+            showNotification('Failed to submit review: ' + (error.error || 'Please try again'), 'error');
+        }
+    } catch (error) {
+        showNotification('Network error. Please try again.', 'error');
+    }
+}
+
 function scrollToSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -263,6 +392,10 @@ function displayResorts(filteredResorts = resorts) {
                     ${resort.map_link ? `<a href="${resort.map_link}" target="_blank" class="map-link"><i class="fas fa-external-link-alt"></i> View on Map</a>` : ''}
                 </p>
                 <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
+                <div class="resort-rating">
+                    ${generateStarRating(resort.rating || 0)}
+                    <span class="rating-text">${resort.rating ? resort.rating.toFixed(1) : 'No reviews'} ${resort.review_count ? `(${resort.review_count} reviews)` : ''}</span>
+                </div>
                 <p class="resort-description">${resort.description}</p>
                 <div class="amenities">
                     ${resort.amenities.map(amenity => `<span class="amenity">${amenity}</span>`).join('')}
@@ -282,9 +415,15 @@ function displayResorts(filteredResorts = resorts) {
                         <a href="Booking cancellation_policy.pdf" target="_blank" class="pdf-link">
                             <i class="fas fa-file-pdf"></i> Cancellation Policy
                         </a>
-                    </div>` : 
+                    </div>
+                    <button class="review-btn" onclick="openReviewModal(${resort.id})">
+                        <i class="fas fa-star"></i> Write Review
+                    </button>` : 
                     `<button class="book-btn unavailable" disabled>
                         <i class="fas fa-times-circle"></i> Currently Unavailable
+                    </button>
+                    <button class="review-btn" onclick="openReviewModal(${resort.id})">
+                        <i class="fas fa-star"></i> Write Review
                     </button>`
                 }
             </div>

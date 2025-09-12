@@ -197,6 +197,43 @@
         </div>
     </div>
 
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeReviewModal()">&times;</span>
+            <h2>Write a Review</h2>
+            <form id="reviewForm">
+                <input type="hidden" id="reviewResortId">
+                
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="reviewerName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                    <input type="hidden" id="selectedRating" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Review (Optional)</label>
+                    <textarea id="reviewText" rows="4" placeholder="Share your experience..."></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Submit Review
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- WhatsApp Help Button -->
     <div class="whatsapp-help">
         <a href="https://wa.me/918341674465?text=Hi,%20I%20need%20help%20with%20resort%20booking" target="_blank" class="whatsapp-btn">
