@@ -1153,9 +1153,8 @@ video.resort-image:hover::-webkit-media-controls {
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 100%;
-    max-height: 80vh;
 }
 
 .resort-info-panel h2 {
@@ -1193,18 +1192,7 @@ video.resort-image:hover::-webkit-media-controls {
     margin-bottom: 3rem;
 }
 
-.resort-info-panel .book-btn {
-    position: sticky;
-    bottom: 10px;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    z-index: 10;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24) !important;
-    box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
-    flex-shrink: 0;
-    width: auto !important;
-    display: inline-block !important;
-}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
