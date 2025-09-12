@@ -186,6 +186,17 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
             return res.status(400).json({ error: 'Selected dates are not available. Please choose different dates.' });
         }
         
+        // Check for duplicate booking (same email/phone on same day)
+        const today = new Date().toISOString().split('T')[0];
+        const duplicateBooking = await db().get(
+            'SELECT id FROM bookings WHERE (email = ? OR phone = ?) AND DATE(booking_date) = ? AND status = "confirmed"',
+            [email, phone, today]
+        );
+        
+        if (duplicateBooking) {
+            return res.status(400).json({ error: 'Only one booking per day allowed with the same email or phone number' });
+        }
+        
         // Calculate total price
         const basePrice = resort.price;
         const guestCount = parseInt(guests);
