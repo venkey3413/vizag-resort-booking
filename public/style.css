@@ -684,17 +684,44 @@ video.resort-image:hover::-webkit-media-controls {
 }
 
 .resort-info h3 {
-    color: #2c3e50;
+    color: #fff;
     margin-bottom: 0.8rem;
-    font-size: 1.6rem;
-    font-weight: 800;
+    font-size: 1.5rem;
+    font-weight: 700;
     font-family: 'Playfair Display', 'Georgia', serif;
     letter-spacing: 0.5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    background: linear-gradient(135deg, #2c3e50, #34495e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    background: linear-gradient(45deg, #8B4513 0%, #A0522D 25%, #CD853F 50%, #D2691E 75%, #8B4513 100%);
+    background-size: 200% 200%;
+    animation: woodGrain 3s ease-in-out infinite;
+    padding: 12px 20px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2);
+    border: 2px solid #654321;
+}
+
+@keyframes woodGrain {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.resort-info h3::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.1) 2px,
+        rgba(0,0,0,0.1) 4px
+    );
+    border-radius: 6px;
+    pointer-events: none;
 }
 
 .resort-location {
