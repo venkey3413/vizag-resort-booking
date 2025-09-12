@@ -70,7 +70,7 @@ app.get('/api/analytics/dashboard', async (req, res) => {
         const totalBookings = await db().get('SELECT COUNT(*) as count FROM bookings');
         
         // Total revenue
-        const totalRevenue = await db().get('SELECT SUM(total_price) as revenue FROM bookings WHERE status = "confirmed"');
+        const totalRevenue = await db().get('SELECT SUM(total_price) as revenue FROM bookings WHERE payment_status = "completed"');
         
         // Today's bookings
         const today = new Date().toISOString().split('T')[0];
@@ -101,7 +101,7 @@ app.get('/api/analytics/dashboard', async (req, res) => {
                 strftime('%Y-%m', booking_date) as month,
                 SUM(total_price) as revenue
             FROM bookings 
-            WHERE status = 'confirmed'
+            WHERE payment_status = 'completed'
             AND booking_date >= date('now', '-6 months')
             GROUP BY strftime('%Y-%m', booking_date)
             ORDER BY month
