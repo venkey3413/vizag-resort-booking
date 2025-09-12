@@ -75,22 +75,66 @@ function scrollToSection(sectionId) {
 }
 
 async function loadResorts() {
+    showLoading('Loading resorts...');
     try {
         const response = await fetch('/api/resorts');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         resorts = await response.json();
         displayResorts();
         populateLocationFilter();
         populateAmenityFilter();
+        hideLoading();
     } catch (error) {
+        hideLoading();
+        showError('Failed to load resorts. Please check your connection.', () => loadResorts());
         console.error('Error loading resorts:', error);
     }
+}
+
+function showLoading(message = 'Loading...') {
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>${message}</p>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+function showError(message, retryCallback = null) {
+    const container = document.getElementById('resortsGrid');
+    container.innerHTML = `
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>${message}</span>
+            ${retryCallback ? '<button class="error-retry" onclick="' + retryCallback.name + '()"><i class="fas fa-redo"></i> Retry</button>' : ''}
+        </div>
+    `;
 }
 
 function displayResorts(filteredResorts = resorts) {
     const grid = document.getElementById('resortsGrid');
     
     if (filteredResorts.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: white; font-size: 1.2rem;">No resorts found.</p>';
+        grid.innerHTML = `
+            <div class="error-message" style="grid-column: 1/-1; background: rgba(255,255,255,0.9); color: #666;">
+                <i class="fas fa-search"></i>
+                <span>No resorts match your search criteria. Try adjusting your filters.</span>
+                <button class="error-retry" onclick="clearFilters()">Clear Filters</button>
+            </div>
+        `;
         return;
     }
     
@@ -105,7 +149,7 @@ function displayResorts(filteredResorts = resorts) {
                                 if (isVideo) {
                                     return `<video src="${media}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" controls muted loop preload="metadata"></video>`;
                                 } else {
-                                    return `<img src="${media}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}">`;
+                                    return `<img src="${media}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 200\\"><rect fill=\\"%23ecf0f1\\" width=\\"400\\" height=\\"200\\"/><text x=\\"200\\" y=\\"100\\" text-anchor=\\"middle\\" fill=\\"%237f8c8d\\" font-size=\\"16\\">Image Error</text></svg>'">`;
                                 }
                             }).join('');
                         }
@@ -375,11 +419,17 @@ function calculateTotal() {
 async function applyDiscount() {
     const code = document.getElementById('discountCode').value.trim().toUpperCase();
     const messageDiv = document.getElementById('discountMessage');
+    const applyBtn = event.target;
+    const originalText = applyBtn.innerHTML;
     
     if (!code) {
         messageDiv.innerHTML = '<span style="color: #f44336;">Please enter a discount code</span>';
         return;
     }
+    
+    // Show loading state
+    applyBtn.innerHTML = '<span class="loading-spinner"></span>';
+    applyBtn.disabled = true;
     
     try {
         const response = await fetch(`/api/discount-codes/validate/${code}`);
@@ -405,9 +455,13 @@ async function applyDiscount() {
             calculateTotal();
         }
     } catch (error) {
-        messageDiv.innerHTML = '<span style="color: #f44336;">Error validating discount code</span>';
+        messageDiv.innerHTML = '<span style="color: #f44336;">Network error. Please try again.</span>';
         appliedDiscount = null;
         calculateTotal();
+    } finally {
+        // Reset button state
+        applyBtn.innerHTML = originalText;
+        applyBtn.disabled = false;
     }
 }
 
@@ -420,12 +474,31 @@ function closeModal() {
 async function handleBooking(e) {
     e.preventDefault();
     
-    const phoneInput = document.getElementById('phone').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
     
+    // Validation
+    const phoneInput = document.getElementById('phone').value;
     if (!/^[0-9]{10}$/.test(phoneInput)) {
         showNotification('Please enter a valid 10-digit mobile number', 'error');
         return;
     }
+    
+    const checkIn = document.getElementById('checkIn').value;
+    const checkOut = document.getElementById('checkOut').value;
+    if (!checkIn || !checkOut) {
+        showNotification('Please select check-in and check-out dates', 'error');
+        return;
+    }
+    
+    if (new Date(checkIn) >= new Date(checkOut)) {
+        showNotification('Check-out date must be after check-in date', 'error');
+        return;
+    }
+    
+    // Show loading state
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Processing...';
+    submitBtn.disabled = true;
     
     const bookingData = {
         resortId: document.getElementById('bookingResortId').value,
@@ -458,13 +531,18 @@ async function handleBooking(e) {
             showNotification(`Booking confirmed!\n\nBooking ID: RB${String(booking.id).padStart(4, '0')}\nTotal: ₹${booking.totalPrice.toLocaleString()}\n\nPlease pay at the resort.`, 'success');
             closeModal();
             document.getElementById('bookingForm').reset();
+            appliedDiscount = null;
         } else {
             const error = await response.json();
-            showNotification('Booking failed: ' + error.error, 'error');
+            showNotification('Booking failed: ' + (error.error || 'Please try again'), 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showNotification('Booking failed. Please try again.', 'error');
+        showNotification('Network error. Please check your connection and try again.', 'error');
+    } finally {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 }
 
