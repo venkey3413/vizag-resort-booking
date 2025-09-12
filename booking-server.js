@@ -140,7 +140,7 @@ app.patch('/api/bookings/:id/payment', async (req, res) => {
         console.error('Error updating payment status:', error);
         res.status(500).json({ error: 'Failed to update payment status' });
     }
-};
+});
 
 // Delete booking
 app.delete('/api/bookings/:id', async (req, res) => {
