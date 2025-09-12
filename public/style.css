@@ -775,12 +775,12 @@ video.resort-image:hover::-webkit-media-controls {
 .book-btn {
     background: linear-gradient(135deg, #ff6b6b, #ee5a24);
     color: white;
-    padding: 8px 12px;
+    padding: 12px 20px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     width: auto;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     font-weight: 600;
     transition: all 0.4s ease;
     box-shadow: 0 8px 25px rgba(238, 90, 36, 0.4);
@@ -817,9 +817,7 @@ video.resort-image:hover::-webkit-media-controls {
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
+    display: inline-block;
     padding: 4px 8px;
     border-radius: 6px;
     transition: all 0.3s ease;
