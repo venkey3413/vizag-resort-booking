@@ -46,9 +46,33 @@ async function createTables() {
             )
         `);
         
-        // Add map_link column if it doesn't exist
+        // Add missing columns if they don't exist
         try {
             await db.exec(`ALTER TABLE resorts ADD COLUMN map_link TEXT`);
+        } catch (err) {
+            // Column already exists, ignore error
+        }
+        
+        try {
+            await db.exec(`ALTER TABLE resorts ADD COLUMN peak_price INTEGER`);
+        } catch (err) {
+            // Column already exists, ignore error
+        }
+        
+        try {
+            await db.exec(`ALTER TABLE resorts ADD COLUMN off_peak_price INTEGER`);
+        } catch (err) {
+            // Column already exists, ignore error
+        }
+        
+        try {
+            await db.exec(`ALTER TABLE resorts ADD COLUMN peak_season_start TEXT`);
+        } catch (err) {
+            // Column already exists, ignore error
+        }
+        
+        try {
+            await db.exec(`ALTER TABLE resorts ADD COLUMN peak_season_end TEXT`);
         } catch (err) {
             // Column already exists, ignore error
         }
