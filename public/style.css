@@ -788,8 +788,9 @@ video.resort-image:hover::-webkit-media-controls {
     transition: all 0.4s ease;
     box-shadow: 0 8px 25px rgba(238, 90, 36, 0.4);
     font-family: 'Poppins', sans-serif;
-    display: inline-block;
+    display: block;
     min-width: 220px;
+    margin: 0 auto 1rem auto;
 }
 
 .book-btn:hover {
