@@ -271,10 +271,10 @@ app.post('/api/bookings', async (req, res) => {
             bookingDate: new Date().toISOString()
         };
         
-        // Real-time sync to booking history service
+        // Real-time sync to all services
         try {
             const axios = require('axios');
-            await axios.post('http://localhost:3002/api/sync/booking-created', {
+            const bookingData = {
                 id: bookingId,
                 resort_id: parseInt(resortId),
                 resort_name: resort.name,
@@ -288,9 +288,18 @@ app.post('/api/bookings', async (req, res) => {
                 payment_id: paymentId,
                 status: 'confirmed',
                 booking_date: new Date().toISOString()
-            }, {
+            };
+            
+            // Sync to booking history service
+            await axios.post('http://localhost:3002/api/sync/booking-created', bookingData, {
                 headers: { 'x-internal-service': 'main-server' }
-            }).catch(e => console.log('Booking sync failed:', e.message));
+            }).catch(e => console.log('Booking history sync failed:', e.message));
+            
+            // Sync to admin panel
+            await axios.post('http://localhost:3001/api/sync/booking-created', bookingData, {
+                headers: { 'x-internal-service': 'main-server' }
+            }).catch(e => console.log('Admin panel sync failed:', e.message));
+            
         } catch (e) {
             console.log('Booking sync error:', e.message);
         }
