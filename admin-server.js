@@ -163,12 +163,7 @@ app.post('/api/upload', csrfProtection, requireAuth, upload.array('media', 10), 
     }
 });
 
-app.post('/api/resorts', (req, res, next) => {
-    if (!req.headers['x-csrf-token']) {
-        return res.status(403).json({ error: 'CSRF token required' });
-    }
-    next();
-}, async (req, res) => {
+app.post('/api/resorts', async (req, res) => {
     try {
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
@@ -209,6 +204,7 @@ app.post('/api/resorts', (req, res, next) => {
 });
 
 app.put('/api/resorts/:id', async (req, res) => {
+    console.log('Update resort request:', req.params.id, req.body);
     try {
         const id = parseInt(req.params.id);
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
