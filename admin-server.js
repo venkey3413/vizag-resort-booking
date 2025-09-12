@@ -471,6 +471,15 @@ app.post('/api/sync/booking-created', (req, res) => {
     res.json({ success: true });
 });
 
+app.post('/api/sync/booking-deleted', (req, res) => {
+    console.log('Booking deletion sync received:', JSON.stringify({ id: req.body.id }));
+    
+    // Emit booking deleted event
+    io.emit('bookingDeleted', req.body);
+    
+    res.json({ success: true });
+});
+
 app.post('/api/sync/resort-updated', (req, res) => {
     console.log('Resort update sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
     io.emit('resortUpdated', req.body);

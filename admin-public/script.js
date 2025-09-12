@@ -30,6 +30,13 @@ function setupSocketIO() {
         loadDashboard();
     });
     
+    socket.on('bookingDeleted', (data) => {
+        console.log('Booking deleted:', data.id);
+        showNotification(`Booking ${data.id} deleted`, 'info');
+        loadDashboard(); // Reload dashboard to update stats and recent bookings
+        loadCalendarData(); // Reload calendar to remove deleted booking
+    });
+    
     socket.on('disconnect', () => {
         console.log('Admin panel disconnected from server');
     });
