@@ -163,7 +163,16 @@ app.post('/api/upload', csrfProtection, requireAuth, upload.array('media', 10), 
     }
 });
 
-app.post('/api/resorts', async (req, res) => {
+app.post('/api/resorts', (req, res, next) => {
+    // Custom CSRF validation
+    const token = req.headers['x-csrf-token'];
+    const sessionToken = req.session.csrfToken;
+    
+    if (!token || !sessionToken || token !== sessionToken) {
+        return res.status(403).json({ error: 'Invalid CSRF token' });
+    }
+    next();
+}, async (req, res) => {
     try {
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
