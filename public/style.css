@@ -484,10 +484,11 @@ section {
     border-radius: 5px;
     cursor: pointer;
     font-size: 0.9rem;
-    margin-top: 10px;
+    margin-top: 0;
     transition: all 0.3s ease;
     display: inline-block;
     float: left;
+    line-height: 1;
 }
 
 .review-btn:hover {
@@ -808,23 +809,23 @@ video.resort-image:hover::-webkit-media-controls {
 }
 
 .policy-link {
-    margin-top: 1rem;
     display: inline-block;
     float: right;
+    margin-top: 0;
+    line-height: 1;
 }
 
 .pdf-link {
     color: #667eea;
     text-decoration: none;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 500;
     display: inline-block;
-    padding: 12px 30px;
-    border-radius: 8px;
+    padding: 6px 10px;
+    border-radius: 4px;
     transition: all 0.3s ease;
     background: rgba(102, 126, 234, 0.1);
     width: auto;
-    min-width: 180px;
 }
 
 .pdf-link:hover {
