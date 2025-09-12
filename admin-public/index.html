@@ -17,6 +17,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('add-resort')">Add Resort</button>
             <button class="tab-btn" onclick="showTab('manage-resorts')">Manage Resorts</button>
+            <button class="tab-btn" onclick="showTab('discount-codes')">Discount Codes</button>
         </div>
 
         <div id="add-resort" class="tab-content active">
@@ -98,6 +99,49 @@ https://resort3413.s3.amazonaws.com/public/images/image2.jpg"></textarea>
         <div id="manage-resorts" class="tab-content">
             <h2>Manage Resorts</h2>
             <div id="resortsGrid" class="resorts-grid"></div>
+        </div>
+
+        <div id="discount-codes" class="tab-content">
+            <h2>Discount Codes</h2>
+            <form id="addDiscountForm" class="resort-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Discount Code *</label>
+                        <input type="text" name="code" required placeholder="SAVE20">
+                    </div>
+                    <div class="form-group">
+                        <label>Discount Type *</label>
+                        <select name="discountType" required>
+                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount (₹)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Discount Value *</label>
+                        <input type="number" name="discountValue" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Minimum Amount (₹)</label>
+                        <input type="number" name="minAmount" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Max Uses</label>
+                        <input type="number" name="maxUses" min="1" placeholder="Unlimited">
+                    </div>
+                    <div class="form-group">
+                        <label>Valid Until</label>
+                        <input type="date" name="validUntil">
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-plus"></i> Add Discount Code
+                </button>
+            </form>
+            <div id="discountCodesGrid" class="resorts-grid"></div>
         </div>
     </div>
 

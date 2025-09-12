@@ -24,6 +24,7 @@ async function getCSRFToken() {
 function setupEventListeners() {
     document.getElementById('addResortForm').addEventListener('submit', handleAddResort);
     document.getElementById('editResortForm').addEventListener('submit', handleEditResort);
+    document.getElementById('addDiscountForm').addEventListener('submit', handleAddDiscount);
 }
 
 async function loadResorts() {
@@ -33,6 +34,85 @@ async function loadResorts() {
         displayResorts();
     } catch (error) {
         console.error('Error loading resorts:', error);
+    }
+}
+
+let discountCodes = [];
+
+async function loadDiscountCodes() {
+    try {
+        const response = await fetch('/api/discount-codes');
+        discountCodes = await response.json();
+        displayDiscountCodes();
+    } catch (error) {
+        console.error('Error loading discount codes:', error);
+    }
+}
+
+function displayDiscountCodes() {
+    const grid = document.getElementById('discountCodesGrid');
+    
+    grid.innerHTML = discountCodes.map(code => `
+        <div class="resort-card">
+            <div class="resort-status">
+                <div>
+                    <h4>${code.code}</h4>
+                    <p>${code.discount_type === 'percentage' ? code.discount_value + '%' : '₹' + code.discount_value} off</p>
+                    <small>Used: ${code.used_count}/${code.max_uses || '∞'} | Min: ₹${code.min_amount}</small>
+                </div>
+                <span class="status-badge ${code.active ? 'available' : 'unavailable'}">
+                    ${code.active ? 'Active' : 'Inactive'}
+                </span>
+            </div>
+            <div class="resort-actions">
+                <button class="availability-btn ${code.active ? 'available' : 'unavailable'}" 
+                        onclick="toggleDiscountStatus(${code.id}, ${!code.active})">
+                    <i class="fas fa-${code.active ? 'eye-slash' : 'eye'}"></i> 
+                    ${code.active ? 'Disable' : 'Enable'}
+                </button>
+                <button class="delete-btn" onclick="deleteDiscountCode(${code.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function handleAddDiscount(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    
+    const discountData = {
+        code: formData.get('code').toUpperCase(),
+        discountType: formData.get('discountType'),
+        discountValue: parseInt(formData.get('discountValue')),
+        minAmount: parseInt(formData.get('minAmount')) || 0,
+        maxUses: parseInt(formData.get('maxUses')) || null,
+        validUntil: formData.get('validUntil') || null
+    };
+    
+    try {
+        const response = await fetch('/api/discount-codes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
+            },
+            credentials: 'include',
+            body: JSON.stringify(discountData)
+        });
+        
+        if (response.ok) {
+            showNotification('Discount code added successfully!', 'success');
+            e.target.reset();
+            loadDiscountCodes();
+        } else {
+            const error = await response.json();
+            showNotification('Error: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        showNotification('Error adding discount code: ' + error.message, 'error');
     }
 }
 

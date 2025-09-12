@@ -125,6 +125,23 @@ async function createTables() {
             )
         `);
 
+        // Discount codes table
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS discount_codes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code TEXT UNIQUE NOT NULL,
+                discount_type TEXT NOT NULL, -- 'percentage' or 'fixed'
+                discount_value INTEGER NOT NULL,
+                min_amount INTEGER DEFAULT 0,
+                max_uses INTEGER DEFAULT NULL,
+                used_count INTEGER DEFAULT 0,
+                valid_from DATE DEFAULT CURRENT_DATE,
+                valid_until DATE DEFAULT NULL,
+                active INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         // Insert default resorts if table is empty
         const result = await db.get('SELECT COUNT(*) as count FROM resorts');
         if (result.count === 0) {
