@@ -66,7 +66,7 @@ async function generateInvoicePDF(booking, resort) {
             doc.fontSize(12)
                .text(`Base Amount (${nights} nights): ₹${baseAmount.toLocaleString()}`, 50, 390)
                .text(`Platform Fee (1.5%): ₹${platformFee.toLocaleString()}`, 50, 410)
-               .text(`Total Amount: ₹${booking.totalPrice.toLocaleString()}`, 50, 430, { underline: true });
+               .text(`Total Amount: ₹${(booking.total_price || booking.totalPrice || 0).toLocaleString()}`, 50, 430, { underline: true });
             
             // Footer
             doc.fontSize(10)
