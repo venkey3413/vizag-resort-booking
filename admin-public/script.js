@@ -476,8 +476,7 @@ async function handleAddResort(e) {
         const response = await fetch('/api/resorts', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfData.token
+                'Content-Type': 'application/json'
             },
             credentials: 'include',
             body: JSON.stringify(resortData)
