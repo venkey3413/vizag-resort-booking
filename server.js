@@ -6,7 +6,7 @@ const socketIo = require('socket.io');
 const csrf = require('csurf');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
 const { upload } = require('./s3-config');
-const { startBackupSchedule } = require('./backup-service');
+// const { startBackupSchedule } = require('./backup-service');
 
 const app = express();
 const server = http.createServer(app);
@@ -57,8 +57,8 @@ app.get('/api/csrf-token', csrfProtection, (req, res) => {
 // Initialize database on startup
 initDatabase();
 
-// Start backup schedule
-startBackupSchedule();
+// Backup schedule disabled
+// startBackupSchedule();
 
 // Get resorts from database
 async function getResorts() {
@@ -262,15 +262,7 @@ app.post('/api/bookings', csrfProtection, async (req, res) => {
             console.log('Booking sync error:', e.message);
         }
         
-        // Generate PDF invoice and store in S3
-        let invoiceUrl = '';
-        try {
-            const { generateInvoicePDF } = require('./invoice-service');
-            invoiceUrl = await generateInvoicePDF(booking, resort);
-            console.log('Invoice PDF generated:', invoiceUrl);
-        } catch (invoiceError) {
-            console.error('Invoice generation failed:', invoiceError.message);
-        }
+        // Invoice generation disabled
         
         // Send booking confirmation email
         try {
