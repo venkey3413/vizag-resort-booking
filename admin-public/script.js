@@ -3,9 +3,108 @@ let csrfToken = '';
 
 document.addEventListener('DOMContentLoaded', function() {
     getCSRFToken();
+    loadDashboard();
     loadResorts();
     setupEventListeners();
 });
+
+let dashboardData = {};
+
+async function loadDashboard() {
+    try {
+        const response = await fetch('/api/analytics/dashboard');
+        dashboardData = await response.json();
+        updateDashboard();
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+    }
+}
+
+function updateDashboard() {
+    // Update stats cards
+    document.getElementById('totalResorts').textContent = dashboardData.totalResorts || 0;
+    document.getElementById('totalBookings').textContent = dashboardData.totalBookings || 0;
+    document.getElementById('totalRevenue').textContent = `₹${(dashboardData.totalRevenue || 0).toLocaleString()}`;
+    document.getElementById('todayBookings').textContent = dashboardData.todayBookings || 0;
+    
+    // Update location stats
+    updateLocationStats();
+    
+    // Update recent bookings
+    updateRecentBookings();
+    
+    // Update revenue chart
+    updateRevenueChart();
+}
+
+function updateLocationStats() {
+    const container = document.getElementById('locationStats');
+    const locations = dashboardData.locationStats || [];
+    
+    container.innerHTML = locations.map(location => `
+        <div class="location-item">
+            <span class="location-name">${location.location}</span>
+            <span class="location-count">${location.count}</span>
+        </div>
+    `).join('');
+}
+
+function updateRecentBookings() {
+    const container = document.getElementById('recentBookingsList');
+    const bookings = dashboardData.recentBookings || [];
+    
+    container.innerHTML = bookings.map(booking => `
+        <div class="booking-item">
+            <div class="booking-info">
+                <div class="booking-guest">${booking.guest_name}</div>
+                <div class="booking-resort">${booking.resort_name}</div>
+            </div>
+            <div class="booking-amount">₹${(booking.total_price || 0).toLocaleString()}</div>
+        </div>
+    `).join('');
+}
+
+function updateRevenueChart() {
+    const canvas = document.getElementById('revenueChart');
+    const ctx = canvas.getContext('2d');
+    const monthlyData = dashboardData.monthlyRevenue || [];
+    
+    // Simple bar chart
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (monthlyData.length === 0) {
+        ctx.fillStyle = '#ccc';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data available', canvas.width / 2, canvas.height / 2);
+        return;
+    }
+    
+    const maxRevenue = Math.max(...monthlyData.map(d => d.revenue));
+    const barWidth = canvas.width / monthlyData.length;
+    const barMaxHeight = canvas.height - 40;
+    
+    monthlyData.forEach((data, index) => {
+        const barHeight = (data.revenue / maxRevenue) * barMaxHeight;
+        const x = index * barWidth;
+        const y = canvas.height - barHeight - 20;
+        
+        // Draw bar
+        ctx.fillStyle = '#667eea';
+        ctx.fillRect(x + 10, y, barWidth - 20, barHeight);
+        
+        // Draw month label
+        ctx.fillStyle = '#333';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(data.month, x + barWidth / 2, canvas.height - 5);
+        
+        // Draw value
+        ctx.fillStyle = '#666';
+        ctx.font = '10px Arial';
+        ctx.fillText(`₹${data.revenue.toLocaleString()}`, x + barWidth / 2, y - 5);
+    });
+}
 
 async function getCSRFToken() {
     try {
