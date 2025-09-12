@@ -273,6 +273,8 @@ function showBookedDatesInfo(resort) {
     }
 }
 
+let appliedDiscount = null;
+
 function calculateTotal() {
     const resortId = parseInt(document.getElementById('bookingResortId').value);
     const resort = resorts.find(r => r.id === resortId);
@@ -293,12 +295,68 @@ function calculateTotal() {
     
     const bookingAmount = basePrice * nights;
     const platformFee = Math.round(bookingAmount * 0.015); // 1.5% platform fee
-    const total = bookingAmount + platformFee;
+    let discountAmount = 0;
+    
+    // Apply discount if available
+    if (appliedDiscount) {
+        if (appliedDiscount.discount_type === 'percentage') {
+            discountAmount = Math.round(bookingAmount * (appliedDiscount.discount_value / 100));
+        } else {
+            discountAmount = appliedDiscount.discount_value;
+        }
+        
+        // Show discount row
+        document.getElementById('discountRow').style.display = 'flex';
+        document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
+    } else {
+        document.getElementById('discountRow').style.display = 'none';
+    }
+    
+    const total = Math.max(0, bookingAmount + platformFee - discountAmount);
     
     document.getElementById('pricePerNight').textContent = `₹${basePrice.toLocaleString()} per night`;
     document.getElementById('bookingAmount').textContent = `₹${bookingAmount.toLocaleString()}`;
     document.getElementById('platformFee').textContent = `₹${platformFee.toLocaleString()}`;
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
+}
+
+async function applyDiscount() {
+    const code = document.getElementById('discountCode').value.trim().toUpperCase();
+    const messageDiv = document.getElementById('discountMessage');
+    
+    if (!code) {
+        messageDiv.innerHTML = '<span style="color: #f44336;">Please enter a discount code</span>';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/discount-codes/validate/${code}`);
+        const result = await response.json();
+        
+        if (response.ok && result.valid) {
+            const bookingAmount = parseInt(document.getElementById('bookingAmount').textContent.replace(/[₹,]/g, ''));
+            
+            if (bookingAmount < result.discount.min_amount) {
+                messageDiv.innerHTML = `<span style="color: #f44336;">Minimum order amount ₹${result.discount.min_amount} required</span>`;
+                return;
+            }
+            
+            appliedDiscount = result.discount;
+            const discountText = result.discount.discount_type === 'percentage' 
+                ? `${result.discount.discount_value}% off` 
+                : `₹${result.discount.discount_value} off`;
+            messageDiv.innerHTML = `<span style="color: #27ae60;">✓ ${discountText} applied!</span>`;
+            calculateTotal();
+        } else {
+            messageDiv.innerHTML = `<span style="color: #f44336;">${result.message || 'Invalid discount code'}</span>`;
+            appliedDiscount = null;
+            calculateTotal();
+        }
+    } catch (error) {
+        messageDiv.innerHTML = '<span style="color: #f44336;">Error validating discount code</span>';
+        appliedDiscount = null;
+        calculateTotal();
+    }
 }
 
 function closeModal() {

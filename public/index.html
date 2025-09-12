@@ -73,6 +73,10 @@
                         <span class="price-label">Platform Fee (1.5%):</span>
                         <span class="price-value" id="platformFee">₹0</span>
                     </div>
+                    <div class="price-info" id="discountRow" style="display: none;">
+                        <span class="price-label">Discount:</span>
+                        <span class="price-value" id="discountAmount" style="color: #27ae60;">-₹0</span>
+                    </div>
                     <div class="total-info">
                         <span class="total-label">Total Amount:</span>
                         <span class="total-value" id="totalAmount">₹0</span>
@@ -109,6 +113,15 @@
                     <label>Number of Guests</label>
                     <input type="number" id="guests" min="1" value="1" required onchange="calculateTotal()">
                     <small id="maxGuestsInfo">Max: <span id="maxGuestsCount">20</span> guests</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Discount Code (Optional)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="discountCode" name="discountCode" placeholder="Enter discount code" style="flex: 1;">
+                        <button type="button" onclick="applyDiscount()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">Apply</button>
+                    </div>
+                    <div id="discountMessage" style="margin-top: 5px; font-size: 0.9em;"></div>
                 </div>
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-calendar-check"></i> Book Now (Pay at Resort)
