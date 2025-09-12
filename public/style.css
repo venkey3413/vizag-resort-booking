@@ -775,7 +775,7 @@ video.resort-image:hover::-webkit-media-controls {
 .book-btn {
     background: linear-gradient(135deg, #ff6b6b, #ee5a24);
     color: white;
-    padding: 12px 20px;
+    padding: 12px 30px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -786,6 +786,7 @@ video.resort-image:hover::-webkit-media-controls {
     box-shadow: 0 8px 25px rgba(238, 90, 36, 0.4);
     font-family: 'Poppins', sans-serif;
     display: inline-block;
+    min-width: 180px;
 }
 
 .book-btn:hover {
