@@ -1,4 +1,7 @@
 let resorts = [];
+let filteredResorts = [];
+let currentPage = 1;
+const itemsPerPage = 6;
 let socket;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -82,7 +85,8 @@ async function loadResorts() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         resorts = await response.json();
-        displayResorts();
+        filteredResorts = resorts;
+        displayResortsWithPagination();
         populateLocationFilter();
         populateAmenityFilter();
         hideLoading();
@@ -275,7 +279,7 @@ function filterResorts() {
     const amenityFilter = document.getElementById('amenityFilter').value;
     const guestFilter = document.getElementById('guestFilter').value;
     
-    const filtered = resorts.filter(resort => {
+    filteredResorts = resorts.filter(resort => {
         // Search filter
         const matchesSearch = resort.name.toLowerCase().includes(searchTerm) || 
                             resort.location.toLowerCase().includes(searchTerm) ||
@@ -308,7 +312,79 @@ function filterResorts() {
                matchesAmenity && matchesGuests;
     });
     
-    displayResorts(filtered);
+    currentPage = 1;
+    displayResortsWithPagination();
+}
+
+function displayResortsWithPagination() {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedResorts = filteredResorts.slice(startIndex, endIndex);
+    
+    displayResorts(paginatedResorts);
+    renderPagination();
+}
+
+function renderPagination() {
+    const totalPages = Math.ceil(filteredResorts.length / itemsPerPage);
+    const paginationContainer = document.getElementById('pagination');
+    
+    if (totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '';
+    
+    // Previous button
+    paginationHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+        <i class="fas fa-chevron-left"></i> Previous
+    </button>`;
+    
+    // Page numbers
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+    
+    if (startPage > 1) {
+        paginationHTML += `<button onclick="changePage(1)">1</button>`;
+        if (startPage > 2) {
+            paginationHTML += `<span class="page-info">...</span>`;
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `<button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>${i}</button>`;
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += `<span class="page-info">...</span>`;
+        }
+        paginationHTML += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+    }
+    
+    // Next button
+    paginationHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+        Next <i class="fas fa-chevron-right"></i>
+    </button>`;
+    
+    // Results info
+    const startResult = (currentPage - 1) * itemsPerPage + 1;
+    const endResult = Math.min(currentPage * itemsPerPage, filteredResorts.length);
+    paginationHTML += `<span class="page-info">Showing ${startResult}-${endResult} of ${filteredResorts.length} resorts</span>`;
+    
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+function changePage(page) {
+    const totalPages = Math.ceil(filteredResorts.length / itemsPerPage);
+    if (page < 1 || page > totalPages) return;
+    
+    currentPage = page;
+    displayResortsWithPagination();
+    
+    // Scroll to top of resorts section
+    document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
 }
 
 function clearFilters() {
@@ -317,7 +393,9 @@ function clearFilters() {
     document.getElementById('priceFilter').value = '';
     document.getElementById('amenityFilter').value = '';
     document.getElementById('guestFilter').value = '';
-    displayResorts(resorts);
+    filteredResorts = resorts;
+    currentPage = 1;
+    displayResortsWithPagination();
 }
 
 function openBookingModal(resortId) {
