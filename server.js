@@ -322,8 +322,8 @@ app.post('/api/bookings', (req, res, next) => {
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: 'vizagresortbooking@gmail.com',
-                    pass: process.env.GMAIL_APP_PASSWORD
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_PASS
                 }
             });
             
@@ -407,7 +407,7 @@ app.post('/api/bookings', (req, res, next) => {
                     </div>
                     
                     <div class="footer">
-                        <p>📧 vizagresortbooking@gmail.com</p>
+                        <p>📧 ${process.env.GMAIL_USER}</p>
                         <p>Thank you for choosing our resort. We look forward to hosting you!</p>
                     </div>
                 </div>
@@ -416,7 +416,7 @@ app.post('/api/bookings', (req, res, next) => {
             `;
             
             await transporter.sendMail({
-                from: 'vizagresortbooking@gmail.com',
+                from: process.env.GMAIL_USER,
                 to: email,
                 subject: `Booking Confirmation - ${bookingReference}`,
                 html: emailHtml
