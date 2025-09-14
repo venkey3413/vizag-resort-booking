@@ -175,16 +175,7 @@ app.get('/api/test', (req, res) => {
 });
 
 // Book a resort
-app.post('/api/bookings', (req, res, next) => {
-    // Custom CSRF validation
-    const token = req.headers['x-csrf-token'];
-    const sessionToken = req.session.csrfToken;
-    
-    if (!token || !sessionToken || token !== sessionToken) {
-        return res.status(403).json({ error: 'Invalid CSRF token' });
-    }
-    next();
-}, async (req, res) => {
+app.post('/api/bookings', async (req, res) => {
     console.log('Booking request received:', req.body);
     try {
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, paymentId } = req.body;

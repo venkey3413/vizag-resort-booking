@@ -106,16 +106,7 @@ app.get('/api/transactions', async (req, res) => {
 });
 
 // Update payment status
-app.patch('/api/bookings/:id/payment', (req, res, next) => {
-    // Custom CSRF validation
-    const token = req.headers['x-csrf-token'];
-    const sessionToken = req.session.csrfToken;
-    
-    if (!token || !sessionToken || token !== sessionToken) {
-        return res.status(403).json({ error: 'Invalid CSRF token' });
-    }
-    next();
-}, async (req, res) => {
+app.patch('/api/bookings/:id/payment', async (req, res) => {
     try {
         const { payment_status } = req.body;
         const bookingId = req.params.id;
@@ -135,16 +126,7 @@ app.patch('/api/bookings/:id/payment', (req, res, next) => {
 });
 
 // Delete booking
-app.delete('/api/bookings/:id', (req, res, next) => {
-    // Custom CSRF validation
-    const token = req.headers['x-csrf-token'];
-    const sessionToken = req.session.csrfToken;
-    
-    if (!token || !sessionToken || token !== sessionToken) {
-        return res.status(403).json({ error: 'Invalid CSRF token' });
-    }
-    next();
-}, async (req, res) => {
+app.delete('/api/bookings/:id', async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });
