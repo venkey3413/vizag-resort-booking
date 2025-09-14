@@ -45,8 +45,15 @@ function requireAuth(req, res, next) {
     next();
 }
 
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-    res.json({ token: req.csrfToken() });
+app.get('/api/csrf-token', (req, res) => {
+    try {
+        const token = require('crypto').randomBytes(32).toString('hex');
+        req.session.csrfToken = token;
+        res.json({ token: token });
+    } catch (error) {
+        console.error('CSRF token error:', error);
+        res.status(500).json({ error: 'Failed to generate CSRF token' });
+    }
 });
 
 let db;
@@ -55,7 +62,7 @@ let db;
 async function initDB() {
     try {
         db = await open({
-            filename: './resort_booking.db',
+            filename: './data/resort_booking.db',
             driver: sqlite3.Database
         });
         console.log('✅ Booking server database connected');
@@ -99,7 +106,16 @@ app.get('/api/transactions', async (req, res) => {
 });
 
 // Update payment status
-app.patch('/api/bookings/:id/payment', async (req, res) => {
+app.patch('/api/bookings/:id/payment', (req, res, next) => {
+    // Custom CSRF validation
+    const token = req.headers['x-csrf-token'];
+    const sessionToken = req.session.csrfToken;
+    
+    if (!token || !sessionToken || token !== sessionToken) {
+        return res.status(403).json({ error: 'Invalid CSRF token' });
+    }
+    next();
+}, async (req, res) => {
     try {
         const { payment_status } = req.body;
         const bookingId = req.params.id;
@@ -119,7 +135,16 @@ app.patch('/api/bookings/:id/payment', async (req, res) => {
 });
 
 // Delete booking
-app.delete('/api/bookings/:id', async (req, res) => {
+app.delete('/api/bookings/:id', (req, res, next) => {
+    // Custom CSRF validation
+    const token = req.headers['x-csrf-token'];
+    const sessionToken = req.session.csrfToken;
+    
+    if (!token || !sessionToken || token !== sessionToken) {
+        return res.status(403).json({ error: 'Invalid CSRF token' });
+    }
+    next();
+}, async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });

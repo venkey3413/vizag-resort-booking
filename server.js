@@ -222,7 +222,7 @@ app.post('/api/bookings', (req, res, next) => {
         const today = new Date().toISOString().split('T')[0];
         const duplicateBooking = await db().get(
             'SELECT id FROM bookings WHERE (email = ? OR phone = ?) AND DATE(booking_date) = ? AND status = "confirmed"',
-            [email, phone, today]
+            [encrypt(email), encrypt(phone), today]
         );
         
         if (duplicateBooking) {
@@ -270,13 +270,13 @@ app.post('/api/bookings', (req, res, next) => {
             resortId: parseInt(resortId),
             resortName: resort.name,
             guestName,
-            email: decrypt(email),
-            phone: decrypt(phone),
+            email,
+            phone,
             checkIn,
             checkOut,
             guests: guestCount,
             totalPrice,
-            paymentId: decrypt(paymentId),
+            paymentId,
             status: 'confirmed',
             bookingDate: new Date().toISOString()
         };
@@ -418,7 +418,7 @@ app.post('/api/bookings', (req, res, next) => {
             
             await transporter.sendMail({
                 from: process.env.GMAIL_USER,
-                to: decrypt(email),
+                to: email,
                 subject: `Booking Confirmation - ${bookingReference}`,
                 html: emailHtml
             });
