@@ -185,7 +185,20 @@ app.post('/api/resorts', async (req, res) => {
         };
         
         // Real-time sync to main website
-        await syncServices('resort-added', newResort);
+        try {
+            const axios = require('axios');
+            await axios.post('http://localhost:3000/api/sync/resort-added', newResort, {
+                headers: { 'x-internal-service': 'admin-server' },
+                timeout: 2000
+            }).catch(e => console.log('Main server sync failed:', e.message));
+            
+            await axios.post('http://localhost:3002/api/sync/resort-added', newResort, {
+                headers: { 'x-internal-service': 'admin-server' },
+                timeout: 2000
+            }).catch(e => console.log('Booking server sync failed:', e.message));
+        } catch (e) {
+            console.log('Sync error:', e.message);
+        }
         
         // Emit real-time update to admin clients
         io.emit('resortAdded', newResort);
@@ -211,7 +224,20 @@ app.put('/api/resorts/:id', async (req, res) => {
         const updatedResort = { id, name, location, price: parseInt(price), description, images, videos, amenities };
         
         // Real-time sync to main website
-        await syncServices('resort-updated', updatedResort);
+        try {
+            const axios = require('axios');
+            await axios.post('http://localhost:3000/api/sync/resort-updated', updatedResort, {
+                headers: { 'x-internal-service': 'admin-server' },
+                timeout: 2000
+            }).catch(e => console.log('Main server sync failed:', e.message));
+            
+            await axios.post('http://localhost:3002/api/sync/resort-updated', updatedResort, {
+                headers: { 'x-internal-service': 'admin-server' },
+                timeout: 2000
+            }).catch(e => console.log('Booking server sync failed:', e.message));
+        } catch (e) {
+            console.log('Sync error:', e.message);
+        }
         
         // Emit real-time update to admin clients
         io.emit('resortUpdated', updatedResort);
