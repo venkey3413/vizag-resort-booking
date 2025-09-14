@@ -52,6 +52,7 @@ AWS_REGION=us-east-1
 # AWS Cognito Configuration
 COGNITO_USER_POOL_ID=your_cognito_user_pool_id
 COGNITO_CLIENT_ID=your_cognito_client_id
+COGNITO_CLIENT_SECRET=your_cognito_client_secret
 
 # JWT Configuration
 JWT_SECRET=your-jwt-secret-key

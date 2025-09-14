@@ -17,17 +17,35 @@ const COGNITO_CONFIG = {
     Region: process.env.AWS_REGION || 'us-east-1'
 };
 
+// Generate SECRET_HASH for Cognito client secret
+function generateSecretHash(username, clientId, clientSecret) {
+    const crypto = require('crypto');
+    const message = username + clientId;
+    return crypto.createHmac('sha256', clientSecret).update(message).digest('base64');
+}
+
 // Admin authentication
 async function authenticateAdmin(username, password) {
     try {
+        const authParameters = {
+            USERNAME: username,
+            PASSWORD: password
+        };
+        
+        // Add SECRET_HASH if client secret is configured
+        if (process.env.COGNITO_CLIENT_SECRET) {
+            authParameters.SECRET_HASH = generateSecretHash(
+                username, 
+                COGNITO_CONFIG.ClientId, 
+                process.env.COGNITO_CLIENT_SECRET
+            );
+        }
+        
         const params = {
             AuthFlow: 'ADMIN_NO_SRP_AUTH',
             UserPoolId: COGNITO_CONFIG.UserPoolId,
             ClientId: COGNITO_CONFIG.ClientId,
-            AuthParameters: {
-                USERNAME: username,
-                PASSWORD: password
-            }
+            AuthParameters: authParameters
         };
 
         const result = await cognito.adminInitiateAuth(params).promise();
