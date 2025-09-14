@@ -26,7 +26,7 @@ app.use((req, res, next) => {
     res.removeHeader('Cross-Origin-Opener-Policy');
     res.removeHeader('Origin-Agent-Cluster');
     res.removeHeader('Strict-Transport-Security');
-    res.setHeader('Content-Security-Policy', 'default-src * data: blob: filesystem: about: ws: wss: \'unsafe-inline\' \'unsafe-eval\'; script-src * data: blob: \'unsafe-inline\' \'unsafe-eval\'; connect-src * data: blob: \'unsafe-inline\'; img-src * data: blob: \'unsafe-inline\'; frame-src * data: blob:; style-src * data: blob: \'unsafe-inline\'; font-src * data: blob: \'unsafe-inline\';');
+    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';");
     next();
 });
 
