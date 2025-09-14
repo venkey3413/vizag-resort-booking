@@ -198,7 +198,7 @@ app.post('/api/upload', upload.array('media', 10), (req, res) => {
     }
 });
 
-app.post('/api/resorts', cognitoAuth, async (req, res) => {
+app.post('/api/resorts', async (req, res) => {
     try {
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
