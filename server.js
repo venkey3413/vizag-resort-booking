@@ -196,24 +196,40 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(400).json({ error: 'Selected dates are not available. Please choose different dates.' });
         }
         
-        // Check for duplicate booking (same email/phone on same day)
+        // Check for duplicate booking by decrypting existing bookings
         const today = new Date().toISOString().split('T')[0];
-        const todayBooking = await db().get(
-            'SELECT id FROM bookings WHERE (email = ? OR phone = ?) AND DATE(booking_date) = ? AND status = "confirmed"',
-            [encrypt(email), encrypt(phone), today]
+        const existingBookings = await db().all(
+            'SELECT email, phone, booking_date FROM bookings WHERE status = "confirmed"'
         );
+        
+        // Check same day booking
+        const todayBooking = existingBookings.find(booking => {
+            try {
+                const decryptedEmail = decrypt(booking.email);
+                const decryptedPhone = decrypt(booking.phone);
+                const bookingDate = booking.booking_date.split('T')[0];
+                return (decryptedEmail === email || decryptedPhone === phone) && bookingDate === today;
+            } catch (e) {
+                return false;
+            }
+        });
         
         if (todayBooking) {
             return res.status(400).json({ error: 'Only one booking per day allowed with the same email or phone number' });
         }
         
         // Check total bookings limit (max 2 bookings per email/phone)
-        const totalBookings = await db().get(
-            'SELECT COUNT(*) as count FROM bookings WHERE (email = ? OR phone = ?) AND status = "confirmed"',
-            [encrypt(email), encrypt(phone)]
-        );
+        const userBookings = existingBookings.filter(booking => {
+            try {
+                const decryptedEmail = decrypt(booking.email);
+                const decryptedPhone = decrypt(booking.phone);
+                return decryptedEmail === email || decryptedPhone === phone;
+            } catch (e) {
+                return false;
+            }
+        });
         
-        if (totalBookings.count >= 2) {
+        if (userBookings.length >= 2) {
             return res.status(400).json({ error: 'Maximum 2 bookings allowed per email/phone number. Please use different contact details.' });
         }
         
