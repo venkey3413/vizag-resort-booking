@@ -198,13 +198,23 @@ app.post('/api/bookings', async (req, res) => {
         
         // Check for duplicate booking (same email/phone on same day)
         const today = new Date().toISOString().split('T')[0];
-        const duplicateBooking = await db().get(
+        const todayBooking = await db().get(
             'SELECT id FROM bookings WHERE (email = ? OR phone = ?) AND DATE(booking_date) = ? AND status = "confirmed"',
             [encrypt(email), encrypt(phone), today]
         );
         
-        if (duplicateBooking) {
+        if (todayBooking) {
             return res.status(400).json({ error: 'Only one booking per day allowed with the same email or phone number' });
+        }
+        
+        // Check total bookings limit (max 2 bookings per email/phone)
+        const totalBookings = await db().get(
+            'SELECT COUNT(*) as count FROM bookings WHERE (email = ? OR phone = ?) AND status = "confirmed"',
+            [encrypt(email), encrypt(phone)]
+        );
+        
+        if (totalBookings.count >= 2) {
+            return res.status(400).json({ error: 'Maximum 2 bookings allowed per email/phone number. Please use different contact details.' });
         }
         
         // Calculate total price
@@ -292,7 +302,30 @@ app.post('/api/bookings', async (req, res) => {
             console.log('Booking sync error:', e.message);
         }
         
-        // Invoice generation disabled
+        // Generate invoice
+        try {
+            const { generateInvoice } = require('./invoice-service');
+            await generateInvoice({
+                bookingId,
+                bookingReference,
+                guestName,
+                email,
+                phone,
+                resortName: resort.name,
+                resortLocation: resort.location,
+                checkIn,
+                checkOut,
+                guests: guestCount,
+                nights,
+                basePrice,
+                platformFee,
+                totalPrice,
+                bookingDate: new Date().toISOString()
+            });
+            console.log('Invoice generated for booking:', bookingReference);
+        } catch (invoiceError) {
+            console.error('Invoice generation failed:', invoiceError.message);
+        }
         
         // Send booking confirmation email
         try {
