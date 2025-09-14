@@ -23,15 +23,17 @@ const io = socketIo(server, {
 });
 const PORT = 3002;
 
-app.use(helmet());
-app.use(generalLimiter);
-app.use(validateOrigin);
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3002'],
-    credentials: true
-}));
+app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('booking-public'));
+
+// Disable CSP headers
+app.use((req, res, next) => {
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('Cross-Origin-Opener-Policy');
+    res.removeHeader('Origin-Agent-Cluster');
+    next();
+});
 
 // Serve index.html for root route
 app.get('/', (req, res) => {
