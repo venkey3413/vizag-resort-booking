@@ -3,13 +3,29 @@ let filteredResorts = [];
 let currentPage = 1;
 const itemsPerPage = 6;
 let socket;
+let csrfToken = '';
 
 document.addEventListener('DOMContentLoaded', function() {
+    getCSRFToken();
     loadResorts();
     setupEventListeners();
     setMinDate();
     initializeSocket();
 });
+
+async function getCSRFToken() {
+    try {
+        const response = await fetch('/api/csrf-token', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        csrfToken = data.token;
+        console.log('CSRF token obtained successfully');
+    } catch (error) {
+        console.error('Error getting CSRF token:', error);
+        csrfToken = '';
+    }
+}
 
 function initializeSocket() {
     try {
@@ -806,15 +822,11 @@ async function handleBooking(e) {
     };
     
     try {
-        // Get CSRF token first
-        const csrfResponse = await fetch('/api/csrf-token', { credentials: 'include' });
-        const csrfData = await csrfResponse.json();
-        
         const response = await fetch('/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfData.token
+                'X-CSRF-Token': csrfToken
             },
             credentials: 'include',
             body: JSON.stringify(bookingData)
