@@ -20,11 +20,13 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('admin-public'));
 
-// Disable CSP headers
+// Force HTTP and disable all security headers
 app.use((req, res, next) => {
     res.removeHeader('Content-Security-Policy');
     res.removeHeader('Cross-Origin-Opener-Policy');
     res.removeHeader('Origin-Agent-Cluster');
+    res.removeHeader('Strict-Transport-Security');
+    res.setHeader('Content-Security-Policy', 'default-src * data: blob: filesystem: about: ws: wss: \'unsafe-inline\' \'unsafe-eval\'; script-src * data: blob: \'unsafe-inline\' \'unsafe-eval\'; connect-src * data: blob: \'unsafe-inline\'; img-src * data: blob: \'unsafe-inline\'; frame-src * data: blob:; style-src * data: blob: \'unsafe-inline\'; font-src * data: blob: \'unsafe-inline\';');
     next();
 });
 
