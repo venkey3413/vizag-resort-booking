@@ -498,15 +498,11 @@ async function handleAddResort(e) {
         mapLink: formData.get('mapLink') || ''
     };
     
-    // Get CSRF token first
-    const csrfResponse = await fetch('/api/csrf-token', { credentials: 'include' });
-    const csrfData = await csrfResponse.json();
-    
     const response = await fetch('/api/resorts', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-Token': csrfData.token
+            'X-CSRF-Token': csrfToken
         },
         credentials: 'include',
         body: JSON.stringify(resortData)
@@ -588,15 +584,11 @@ async function handleEditResort(e) {
     };
     
     try {
-        // Get CSRF token
-        const csrfResponse = await fetch('/api/csrf-token', { credentials: 'include' });
-        const csrfData = await csrfResponse.json();
-        
         const response = await fetch(`/api/resorts/${resortId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfData.token
+                'X-CSRF-Token': csrfToken
             },
             credentials: 'include',
             body: JSON.stringify(resortData)
