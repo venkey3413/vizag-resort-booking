@@ -20,13 +20,15 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('booking-public'));
 
-// Force HTTP and disable all security headers
+// Completely disable all security headers
 app.use((req, res, next) => {
     res.removeHeader('Content-Security-Policy');
     res.removeHeader('Cross-Origin-Opener-Policy');
     res.removeHeader('Origin-Agent-Cluster');
     res.removeHeader('Strict-Transport-Security');
-    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';");
+    res.removeHeader('X-Content-Type-Options');
+    res.removeHeader('X-Frame-Options');
+    res.removeHeader('X-XSS-Protection');
     next();
 });
 
