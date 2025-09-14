@@ -29,7 +29,7 @@ fi
 
 # Install all dependencies
 echo "📦 Installing dependencies..."
-npm install express cors http socket.io csrf cookie-parser express-session sqlite3 multer aws-sdk nodemailer axios dotenv
+npm install express cors http socket.io csrf cookie-parser express-session sqlite3 multer aws-sdk nodemailer axios dotenv node-cron
 
 # Install PM2 globally
 echo "🔧 Installing PM2..."
@@ -40,13 +40,17 @@ if [ ! -f .env ]; then
     echo "📝 Creating .env file..."
     cat > .env << EOF
 # Gmail Configuration
-GMAIL_APP_PASSWORD=your_gmail_app_password_here
+GMAIL_USER=your-email@gmail.com
+GMAIL_PASS=your-app-password
 
 # AWS S3 Configuration
 S3_BUCKET=your_s3_bucket_name
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 AWS_REGION=us-east-1
+
+# Encryption
+ENCRYPTION_KEY=your-32-character-encryption-key
 
 # Server Configuration
 PORT=3000
@@ -58,6 +62,10 @@ ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:300
 EOF
     echo "⚠️  Please edit .env file with your actual credentials!"
 fi
+
+# Create secure directories
+mkdir -p data backups
+chmod 700 data backups
 
 # Set proper permissions
 chmod +x *.js
