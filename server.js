@@ -198,12 +198,12 @@ app.post('/api/bookings', async (req, res) => {
         
         // Check for duplicate booking by decrypting existing bookings
         const today = new Date().toISOString().split('T')[0];
-        const existingBookings = await db().all(
+        const allBookings = await db().all(
             'SELECT email, phone, booking_date FROM bookings WHERE status = "confirmed"'
         );
         
         // Check same day booking
-        const todayBooking = existingBookings.find(booking => {
+        const todayBooking = allBookings.find(booking => {
             try {
                 const decryptedEmail = decrypt(booking.email);
                 const decryptedPhone = decrypt(booking.phone);
@@ -219,7 +219,7 @@ app.post('/api/bookings', async (req, res) => {
         }
         
         // Check total bookings limit (max 2 bookings per email/phone)
-        const userBookings = existingBookings.filter(booking => {
+        const userBookings = allBookings.filter(booking => {
             try {
                 const decryptedEmail = decrypt(booking.email);
                 const decryptedPhone = decrypt(booking.phone);
