@@ -3,9 +3,15 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const csrf = require('csurf');
+const helmet = require('helmet');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
+const { 
+    generalLimiter, 
+    validateOrigin, 
+    validateJWT, 
+    generateToken 
+} = require('./security');
 
 const app = express();
 const server = http.createServer(app);
@@ -17,43 +23,20 @@ const io = socketIo(server, {
 });
 const PORT = 3002;
 
+app.use(helmet());
+app.use(generalLimiter);
+app.use(validateOrigin);
 app.use(cors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3002'],
     credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static('booking-public'));
-app.use(require('cookie-parser')());
-app.use(require('express-session')({
-    secret: 'booking-secret',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
-}));
 
-const csrfProtection = csrf({ cookie: false });
-
-function requireAuth(req, res, next) {
-    // Skip auth for internal service-to-service calls
-    if (req.headers['x-internal-service']) {
-        return next();
-    }
-    const token = req.headers.authorization;
-    if (!token) {
-        return res.status(401).json({ error: 'Authentication required' });
-    }
-    next();
-}
-
-app.get('/api/csrf-token', (req, res) => {
-    try {
-        const token = require('crypto').randomBytes(32).toString('hex');
-        req.session.csrfToken = token;
-        res.json({ token: token });
-    } catch (error) {
-        console.error('CSRF token error:', error);
-        res.status(500).json({ error: 'Failed to generate CSRF token' });
-    }
+// Generate access token for booking management
+app.post('/api/auth/token', (req, res) => {
+    const token = generateToken({ type: 'booking-management', timestamp: Date.now() });
+    res.json({ token });
 });
 
 let db;
@@ -106,7 +89,7 @@ app.get('/api/transactions', async (req, res) => {
 });
 
 // Update payment status
-app.patch('/api/bookings/:id/payment', async (req, res) => {
+app.patch('/api/bookings/:id/payment', validateJWT, async (req, res) => {
     try {
         const { payment_status } = req.body;
         const bookingId = req.params.id;
@@ -126,7 +109,7 @@ app.patch('/api/bookings/:id/payment', async (req, res) => {
 });
 
 // Delete booking
-app.delete('/api/bookings/:id', async (req, res) => {
+app.delete('/api/bookings/:id', validateJWT, async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });

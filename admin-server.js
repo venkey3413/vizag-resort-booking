@@ -3,9 +3,17 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const csrf = require('csurf');
+const helmet = require('helmet');
 const { db, initDatabase } = require('./database');
 const { upload } = require('./s3-config');
+const { 
+    generalLimiter, 
+    validateOrigin, 
+    validateJWT, 
+    generateToken, 
+    resortValidation, 
+    handleValidationErrors 
+} = require('./security');
 
 const app = express();
 const server = http.createServer(app);
@@ -17,40 +25,20 @@ const io = socketIo(server, {
 });
 const PORT = 3001;
 
+app.use(helmet());
+app.use(generalLimiter);
+app.use(validateOrigin);
 app.use(cors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3001'],
     credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static('admin-public'));
-app.use(require('cookie-parser')());
-app.use(require('express-session')({
-    secret: 'admin-secret',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
-}));
 
-const csrfProtection = csrf({ cookie: false });
-
-function requireAuth(req, res, next) {
-    // Skip auth for internal service-to-service calls
-    if (req.headers['x-internal-service']) {
-        return next();
-    }
-    // Temporarily disable auth for admin operations
-    next();
-}
-
-app.get('/api/csrf-token', (req, res) => {
-    try {
-        const token = require('crypto').randomBytes(32).toString('hex');
-        req.session.csrfToken = token;
-        res.json({ token: token });
-    } catch (error) {
-        console.error('CSRF token error:', error);
-        res.status(500).json({ error: 'Failed to generate CSRF token' });
-    }
+// Generate access token for admin
+app.post('/api/auth/token', (req, res) => {
+    const token = generateToken({ type: 'admin', timestamp: Date.now() });
+    res.json({ token });
 });
 
 // Initialize database on startup
@@ -163,7 +151,7 @@ app.post('/api/upload', upload.array('media', 10), (req, res) => {
     }
 });
 
-app.post('/api/resorts', async (req, res) => {
+app.post('/api/resorts', validateJWT, resortValidation, handleValidationErrors, async (req, res) => {
     try {
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
@@ -203,7 +191,7 @@ app.post('/api/resorts', async (req, res) => {
     }
 });
 
-app.put('/api/resorts/:id', async (req, res) => {
+app.put('/api/resorts/:id', validateJWT, resortValidation, handleValidationErrors, async (req, res) => {
     console.log('Update resort request:', req.params.id, req.body);
     try {
         const id = parseInt(req.params.id);
@@ -246,7 +234,7 @@ app.patch('/api/resorts/:id/availability', async (req, res) => {
     }
 });
 
-app.delete('/api/resorts/:id', async (req, res) => {
+app.delete('/api/resorts/:id', validateJWT, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         

@@ -825,11 +825,14 @@ async function handleBooking(e) {
     };
     
     try {
+        if (!accessToken) {
+            await getAccessToken();
+        }
+        
         const response = await fetch('/api/bookings', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
+                'Content-Type': 'application/json'
             },
             credentials: 'include',
             body: JSON.stringify(bookingData)

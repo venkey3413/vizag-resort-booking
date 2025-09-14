@@ -158,7 +158,7 @@ app.get('/api/test', (req, res) => {
     res.json({ message: 'Server is working', timestamp: new Date().toISOString() });
 });
 
-// Book a resort
+// Book a resort (public endpoint - no JWT required)
 app.post('/api/bookings', bookingLimiter, bookingValidation, handleValidationErrors, async (req, res) => {
     console.log('Booking request received:', req.body);
     try {
