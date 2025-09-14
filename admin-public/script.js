@@ -298,10 +298,15 @@ function setupEventListeners() {
 async function loadResorts() {
     try {
         const response = await fetch('/api/resorts');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         resorts = await response.json();
+        console.log('Loaded resorts:', resorts.length);
         displayResorts();
     } catch (error) {
         console.error('Error loading resorts:', error);
+        showNotification('Failed to load resorts: ' + error.message, 'error');
     }
 }
 
@@ -417,6 +422,13 @@ function showConfirmation(message) {
 
 function displayResorts() {
     const grid = document.getElementById('resortsGrid');
+    
+    console.log('Displaying resorts:', resorts);
+    
+    if (!resorts || resorts.length === 0) {
+        grid.innerHTML = '<div class="no-data">No resorts found. Add a resort to get started.</div>';
+        return;
+    }
     
     grid.innerHTML = resorts.map(resort => {
         const safeName = sanitizeHtml(resort.name || '');
