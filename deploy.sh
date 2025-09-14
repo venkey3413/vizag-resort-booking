@@ -29,7 +29,7 @@ fi
 
 # Install all dependencies
 echo "📦 Installing dependencies..."
-npm install express cors http socket.io sqlite3 sqlite multer aws-sdk nodemailer axios dotenv node-cron jsonwebtoken express-rate-limit express-validator helmet
+npm install express cors socket.io sqlite3 sqlite multer aws-sdk multer-s3 nodemailer axios dotenv node-cron jsonwebtoken express-rate-limit express-validator helmet razorpay csurf crypto
 
 # Install PM2 globally
 echo "🔧 Installing PM2..."
