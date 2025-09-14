@@ -33,6 +33,11 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('booking-public'));
 
+// Serve index.html for root route
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/booking-public/index.html');
+});
+
 // Generate access token for booking management
 app.post('/api/auth/token', (req, res) => {
     const token = generateToken({ type: 'booking-management', timestamp: Date.now() });

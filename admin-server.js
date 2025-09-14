@@ -35,6 +35,11 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('admin-public'));
 
+// Serve index.html for root route
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/admin-public/index.html');
+});
+
 // Generate access token for admin
 app.post('/api/auth/token', (req, res) => {
     const token = generateToken({ type: 'admin', timestamp: Date.now() });
