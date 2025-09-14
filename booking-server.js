@@ -37,6 +37,11 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/booking-public/index.html');
 });
 
+// Serve simple.html as backup
+app.get('/simple', (req, res) => {
+    res.sendFile(__dirname + '/booking-public/simple.html');
+});
+
 // Simple test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Booking server working' });

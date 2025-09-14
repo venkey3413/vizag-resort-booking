@@ -37,6 +37,11 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/admin-public/index.html');
 });
 
+// Serve simple.html as backup
+app.get('/simple', (req, res) => {
+    res.sendFile(__dirname + '/admin-public/simple.html');
+});
+
 // Simple test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Admin server working' });
