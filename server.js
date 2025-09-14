@@ -153,7 +153,7 @@ app.get('/api/resorts', async (req, res) => {
 });
 
 // Add new resort
-app.post('/api/resorts', csrfProtection, requireAuth, async (req, res) => {
+app.post('/api/resorts', async (req, res) => {
     try {
         const { name, location, price, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
