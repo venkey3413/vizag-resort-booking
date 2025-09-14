@@ -4,29 +4,12 @@ let currentPage = 1;
 const itemsPerPage = 6;
 let socket;
 
-let accessToken = '';
-
 document.addEventListener('DOMContentLoaded', function() {
-    getAccessToken();
     loadResorts();
     setupEventListeners();
     setMinDate();
     initializeSocket();
 });
-
-async function getAccessToken() {
-    try {
-        const response = await fetch('/api/auth/token', {
-            method: 'POST',
-            credentials: 'include'
-        });
-        const data = await response.json();
-        accessToken = data.token;
-        console.log('Access token obtained');
-    } catch (error) {
-        console.error('Error getting access token:', error);
-    }
-}
 
 
 
@@ -825,16 +808,11 @@ async function handleBooking(e) {
     };
     
     try {
-        if (!accessToken) {
-            await getAccessToken();
-        }
-        
         const response = await fetch('/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            credentials: 'include',
             body: JSON.stringify(bookingData)
         });
         
