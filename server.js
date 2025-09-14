@@ -3,19 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const helmet = require('helmet');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
 const { encrypt, decrypt } = require('./crypto-utils');
 const { upload } = require('./s3-config');
 const { startBackupSchedule } = require('./backup-service');
-const { 
-    bookingLimiter, 
-    generalLimiter, 
-    validateOrigin, 
-    generateToken, 
-    bookingValidation, 
-    handleValidationErrors 
-} = require('./security');
 
 const app = express();
 const server = http.createServer(app);
@@ -37,10 +28,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public'));
 
-// Generate access token for frontend
-app.post('/api/auth/token', (req, res) => {
-    const token = generateToken({ type: 'booking', timestamp: Date.now() });
-    res.json({ token });
+// Test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Server working', timestamp: new Date().toISOString() });
 });
 
 // Initialize database on startup
@@ -150,10 +140,7 @@ app.post('/api/resorts', async (req, res) => {
     }
 });
 
-// Test endpoint
-app.get('/api/test', (req, res) => {
-    res.json({ message: 'Server is working', timestamp: new Date().toISOString() });
-});
+
 
 // Book a resort (public endpoint - no validation required)
 app.post('/api/bookings', async (req, res) => {
