@@ -28,6 +28,11 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public'));
 
+// Serve index.html for root route
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
+
 // Test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Server working', timestamp: new Date().toISOString() });
