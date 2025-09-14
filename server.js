@@ -33,6 +33,12 @@ app.get('/api/test', (req, res) => {
     res.json({ message: 'Server working', timestamp: new Date().toISOString() });
 });
 
+// Simple booking test endpoint
+app.post('/api/test-booking', async (req, res) => {
+    console.log('Test booking:', req.body);
+    res.json({ success: true, message: 'Test booking successful', data: req.body });
+});
+
 // Initialize database on startup
 initDatabase();
 
