@@ -3,15 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const helmet = require('helmet');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
-const { 
-    generalLimiter, 
-    validateOrigin, 
-    validateJWT, 
-    generateToken 
-} = require('./security');
 
 const app = express();
 const server = http.createServer(app);
@@ -40,10 +33,9 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/booking-public/index.html');
 });
 
-// Generate access token for booking management
-app.post('/api/auth/token', (req, res) => {
-    const token = generateToken({ type: 'booking-management', timestamp: Date.now() });
-    res.json({ token });
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Booking server working' });
 });
 
 let db;
@@ -96,7 +88,7 @@ app.get('/api/transactions', async (req, res) => {
 });
 
 // Update payment status
-app.patch('/api/bookings/:id/payment', validateJWT, async (req, res) => {
+app.patch('/api/bookings/:id/payment', async (req, res) => {
     try {
         const { payment_status } = req.body;
         const bookingId = req.params.id;
@@ -116,7 +108,7 @@ app.patch('/api/bookings/:id/payment', validateJWT, async (req, res) => {
 });
 
 // Delete booking
-app.delete('/api/bookings/:id', validateJWT, async (req, res) => {
+app.delete('/api/bookings/:id', async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });

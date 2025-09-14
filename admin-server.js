@@ -3,17 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const helmet = require('helmet');
 const { db, initDatabase } = require('./database');
 const { upload } = require('./s3-config');
-const { 
-    generalLimiter, 
-    validateOrigin, 
-    validateJWT, 
-    generateToken, 
-    resortValidation, 
-    handleValidationErrors 
-} = require('./security');
 
 const app = express();
 const server = http.createServer(app);
@@ -42,10 +33,9 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/admin-public/index.html');
 });
 
-// Generate access token for admin
-app.post('/api/auth/token', (req, res) => {
-    const token = generateToken({ type: 'admin', timestamp: Date.now() });
-    res.json({ token });
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Admin server working' });
 });
 
 // Initialize database on startup
@@ -158,7 +148,7 @@ app.post('/api/upload', upload.array('media', 10), (req, res) => {
     }
 });
 
-app.post('/api/resorts', validateJWT, resortValidation, handleValidationErrors, async (req, res) => {
+app.post('/api/resorts', async (req, res) => {
     try {
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
@@ -198,7 +188,7 @@ app.post('/api/resorts', validateJWT, resortValidation, handleValidationErrors, 
     }
 });
 
-app.put('/api/resorts/:id', validateJWT, resortValidation, handleValidationErrors, async (req, res) => {
+app.put('/api/resorts/:id', async (req, res) => {
     console.log('Update resort request:', req.params.id, req.body);
     try {
         const id = parseInt(req.params.id);
@@ -241,7 +231,7 @@ app.patch('/api/resorts/:id/availability', async (req, res) => {
     }
 });
 
-app.delete('/api/resorts/:id', validateJWT, async (req, res) => {
+app.delete('/api/resorts/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         
