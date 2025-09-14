@@ -6,7 +6,7 @@ let db;
 // Initialize SQLite database
 async function initDB() {
     db = await open({
-        filename: './resort_booking.db',
+        filename: './data/resort_booking.db',
         driver: sqlite3.Database
     });
     return db;

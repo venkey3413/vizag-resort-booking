@@ -1,4 +1,9 @@
 node_modules/
-uploads/
 .env
+data/
+backups/
+*.db
 *.log
+uploads/
+.DS_Store
+Thumbs.db

@@ -5,8 +5,9 @@ const http = require('http');
 const socketIo = require('socket.io');
 const csrf = require('csurf');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
+const { encrypt, decrypt } = require('./crypto-utils');
 const { upload } = require('./s3-config');
-// const { startBackupSchedule } = require('./backup-service');
+const { startBackupSchedule } = require('./backup-service');
 
 const app = express();
 const server = http.createServer(app);
@@ -64,8 +65,8 @@ app.get('/api/csrf-token', (req, res) => {
 // Initialize database on startup
 initDatabase();
 
-// Backup schedule disabled
-// startBackupSchedule();
+// Start backup schedule
+startBackupSchedule();
 
 // Get resorts from database
 async function getResorts() {
@@ -240,10 +241,10 @@ app.post('/api/bookings', (req, res, next) => {
         const platformFee = Math.round(bookingAmount * 0.015);
         const totalPrice = bookingAmount + platformFee;
         
-        // Create booking
+        // Create booking with encrypted sensitive data
         const bookingResult = await db().run(
             'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, payment_id, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [parseInt(resortId), resort.name, guestName, email, phone, checkIn, checkOut, guestCount, totalPrice, paymentId, 'confirmed', 'pending']
+            [parseInt(resortId), resort.name, guestName, encrypt(email), encrypt(phone), checkIn, checkOut, guestCount, totalPrice, encrypt(paymentId), 'confirmed', 'pending']
         );
         
         const bookingId = bookingResult.lastID;
@@ -269,13 +270,13 @@ app.post('/api/bookings', (req, res, next) => {
             resortId: parseInt(resortId),
             resortName: resort.name,
             guestName,
-            email,
-            phone,
+            email: decrypt(email),
+            phone: decrypt(phone),
             checkIn,
             checkOut,
             guests: guestCount,
             totalPrice,
-            paymentId,
+            paymentId: decrypt(paymentId),
             status: 'confirmed',
             bookingDate: new Date().toISOString()
         };
@@ -417,7 +418,7 @@ app.post('/api/bookings', (req, res, next) => {
             
             await transporter.sendMail({
                 from: process.env.GMAIL_USER,
-                to: email,
+                to: decrypt(email),
                 subject: `Booking Confirmation - ${bookingReference}`,
                 html: emailHtml
             });

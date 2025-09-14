@@ -1,51 +1,62 @@
-const AWS = require('aws-sdk');
 const fs = require('fs');
+const path = require('path');
 const cron = require('node-cron');
 
-require('dotenv').config();
+const DB_PATH = path.join(__dirname, 'data', 'resort_booking.db');
+const BACKUP_DIR = path.join(__dirname, 'backups');
 
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION || 'ap-south-1'
-});
-
-// Daily backup at 2 AM
-function startBackupSchedule() {
-    cron.schedule('0 2 * * *', async () => {
-        await backupDatabase();
-    });
-    
-    console.log('📅 Database backup scheduled for 2 AM daily');
-}
-
-async function backupDatabase() {
+function createBackup() {
     try {
-        const timestamp = new Date().toISOString().split('T')[0];
-        const backupFile = `backup-${timestamp}.db`;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = path.join(BACKUP_DIR, `resort_booking_${timestamp}.db`);
         
-        // Copy database file
-        fs.copyFileSync('./resort_booking.db', backupFile);
-        
-        // Upload to S3
-        const fileContent = fs.readFileSync(backupFile);
-        await s3.upload({
-            Bucket: process.env.S3_BUCKET || 'resort3413',
-            Key: `backups/${backupFile}`,
-            Body: fileContent
-        }).promise();
-        
-        // Clean up local copy
-        fs.unlinkSync(backupFile);
-        console.log(`✅ Database backed up: ${backupFile}`);
+        if (fs.existsSync(DB_PATH)) {
+            fs.copyFileSync(DB_PATH, backupPath);
+            console.log(`✅ Database backup created: ${backupPath}`);
+            
+            // Keep only last 7 backups
+            cleanOldBackups();
+        }
     } catch (error) {
         console.error('❌ Backup failed:', error.message);
     }
 }
 
-// Manual backup function
-async function manualBackup() {
-    await backupDatabase();
+function cleanOldBackups() {
+    try {
+        const files = fs.readdirSync(BACKUP_DIR)
+            .filter(file => file.startsWith('resort_booking_') && file.endsWith('.db'))
+            .map(file => ({
+                name: file,
+                path: path.join(BACKUP_DIR, file),
+                time: fs.statSync(path.join(BACKUP_DIR, file)).mtime
+            }))
+            .sort((a, b) => b.time - a.time);
+        
+        // Keep only 7 most recent backups
+        files.slice(7).forEach(file => {
+            fs.unlinkSync(file.path);
+            console.log(`🗑️ Deleted old backup: ${file.name}`);
+        });
+    } catch (error) {
+        console.error('Error cleaning backups:', error.message);
+    }
 }
 
-module.exports = { startBackupSchedule, manualBackup };
+function startBackupSchedule() {
+    // Daily backup at 2 AM
+    cron.schedule('0 2 * * *', () => {
+        console.log('🔄 Starting scheduled backup...');
+        createBackup();
+    });
+    
+    // Weekly backup on Sunday at 3 AM
+    cron.schedule('0 3 * * 0', () => {
+        console.log('🔄 Starting weekly backup...');
+        createBackup();
+    });
+    
+    console.log('📅 Backup schedule started - Daily at 2 AM, Weekly on Sunday at 3 AM');
+}
+
+module.exports = { createBackup, startBackupSchedule };
