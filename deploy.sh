@@ -29,7 +29,7 @@ fi
 
 # Install all dependencies
 echo "📦 Installing dependencies..."
-npm install express cors socket.io sqlite3 sqlite multer aws-sdk multer-s3 nodemailer axios dotenv node-cron jsonwebtoken express-rate-limit express-validator helmet crypto
+npm install express cors socket.io sqlite3 sqlite multer aws-sdk multer-s3 nodemailer axios dotenv node-cron jsonwebtoken express-rate-limit express-validator helmet crypto amazon-cognito-identity-js
 
 # Install PM2 globally
 echo "🔧 Installing PM2..."
@@ -48,6 +48,10 @@ S3_BUCKET=your_s3_bucket_name
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 AWS_REGION=us-east-1
+
+# AWS Cognito Configuration
+COGNITO_USER_POOL_ID=your_cognito_user_pool_id
+COGNITO_CLIENT_ID=your_cognito_client_id
 
 # JWT Configuration
 JWT_SECRET=your-jwt-secret-key

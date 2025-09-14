@@ -42,7 +42,48 @@ app.get('/simple', (req, res) => {
     res.sendFile(__dirname + '/admin-public/simple.html');
 });
 
-// Simple test endpoint
+// Cognito authentication
+const { authenticateAdmin, createAdminUser } = require('./cognito-config');
+const { cognitoAuth } = require('./cognito-middleware');
+
+// Admin login endpoint
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password required' });
+        }
+        
+        const result = await authenticateAdmin(username, password);
+        
+        if (result.success) {
+            res.json({
+                success: true,
+                accessToken: result.accessToken,
+                idToken: result.idToken
+            });
+        } else {
+            res.status(401).json({ error: result.error });
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// Create admin user (run once)
+app.post('/api/auth/create-admin', async (req, res) => {
+    try {
+        const { username, password, email } = req.body;
+        const result = await createAdminUser(username, password, email);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Admin server working' });
 });
@@ -157,7 +198,7 @@ app.post('/api/upload', upload.array('media', 10), (req, res) => {
     }
 });
 
-app.post('/api/resorts', async (req, res) => {
+app.post('/api/resorts', cognitoAuth, async (req, res) => {
     try {
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
@@ -210,7 +251,7 @@ app.post('/api/resorts', async (req, res) => {
     }
 });
 
-app.put('/api/resorts/:id', async (req, res) => {
+app.put('/api/resorts/:id', cognitoAuth, async (req, res) => {
     console.log('Update resort request:', req.params.id, req.body);
     try {
         const id = parseInt(req.params.id);
@@ -266,7 +307,7 @@ app.patch('/api/resorts/:id/availability', async (req, res) => {
     }
 });
 
-app.delete('/api/resorts/:id', async (req, res) => {
+app.delete('/api/resorts/:id', cognitoAuth, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         
