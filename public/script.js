@@ -6,7 +6,6 @@ let socket;
 let csrfToken = '';
 
 document.addEventListener('DOMContentLoaded', function() {
-    getCSRFToken();
     loadResorts();
     setupEventListeners();
     setMinDate();
@@ -831,29 +830,12 @@ async function handleBooking(e) {
             document.getElementById('bookingForm').reset();
             appliedDiscount = null;
         } else {
-            const errorText = await response.text();
-            let errorMessage = 'Please try again';
-            try {
-                const error = JSON.parse(errorText);
-                errorMessage = error.error || errorMessage;
-            } catch (e) {
-                errorMessage = errorText || errorMessage;
-            }
-            showNotification('Booking failed: ' + errorMessage, 'error');
+            const error = await response.json();
+            showNotification('Booking failed: ' + (error.error || 'Please try again'), 'error');
         }
     } catch (error) {
-        console.error('Booking error details:', error);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-        
-        let errorMessage = 'Network error. Please check your connection and try again.';
-        if (error.message && error.message.includes('Failed to fetch')) {
-            errorMessage = 'Connection failed. Please check if the server is running.';
-        } else if (error.message) {
-            errorMessage = 'Error: ' + error.message;
-        }
-        
-        showNotification(errorMessage, 'error');
+        console.error('Booking error:', error);
+        showNotification('Booking failed: ' + error.message, 'error');
     } finally {
         // Reset button state
         submitBtn.innerHTML = originalText;
