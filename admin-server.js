@@ -187,12 +187,12 @@ app.post('/api/resorts', async (req, res) => {
         // Real-time sync to main website
         try {
             const axios = require('axios');
-            await axios.post('http://localhost:3000/api/sync/resort-added', newResort, {
+            await axios.post('http://13.201.12.180:3000/api/sync/resort-added', newResort, {
                 headers: { 'x-internal-service': 'admin-server' },
                 timeout: 2000
             }).catch(e => console.log('Main server sync failed:', e.message));
             
-            await axios.post('http://localhost:3002/api/sync/resort-added', newResort, {
+            await axios.post('http://13.201.12.180:3002/api/sync/resort-added', newResort, {
                 headers: { 'x-internal-service': 'admin-server' },
                 timeout: 2000
             }).catch(e => console.log('Booking server sync failed:', e.message));
@@ -226,12 +226,12 @@ app.put('/api/resorts/:id', async (req, res) => {
         // Real-time sync to main website
         try {
             const axios = require('axios');
-            await axios.post('http://localhost:3000/api/sync/resort-updated', updatedResort, {
+            await axios.post('http://13.201.12.180:3000/api/sync/resort-updated', updatedResort, {
                 headers: { 'x-internal-service': 'admin-server' },
                 timeout: 2000
             }).catch(e => console.log('Main server sync failed:', e.message));
             
-            await axios.post('http://localhost:3002/api/sync/resort-updated', updatedResort, {
+            await axios.post('http://13.201.12.180:3002/api/sync/resort-updated', updatedResort, {
                 headers: { 'x-internal-service': 'admin-server' },
                 timeout: 2000
             }).catch(e => console.log('Booking server sync failed:', e.message));
