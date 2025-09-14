@@ -61,6 +61,10 @@ startBackupSchedule();
 // Get resorts from database
 async function getResorts() {
     try {
+        if (!db()) {
+            console.error('Database not connected');
+            return [];
+        }
         const rows = await db().all('SELECT * FROM resorts ORDER BY id DESC');
         
         return rows.map(row => {
