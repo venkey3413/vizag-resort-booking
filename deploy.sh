@@ -29,7 +29,7 @@ fi
 
 # Install all dependencies
 echo "📦 Installing dependencies..."
-npm install express cors http socket.io csrf cookie-parser express-session sqlite3 sqlite multer aws-sdk nodemailer axios dotenv node-cron crypto
+npm install express cors http socket.io sqlite3 sqlite multer aws-sdk nodemailer axios dotenv node-cron jsonwebtoken express-rate-limit express-validator helmet
 
 # Install PM2 globally
 echo "🔧 Installing PM2..."
@@ -48,6 +48,9 @@ S3_BUCKET=your_s3_bucket_name
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 AWS_REGION=us-east-1
+
+# JWT Configuration
+JWT_SECRET=your-jwt-secret-key
 
 # Encryption
 ENCRYPTION_KEY=your-32-character-encryption-key
