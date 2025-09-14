@@ -28,6 +28,14 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public'));
 
+// Disable CSP for development
+app.use((req, res, next) => {
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('Cross-Origin-Opener-Policy');
+    res.removeHeader('Origin-Agent-Cluster');
+    next();
+});
+
 // Serve index.html for root route
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
