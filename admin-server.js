@@ -567,7 +567,7 @@ async function syncServices(action, data) {
     }
 }
 
-server.listen(PORT, () => {
-    console.log(`🔧 Admin Panel running on http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🔧 Admin Panel running on http://0.0.0.0:${PORT}`);
     console.log(`⚡ Lambda triggers enabled`);
 });
