@@ -59,6 +59,7 @@ function initializeSocket() {
 }
 
 function setupEventListeners() {
+    // Navigation links
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
@@ -68,15 +69,179 @@ function setupEventListeners() {
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             
-            // Close mobile menu after clicking
             closeMobileMenu();
         });
     });
 
+    // Mobile menu toggle
+    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', toggleMobileMenu);
+    }
+
+    // CTA button
+    const ctaBtn = document.querySelector('.cta-btn');
+    if (ctaBtn) {
+        ctaBtn.addEventListener('click', function() {
+            scrollToSection('resorts');
+        });
+    }
+
+    // Search and filters
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterResorts);
+    }
+
+    ['locationFilter', 'priceFilter', 'amenityFilter', 'guestFilter'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', filterResorts);
+        }
+    });
+
+    const clearFilters = document.getElementById('clearFilters');
+    if (clearFilters) {
+        clearFilters.addEventListener('click', () => {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('locationFilter').value = '';
+            document.getElementById('priceFilter').value = '';
+            document.getElementById('amenityFilter').value = '';
+            document.getElementById('guestFilter').value = '';
+            filteredResorts = resorts;
+            currentPage = 1;
+            displayResortsWithPagination();
+        });
+    }
+
+    // Booking form
     const bookingForm = document.getElementById('bookingForm');
     if (bookingForm) {
         bookingForm.addEventListener('submit', handleBooking);
     }
+
+    // Date inputs
+    const checkIn = document.getElementById('checkIn');
+    const checkOut = document.getElementById('checkOut');
+    const guests = document.getElementById('guests');
+    
+    if (checkIn) checkIn.addEventListener('change', calculateTotal);
+    if (checkOut) checkOut.addEventListener('change', calculateTotal);
+    if (guests) guests.addEventListener('change', calculateTotal);
+
+    // Discount button
+    const applyDiscount = document.getElementById('applyDiscount');
+    if (applyDiscount) {
+        applyDiscount.addEventListener('click', function() {
+            const code = document.getElementById('discountCode').value.trim().toUpperCase();
+            const messageDiv = document.getElementById('discountMessage');
+            const applyBtn = this;
+            const originalText = applyBtn.innerHTML;
+            
+            if (!code) {
+                messageDiv.innerHTML = '<span style="color: #f44336;">Please enter a discount code</span>';
+                return;
+            }
+            
+            applyBtn.innerHTML = 'Loading...';
+            applyBtn.disabled = true;
+            
+            fetch(`/api/discount-codes/validate/${code}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.valid) {
+                        const bookingAmount = parseInt(document.getElementById('bookingAmount').textContent.replace(/[₹,]/g, ''));
+                        
+                        if (bookingAmount < result.discount.min_amount) {
+                            messageDiv.innerHTML = `<span style="color: #f44336;">Minimum order amount ₹${result.discount.min_amount} required</span>`;
+                            return;
+                        }
+                        
+                        appliedDiscount = result.discount;
+                        const discountText = result.discount.discount_type === 'percentage' 
+                            ? `${result.discount.discount_value}% off` 
+                            : `₹${result.discount.discount_value} off`;
+                        messageDiv.innerHTML = `<span style="color: #27ae60;">✓ ${discountText} applied!</span>`;
+                        calculateTotal();
+                    } else {
+                        messageDiv.innerHTML = `<span style="color: #f44336;">${result.message || 'Invalid discount code'}</span>`;
+                        appliedDiscount = null;
+                        calculateTotal();
+                    }
+                })
+                .catch(error => {
+                    messageDiv.innerHTML = '<span style="color: #f44336;">Network error. Please try again.</span>';
+                    appliedDiscount = null;
+                    calculateTotal();
+                })
+                .finally(() => {
+                    applyBtn.innerHTML = originalText;
+                    applyBtn.disabled = false;
+                });
+        });
+    }
+
+    // Modal close buttons
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    // Click outside modal to close
+    window.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    });
+
+    // Event delegation for resort interactions
+    document.addEventListener('click', function(e) {
+        // Book button
+        if (e.target.closest('.book-btn') && !e.target.closest('.book-btn').disabled) {
+            const resortId = parseInt(e.target.closest('.book-btn').dataset.resortId);
+            openBookingModal(resortId);
+        }
+        
+        // Review button
+        if (e.target.closest('.review-btn')) {
+            const resortId = parseInt(e.target.closest('.review-btn').dataset.resortId);
+            openReviewModal(resortId);
+        }
+        
+        // Image slider - open details
+        if (e.target.closest('.image-slider')) {
+            const resortId = parseInt(e.target.closest('.image-slider').dataset.resortId);
+            openResortDetails(resortId);
+        }
+        
+        // Image navigation
+        if (e.target.closest('.image-navigation')) {
+            e.stopPropagation();
+            const btn = e.target.closest('.image-navigation');
+            const resortId = parseInt(btn.dataset.resortId);
+            const direction = parseInt(btn.dataset.direction);
+            changeCardImage(resortId, direction, e);
+        }
+        
+        // Image dots
+        if (e.target.closest('.dot')) {
+            e.stopPropagation();
+            const dot = e.target.closest('.dot');
+            const resortId = parseInt(dot.dataset.resortId);
+            const index = parseInt(dot.dataset.index);
+            setCardImage(resortId, index, e);
+        }
+        
+        // Pagination
+        if (e.target.closest('.pagination button')) {
+            const page = parseInt(e.target.closest('.pagination button').dataset.page);
+            if (page) changePage(page);
+        }
+    });
 }
 
 function toggleMobileMenu() {
@@ -364,7 +529,7 @@ function displayResorts(filteredResorts = resorts) {
     grid.innerHTML = filteredResorts.map(resort => `
         <div class="resort-card" data-resort-id="${resort.id}">
             <div class="image-gallery">
-                <div class="image-slider" onclick="openResortDetails(${resort.id})">
+                <div class="image-slider" data-resort-id="${resort.id}">
                     ${(() => {
                         if (resort.images && resort.images.length > 0) {
                             return resort.images.map((media, index) => {
@@ -380,15 +545,15 @@ function displayResorts(filteredResorts = resorts) {
                     })()}
                 </div>
                 ${resort.images && resort.images.length > 1 ? `
-                    <button class="image-navigation prev-nav" onclick="changeCardImage(${resort.id}, -1, event)">
+                    <button class="image-navigation prev-nav" data-resort-id="${resort.id}" data-direction="-1">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <button class="image-navigation next-nav" onclick="changeCardImage(${resort.id}, 1, event)">
+                    <button class="image-navigation next-nav" data-resort-id="${resort.id}" data-direction="1">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                     <div class="image-dots">
                         ${resort.images.map((_, index) => 
-                            `<span class="dot ${index === 0 ? 'active' : ''}" onclick="setCardImage(${resort.id}, ${index}, event)"></span>`
+                            `<span class="dot ${index === 0 ? 'active' : ''}" data-resort-id="${resort.id}" data-index="${index}"></span>`
                         ).join('')}
                     </div>
                     <div class="image-count">${resort.images.length} media</div>
@@ -411,11 +576,11 @@ function displayResorts(filteredResorts = resorts) {
                 </div>
 
                 ${resort.available ? 
-                    `<button class="book-btn" onclick="openBookingModal(${resort.id})">
+                    `<button class="book-btn" data-resort-id="${resort.id}">
                         <i class="fas fa-calendar-check"></i> Book Now
                     </button>
                     <div style="overflow: hidden; margin-top: 1rem;">
-                        <button class="review-btn" onclick="openReviewModal(${resort.id})">
+                        <button class="review-btn" data-resort-id="${resort.id}">
                             <i class="fas fa-star"></i> Write Review
                         </button>
                         <div class="policy-link">
@@ -427,7 +592,7 @@ function displayResorts(filteredResorts = resorts) {
                     `<button class="book-btn unavailable" disabled>
                         <i class="fas fa-times-circle"></i> Currently Unavailable
                     </button>
-                    <button class="review-btn" onclick="openReviewModal(${resort.id})">
+                    <button class="review-btn" data-resort-id="${resort.id}">
                         <i class="fas fa-star"></i> Write Review
                     </button>`
                 }
@@ -562,7 +727,7 @@ function renderPagination() {
     let paginationHTML = '';
     
     // Previous button
-    paginationHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+    paginationHTML += `<button data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>
         <i class="fas fa-chevron-left"></i> Previous
     </button>`;
     
@@ -571,25 +736,25 @@ function renderPagination() {
     const endPage = Math.min(totalPages, currentPage + 2);
     
     if (startPage > 1) {
-        paginationHTML += `<button onclick="changePage(1)">1</button>`;
+        paginationHTML += `<button data-page="1">1</button>`;
         if (startPage > 2) {
             paginationHTML += `<span class="page-info">...</span>`;
         }
     }
     
     for (let i = startPage; i <= endPage; i++) {
-        paginationHTML += `<button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>${i}</button>`;
+        paginationHTML += `<button data-page="${i}" ${i === currentPage ? 'class="active"' : ''}>${i}</button>`;
     }
     
     if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
             paginationHTML += `<span class="page-info">...</span>`;
         }
-        paginationHTML += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+        paginationHTML += `<button data-page="${totalPages}">${totalPages}</button>`;
     }
     
     // Next button
-    paginationHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+    paginationHTML += `<button data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>
         Next <i class="fas fa-chevron-right"></i>
     </button>`;
     
@@ -719,54 +884,7 @@ function calculateTotal() {
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
 }
 
-async function applyDiscount() {
-    const code = document.getElementById('discountCode').value.trim().toUpperCase();
-    const messageDiv = document.getElementById('discountMessage');
-    const applyBtn = event.target;
-    const originalText = applyBtn.innerHTML;
-    
-    if (!code) {
-        messageDiv.innerHTML = '<span style="color: #f44336;">Please enter a discount code</span>';
-        return;
-    }
-    
-    // Show loading state
-    applyBtn.innerHTML = '<span class="loading-spinner"></span>';
-    applyBtn.disabled = true;
-    
-    try {
-            const response = await fetch(`/api/discount-codes/validate/${code}`);
-        const result = await response.json();
-        
-        if (response.ok && result.valid) {
-            const bookingAmount = parseInt(document.getElementById('bookingAmount').textContent.replace(/[₹,]/g, ''));
-            
-            if (bookingAmount < result.discount.min_amount) {
-                messageDiv.innerHTML = `<span style="color: #f44336;">Minimum order amount ₹${result.discount.min_amount} required</span>`;
-                return;
-            }
-            
-            appliedDiscount = result.discount;
-            const discountText = result.discount.discount_type === 'percentage' 
-                ? `${result.discount.discount_value}% off` 
-                : `₹${result.discount.discount_value} off`;
-            messageDiv.innerHTML = `<span style="color: #27ae60;">✓ ${discountText} applied!</span>`;
-            calculateTotal();
-        } else {
-            messageDiv.innerHTML = `<span style="color: #f44336;">${result.message || 'Invalid discount code'}</span>`;
-            appliedDiscount = null;
-            calculateTotal();
-        }
-    } catch (error) {
-        messageDiv.innerHTML = '<span style="color: #f44336;">Network error. Please try again.</span>';
-        appliedDiscount = null;
-        calculateTotal();
-    } finally {
-        // Reset button state
-        applyBtn.innerHTML = originalText;
-        applyBtn.disabled = false;
-    }
-}
+
 
 function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
