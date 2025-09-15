@@ -9,9 +9,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     setMinDate();
     initializeSocket();
+    setupImageHandling();
+    setupStarRating();
+    loadRazorpayScript();
 });
-
-
 
 function initializeSocket() {
     try {
@@ -72,7 +73,10 @@ function setupEventListeners() {
         });
     });
 
-    document.getElementById('bookingForm').addEventListener('submit', handleBooking);
+    const bookingForm = document.getElementById('bookingForm');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', handleBooking);
+    }
 }
 
 function toggleMobileMenu() {
@@ -102,7 +106,7 @@ document.addEventListener('click', function(e) {
 });
 
 // Image optimization - lazy loading handler
-document.addEventListener('DOMContentLoaded', function() {
+function setupImageHandling() {
     // Add load event listeners to all lazy images
     function handleImageLoad() {
         document.addEventListener('load', function(e) {
@@ -151,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         childList: true,
         subtree: true
     });
-});
+}
 
 // Review system functions
 function generateStarRating(rating) {
@@ -201,7 +205,7 @@ function closeReviewModal() {
 }
 
 // Star rating interaction
-document.addEventListener('DOMContentLoaded', function() {
+function setupStarRating() {
     const stars = document.querySelectorAll('.star');
     
     stars.forEach(star => {
@@ -243,8 +247,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Review form submission
-    document.getElementById('reviewForm').addEventListener('submit', handleReviewSubmission);
-});
+    const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', handleReviewSubmission);
+    }
+}
 
 async function handleReviewSubmission(e) {
     e.preventDefault();
@@ -1120,7 +1127,7 @@ window.onclick = function(event) {
     }
 }
 
-// Load Razorpay script
+// Initialize Razorpay
 function loadRazorpayScript() {
     return new Promise((resolve) => {
         if (window.Razorpay) {
@@ -1133,14 +1140,10 @@ function loadRazorpayScript() {
         script.onload = () => resolve(true);
         script.onerror = () => resolve(false);
         document.body.appendChild(script);
-    });
-}
-
-// Initialize Razorpay on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadRazorpayScript().then(loaded => {
+    }).then(loaded => {
         if (!loaded) {
             console.error('Failed to load Razorpay script');
         }
+        return loaded;
     });
-});
+}
