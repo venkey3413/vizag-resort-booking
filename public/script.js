@@ -241,6 +241,14 @@ function setupEventListeners() {
             const page = parseInt(e.target.closest('.pagination button').dataset.page);
             if (page) changePage(page);
         }
+        
+        // Retry buttons
+        if (e.target.closest('.error-retry')) {
+            const callback = e.target.closest('.error-retry').dataset.retryCallback;
+            if (callback && window[callback]) {
+                window[callback]();
+            }
+        }
     });
 }
 
@@ -389,24 +397,28 @@ function setupStarRating() {
         });
         
         star.addEventListener('mouseover', function() {
+            const ACTIVE_COLOR = '#ffc107';
+            const INACTIVE_COLOR = '#ddd';
             const rating = parseInt(this.dataset.rating);
             stars.forEach((s, index) => {
                 if (index < rating) {
-                    s.style.color = '#ffc107';
+                    s.style.color = ACTIVE_COLOR;
                 } else {
-                    s.style.color = '#ddd';
+                    s.style.color = INACTIVE_COLOR;
                 }
             });
         });
     });
     
     document.getElementById('starRating').addEventListener('mouseleave', function() {
+        const ACTIVE_COLOR = '#ffc107';
+        const INACTIVE_COLOR = '#ddd';
         const selectedRating = parseInt(document.getElementById('selectedRating').value) || 0;
         stars.forEach((s, index) => {
             if (index < selectedRating) {
-                s.style.color = '#ffc107';
+                s.style.color = ACTIVE_COLOR;
             } else {
-                s.style.color = '#ddd';
+                s.style.color = INACTIVE_COLOR;
             }
         });
     });
@@ -507,7 +519,7 @@ function showError(message, retryCallback = null) {
         <div class="error-message">
             <i class="fas fa-exclamation-triangle"></i>
             <span>${message}</span>
-            ${retryCallback ? '<button class="error-retry" onclick="' + retryCallback.name + '()"><i class="fas fa-redo"></i> Retry</button>' : ''}
+            ${retryCallback ? '<button class="error-retry" data-retry-callback="' + retryCallback.name + '"><i class="fas fa-redo"></i> Retry</button>' : ''}
         </div>
     `;
 }
@@ -986,7 +998,41 @@ async function handleBooking(e) {
 
 
 // Custom notification system
+// Initialize notification styles once
+let notificationStylesAdded = false;
+
+function initNotificationStyles() {
+    if (notificationStylesAdded) return;
+    
+    const styles = document.createElement('style');
+    styles.id = 'notification-styles';
+    styles.textContent = `
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 400px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+        .notification.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .notification.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .notification.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .notification-content { display: flex; justify-content: space-between; align-items: flex-start; }
+        .notification-message { flex: 1; white-space: pre-line; }
+        .notification-close { background: none; border: none; font-size: 20px; cursor: pointer; margin-left: 10px; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    `;
+    document.head.appendChild(styles);
+    notificationStylesAdded = true;
+}
+
 function showNotification(message, type = 'info') {
+    initNotificationStyles();
+    
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
@@ -995,33 +1041,6 @@ function showNotification(message, type = 'info') {
             <button class="notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
         </div>
     `;
-    
-    // Add styles if not already present
-    if (!document.getElementById('notification-styles')) {
-        const styles = document.createElement('style');
-        styles.id = 'notification-styles';
-        styles.textContent = `
-            .notification {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                max-width: 400px;
-                padding: 15px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-            }
-            .notification.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-            .notification.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-            .notification.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-            .notification-content { display: flex; justify-content: space-between; align-items: flex-start; }
-            .notification-message { flex: 1; white-space: pre-line; }
-            .notification-close { background: none; border: none; font-size: 20px; cursor: pointer; margin-left: 10px; }
-            @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        `;
-        document.head.appendChild(styles);
-    }
     
     document.body.appendChild(notification);
     

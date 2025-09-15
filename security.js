@@ -49,7 +49,12 @@ function validateJWT(req, res, next) {
 
 // Generate JWT token
 function generateToken(payload) {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+    try {
+        return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+    } catch (error) {
+        console.error('JWT signing error:', error);
+        throw new Error('Token generation failed');
+    }
 }
 
 // Input validation rules

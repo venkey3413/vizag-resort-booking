@@ -101,7 +101,9 @@ async function pollSyncEvents() {
     } catch (err) {
         console.error('Error polling sync_events:', err);
     }
-    setTimeout(pollSyncEvents, 2000); // Poll every 2 seconds
+    // Use setInterval instead of recursive setTimeout
+}
+setInterval(pollSyncEvents, 2000); // Poll every 2 seconds
 }
 pollSyncEvents();
 

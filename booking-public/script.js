@@ -129,7 +129,7 @@ function updateStats() {
 }
 
 async function markPaymentComplete(bookingId) {
-    if (!confirm('Mark this payment as completed?')) return;
+    // Remove confirm dialog for better UX
     
     try {
     const response = await fetch(`http://13.233.164.0:3002/api/bookings/${bookingId}/payment`, {
@@ -152,7 +152,7 @@ async function markPaymentComplete(bookingId) {
 }
 
 async function deleteBooking(bookingId) {
-    if (!confirm('Are you sure you want to delete this booking?')) return;
+    // Remove confirm dialog for better UX
     
     try {
     const response = await fetch(`http://13.233.164.0:3002/api/bookings/${bookingId}`, {
