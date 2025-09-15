@@ -9,22 +9,20 @@
     <link rel="stylesheet" href="map-styles.css">
     <link rel="stylesheet" href="loading.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <nav class="navbar">
             <div class="nav-brand">
                 <span class="brand-letter">I</span>
-                <img src="logo.png" alt="Resort Logo" class="brand-logo" onclick="rotateLogo()">
+                <img src="logo.png" alt="Resort Logo" class="brand-logo">
                 <span class="brand-text">Resort</span>
             </div>
             <div class="nav-links">
                 <a href="#home" class="nav-link active">Home</a>
                 <a href="#resorts" class="nav-link">Resorts</a>
             </div>
-            <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+            <div class="mobile-menu-toggle">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -32,44 +30,42 @@
         </nav>
     </header>
 
-    <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="hero-content">
             <h1>Find Your Perfect Resort</h1>
             <p>Discover stunning resorts and enjoy the getaway you deserve</p>
-            <button class="cta-btn" onclick="scrollToSection('resorts')">
+            <button class="cta-btn" data-target="resorts">
                 <i class="fas fa-search"></i> Explore Resorts
             </button>
         </div>
     </section>
 
-    <!-- Resorts Section -->
     <section id="resorts" class="resorts-section">
         <div class="container">
             <h2>Available Resorts</h2>
             <div class="search-filter">
-                <input type="text" id="searchInput" placeholder="Search resorts..." onkeyup="filterResorts()">
-                <select id="locationFilter" onchange="filterResorts()">
+                <input type="text" id="searchInput" placeholder="Search resorts...">
+                <select id="locationFilter">
                     <option value="">All Locations</option>
                 </select>
-                <select id="priceFilter" onchange="filterResorts()">
+                <select id="priceFilter">
                     <option value="">All Prices</option>
                     <option value="0-3000">Under ₹3,000</option>
                     <option value="3000-5000">₹3,000 - ₹5,000</option>
                     <option value="5000-8000">₹5,000 - ₹8,000</option>
                     <option value="8000-999999">Above ₹8,000</option>
                 </select>
-                <select id="amenityFilter" onchange="filterResorts()">
+                <select id="amenityFilter">
                     <option value="">All Amenities</option>
                 </select>
-                <select id="guestFilter" onchange="filterResorts()">
+                <select id="guestFilter">
                     <option value="">Any Guests</option>
                     <option value="1-4">1-4 Guests</option>
                     <option value="5-8">5-8 Guests</option>
                     <option value="9-12">9-12 Guests</option>
                     <option value="13-999">13+ Guests</option>
                 </select>
-                <button onclick="clearFilters()" style="padding: 10px 15px; background: #f44336; color: white; border: none; border-radius: 5px;">
+                <button id="clearFilters" class="clear-btn">
                     <i class="fas fa-times"></i> Clear
                 </button>
             </div>
@@ -78,10 +74,9 @@
         </div>
     </section>
 
-    <!-- Booking Modal -->
     <div id="bookingModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
+            <span class="close">&times;</span>
             <h2 id="modalResortName">Book Resort</h2>
             <form id="bookingForm">
                 <input type="hidden" id="bookingResortId">
@@ -111,44 +106,44 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Guest Name</label>
+                    <label for="guestName">Guest Name</label>
                     <input type="text" id="guestName" required>
                 </div>
                 <div class="form-group">
-                    <label>Email</label>
+                    <label for="email">Email</label>
                     <input type="email" id="email" required>
                 </div>
                 <div class="form-group">
-                    <label>Phone Number</label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="padding: 15px 20px; background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 15px; font-weight: 600; color: #374151;">+91</span>
-                        <input type="tel" id="phone" placeholder="Enter 10 digit number" pattern="[0-9]{10}" maxlength="10" required style="flex: 1;">
+                    <label for="phone">Phone Number</label>
+                    <div class="phone-input">
+                        <span class="country-code">+91</span>
+                        <input type="tel" id="phone" placeholder="Enter 10 digit number" pattern="[0-9]{10}" maxlength="10" required>
                     </div>
-                    <small style="color: #7f8c8d; margin-top: 5px; display: block;">Enter 10 digit mobile number</small>
+                    <small>Enter 10 digit mobile number</small>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Check-in Date (11:00 AM)</label>
-                        <input type="date" id="checkIn" required onchange="calculateTotal()">
+                        <label for="checkIn">Check-in Date (11:00 AM)</label>
+                        <input type="date" id="checkIn" required>
                     </div>
                     <div class="form-group">
-                        <label>Check-out Date (9:00 AM)</label>
-                        <input type="date" id="checkOut" required onchange="calculateTotal()">
+                        <label for="checkOut">Check-out Date (9:00 AM)</label>
+                        <input type="date" id="checkOut" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Number of Guests</label>
-                    <input type="number" id="guests" min="1" value="1" required onchange="calculateTotal()">
+                    <label for="guests">Number of Guests</label>
+                    <input type="number" id="guests" min="1" value="1" required>
                     <small id="maxGuestsInfo">Max: <span id="maxGuestsCount">20</span> guests</small>
                 </div>
                 
                 <div class="form-group">
-                    <label>Discount Code (Optional)</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="discountCode" name="discountCode" placeholder="Enter discount code" style="flex: 1;">
-                        <button type="button" onclick="applyDiscount()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">Apply</button>
+                    <label for="discountCode">Discount Code (Optional)</label>
+                    <div class="discount-input">
+                        <input type="text" id="discountCode" placeholder="Enter discount code">
+                        <button type="button" id="applyDiscount" class="apply-btn">Apply</button>
                     </div>
-                    <div id="discountMessage" style="margin-top: 5px; font-size: 0.9em;"></div>
+                    <div id="discountMessage"></div>
                 </div>
                 <button type="submit" class="submit-btn">
                     <i class="fab fa-whatsapp"></i> Book & Pay via WhatsApp
@@ -157,20 +152,18 @@
         </div>
     </div>
 
-    <!-- Resort Details Modal -->
     <div id="resortDetailsModal" class="modal">
         <div class="resort-details-content">
-            <span class="close" onclick="closeResortDetails()">&times;</span>
+            <span class="close">&times;</span>
             
             <div class="resort-details-layout">
-                <!-- Image Gallery -->
                 <div class="resort-gallery">
                     <div class="main-image-container">
-                        <button class="nav-arrow prev-arrow" onclick="previousImage()">
+                        <button class="nav-arrow prev-arrow">
                             <i class="fas fa-chevron-left"></i>
                         </button>
                         <img id="mainResortImage" src="" alt="" class="main-resort-image">
-                        <button class="nav-arrow next-arrow" onclick="nextImage()">
+                        <button class="nav-arrow next-arrow">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                         <div class="image-counter">
@@ -182,7 +175,6 @@
                     </div>
                 </div>
                 
-                <!-- Resort Info -->
                 <div class="resort-info-panel">
                     <h2 id="detailsResortName"></h2>
                     <p id="detailsLocation" class="location"></p>
@@ -194,16 +186,15 @@
         </div>
     </div>
 
-    <!-- Review Modal -->
     <div id="reviewModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeReviewModal()">&times;</span>
+            <span class="close">&times;</span>
             <h2>Write a Review</h2>
             <form id="reviewForm">
                 <input type="hidden" id="reviewResortId">
                 
                 <div class="form-group">
-                    <label>Your Name</label>
+                    <label for="reviewerName">Your Name</label>
                     <input type="text" id="reviewerName" required>
                 </div>
                 
@@ -220,7 +211,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Review (Optional)</label>
+                    <label for="reviewText">Review (Optional)</label>
                     <textarea id="reviewText" rows="4" placeholder="Share your experience..."></textarea>
                 </div>
                 
@@ -231,12 +222,19 @@
         </div>
     </div>
 
-    <!-- WhatsApp Help Button -->
     <div class="whatsapp-help">
         <a href="https://wa.me/918341674465?text=Hi,%20I%20need%20help%20with%20resort%20booking" target="_blank" class="whatsapp-btn">
             <i class="fab fa-whatsapp"></i>
             <span>Need Help?</span>
         </a>
+    </div>
+
+    <div id="notification" class="notification"></div>
+    <div id="loading" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
     </div>
 
     <script src="script.js"></script>
