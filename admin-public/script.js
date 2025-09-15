@@ -66,7 +66,7 @@ function initCalendar() {
 
 async function loadCalendarData() {
     try {
-        const response = await fetch('/api/calendar/bookings');
+                const response = await fetch('http://13.233.164.0:3001/api/calendar/bookings');
         calendarBookings = await response.json();
         renderCalendar();
     } catch (error) {
@@ -166,7 +166,7 @@ let dashboardData = {};
 
 async function loadDashboard() {
     try {
-        const response = await fetch('/api/analytics/dashboard');
+                const response = await fetch('http://13.233.164.0:3001/api/analytics/dashboard');
         dashboardData = await response.json();
         updateDashboard();
     } catch (error) {
@@ -262,7 +262,7 @@ function updateRevenueChart() {
 
 async function exportData(type, format) {
     try {
-        const response = await fetch(`/api/export/${type}?format=${format}`);
+                const response = await fetch(`http://13.233.164.0:3001/api/export/${type}?format=${format}`);
         
         if (!response.ok) {
             throw new Error('Export failed');
@@ -302,7 +302,7 @@ function setupEventListeners() {
 
 async function loadResorts() {
     try {
-        const response = await fetch('/api/resorts');
+                const response = await fetch('http://13.233.164.0:3001/api/resorts');
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -319,7 +319,7 @@ let discountCodes = [];
 
 async function loadDiscountCodes() {
     try {
-        const response = await fetch('/api/discount-codes');
+                const response = await fetch('http://13.233.164.0:3001/api/discount-codes');
         discountCodes = await response.json();
         displayDiscountCodes();
     } catch (error) {
@@ -371,7 +371,7 @@ async function handleAddDiscount(e) {
     };
     
     try {
-        const response = await fetch('/api/discount-codes', {
+            const response = await fetch('http://13.233.164.0:3001/api/discount-codes', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -513,7 +513,7 @@ async function handleAddResort(e) {
         mapLink: formData.get('mapLink') || ''
     };
     
-    const response = await fetch('/api/resorts', {
+            const response = await fetch('http://13.233.164.0:3001/api/resorts', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

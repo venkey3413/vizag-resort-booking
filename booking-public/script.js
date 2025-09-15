@@ -34,7 +34,7 @@ function initializeSocket() {
 
 async function loadBookings() {
     try {
-        const response = await fetch('/api/bookings');
+    const response = await fetch('http://13.233.164.0:3002/api/bookings');
         const newBookings = await response.json();
         
         // Only update if data changed
@@ -132,7 +132,7 @@ async function markPaymentComplete(bookingId) {
     if (!confirm('Mark this payment as completed?')) return;
     
     try {
-        const response = await fetch(`/api/bookings/${bookingId}/payment`, {
+    const response = await fetch(`http://13.233.164.0:3002/api/bookings/${bookingId}/payment`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
@@ -155,7 +155,7 @@ async function deleteBooking(bookingId) {
     if (!confirm('Are you sure you want to delete this booking?')) return;
     
     try {
-        const response = await fetch(`/api/bookings/${bookingId}`, {
+    const response = await fetch(`http://13.233.164.0:3002/api/bookings/${bookingId}`, {
             method: 'DELETE'
         });
         

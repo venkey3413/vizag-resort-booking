@@ -262,7 +262,7 @@ async function handleReviewSubmission(e) {
     }
     
     try {
-        const response = await fetch('/api/reviews', {
+            const response = await fetch('http://13.233.164.0:3000/api/reviews', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -292,7 +292,7 @@ function scrollToSection(sectionId) {
 async function loadResorts() {
     showLoading('Loading resorts...');
     try {
-        const response = await fetch('/api/resorts');
+            const response = await fetch('http://13.233.164.0:3000/api/resorts');
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -728,7 +728,7 @@ async function applyDiscount() {
     applyBtn.disabled = true;
     
     try {
-        const response = await fetch(`/api/discount-codes/validate/${code}`);
+            const response = await fetch(`http://13.233.164.0:3000/api/discount-codes/validate/${code}`);
         const result = await response.json();
         
         if (response.ok && result.valid) {
@@ -774,33 +774,33 @@ async function handleBooking(e) {
     const originalText = submitBtn.innerHTML;
     
     // Validation
-    const phoneInput = document.getElementById('phone').value;
+    const phoneInput = document.getElementById('phone').value.trim();
     if (!/^[0-9]{10}$/.test(phoneInput)) {
         showNotification('Please enter a valid 10-digit mobile number', 'error');
         return;
     }
-    
+
     const checkIn = document.getElementById('checkIn').value;
     const checkOut = document.getElementById('checkOut').value;
     if (!checkIn || !checkOut) {
         showNotification('Please select check-in and check-out dates', 'error');
         return;
     }
-    
+
     if (new Date(checkIn) >= new Date(checkOut)) {
         showNotification('Check-out date must be after check-in date', 'error');
         return;
     }
-    
+
     // Show loading state
     submitBtn.innerHTML = '<span class="loading-spinner"></span> Processing...';
     submitBtn.disabled = true;
-    
+
     const bookingData = {
         resortId: document.getElementById('bookingResortId').value,
         guestName: document.getElementById('guestName').value,
         email: document.getElementById('email').value,
-        phone: '+91' + phoneInput,
+        phone: phoneInput, // send only digits
         checkIn: document.getElementById('checkIn').value + 'T11:00',
         checkOut: document.getElementById('checkOut').value + 'T09:00',
         guests: document.getElementById('guests').value,
@@ -808,7 +808,7 @@ async function handleBooking(e) {
     };
     
     try {
-        const response = await fetch('/api/bookings', {
+            const response = await fetch('http://13.233.164.0:3000/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -825,8 +825,14 @@ async function handleBooking(e) {
             document.getElementById('bookingForm').reset();
             appliedDiscount = null;
         } else {
-            const error = await response.json();
-            showNotification('Booking failed: ' + (error.error || 'Please try again'), 'error');
+            let errorMsg = 'Please try again';
+            try {
+                const error = await response.json();
+                errorMsg = error.error || errorMsg;
+            } catch (err) {
+                errorMsg = 'Booking failed: ' + response.status;
+            }
+            showNotification('Booking failed: ' + errorMsg, 'error');
         }
     } catch (error) {
         console.error('Booking error:', error);
