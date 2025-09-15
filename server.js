@@ -309,12 +309,12 @@ app.post('/api/bookings', async (req, res) => {
             };
             
             // Sync to booking history service
-            await axios.post('http://localhost:3002/api/sync/booking-created', bookingData, {
+            await axios.post(`http://${process.env.SERVER_IP || 'localhost'}:3002/api/sync/booking-created`, bookingData, {
                 headers: { 'x-internal-service': 'main-server' }
             }).catch(e => console.log('Booking history sync failed:', e.message));
             
             // Sync to admin panel
-            await axios.post('http://localhost:3001/api/sync/booking-created', bookingData, {
+            await axios.post(`http://${process.env.SERVER_IP || 'localhost'}:3001/api/sync/booking-created`, bookingData, {
                 headers: { 'x-internal-service': 'main-server' }
             }).catch(e => console.log('Admin panel sync failed:', e.message));
             

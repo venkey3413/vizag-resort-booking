@@ -346,8 +346,8 @@ io.on('connection', (socket) => {
 async function syncServices(action, data) {
     try {
         const services = [
-            'http://localhost:3000', // Main Website
-            'http://localhost:3002'  // Booking History
+            `http://${process.env.SERVER_IP || 'localhost'}:3000`, // Main Website
+            `http://${process.env.SERVER_IP || 'localhost'}:3002`  // Booking History
         ];
         
         const promises = services.map(service => 
@@ -549,8 +549,8 @@ async function syncServices(action, data) {
     try {
         const axios = require('axios');
         const services = [
-            'http://localhost:3000', // Main Website
-            'http://localhost:3002'  // Booking History
+            `http://${process.env.SERVER_IP || 'localhost'}:3000`, // Main Website
+            `http://${process.env.SERVER_IP || 'localhost'}:3002`  // Booking History
         ];
         
         const promises = services.map(service => 

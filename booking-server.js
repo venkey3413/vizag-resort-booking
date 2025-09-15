@@ -137,7 +137,7 @@ app.delete('/api/bookings/:id', async (req, res) => {
         // Sync with main server to update availability
         try {
             const axios = require('axios');
-            await axios.post('http://localhost:3000/api/sync/booking-deleted', {
+            await axios.post(`http://${process.env.SERVER_IP || 'localhost'}:3000/api/sync/booking-deleted`, {
                 id,
                 resort_id: deletedBooking?.resort_id
             }, {
