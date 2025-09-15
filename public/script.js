@@ -927,12 +927,14 @@ async function handleBooking(e) {
         resortId: document.getElementById('bookingResortId').value,
         guestName: document.getElementById('guestName').value,
         email: document.getElementById('email').value,
-        phone: cleanPhone, // send only digits
+        phone: cleanPhone,
         checkIn: document.getElementById('checkIn').value + 'T11:00',
         checkOut: document.getElementById('checkOut').value + 'T09:00',
         guests: document.getElementById('guests').value,
         paymentId: 'CASH_' + Date.now()
     };
+    
+    console.log('Sending booking data:', bookingData);
     
     try {
             const response = await fetch('/api/bookings', {
@@ -952,17 +954,21 @@ async function handleBooking(e) {
             document.getElementById('bookingForm').reset();
             appliedDiscount = null;
         } else {
+            console.log('Booking failed with status:', response.status);
             let errorMsg = 'Please try again';
             try {
                 const errorText = await response.text();
-                console.log('Server response:', errorText);
+                console.log('Server error response:', errorText);
                 try {
                     const error = JSON.parse(errorText);
                     errorMsg = error.error || errorMsg;
+                    console.log('Parsed error:', error);
                 } catch (parseErr) {
+                    console.log('Failed to parse error response:', parseErr);
                     errorMsg = 'Server error: ' + response.status + ' - ' + errorText.substring(0, 100);
                 }
             } catch (err) {
+                console.log('Failed to read error response:', err);
                 errorMsg = 'Booking failed: ' + response.status;
             }
             showNotification('Booking failed: ' + errorMsg, 'error');
