@@ -55,6 +55,38 @@ app.post('/api/test-booking', async (req, res) => {
 // Initialize database on startup
 initDatabase();
 
+// Event polling for sync_events table
+const { db: getDb } = require('./database');
+let lastEventId = 0;
+async function pollSyncEvents() {
+    try {
+        const rows = await getDb().all('SELECT * FROM sync_events WHERE id > ? ORDER BY id ASC', [lastEventId]);
+        for (const event of rows) {
+            lastEventId = event.id;
+            const payload = JSON.parse(event.payload);
+            switch (event.event_type) {
+                case 'booking_created':
+                    io.emit('bookingCreated', payload);
+                    break;
+                case 'booking_deleted':
+                    io.emit('bookingDeleted', payload);
+                    break;
+                case 'resort_added':
+                    io.emit('resortAdded', payload);
+                    break;
+                case 'resort_updated':
+                    io.emit('resortUpdated', payload);
+                    break;
+                // Add more event types as needed
+            }
+        }
+    } catch (err) {
+        console.error('Error polling sync_events:', err);
+    }
+    setTimeout(pollSyncEvents, 2000); // Poll every 2 seconds
+}
+pollSyncEvents();
+
 // Start backup schedule
 startBackupSchedule();
 
@@ -360,6 +392,20 @@ app.post('/api/bookings', async (req, res) => {
             });
             
             const emailHtml = `
+                        // Log event to sync_events table
+                        const { addSyncEvent } = require('./database');
+                        await addSyncEvent('resort_added', {
+                            id: result.lastID,
+                            name,
+                            location,
+                            price,
+                            description,
+                            images,
+                            videos,
+                            amenities,
+                            maxGuests,
+                            perHeadCharge
+                        });
             <!DOCTYPE html>
             <html>
             <head>

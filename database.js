@@ -157,6 +157,16 @@ async function createTables() {
                 FOREIGN KEY (resort_id) REFERENCES resorts(id)
             )
         `);
+            // Sync events table for cross-service event sync
+            await db.exec(`
+                CREATE TABLE IF NOT EXISTS sync_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_type TEXT NOT NULL,
+                    payload TEXT NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    processed_by TEXT DEFAULT ''
+                )
+            `);
 
         // Insert default resorts if table is empty
         const result = await db.get('SELECT COUNT(*) as count FROM resorts');
@@ -209,6 +219,26 @@ async function addTransaction(bookingId, paymentId, amount, paymentMethod = 'onl
         return null;
     }
 }
+    
+// Helper function for sync events
+async function addSyncEvent(eventType, payload, processedBy = '') {
+    try {
+        await db.run(
+            'INSERT INTO sync_events (event_type, payload, processed_by) VALUES (?, ?, ?)',
+            [eventType, JSON.stringify(payload), processedBy]
+        );
+    } catch (error) {
+        console.error('Error adding sync event:', error);
+    }
+}
+
+module.exports = { 
+    db: () => db, 
+    initDatabase, 
+    addBookingHistory, 
+    addTransaction, 
+    addSyncEvent 
+};
 
 module.exports = { 
     db: () => db, 

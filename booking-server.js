@@ -133,6 +133,9 @@ app.delete('/api/bookings/:id', async (req, res) => {
         const deletedBooking = await db.get('SELECT * FROM bookings WHERE id = ?', [id]);
         
         io.emit('bookingDeleted', { id });
+    // Log event to sync_events table
+    const { addSyncEvent } = require('./database');
+    await addSyncEvent('booking_deleted', { id });
         
         // Sync with main server to update availability
         try {
@@ -165,6 +168,37 @@ io.on('connection', (socket) => {
 
 // Initialize and start server
 initDB().then(() => {
+    // Event polling for sync_events table
+    const { db: getDb } = require('./database');
+    let lastEventId = 0;
+    async function pollSyncEvents() {
+        try {
+            const rows = await getDb().all('SELECT * FROM sync_events WHERE id > ? ORDER BY id ASC', [lastEventId]);
+            for (const event of rows) {
+                lastEventId = event.id;
+                const payload = JSON.parse(event.payload);
+                switch (event.event_type) {
+                    case 'booking_created':
+                        io.emit('bookingCreated', payload);
+                        break;
+                    case 'booking_deleted':
+                        io.emit('bookingDeleted', payload);
+                        break;
+                    case 'resort_added':
+                        io.emit('resortAdded', payload);
+                        break;
+                    case 'resort_updated':
+                        io.emit('resortUpdated', payload);
+                        break;
+                    // Add more event types as needed
+                }
+            }
+        } catch (err) {
+            console.error('Error polling sync_events:', err);
+        }
+        setTimeout(pollSyncEvents, 2000); // Poll every 2 seconds
+    }
+    pollSyncEvents();
         // Sync endpoints for API Gateway
     app.post('/api/sync/booking-created', (req, res) => {
         if (!req.headers['x-internal-service']) {

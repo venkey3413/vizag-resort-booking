@@ -73,6 +73,38 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // Create admin user (run once)
+// Event polling for sync_events table
+const { db: getDb } = require('./database');
+let lastEventId = 0;
+async function pollSyncEvents() {
+    try {
+        const rows = await getDb().all('SELECT * FROM sync_events WHERE id > ? ORDER BY id ASC', [lastEventId]);
+        for (const event of rows) {
+            lastEventId = event.id;
+            const payload = JSON.parse(event.payload);
+            switch (event.event_type) {
+                case 'booking_created':
+                    io.emit('bookingCreated', payload);
+                    break;
+                case 'booking_deleted':
+                    io.emit('bookingDeleted', payload);
+                    break;
+                case 'resort_added':
+                    io.emit('resortAdded', payload);
+                    break;
+                case 'resort_updated':
+                    io.emit('resortUpdated', payload);
+                    break;
+                // Add more event types as needed
+            }
+        }
+    } catch (err) {
+        console.error('Error polling sync_events:', err);
+    }
+    setTimeout(pollSyncEvents, 2000); // Poll every 2 seconds
+}
+pollSyncEvents();
+
 app.post('/api/auth/create-admin', async (req, res) => {
     try {
         const { username, password, email } = req.body;
@@ -243,6 +275,9 @@ app.post('/api/resorts', async (req, res) => {
         
         // Emit real-time update to admin clients
         io.emit('resortAdded', newResort);
+    // Log event to sync_events table
+    const { addSyncEvent } = require('./database');
+    await addSyncEvent('resort_added', newResort);
         
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
@@ -282,6 +317,9 @@ app.put('/api/resorts/:id', async (req, res) => {
         
         // Emit real-time update to admin clients
         io.emit('resortUpdated', updatedResort);
+    // Log event to sync_events table
+    const { addSyncEvent } = require('./database');
+    await addSyncEvent('resort_updated', updatedResort);
         
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {

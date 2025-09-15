@@ -36,6 +36,20 @@ function setupSocketIO() {
         loadDashboard(); // Reload dashboard to update stats and recent bookings
         loadCalendarData(); // Reload calendar to remove deleted booking
     });
+
+        socket.on('resortAdded', (resort) => {
+            console.log('Resort added:', resort);
+            showNotification(`New resort added: ${resort.name}`, 'success');
+            loadDashboard();
+            loadResorts();
+        });
+
+        socket.on('resortUpdated', (resort) => {
+            console.log('Resort updated:', resort);
+            showNotification(`Resort updated: ${resort.name}`, 'info');
+            loadDashboard();
+            loadResorts();
+        });
     
     socket.on('disconnect', () => {
         console.log('Admin panel disconnected from server');
