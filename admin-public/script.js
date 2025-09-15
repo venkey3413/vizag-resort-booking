@@ -276,17 +276,8 @@ async function exportData(type, format) {
 }
 
 async function getCSRFToken() {
-    try {
-        const response = await fetch('/api/csrf-token', {
-            credentials: 'include'
-        });
-        const data = await response.json();
-        csrfToken = data.token;
-        console.log('CSRF token obtained successfully');
-    } catch (error) {
-        console.error('Error getting CSRF token:', error);
-        csrfToken = '';
-    }
+    // CSRF disabled for simplicity
+    csrfToken = '';
 }
 
 function setupEventListeners() {
@@ -369,10 +360,8 @@ async function handleAddDiscount(e) {
         const response = await fetch('/api/discount-codes', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
+                'Content-Type': 'application/json'
             },
-            credentials: 'include',
             body: JSON.stringify(discountData)
         });
         

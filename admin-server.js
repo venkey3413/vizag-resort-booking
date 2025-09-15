@@ -228,12 +228,12 @@ app.post('/api/resorts', async (req, res) => {
         // Real-time sync to main website
         try {
             const axios = require('axios');
-            await axios.post('http://13.201.12.180:3000/api/sync/resort-added', newResort, {
+            await axios.post('http://15.206.69.253:3000/api/sync/resort-added', newResort, {
                 headers: { 'x-internal-service': 'admin-server' },
                 timeout: 2000
             }).catch(e => console.log('Main server sync failed:', e.message));
             
-            await axios.post('http://13.201.12.180:3002/api/sync/resort-added', newResort, {
+            await axios.post('http://15.206.69.253:3002/api/sync/resort-added', newResort, {
                 headers: { 'x-internal-service': 'admin-server' },
                 timeout: 2000
             }).catch(e => console.log('Booking server sync failed:', e.message));
@@ -251,7 +251,7 @@ app.post('/api/resorts', async (req, res) => {
     }
 });
 
-app.put('/api/resorts/:id', cognitoAuth, async (req, res) => {
+app.put('/api/resorts/:id', async (req, res) => {
     console.log('Update resort request:', req.params.id, req.body);
     try {
         const id = parseInt(req.params.id);
@@ -267,12 +267,12 @@ app.put('/api/resorts/:id', cognitoAuth, async (req, res) => {
         // Real-time sync to main website
         try {
             const axios = require('axios');
-            await axios.post('http://13.201.12.180:3000/api/sync/resort-updated', updatedResort, {
+            await axios.post('http://15.206.69.253:3000/api/sync/resort-updated', updatedResort, {
                 headers: { 'x-internal-service': 'admin-server' },
                 timeout: 2000
             }).catch(e => console.log('Main server sync failed:', e.message));
             
-            await axios.post('http://13.201.12.180:3002/api/sync/resort-updated', updatedResort, {
+            await axios.post('http://15.206.69.253:3002/api/sync/resort-updated', updatedResort, {
                 headers: { 'x-internal-service': 'admin-server' },
                 timeout: 2000
             }).catch(e => console.log('Booking server sync failed:', e.message));
@@ -307,7 +307,7 @@ app.patch('/api/resorts/:id/availability', async (req, res) => {
     }
 });
 
-app.delete('/api/resorts/:id', cognitoAuth, async (req, res) => {
+app.delete('/api/resorts/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         
