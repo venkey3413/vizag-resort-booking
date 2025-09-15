@@ -17,15 +17,9 @@ sudo apt-get install -y nodejs git
 echo "✅ Node.js version: $(node --version)"
 echo "✅ NPM version: $(npm --version)"
 
-# Clone repository
-echo "📥 Cloning repository..."
-if [ -d "vizag-resort-booking" ]; then
-    cd vizag-resort-booking
-    git pull origin main
-else
-    git clone https://github.com/venkey3413/vizag-resort-booking.git
-    cd vizag-resort-booking
-fi
+# Update repository
+echo "📥 Updating repository..."
+git pull origin main
 
 # Install all dependencies
 echo "📦 Installing dependencies..."

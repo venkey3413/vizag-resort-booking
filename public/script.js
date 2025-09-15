@@ -957,8 +957,16 @@ async function handleBooking(e) {
             body: JSON.stringify(bookingData)
         });
         
-        if (response.ok) {
-            const booking = await response.json();
+        const responseText = await response.text();
+        let booking;
+        
+        try {
+            booking = JSON.parse(responseText);
+        } catch (e) {
+            booking = null;
+        }
+        
+        if (response.ok && booking) {
             const bookingId = booking.id || booking.bookingId || 'Unknown';
             const totalPrice = booking.totalPrice || booking.total_price || 0;
             showNotification(`Booking confirmed!\n\nBooking ID: RB${String(bookingId).padStart(4, '0')}\nTotal: ₹${totalPrice.toLocaleString()}\n\nPay via WhatsApp now!`, 'success');
@@ -967,21 +975,13 @@ async function handleBooking(e) {
             appliedDiscount = null;
         } else {
             console.log('Booking failed with status:', response.status);
+            console.log('Server response:', responseText);
+            
             let errorMsg = 'Please try again';
-            try {
-                const errorText = await response.text();
-                console.log('Server error response:', errorText);
-                try {
-                    const error = JSON.parse(errorText);
-                    errorMsg = error.error || errorMsg;
-                    console.log('Parsed error:', error);
-                } catch (parseErr) {
-                    console.log('Failed to parse error response:', parseErr);
-                    errorMsg = 'Server error: ' + response.status + ' - ' + errorText.substring(0, 100);
-                }
-            } catch (err) {
-                console.log('Failed to read error response:', err);
-                errorMsg = 'Booking failed: ' + response.status;
+            if (booking && booking.error) {
+                errorMsg = booking.error;
+            } else if (responseText) {
+                errorMsg = 'Server error: ' + responseText.substring(0, 100);
             }
             showNotification('Booking failed: ' + errorMsg, 'error');
         }
