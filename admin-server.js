@@ -104,8 +104,6 @@ async function pollSyncEvents() {
     // Use setInterval instead of recursive setTimeout
 }
 setInterval(pollSyncEvents, 2000); // Poll every 2 seconds
-}
-pollSyncEvents();
 
 app.post('/api/auth/create-admin', async (req, res) => {
     try {
