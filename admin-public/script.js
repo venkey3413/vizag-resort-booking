@@ -617,7 +617,6 @@ async function toggleAvailability(resortId, newAvailability) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            credentials: 'include',
             body: JSON.stringify({ available: newAvailability })
         });
         

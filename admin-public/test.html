@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Test</title>
+</head>
+<body>
+    <h1>Resort Admin Test</h1>
+    <button onclick="addTestResort()">Add Test Resort</button>
+    <div id="result"></div>
+    
+    <script>
+    async function addTestResort() {
+        try {
+            const response = await fetch('/api/resorts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: 'Test Resort ' + Date.now(),
+                    location: 'Test City',
+                    price: 1000,
+                    description: 'Test description'
+                })
+            });
+            
+            const result = await response.json();
+            document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+        } catch (error) {
+            document.getElementById('result').innerHTML = 'Error: ' + error.message;
+        }
+    }
+    </script>
+</body>
+</html>
