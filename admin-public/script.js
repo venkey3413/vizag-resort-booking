@@ -1,603 +1,271 @@
+// Socket.IO connection for real-time updates
+const socket = io();
+
+// Global variables
 let resorts = [];
-let csrfToken = '';
-
-document.addEventListener('DOMContentLoaded', function() {
-    getCSRFToken();
-    loadDashboard();
-    loadResorts();
-    setupEventListeners();
-    initCalendar();
-    setupSocketIO();
-});
-
-// Socket.IO setup for real-time updates
-function setupSocketIO() {
-    const socket = io();
-    
-    socket.on('connect', () => {
-        console.log('Admin panel connected to server');
-    });
-    
-    socket.on('bookingCreated', (booking) => {
-        console.log('New booking received:', booking);
-        showNotification(`New booking: ${booking.guest_name} - ${booking.resort_name}`, 'success');
-        loadDashboard(); // Reload dashboard data
-        loadCalendarData(); // Reload calendar
-    });
-    
-    socket.on('dashboardReload', (data) => {
-        console.log('Dashboard reload requested:', data.reason);
-        loadDashboard();
-    });
-    
-    socket.on('bookingDeleted', (data) => {
-        console.log('Booking deleted:', data.id);
-        showNotification(`Booking ${data.id} deleted`, 'info');
-        loadDashboard(); // Reload dashboard to update stats and recent bookings
-        loadCalendarData(); // Reload calendar to remove deleted booking
-    });
-
-        socket.on('resortAdded', (resort) => {
-            console.log('Resort added:', resort);
-            showNotification(`New resort added: ${resort.name}`, 'success');
-            loadDashboard();
-            loadResorts();
-        });
-
-        socket.on('resortUpdated', (resort) => {
-            console.log('Resort updated:', resort);
-            showNotification(`Resort updated: ${resort.name}`, 'info');
-            loadDashboard();
-            loadResorts();
-        });
-    
-    socket.on('disconnect', () => {
-        console.log('Admin panel disconnected from server');
-    });
-}
-
-let currentDate = new Date();
+let discountCodes = [];
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
 let calendarBookings = [];
 
-function initCalendar() {
-    loadCalendarData();
-    renderCalendar();
-}
-
-async function loadCalendarData() {
-    try {
-                const response = await fetch('http://3.110.142.138:3001/api/calendar/bookings');
-        calendarBookings = await response.json();
-        renderCalendar();
-    } catch (error) {
-        console.error('Error loading calendar data:', error);
-    }
-}
-
-function renderCalendar() {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboard();
+    loadResorts();
+    loadDiscountCodes();
+    loadCalendarBookings();
     
-    // Update month header
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'];
-    document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
-    
-    // Get first day of month and number of days
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const daysInPrevMonth = new Date(year, month, 0).getDate();
-    
-    const calendarDays = document.getElementById('calendarDays');
-    calendarDays.innerHTML = '';
-    
-    // Previous month days
-    for (let i = firstDay - 1; i >= 0; i--) {
-        const day = daysInPrevMonth - i;
-        const dayElement = createDayElement(day, true, year, month - 1);
-        calendarDays.appendChild(dayElement);
-    }
-    
-    // Current month days
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dayElement = createDayElement(day, false, year, month);
-        calendarDays.appendChild(dayElement);
-    }
-    
-    // Next month days
-    const totalCells = calendarDays.children.length;
-    const remainingCells = 42 - totalCells; // 6 rows × 7 days
-    for (let day = 1; day <= remainingCells; day++) {
-        const dayElement = createDayElement(day, true, year, month + 1);
-        calendarDays.appendChild(dayElement);
-    }
-}
-
-function createDayElement(day, isOtherMonth, year, month) {
-    const dayElement = document.createElement('div');
-    dayElement.className = 'calendar-day';
-    if (isOtherMonth) dayElement.classList.add('other-month');
-    
-    const today = new Date();
-    if (!isOtherMonth && day === today.getDate() && 
-        month === today.getMonth() && year === today.getFullYear()) {
-        dayElement.classList.add('today');
-    }
-    
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    
-    // Get bookings for this date
-    const dayBookings = calendarBookings.filter(booking => {
-        const checkIn = booking.check_in;
-        const checkOut = booking.check_out;
-        return dateStr >= checkIn && dateStr <= checkOut;
-    });
-    
-    const checkIns = calendarBookings.filter(b => b.check_in === dateStr);
-    const checkOuts = calendarBookings.filter(b => b.check_out === dateStr);
-    
-    dayElement.innerHTML = `
-        <div class="day-number">${day}</div>
-        <div class="booking-indicators">
-            ${checkIns.map(() => '<span class="booking-dot checkin"></span>').join('')}
-            ${checkOuts.map(() => '<span class="booking-dot checkout"></span>').join('')}
-        </div>
-        ${dayBookings.length > 0 ? `<div class="booking-count">${dayBookings.length} booking${dayBookings.length > 1 ? 's' : ''}</div>` : ''}
-    `;
-    
-    if (dayBookings.length > 0) {
-        dayElement.title = dayBookings.map(b => `${b.guest_name} - ${b.resort_name}`).join('\n');
-    }
-    
-    return dayElement;
-}
-
-function previousMonth() {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar();
-}
-
-function nextMonth() {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar();
-}
-
-let dashboardData = {};
-
-async function loadDashboard() {
-    try {
-                const response = await fetch('http://3.110.142.138:3001/api/analytics/dashboard');
-        dashboardData = await response.json();
-        updateDashboard();
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-    }
-}
-
-function updateDashboard() {
-    // Update stats cards
-    document.getElementById('totalResorts').textContent = dashboardData.totalResorts || 0;
-    document.getElementById('totalBookings').textContent = dashboardData.totalBookings || 0;
-    document.getElementById('totalRevenue').textContent = `₹${(dashboardData.totalRevenue || 0).toLocaleString()}`;
-    document.getElementById('todayBookings').textContent = dashboardData.todayBookings || 0;
-    
-    // Update location stats
-    updateLocationStats();
-    
-    // Update recent bookings
-    updateRecentBookings();
-    
-    // Update revenue chart
-    updateRevenueChart();
-}
-
-function updateLocationStats() {
-    const container = document.getElementById('locationStats');
-    const locations = dashboardData.locationStats || [];
-    
-    container.innerHTML = locations.map(location => `
-        <div class="location-item">
-            <span class="location-name">${location.location}</span>
-            <span class="location-count">${location.count}</span>
-        </div>
-    `).join('');
-}
-
-function updateRecentBookings() {
-    const container = document.getElementById('recentBookingsList');
-    const bookings = dashboardData.recentBookings || [];
-    
-    container.innerHTML = bookings.map(booking => `
-        <div class="booking-item">
-            <div class="booking-info">
-                <div class="booking-guest">${booking.guest_name}</div>
-                <div class="booking-resort">${booking.resort_name}</div>
-            </div>
-            <div class="booking-amount">₹${(booking.total_price || 0).toLocaleString()}</div>
-        </div>
-    `).join('');
-}
-
-function updateRevenueChart() {
-    const canvas = document.getElementById('revenueChart');
-    const ctx = canvas.getContext('2d');
-    const monthlyData = dashboardData.monthlyRevenue || [];
-    
-    // Simple bar chart
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (monthlyData.length === 0) {
-        ctx.fillStyle = '#ccc';
-        ctx.font = '16px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('No data available', canvas.width / 2, canvas.height / 2);
-        return;
-    }
-    
-    const maxRevenue = Math.max(...monthlyData.map(d => d.revenue));
-    const barWidth = canvas.width / monthlyData.length;
-    const barMaxHeight = canvas.height - 40;
-    
-    monthlyData.forEach((data, index) => {
-        const barHeight = (data.revenue / maxRevenue) * barMaxHeight;
-        const x = index * barWidth;
-        const y = canvas.height - barHeight - 20;
-        
-        // Draw bar
-        ctx.fillStyle = '#667eea';
-        ctx.fillRect(x + 10, y, barWidth - 20, barHeight);
-        
-        // Draw month label
-        ctx.fillStyle = '#333';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(data.month, x + barWidth / 2, canvas.height - 5);
-        
-        // Draw value
-        ctx.fillStyle = '#666';
-        ctx.font = '10px Arial';
-        ctx.fillText(`₹${data.revenue.toLocaleString()}`, x + barWidth / 2, y - 5);
-    });
-}
-
-async function exportData(type, format) {
-    try {
-                const response = await fetch(`http://3.110.142.138:3001/api/export/${type}?format=${format}`);
-        
-        if (!response.ok) {
-            throw new Error('Export failed');
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        
-        const timestamp = new Date().toISOString().split('T')[0];
-        const extension = format === 'excel' ? 'xlsx' : 'csv';
-        a.download = `${type}-${timestamp}.${extension}`;
-        
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        showNotification(`${type} exported successfully!`, 'success');
-    } catch (error) {
-        console.error('Export error:', error);
-        showNotification('Export failed. Please try again.', 'error');
-    }
-}
-
-async function getCSRFToken() {
-    // CSRF disabled for simplicity
-    csrfToken = '';
-}
-
-function setupEventListeners() {
+    // Set up form handlers
     document.getElementById('addResortForm').addEventListener('submit', handleAddResort);
     document.getElementById('editResortForm').addEventListener('submit', handleEditResort);
-    document.getElementById('addDiscountForm').addEventListener('submit', handleAddDiscount);
+    document.getElementById('addDiscountForm').addEventListener('submit', handleAddDiscountCode);
+});
+
+// Socket event listeners for real-time updates
+socket.on('connect', () => {
+    console.log('Connected to admin server');
+});
+
+socket.on('resortAdded', (resort) => {
+    console.log('Resort added:', resort);
+    loadResorts();
+    loadDashboard();
+});
+
+socket.on('resortUpdated', (resort) => {
+    console.log('Resort updated:', resort);
+    loadResorts();
+    loadDashboard();
+});
+
+socket.on('resortDeleted', (data) => {
+    console.log('Resort deleted:', data);
+    loadResorts();
+    loadDashboard();
+});
+
+socket.on('bookingCreated', (booking) => {
+    console.log('Booking created:', booking);
+    loadDashboard();
+    loadCalendarBookings();
+});
+
+socket.on('bookingDeleted', (data) => {
+    console.log('Booking deleted:', data);
+    loadDashboard();
+    loadCalendarBookings();
+});
+
+// Tab management
+function showTab(tabName, event) {
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(tab => tab.classList.remove('active'));
+    
+    // Remove active class from all tab buttons
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // Show selected tab and mark button as active
+    document.getElementById(tabName).classList.add('active');
+    if (event) event.target.classList.add('active');
+    
+    // Load data based on tab
+    switch(tabName) {
+        case 'dashboard':
+            loadDashboard();
+            break;
+        case 'calendar':
+            loadCalendarBookings();
+            break;
+        case 'manage-resorts':
+            loadResorts();
+            break;
+        case 'discount-codes':
+            loadDiscountCodes();
+            break;
+    }
 }
 
+// Dashboard functions
+async function loadDashboard() {
+    try {
+        const response = await fetch('/api/analytics/dashboard');
+        const data = await response.json();
+        
+        document.getElementById('totalResorts').textContent = data.totalResorts;
+        document.getElementById('totalBookings').textContent = data.totalBookings;
+        document.getElementById('totalRevenue').textContent = `₹${data.totalRevenue.toLocaleString()}`;
+        document.getElementById('todayBookings').textContent = data.todayBookings;
+        
+        // Update location stats
+        const locationStats = document.getElementById('locationStats');
+        locationStats.innerHTML = data.locationStats.map(stat => `
+            <div class="location-stat">
+                <span class="location-name">${stat.location}</span>
+                <span class="location-count">${stat.count} bookings</span>
+            </div>
+        `).join('');
+        
+        // Update recent bookings
+        const recentBookings = document.getElementById('recentBookingsList');
+        recentBookings.innerHTML = data.recentBookings.map(booking => `
+            <div class="booking-item">
+                <div class="booking-info">
+                    <strong>${booking.guest_name}</strong>
+                    <span>${booking.resort_name}</span>
+                </div>
+                <div class="booking-amount">₹${booking.total_price}</div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+        showNotification('Failed to load dashboard data', 'error');
+    }
+}
+
+// Resort management functions
 async function loadResorts() {
     try {
-                const response = await fetch('http://3.110.142.138:3001/api/resorts');
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        const response = await fetch('/api/resorts');
         resorts = await response.json();
-        console.log('Loaded resorts:', resorts.length);
         displayResorts();
     } catch (error) {
         console.error('Error loading resorts:', error);
-        showNotification('Failed to load resorts: ' + error.message, 'error');
+        showNotification('Failed to load resorts', 'error');
     }
-}
-
-let discountCodes = [];
-
-async function loadDiscountCodes() {
-    try {
-                const response = await fetch('http://3.110.142.138:3001/api/discount-codes');
-        discountCodes = await response.json();
-        displayDiscountCodes();
-    } catch (error) {
-        console.error('Error loading discount codes:', error);
-    }
-}
-
-function displayDiscountCodes() {
-    const grid = document.getElementById('discountCodesGrid');
-    
-    grid.innerHTML = discountCodes.map(code => `
-        <div class="resort-card">
-            <div class="resort-status">
-                <div>
-                    <h4>${code.code}</h4>
-                    <p>${code.discount_type === 'percentage' ? code.discount_value + '%' : '₹' + code.discount_value} off</p>
-                    <small>Used: ${code.used_count}/${code.max_uses || '∞'} | Min: ₹${code.min_amount}</small>
-                </div>
-                <span class="status-badge ${code.active ? 'available' : 'unavailable'}">
-                    ${code.active ? 'Active' : 'Inactive'}
-                </span>
-            </div>
-            <div class="resort-actions">
-                <button class="availability-btn ${code.active ? 'available' : 'unavailable'}" 
-                        onclick="toggleDiscountStatus(${code.id}, ${!code.active})">
-                    <i class="fas fa-${code.active ? 'eye-slash' : 'eye'}"></i> 
-                    ${code.active ? 'Disable' : 'Enable'}
-                </button>
-                <button class="delete-btn" onclick="deleteDiscountCode(${code.id})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-async function handleAddDiscount(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target);
-    
-    const discountData = {
-        code: formData.get('code').toUpperCase(),
-        discountType: formData.get('discountType'),
-        discountValue: parseInt(formData.get('discountValue')),
-        minAmount: parseInt(formData.get('minAmount')) || 0,
-        maxUses: parseInt(formData.get('maxUses')) || null,
-        validUntil: formData.get('validUntil') || null
-    };
-    
-    try {
-            const response = await fetch('http://3.110.142.138:3001/api/discount-codes', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(discountData)
-        });
-        
-        if (response.ok) {
-            showNotification('Discount code added successfully!', 'success');
-            e.target.reset();
-            loadDiscountCodes();
-        } else {
-            const error = await response.json();
-            showNotification('Error: ' + (error.error || 'Unknown error'), 'error');
-        }
-    } catch (error) {
-        showNotification('Error adding discount code: ' + error.message, 'error');
-    }
-}
-
-function sanitizeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed; top: 20px; right: 20px; z-index: 9999;
-        padding: 12px 20px; border-radius: 4px; color: white;
-        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
-}
-
-function showConfirmation(message) {
-    return new Promise(resolve => {
-        const modal = document.createElement('div');
-        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center';
-        modal.innerHTML = `<div style="background:white;padding:20px;border-radius:8px;text-align:center"><p>${message}</p><button onclick="this.parentElement.parentElement.remove();resolve(true)" style="margin:5px;padding:8px 16px;background:#f44336;color:white;border:none;border-radius:4px">Yes</button><button onclick="this.parentElement.parentElement.remove();resolve(false)" style="margin:5px;padding:8px 16px;background:#ccc;border:none;border-radius:4px">No</button></div>`;
-        document.body.appendChild(modal);
-        modal.querySelector('button').onclick = () => { modal.remove(); resolve(true); };
-        modal.querySelector('button:last-child').onclick = () => { modal.remove(); resolve(false); };
-    });
 }
 
 function displayResorts() {
     const grid = document.getElementById('resortsGrid');
-    
-    console.log('Displaying resorts:', resorts);
-    
-    if (!resorts || resorts.length === 0) {
-        grid.innerHTML = '<div class="no-data">No resorts found. Add a resort to get started.</div>';
-        return;
-    }
-    
-    grid.innerHTML = resorts.map(resort => {
-        const safeName = sanitizeHtml(resort.name || '');
-        const safeLocation = sanitizeHtml(resort.location || '');
-        const safePrice = parseInt(resort.price) || 0;
-        const safeMaxGuests = parseInt(resort.max_guests) || 0;
-        const safePerHeadCharge = parseInt(resort.per_head_charge) || 0;
-        const safeId = parseInt(resort.id) || 0;
-        const isAvailable = Boolean(resort.available);
-        
-        return `
+    grid.innerHTML = resorts.map(resort => `
         <div class="resort-card">
-            <div class="resort-status">
-                <div>
-                    <h4>${safeName}</h4>
-                    <p>${safeLocation} - ₹${safePrice}/night</p>
-                    <small>Max: ${safeMaxGuests} guests, Extra: ₹${safePerHeadCharge}/head</small>
+            <div class="resort-header">
+                <h3>${resort.name}</h3>
+                <div class="resort-actions">
+                    <button onclick="editResort(${resort.id})" class="edit-btn">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteResort(${resort.id})" class="delete-btn">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
-                <span class="status-badge ${isAvailable ? 'available' : 'unavailable'}">
-                    ${isAvailable ? 'Available' : 'Unavailable'}
-                </span>
             </div>
-            <div class="resort-media">
-                ${resort.images && resort.images.length > 0 ? 
-                    `<img src="${sanitizeHtml(resort.images[0])}" alt="${safeName}" style="width:100px;height:60px;object-fit:cover;" onerror="this.style.display='none'">` : 
-                    '<div style="width:100px;height:60px;background:#eee;display:flex;align-items:center;justify-content:center;">No Image</div>'
-                }
-                <small>${resort.images ? resort.images.length : 0} images, ${resort.videos ? resort.videos.length : 0} videos</small>
+            <div class="resort-info">
+                <p><i class="fas fa-map-marker-alt"></i> ${resort.location}</p>
+                <p><i class="fas fa-rupee-sign"></i> ₹${resort.price}/night</p>
+                <p><i class="fas fa-users"></i> Max ${resort.max_guests || 10} guests</p>
+                ${resort.map_link ? `<p><a href="${resort.map_link}" target="_blank"><i class="fas fa-map"></i> View on Map</a></p>` : ''}
             </div>
-            <div class="resort-actions">
-                <button class="availability-btn ${isAvailable ? 'available' : 'unavailable'}" 
-                        onclick="toggleAvailability(${safeId}, ${!isAvailable}); return false;">
-                    <i class="fas fa-${isAvailable ? 'eye-slash' : 'eye'}"></i> 
-                    ${isAvailable ? 'Disable' : 'Enable'}
-                </button>
-                <button class="edit-btn" onclick="openEditModal(${safeId})">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="delete-btn" onclick="deleteResort(${safeId})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
+            <div class="resort-description">
+                <p>${resort.description}</p>
             </div>
+            ${resort.amenities && resort.amenities.length > 0 ? `
+                <div class="resort-amenities">
+                    ${resort.amenities.map(amenity => `<span class="amenity-tag">${amenity}</span>`).join('')}
+                </div>
+            ` : ''}
+            ${resort.images && resort.images.length > 0 ? `
+                <div class="resort-images">
+                    <img src="${resort.images[0]}" alt="${resort.name}" onerror="this.style.display='none'">
+                </div>
+            ` : ''}
         </div>
-        `;
-    }).join('');
+    `).join('');
 }
 
-async function handleAddResort(e) {
-    e.preventDefault();
+async function handleAddResort(event) {
+    event.preventDefault();
     
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<span class="loading-spinner"></span> Adding...';
-    submitBtn.disabled = true;
-    
-    try {
-        const formData = new FormData(e.target);
-    
-    // Parse URLs from textarea
-    const imageUrls = formData.get('imageUrls') ? 
-        formData.get('imageUrls').split('\n').map(url => url.trim()).filter(url => url) : [];
-    const videoUrls = formData.get('videoUrls') ? 
-        formData.get('videoUrls').split('\n').map(url => url.trim()).filter(url => url) : [];
-    
+    const formData = new FormData(event.target);
     const resortData = {
         name: formData.get('name'),
         location: formData.get('location'),
         price: parseInt(formData.get('price')),
-        peakPrice: parseInt(formData.get('peakPrice')) || null,
-        offPeakPrice: parseInt(formData.get('offPeakPrice')) || null,
-        peakStart: formData.get('peakStart') || null,
-        peakEnd: formData.get('peakEnd') || null,
+        peakPrice: formData.get('peakPrice') ? parseInt(formData.get('peakPrice')) : null,
+        offPeakPrice: formData.get('offPeakPrice') ? parseInt(formData.get('offPeakPrice')) : null,
+        peakStart: formData.get('peakStart'),
+        peakEnd: formData.get('peakEnd'),
         description: formData.get('description'),
         amenities: formData.get('amenities') ? formData.get('amenities').split(',').map(a => a.trim()) : [],
+        images: formData.get('imageUrls') ? formData.get('imageUrls').split('\\n').filter(url => url.trim()) : [],
+        videos: formData.get('videoUrls') ? formData.get('videoUrls').split('\\n').filter(url => url.trim()) : [],
         maxGuests: parseInt(formData.get('maxGuests')) || 10,
         perHeadCharge: parseInt(formData.get('perHeadCharge')) || 300,
-        images: imageUrls,
-        videos: videoUrls,
-        mapLink: formData.get('mapLink') || ''
+        mapLink: formData.get('mapLink')
     };
     
-            const response = await fetch('http://3.110.142.138:3001/api/resorts', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(resortData)
-    });
-    
-    if (response.ok) {
-        console.log('Resort added successfully!');
-        showNotification('Resort added successfully!', 'success');
-        e.target.reset();
-        loadResorts();
-    } else {
-        const error = await response.json();
-        console.error('Error adding resort:', error.error || 'Unknown error');
-        showNotification('Error adding resort: ' + (error.error || 'Unknown error'), 'error');
-    }
+    try {
+        const response = await fetch('/api/resorts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(resortData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showNotification('Resort added successfully!', 'success');
+            event.target.reset();
+            loadResorts();
+        } else {
+            showNotification(result.error || 'Failed to add resort', 'error');
+        }
     } catch (error) {
-        console.error('Error adding resort:', error.message);
-        showNotification('Error adding resort: ' + error.message, 'error');
-    } finally {
-        // Reset button state
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        console.error('Error adding resort:', error);
+        showNotification('Failed to add resort', 'error');
     }
 }
 
-function openEditModal(resortId) {
-    const resort = resorts.find(r => r.id === resortId);
+function editResort(id) {
+    const resort = resorts.find(r => r.id === id);
     if (!resort) return;
     
     document.getElementById('editResortId').value = resort.id;
     document.getElementById('editName').value = resort.name;
     document.getElementById('editLocation').value = resort.location;
     document.getElementById('editPrice').value = resort.price;
-    document.getElementById('editDescription').value = resort.description;
-    document.getElementById('editAmenities').value = resort.amenities ? resort.amenities.join(', ') : '';
-    document.getElementById('editMaxGuests').value = resort.max_guests || 10;
-    document.getElementById('editPerHeadCharge').value = resort.per_head_charge || 300;
-    document.getElementById('editImageUrls').value = resort.images ? resort.images.join('\n') : '';
-    document.getElementById('editVideoUrls').value = resort.videos ? resort.videos.join('\n') : '';
-    document.getElementById('editMapLink').value = resort.map_link || '';
     document.getElementById('editPeakPrice').value = resort.peak_price || '';
     document.getElementById('editOffPeakPrice').value = resort.off_peak_price || '';
     document.getElementById('editPeakStart').value = resort.peak_season_start || '';
     document.getElementById('editPeakEnd').value = resort.peak_season_end || '';
+    document.getElementById('editDescription').value = resort.description;
+    document.getElementById('editAmenities').value = resort.amenities ? resort.amenities.join(', ') : '';
+    document.getElementById('editImageUrls').value = resort.images ? resort.images.join('\\n') : '';
+    document.getElementById('editVideoUrls').value = resort.videos ? resort.videos.join('\\n') : '';
+    document.getElementById('editMaxGuests').value = resort.max_guests || 10;
+    document.getElementById('editPerHeadCharge').value = resort.per_head_charge || 300;
+    document.getElementById('editMapLink').value = resort.map_link || '';
     
     document.getElementById('editModal').style.display = 'block';
 }
 
-function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-}
-
-async function handleEditResort(e) {
-    e.preventDefault();
+async function handleEditResort(event) {
+    event.preventDefault();
     
-    const resortId = document.getElementById('editResortId').value;
-    
-    // Parse URLs from textarea
-    const imageUrls = document.getElementById('editImageUrls').value ? 
-        document.getElementById('editImageUrls').value.split('\n').map(url => url.trim()).filter(url => url) : [];
-    const videoUrls = document.getElementById('editVideoUrls').value ? 
-        document.getElementById('editVideoUrls').value.split('\n').map(url => url.trim()).filter(url => url) : [];
-    
+    const id = document.getElementById('editResortId').value;
     const resortData = {
         name: document.getElementById('editName').value,
         location: document.getElementById('editLocation').value,
         price: parseInt(document.getElementById('editPrice').value),
-        peakPrice: parseInt(document.getElementById('editPeakPrice').value) || null,
-        offPeakPrice: parseInt(document.getElementById('editOffPeakPrice').value) || null,
-        peakStart: document.getElementById('editPeakStart').value || null,
-        peakEnd: document.getElementById('editPeakEnd').value || null,
+        peakPrice: document.getElementById('editPeakPrice').value ? parseInt(document.getElementById('editPeakPrice').value) : null,
+        offPeakPrice: document.getElementById('editOffPeakPrice').value ? parseInt(document.getElementById('editOffPeakPrice').value) : null,
+        peakStart: document.getElementById('editPeakStart').value,
+        peakEnd: document.getElementById('editPeakEnd').value,
         description: document.getElementById('editDescription').value,
-        amenities: document.getElementById('editAmenities').value.split(',').map(a => a.trim()).filter(a => a),
+        amenities: document.getElementById('editAmenities').value ? document.getElementById('editAmenities').value.split(',').map(a => a.trim()) : [],
+        images: document.getElementById('editImageUrls').value ? document.getElementById('editImageUrls').value.split('\\n').filter(url => url.trim()) : [],
+        videos: document.getElementById('editVideoUrls').value ? document.getElementById('editVideoUrls').value.split('\\n').filter(url => url.trim()) : [],
         maxGuests: parseInt(document.getElementById('editMaxGuests').value) || 10,
         perHeadCharge: parseInt(document.getElementById('editPerHeadCharge').value) || 300,
-        images: imageUrls,
-        videos: videoUrls,
-        mapLink: document.getElementById('editMapLink').value || ''
+        mapLink: document.getElementById('editMapLink').value
     };
     
     try {
-        const response = await fetch(`/api/resorts/${resortId}`, {
+        const response = await fetch(`/api/resorts/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -605,105 +273,256 @@ async function handleEditResort(e) {
             body: JSON.stringify(resortData)
         });
         
+        const result = await response.json();
+        
         if (response.ok) {
-            console.log('Resort updated successfully!');
             showNotification('Resort updated successfully!', 'success');
             closeEditModal();
             loadResorts();
         } else {
-            const error = await response.json();
-            console.error('Error updating resort:', error.error || 'Unknown error');
-            showNotification('Error updating resort: ' + (error.error || 'Unknown error'), 'error');
+            showNotification(result.error || 'Failed to update resort', 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        console.error('Error updating resort:', error.message);
-        showNotification('Error updating resort: ' + error.message, 'error');
+        console.error('Error updating resort:', error);
+        showNotification('Failed to update resort', 'error');
     }
 }
 
-async function toggleAvailability(resortId, newAvailability) {
-    console.log(`Toggling resort ${resortId} to ${newAvailability}`);
+async function deleteResort(id) {
+    if (!confirm('Are you sure you want to delete this resort?')) return;
     
     try {
-        const response = await fetch(`/api/resorts/${resortId}/availability`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ available: newAvailability })
+        const response = await fetch(`/api/resorts/${id}`, {
+            method: 'DELETE'
         });
         
-        console.log('Response status:', response.status);
+        const result = await response.json();
         
         if (response.ok) {
-            console.log(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`);
-            showNotification(`Resort ${newAvailability ? 'enabled' : 'disabled'} successfully!`, 'success');
-            
-            // Update local data immediately for instant UI update
-            const resort = resorts.find(r => r.id === resortId);
-            if (resort) {
-                console.log('Updating local resort data');
-                resort.available = newAvailability;
-                displayResorts();
-            } else {
-                console.log('Resort not found in local data');
-            }
-            
-            // Also reload from server to ensure sync
-            setTimeout(() => loadResorts(), 100);
-        } else {
-            console.error('Error updating availability, status:', response.status);
-            showNotification('Error updating availability', 'error');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification('Error updating availability: ' + error.message, 'error');
-    }
-}
-
-async function deleteResort(resortId) {
-    if (!await showConfirmation('Are you sure you want to delete this resort?')) return;
-    
-    try {
-        const response = await fetch(`/api/resorts/${resortId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            console.log('Resort deleted successfully!');
             showNotification('Resort deleted successfully!', 'success');
             loadResorts();
         } else {
-            console.error('Error deleting resort');
-            showNotification('Error deleting resort', 'error');
+            showNotification(result.error || 'Failed to delete resort', 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        console.error('Error deleting resort');
-        showNotification('Error deleting resort', 'error');
+        console.error('Error deleting resort:', error);
+        showNotification('Failed to delete resort', 'error');
     }
 }
 
-function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    document.getElementById(tabName).classList.add('active');
-    event.target.classList.add('active');
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
 }
 
+// Discount codes functions
+async function loadDiscountCodes() {
+    try {
+        const response = await fetch('/api/discount-codes');
+        discountCodes = await response.json();
+        displayDiscountCodes();
+    } catch (error) {
+        console.error('Error loading discount codes:', error);
+        showNotification('Failed to load discount codes', 'error');
+    }
+}
+
+function displayDiscountCodes() {
+    const grid = document.getElementById('discountCodesGrid');
+    grid.innerHTML = discountCodes.map(code => `
+        <div class="resort-card">
+            <div class="resort-header">
+                <h3>${code.code}</h3>
+                <div class="resort-actions">
+                    <button onclick="deleteDiscountCode(${code.id})" class="delete-btn">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="resort-info">
+                <p><i class="fas fa-percentage"></i> ${code.discount_type === 'percentage' ? code.discount_value + '%' : '₹' + code.discount_value}</p>
+                <p><i class="fas fa-rupee-sign"></i> Min: ₹${code.min_amount}</p>
+                ${code.max_uses ? `<p><i class="fas fa-users"></i> Max uses: ${code.max_uses}</p>` : '<p><i class="fas fa-infinity"></i> Unlimited uses</p>'}
+                ${code.valid_until ? `<p><i class="fas fa-calendar"></i> Valid until: ${new Date(code.valid_until).toLocaleDateString()}</p>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function handleAddDiscountCode(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const codeData = {
+        code: formData.get('code'),
+        discountType: formData.get('discountType'),
+        discountValue: parseInt(formData.get('discountValue')),
+        minAmount: parseInt(formData.get('minAmount')) || 0,
+        maxUses: formData.get('maxUses') ? parseInt(formData.get('maxUses')) : null,
+        validUntil: formData.get('validUntil') || null
+    };
+    
+    try {
+        const response = await fetch('/api/discount-codes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(codeData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showNotification('Discount code created successfully!', 'success');
+            event.target.reset();
+            loadDiscountCodes();
+        } else {
+            showNotification(result.error || 'Failed to create discount code', 'error');
+        }
+    } catch (error) {
+        console.error('Error creating discount code:', error);
+        showNotification('Failed to create discount code', 'error');
+    }
+}
+
+async function deleteDiscountCode(id) {
+    if (!confirm('Are you sure you want to delete this discount code?')) return;
+    
+    try {
+        const response = await fetch(`/api/discount-codes/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showNotification('Discount code deleted successfully!', 'success');
+            loadDiscountCodes();
+        } else {
+            showNotification('Failed to delete discount code', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting discount code:', error);
+        showNotification('Failed to delete discount code', 'error');
+    }
+}
+
+// Calendar functions
+async function loadCalendarBookings() {
+    try {
+        const response = await fetch('/api/calendar/bookings');
+        calendarBookings = await response.json();
+        renderCalendar();
+    } catch (error) {
+        console.error('Error loading calendar bookings:', error);
+        showNotification('Failed to load calendar data', 'error');
+    }
+}
+
+function renderCalendar() {
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+    
+    document.getElementById('currentMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    const calendarDays = document.getElementById('calendarDays');
+    calendarDays.innerHTML = '';
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day empty';
+        calendarDays.appendChild(emptyDay);
+    }
+    
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+        
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayBookings = calendarBookings.filter(booking => 
+            booking.check_in <= dateStr && booking.check_out >= dateStr
+        );
+        
+        if (dayBookings.length > 0) {
+            dayElement.classList.add('has-bookings');
+            dayElement.title = `${dayBookings.length} booking(s)`;
+        }
+        
+        calendarDays.appendChild(dayElement);
+    }
+}
+
+function previousMonth() {
+    currentMonth--;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    }
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentMonth++;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    renderCalendar();
+}
+
+// Export functions
+async function exportData(type, format) {
+    try {
+        const response = await fetch(`/api/export/${type}?format=${format}`);
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_${new Date().toISOString().split('T')[0]}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showNotification(`${type} exported successfully!`, 'success');
+        } else {
+            showNotification(`Failed to export ${type}`, 'error');
+        }
+    } catch (error) {
+        console.error('Export error:', error);
+        showNotification(`Failed to export ${type}`, 'error');
+    }
+}
+
+// Utility functions
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Close modal when clicking outside
 window.onclick = function(event) {
-    const editModal = document.getElementById('editModal');
-    if (event.target === editModal) {
-        editModal.style.display = 'none';
+    const modal = document.getElementById('editModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
     }
 }

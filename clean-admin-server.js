@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const { db, initDatabase, addSyncEvent } = require('./database');
+const { db, initDatabase } = require('./database');
 
 const app = express();
 const server = http.createServer(app);
@@ -29,12 +29,11 @@ app.get('/api/test', (req, res) => {
 
 initDatabase();
 
-// Event polling for real-time sync
+const { db: getDb } = require('./database');
 let lastEventId = 0;
 async function pollSyncEvents() {
     try {
-        if (!db()) return;
-        const rows = await db().all('SELECT * FROM sync_events WHERE id > ? ORDER BY id ASC', [lastEventId]);
+        const rows = await getDb().all('SELECT * FROM sync_events WHERE id > ? ORDER BY id ASC', [lastEventId]);
         for (const event of rows) {
             lastEventId = event.id;
             const payload = JSON.parse(event.payload);
@@ -51,9 +50,6 @@ async function pollSyncEvents() {
                 case 'resort_updated':
                     io.emit('resortUpdated', payload);
                     break;
-                case 'resort_deleted':
-                    io.emit('resortDeleted', payload);
-                    break;
             }
         }
     } catch (err) {
@@ -62,7 +58,6 @@ async function pollSyncEvents() {
 }
 setInterval(pollSyncEvents, 2000);
 
-// Analytics dashboard
 app.get('/api/analytics/dashboard', async (req, res) => {
     try {
         if (!db()) {
@@ -118,7 +113,6 @@ app.get('/api/analytics/dashboard', async (req, res) => {
     }
 });
 
-// Resort management APIs
 app.get('/api/resorts', async (req, res) => {
     try {
         const rows = await db().all('SELECT * FROM resorts ORDER BY id DESC');
@@ -151,7 +145,7 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge, mapLink } = req.body;
+        const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
         if (!name || !location || !price) {
             return res.status(400).json({ error: 'Name, location, and price are required' });
@@ -159,7 +153,7 @@ app.post('/api/resorts', async (req, res) => {
         
         const result = await db().run(
             'INSERT INTO resorts (name, location, price, peak_price, off_peak_price, peak_season_start, peak_season_end, description, images, videos, amenities, available, max_guests, per_head_charge, map_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), peakPrice ? parseInt(peakPrice) : null, offPeakPrice ? parseInt(offPeakPrice) : null, peakStart || null, peakEnd || null, description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, mapLink || '']
+            [name, location, parseInt(price), peakPrice ? parseInt(peakPrice) : null, offPeakPrice ? parseInt(offPeakPrice) : null, peakStart || null, peakEnd || null, description || 'No description', JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), 1, parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, req.body.mapLink || '']
         );
         
         const newResort = { 
@@ -173,14 +167,10 @@ app.post('/api/resorts', async (req, res) => {
             amenities,
             available: true,
             max_guests: parseInt(maxGuests) || 10,
-            per_head_charge: parseInt(perHeadCharge) || 300,
-            map_link: mapLink || ''
+            per_head_charge: parseInt(perHeadCharge) || 300
         };
         
-        // Real-time sync
         io.emit('resortAdded', newResort);
-        await addSyncEvent('resort_added', newResort);
-        
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
         console.error('Error adding resort:', error);
@@ -191,31 +181,15 @@ app.post('/api/resorts', async (req, res) => {
 app.put('/api/resorts/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge, mapLink } = req.body;
+        const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
         
         await db().run(
             'UPDATE resorts SET name = ?, location = ?, price = ?, peak_price = ?, off_peak_price = ?, peak_season_start = ?, peak_season_end = ?, description = ?, images = ?, videos = ?, amenities = ?, max_guests = ?, per_head_charge = ?, map_link = ? WHERE id = ?',
-            [name, location, parseInt(price), peakPrice ? parseInt(peakPrice) : null, offPeakPrice ? parseInt(offPeakPrice) : null, peakStart || null, peakEnd || null, description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, mapLink || '', id]
+            [name, location, parseInt(price), peakPrice ? parseInt(peakPrice) : null, offPeakPrice ? parseInt(offPeakPrice) : null, peakStart || null, peakEnd || null, description, JSON.stringify(images || []), JSON.stringify(videos || []), JSON.stringify(amenities || []), parseInt(maxGuests) || 10, parseInt(perHeadCharge) || 300, req.body.mapLink || '', id]
         );
         
-        const updatedResort = { 
-            id, 
-            name, 
-            location, 
-            price: parseInt(price), 
-            description, 
-            images, 
-            videos, 
-            amenities,
-            max_guests: parseInt(maxGuests) || 10,
-            per_head_charge: parseInt(perHeadCharge) || 300,
-            map_link: mapLink || ''
-        };
-        
-        // Real-time sync
+        const updatedResort = { id, name, location, price: parseInt(price), description, images, videos, amenities };
         io.emit('resortUpdated', updatedResort);
-        await addSyncEvent('resort_updated', updatedResort);
-        
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
         console.error('Error updating resort:', error);
@@ -232,10 +206,7 @@ app.delete('/api/resorts/:id', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Real-time sync
         io.emit('resortDeleted', { id });
-        await addSyncEvent('resort_deleted', { id });
-        
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
         console.error('Error deleting resort:', error);
@@ -243,7 +214,6 @@ app.delete('/api/resorts/:id', async (req, res) => {
     }
 });
 
-// Discount codes API
 app.get('/api/discount-codes', async (req, res) => {
     try {
         const codes = await db().all('SELECT * FROM discount_codes ORDER BY created_at DESC');
@@ -270,7 +240,6 @@ app.post('/api/discount-codes', async (req, res) => {
     }
 });
 
-// Calendar bookings
 app.get('/api/calendar/bookings', async (req, res) => {
     try {
         const bookings = await db().all(`
@@ -297,7 +266,83 @@ app.get('/api/calendar/bookings', async (req, res) => {
     }
 });
 
-// Socket.IO connection handling
+app.get('/api/export/:type', async (req, res) => {
+    try {
+        const { type } = req.params;
+        const { format } = req.query;
+        
+        let data = [];
+        let filename = '';
+        
+        if (type === 'bookings') {
+            data = await db().all(`
+                SELECT 
+                    b.id,
+                    b.guest_name,
+                    b.email,
+                    b.phone,
+                    r.name as resort_name,
+                    r.location,
+                    b.check_in,
+                    b.check_out,
+                    b.guests,
+                    b.total_price,
+                    b.payment_status,
+                    b.booking_date
+                FROM bookings b
+                JOIN resorts r ON b.resort_id = r.id
+                ORDER BY b.booking_date DESC
+            `);
+            filename = 'bookings';
+        } else if (type === 'resorts') {
+            data = await db().all(`
+                SELECT 
+                    id,
+                    name,
+                    location,
+                    price,
+                    peak_price,
+                    off_peak_price,
+                    max_guests,
+                    per_head_charge,
+                    available,
+                    created_at
+                FROM resorts
+                ORDER BY created_at DESC
+            `);
+            filename = 'resorts';
+        } else {
+            return res.status(400).json({ error: 'Invalid export type' });
+        }
+        
+        if (format === 'csv') {
+            if (data.length === 0) {
+                return res.status(404).json({ error: 'No data to export' });
+            }
+            
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(row => 
+                Object.values(row).map(value => 
+                    typeof value === 'string' && value.includes(',') 
+                        ? `"${value}"` 
+                        : value
+                ).join(',')
+            );
+            
+            const csv = [headers, ...rows].join('\n');
+            
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', `attachment; filename=${filename}.csv`);
+            res.send(csv);
+        } else {
+            res.status(400).json({ error: 'Invalid format. Use csv' });
+        }
+    } catch (error) {
+        console.error('Export error:', error);
+        res.status(500).json({ error: 'Export failed' });
+    }
+});
+
 io.on('connection', (socket) => {
     console.log('Admin client connected:', socket.id);
     socket.emit('dashboardUpdate', 'connected');

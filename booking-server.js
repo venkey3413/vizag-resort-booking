@@ -5,6 +5,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
+const { addSyncEvent } = require('./database');
 
 const app = express();
 const server = http.createServer(app);
@@ -20,29 +21,10 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('booking-public'));
 
-// Completely disable all security headers
-app.use((req, res, next) => {
-    res.removeHeader('Content-Security-Policy');
-    res.removeHeader('Cross-Origin-Opener-Policy');
-    res.removeHeader('Origin-Agent-Cluster');
-    res.removeHeader('Strict-Transport-Security');
-    res.removeHeader('X-Content-Type-Options');
-    res.removeHeader('X-Frame-Options');
-    res.removeHeader('X-XSS-Protection');
-    next();
-});
-
-// Serve index.html for root route
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/booking-public/index.html');
 });
 
-// Serve simple.html as backup
-app.get('/simple', (req, res) => {
-    res.sendFile(__dirname + '/booking-public/simple.html');
-});
-
-// Simple test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Booking server working' });
 });
@@ -62,37 +44,22 @@ async function initDB() {
     }
 }
 
-// Test endpoint
-app.get('/api/test', (req, res) => {
-    res.json({ message: 'Booking server is working', database: db ? 'connected' : 'disconnected' });
-});
-
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });
         }
-        const bookings = await db.all('SELECT * FROM bookings ORDER BY booking_date DESC');
-        console.log('Found bookings:', bookings.length);
+        const bookings = await db.all(`
+            SELECT b.*, r.name as resort_name, r.location 
+            FROM bookings b 
+            LEFT JOIN resorts r ON b.resort_id = r.id 
+            ORDER BY b.booking_date DESC
+        `);
         res.json(bookings);
     } catch (error) {
         console.error('Error fetching bookings:', error);
         res.status(500).json({ error: 'Failed to fetch bookings: ' + error.message });
-    }
-});
-
-// Get transactions
-app.get('/api/transactions', async (req, res) => {
-    try {
-        if (!db) {
-            return res.status(503).json({ error: 'Database not connected' });
-        }
-        const transactions = await db.all('SELECT * FROM transactions ORDER BY transaction_date DESC');
-        res.json(transactions);
-    } catch (error) {
-        console.error('Error fetching transactions:', error);
-        res.status(500).json({ error: 'Failed to fetch transactions: ' + error.message });
     }
 });
 
@@ -106,8 +73,6 @@ app.patch('/api/bookings/:id/payment', async (req, res) => {
             'UPDATE bookings SET payment_status = ? WHERE id = ?',
             [payment_status, bookingId]
         );
-        
-        // Invoice generation disabled - manual upload to S3
         
         res.json({ success: true });
     } catch (error) {
@@ -123,32 +88,22 @@ app.delete('/api/bookings/:id', async (req, res) => {
             return res.status(503).json({ error: 'Database not connected' });
         }
         const id = parseInt(req.params.id);
+        
+        // Get booking details before deletion
+        const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [id]);
+        if (!booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+        
         const result = await db.run('DELETE FROM bookings WHERE id = ?', [id]);
         
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Booking not found' });
         }
         
-        // Get booking details before deletion for real-time sync
-        const deletedBooking = await db.get('SELECT * FROM bookings WHERE id = ?', [id]);
-        
+        // Real-time sync
         io.emit('bookingDeleted', { id });
-    // Log event to sync_events table
-    const { addSyncEvent } = require('./database');
-    await addSyncEvent('booking_deleted', { id });
-        
-        // Sync with main server to update availability
-        try {
-            const axios = require('axios');
-            await axios.post(`http://${process.env.SERVER_IP || 'localhost'}:3000/api/sync/booking-deleted`, {
-                id,
-                resort_id: deletedBooking?.resort_id
-            }, {
-                headers: { 'x-internal-service': 'booking-server' }
-            }).catch(e => console.log('Booking deletion sync failed:', e.message));
-        } catch (e) {
-            console.log('Booking deletion sync error:', e.message);
-        }
+        await addSyncEvent('booking_deleted', { id, resort_id: booking.resort_id });
         
         res.json({ message: 'Booking deleted successfully' });
     } catch (error) {
@@ -156,6 +111,38 @@ app.delete('/api/bookings/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to delete booking' });
     }
 });
+
+// Event polling for real-time sync
+let lastEventId = 0;
+async function pollSyncEvents() {
+    try {
+        if (!db) return;
+        const rows = await db.all('SELECT * FROM sync_events WHERE id > ? ORDER BY id ASC', [lastEventId]);
+        for (const event of rows) {
+            lastEventId = event.id;
+            const payload = JSON.parse(event.payload);
+            switch (event.event_type) {
+                case 'booking_created':
+                    io.emit('bookingCreated', payload);
+                    break;
+                case 'booking_deleted':
+                    io.emit('bookingDeleted', payload);
+                    break;
+                case 'resort_added':
+                    io.emit('resortAdded', payload);
+                    break;
+                case 'resort_updated':
+                    io.emit('resortUpdated', payload);
+                    break;
+                case 'resort_deleted':
+                    io.emit('resortDeleted', payload);
+                    break;
+            }
+        }
+    } catch (err) {
+        console.error('Error polling sync_events:', err);
+    }
+}
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
@@ -168,77 +155,10 @@ io.on('connection', (socket) => {
 
 // Initialize and start server
 initDB().then(() => {
-    // Event polling for sync_events table
-    const { db: getDb } = require('./database');
-    let lastEventId = 0;
-    async function pollSyncEvents() {
-        try {
-            const rows = await getDb().all('SELECT * FROM sync_events WHERE id > ? ORDER BY id ASC', [lastEventId]);
-            for (const event of rows) {
-                lastEventId = event.id;
-                const payload = JSON.parse(event.payload);
-                switch (event.event_type) {
-                    case 'booking_created':
-                        io.emit('bookingCreated', payload);
-                        break;
-                    case 'booking_deleted':
-                        io.emit('bookingDeleted', payload);
-                        break;
-                    case 'resort_added':
-                        io.emit('resortAdded', payload);
-                        break;
-                    case 'resort_updated':
-                        io.emit('resortUpdated', payload);
-                        break;
-                    // Add more event types as needed
-                }
-            }
-        } catch (err) {
-            console.error('Error polling sync_events:', err);
-        }
-        setTimeout(pollSyncEvents, 2000); // Poll every 2 seconds
-    }
-    pollSyncEvents();
-        // Sync endpoints for API Gateway
-    app.post('/api/sync/booking-created', (req, res) => {
-        if (!req.headers['x-internal-service']) {
-            return res.status(403).json({ error: 'Internal service calls only' });
-        }
-        console.log('Booking sync received:', req.body.id);
-        io.emit('bookingCreated', req.body);
-        res.json({ success: true });
-    });
+    setInterval(pollSyncEvents, 2000);
     
-    app.post('/api/sync/resort-updated', (req, res) => {
-        if (!req.headers['x-internal-service']) {
-            return res.status(403).json({ error: 'Internal service calls only' });
-        }
-        console.log('Resort update sync received');
-        io.emit('resortUpdated', req.body);
-        res.json({ success: true });
-    });
-    
-    app.post('/api/sync/resort-added', (req, res) => {
-        if (!req.headers['x-internal-service']) {
-            return res.status(403).json({ error: 'Internal service calls only' });
-        }
-        console.log('Resort added sync received');
-        io.emit('resortAdded', req.body);
-        res.json({ success: true });
-    });
-    
-    app.post('/api/sync/resort-deleted', (req, res) => {
-        if (!req.headers['x-internal-service']) {
-            return res.status(403).json({ error: 'Internal service calls only' });
-        }
-        console.log('Resort deleted sync received');
-        io.emit('resortDeleted', req.body);
-        res.json({ success: true });
-    });
-    
-    server.listen(PORT, () => {
-        console.log(`📋 Booking History Server running on http://localhost:${PORT}`);
-        console.log(`⚡ Lambda updates enabled`);
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log(`📋 Booking History Server running on http://0.0.0.0:${PORT}`);
     });
 }).catch(error => {
     console.error('Failed to start booking server:', error);
