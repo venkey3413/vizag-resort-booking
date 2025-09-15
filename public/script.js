@@ -262,7 +262,7 @@ async function handleReviewSubmission(e) {
     }
     
     try {
-            const response = await fetch('http://13.233.164.0:3000/api/reviews', {
+            const response = await fetch('/api/reviews', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -292,7 +292,7 @@ function scrollToSection(sectionId) {
 async function loadResorts() {
     showLoading('Loading resorts...');
     try {
-            const response = await fetch('http://13.233.164.0:3000/api/resorts');
+            const response = await fetch('/api/resorts');
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -728,7 +728,7 @@ async function applyDiscount() {
     applyBtn.disabled = true;
     
     try {
-            const response = await fetch(`http://13.233.164.0:3000/api/discount-codes/validate/${code}`);
+            const response = await fetch(`/api/discount-codes/validate/${code}`);
         const result = await response.json();
         
         if (response.ok && result.valid) {
@@ -810,7 +810,7 @@ async function handleBooking(e) {
     };
     
     try {
-            const response = await fetch('http://13.233.164.0:3000/api/bookings', {
+            const response = await fetch('/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
