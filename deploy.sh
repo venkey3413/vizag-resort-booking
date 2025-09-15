@@ -29,7 +29,7 @@ fi
 
 # Install all dependencies
 echo "📦 Installing dependencies..."
-npm install express cors socket.io sqlite3 sqlite multer aws-sdk multer-s3 nodemailer axios dotenv node-cron jsonwebtoken express-rate-limit express-validator helmet crypto amazon-cognito-identity-js
+npm install express cors socket.io sqlite3 sqlite multer aws-sdk multer-s3 nodemailer axios dotenv node-cron jsonwebtoken express-rate-limit express-validator helmet crypto amazon-cognito-identity-js bcryptjs pdfkit fs-extra path uuid moment
 
 # Install PM2 globally
 echo "🔧 Installing PM2..."
@@ -44,10 +44,10 @@ GMAIL_USER=your-email@gmail.com
 GMAIL_PASS=your-app-password
 
 # AWS S3 Configuration
-S3_BUCKET=your_s3_bucket_name
+S3_BUCKET=resort3413
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-AWS_REGION=us-east-1
+AWS_REGION=ap-south-1
 
 # AWS Cognito Configuration
 COGNITO_USER_POOL_ID=your_cognito_user_pool_id
@@ -64,7 +64,7 @@ ENCRYPTION_KEY=your-32-character-encryption-key
 PORT=3000
 ADMIN_PORT=3001
 BOOKING_PORT=3002
-SERVER_IP=15.206.69.253
+SERVER_IP=3.110.142.138
 
 # Security
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
@@ -77,7 +77,7 @@ mkdir -p data backups
 chmod 700 data backups
 
 # Set proper permissions
-chmod +x *.js
+chmod +x ./*.js
 chmod 755 public/
 chmod 755 admin-public/
 
