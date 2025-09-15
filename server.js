@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 3000;
 
 // Basic middleware only
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://13.233.164.0:3000', 'https://13.233.164.0:3000'],
+    origin: ['http://localhost:3000', 'http://3.110.142.138:3000', 'https://3.110.142.138:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
