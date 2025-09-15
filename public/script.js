@@ -775,7 +775,9 @@ async function handleBooking(e) {
     
     // Validation
     const phoneInput = document.getElementById('phone').value.trim();
-    if (!/^[0-9]{10}$/.test(phoneInput)) {
+    // Remove any non-digit characters and validate
+    const cleanPhone = phoneInput.replace(/[^0-9]/g, '');
+    if (!/^[0-9]{10}$/.test(cleanPhone)) {
         showNotification('Please enter a valid 10-digit mobile number', 'error');
         return;
     }
@@ -800,7 +802,7 @@ async function handleBooking(e) {
         resortId: document.getElementById('bookingResortId').value,
         guestName: document.getElementById('guestName').value,
         email: document.getElementById('email').value,
-        phone: phoneInput, // send only digits
+        phone: cleanPhone, // send only digits
         checkIn: document.getElementById('checkIn').value + 'T11:00',
         checkOut: document.getElementById('checkOut').value + 'T09:00',
         guests: document.getElementById('guests').value,
@@ -827,8 +829,14 @@ async function handleBooking(e) {
         } else {
             let errorMsg = 'Please try again';
             try {
-                const error = await response.json();
-                errorMsg = error.error || errorMsg;
+                const errorText = await response.text();
+                console.log('Server response:', errorText);
+                try {
+                    const error = JSON.parse(errorText);
+                    errorMsg = error.error || errorMsg;
+                } catch (parseErr) {
+                    errorMsg = 'Server error: ' + response.status + ' - ' + errorText.substring(0, 100);
+                }
             } catch (err) {
                 errorMsg = 'Booking failed: ' + response.status;
             }

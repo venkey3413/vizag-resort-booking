@@ -199,9 +199,52 @@ app.post('/api/resorts', async (req, res) => {
 
 // Book a resort (public endpoint - no validation required)
 app.post('/api/bookings', async (req, res) => {
-    console.log('Booking request received:', req.body);
+    console.log('Booking request received:', {
+        resortId: req.body.resortId,
+        guestName: req.body.guestName,
+        email: req.body.email,
+        phone: req.body.phone,
+        checkIn: req.body.checkIn,
+        checkOut: req.body.checkOut,
+        guests: req.body.guests
+    });
+    
+    // Validate required fields
+    const { resortId, guestName, email, phone, checkIn, checkOut, guests, paymentId } = req.body;
+    
+    if (!resortId || !guestName || !email || !phone || !checkIn || !checkOut || !guests) {
+        console.log('Missing required fields:', { resortId, guestName, email, phone, checkIn, checkOut, guests });
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Validate phone format (should be 10 digits)
+    const cleanPhone = phone.toString().replace(/[^0-9]/g, '');
+    if (!/^[0-9]{10}$/.test(cleanPhone)) {
+        console.log('Invalid phone format:', phone);
+        return res.status(400).json({ error: 'Phone number must be 10 digits' });
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        console.log('Invalid email format:', email);
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+    
+    // Validate dates
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+        console.log('Invalid date format:', { checkIn, checkOut });
+        return res.status(400).json({ error: 'Invalid date format' });
+    }
+    
+    if (checkInDate >= checkOutDate) {
+        console.log('Invalid date range:', { checkIn, checkOut });
+        return res.status(400).json({ error: 'Check-out must be after check-in' });
+    }
+    
     try {
-        const { resortId, guestName, email, phone, checkIn, checkOut, guests, paymentId } = req.body;
         
         const resorts = await getResorts();
         const resort = resorts.find(r => r.id === parseInt(resortId));
@@ -284,7 +327,7 @@ app.post('/api/bookings', async (req, res) => {
         // Create booking with encrypted sensitive data
         const bookingResult = await db().run(
             'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, payment_id, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [parseInt(resortId), resort.name, guestName, encrypt(email), encrypt(phone), checkIn, checkOut, guestCount, totalPrice, encrypt(paymentId), 'confirmed', 'pending']
+            [parseInt(resortId), resort.name, guestName, encrypt(email), encrypt(cleanPhone), checkIn, checkOut, guestCount, totalPrice, encrypt(paymentId), 'confirmed', 'pending']
         );
         
         const bookingId = bookingResult.lastID;
@@ -311,7 +354,7 @@ app.post('/api/bookings', async (req, res) => {
             resortName: resort.name,
             guestName,
             email,
-            phone,
+            phone: cleanPhone,
             checkIn,
             checkOut,
             guests: guestCount,
@@ -330,7 +373,7 @@ app.post('/api/bookings', async (req, res) => {
                 resort_name: resort.name,
                 guest_name: guestName,
                 email,
-                phone,
+                phone: cleanPhone,
                 check_in: checkIn,
                 check_out: checkOut,
                 guests: guestCount,
@@ -362,7 +405,7 @@ app.post('/api/bookings', async (req, res) => {
                 bookingReference,
                 guestName,
                 email,
-                phone,
+                phone: cleanPhone,
                 resortName: resort.name,
                 resortLocation: resort.location,
                 checkIn,
@@ -458,7 +501,7 @@ app.post('/api/bookings', async (req, res) => {
                             </div>
                             <div class="detail-row">
                                 <span class="label">Phone:</span>
-                                <span class="value">${phone}</span>
+                                <span class="value">${cleanPhone}</span>
                             </div>
                         </div>
                         

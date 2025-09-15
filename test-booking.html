@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Booking</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Test Booking API</h1>
+    
+    <form id="testForm">
+        <div class="form-group">
+            <label>Resort ID:</label>
+            <input type="number" id="resortId" value="1" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Guest Name:</label>
+            <input type="text" id="guestName" value="Test User" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="email" value="test@example.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Phone (10 digits):</label>
+            <input type="tel" id="phone" value="9876543210" pattern="[0-9]{10}" maxlength="10" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Check-in Date:</label>
+            <input type="date" id="checkIn" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Check-out Date:</label>
+            <input type="date" id="checkOut" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Number of Guests:</label>
+            <input type="number" id="guests" value="2" min="1" required>
+        </div>
+        
+        <button type="submit">Test Booking</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        // Set default dates
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dayAfter = new Date(today);
+        dayAfter.setDate(dayAfter.getDate() + 2);
+        
+        document.getElementById('checkIn').value = tomorrow.toISOString().split('T')[0];
+        document.getElementById('checkOut').value = dayAfter.toISOString().split('T')[0];
+        
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            // Clean phone number
+            const phoneInput = document.getElementById('phone').value.trim();
+            const cleanPhone = phoneInput.replace(/[^0-9]/g, '');
+            
+            const bookingData = {
+                resortId: document.getElementById('resortId').value,
+                guestName: document.getElementById('guestName').value,
+                email: document.getElementById('email').value,
+                phone: cleanPhone,
+                checkIn: document.getElementById('checkIn').value + 'T11:00',
+                checkOut: document.getElementById('checkOut').value + 'T09:00',
+                guests: document.getElementById('guests').value,
+                paymentId: 'TEST_' + Date.now()
+            };
+            
+            console.log('Sending booking data:', bookingData);
+            
+            try {
+                const response = await fetch('http://13.233.164.0:3000/api/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+                
+                const responseText = await response.text();
+                console.log('Response status:', response.status);
+                console.log('Response text:', responseText);
+                
+                if (response.ok) {
+                    const result = JSON.parse(responseText);
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h3>✅ Booking Successful!</h3>
+                        <p><strong>Booking ID:</strong> ${result.bookingReference || result.id}</p>
+                        <p><strong>Total Price:</strong> &#8377;${result.totalPrice}</p>
+                        <p><strong>Status:</strong> ${result.status}</p>
+                    `;
+                } else {
+                    let errorMsg = 'Unknown error';
+                    try {
+                        const error = JSON.parse(responseText);
+                        errorMsg = error.error || errorMsg;
+                    } catch (e) {
+                        errorMsg = responseText || 'Server error';
+                    }
+                    
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h3>❌ Booking Failed</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Error:</strong> ${errorMsg}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Network Error</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
