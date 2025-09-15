@@ -20,59 +20,19 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('admin-public'));
 
-// Completely disable all security headers
-app.use((req, res, next) => {
-    res.removeHeader('Content-Security-Policy');
-    res.removeHeader('Cross-Origin-Opener-Policy');
-    res.removeHeader('Origin-Agent-Cluster');
-    res.removeHeader('Strict-Transport-Security');
-    res.removeHeader('X-Content-Type-Options');
-    res.removeHeader('X-Frame-Options');
-    res.removeHeader('X-XSS-Protection');
-    next();
-});
-
 // Serve index.html for root route
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/admin-public/index.html');
 });
 
-// Serve simple.html as backup
-app.get('/simple', (req, res) => {
-    res.sendFile(__dirname + '/admin-public/simple.html');
+// Test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Admin server working' });
 });
 
-// Cognito authentication
-const { authenticateAdmin, createAdminUser } = require('./cognito-config');
-const { cognitoAuth } = require('./cognito-middleware');
+// Initialize database on startup
+initDatabase();
 
-// Admin login endpoint
-app.post('/api/auth/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        
-        if (!username || !password) {
-            return res.status(400).json({ error: 'Username and password required' });
-        }
-        
-        const result = await authenticateAdmin(username, password);
-        
-        if (result.success) {
-            res.json({
-                success: true,
-                accessToken: result.accessToken,
-                idToken: result.idToken
-            });
-        } else {
-            res.status(401).json({ error: result.error });
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ error: 'Login failed' });
-    }
-});
-
-// Create admin user (run once)
 // Event polling for sync_events table
 const { db: getDb } = require('./database');
 let lastEventId = 0;
@@ -95,33 +55,13 @@ async function pollSyncEvents() {
                 case 'resort_updated':
                     io.emit('resortUpdated', payload);
                     break;
-                // Add more event types as needed
             }
         }
     } catch (err) {
         console.error('Error polling sync_events:', err);
     }
-    // Use setInterval instead of recursive setTimeout
 }
-setInterval(pollSyncEvents, 2000); // Poll every 2 seconds
-
-app.post('/api/auth/create-admin', async (req, res) => {
-    try {
-        const { username, password, email } = req.body;
-        const result = await createAdminUser(username, password, email);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Test endpoint
-app.get('/api/test', (req, res) => {
-    res.json({ message: 'Admin server working' });
-});
-
-// Initialize database on startup
-initDatabase();
+setInterval(pollSyncEvents, 2000);
 
 // Analytics dashboard endpoint
 app.get('/api/analytics/dashboard', async (req, res) => {
@@ -130,20 +70,12 @@ app.get('/api/analytics/dashboard', async (req, res) => {
             return res.status(503).json({ error: 'Database not connected' });
         }
         
-        // Total resorts
         const totalResorts = await db().get('SELECT COUNT(*) as count FROM resorts');
-        
-        // Total bookings
         const totalBookings = await db().get('SELECT COUNT(*) as count FROM bookings');
-        
-        // Total revenue
         const totalRevenue = await db().get('SELECT SUM(total_price) as revenue FROM bookings WHERE payment_status = "completed"');
-        
-        // Today's bookings
         const today = new Date().toISOString().split('T')[0];
         const todayBookings = await db().get('SELECT COUNT(*) as count FROM bookings WHERE DATE(booking_date) = ?', [today]);
         
-        // Location stats
         const locationStats = await db().all(`
             SELECT r.location, COUNT(b.id) as count 
             FROM resorts r 
@@ -153,7 +85,6 @@ app.get('/api/analytics/dashboard', async (req, res) => {
             LIMIT 5
         `);
         
-        // Recent bookings
         const recentBookings = await db().all(`
             SELECT b.guest_name, b.total_price, r.name as resort_name, b.booking_date
             FROM bookings b 
@@ -162,7 +93,6 @@ app.get('/api/analytics/dashboard', async (req, res) => {
             LIMIT 5
         `);
         
-        // Monthly revenue (last 6 months)
         const monthlyRevenue = await db().all(`
             SELECT 
                 strftime('%Y-%m', booking_date) as month,
@@ -220,16 +150,6 @@ app.get('/api/resorts', async (req, res) => {
     }
 });
 
-app.post('/api/upload', upload.array('media', 10), (req, res) => {
-    try {
-        const fileUrls = req.files.map(file => file.location);
-        res.json({ urls: fileUrls });
-    } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({ error: 'Upload failed' });
-    }
-});
-
 app.post('/api/resorts', async (req, res) => {
     try {
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
@@ -257,28 +177,7 @@ app.post('/api/resorts', async (req, res) => {
             per_head_charge: parseInt(perHeadCharge) || 300
         };
         
-        // Real-time sync to main website
-        try {
-            const axios = require('axios');
-            await axios.post(`http://${process.env.SERVER_IP || 'localhost'}:3000/api/sync/resort-added`, newResort, {
-                headers: { 'x-internal-service': 'admin-server' },
-                timeout: 2000
-            }).catch(e => console.log('Main server sync failed:', e.message));
-            
-            await axios.post(`http://${process.env.SERVER_IP || 'localhost'}:3002/api/sync/resort-added`, newResort, {
-                headers: { 'x-internal-service': 'admin-server' },
-                timeout: 2000
-            }).catch(e => console.log('Booking server sync failed:', e.message));
-        } catch (e) {
-            console.log('Sync error:', e.message);
-        }
-        
-        // Emit real-time update to admin clients
         io.emit('resortAdded', newResort);
-    // Log event to sync_events table
-    const { addSyncEvent } = require('./database');
-    await addSyncEvent('resort_added', newResort);
-        
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
         console.error('Error adding resort:', error);
@@ -287,7 +186,6 @@ app.post('/api/resorts', async (req, res) => {
 });
 
 app.put('/api/resorts/:id', async (req, res) => {
-    console.log('Update resort request:', req.params.id, req.body);
     try {
         const id = parseInt(req.params.id);
         const { name, location, price, peakPrice, offPeakPrice, peakStart, peakEnd, description, images, videos, amenities, maxGuests, perHeadCharge } = req.body;
@@ -298,29 +196,7 @@ app.put('/api/resorts/:id', async (req, res) => {
         );
         
         const updatedResort = { id, name, location, price: parseInt(price), description, images, videos, amenities };
-        
-        // Real-time sync to main website
-        try {
-            const axios = require('axios');
-            await axios.post(`http://${process.env.SERVER_IP || 'localhost'}:3000/api/sync/resort-updated`, updatedResort, {
-                headers: { 'x-internal-service': 'admin-server' },
-                timeout: 2000
-            }).catch(e => console.log('Main server sync failed:', e.message));
-            
-            await axios.post(`http://${process.env.SERVER_IP || 'localhost'}:3002/api/sync/resort-updated`, updatedResort, {
-                headers: { 'x-internal-service': 'admin-server' },
-                timeout: 2000
-            }).catch(e => console.log('Booking server sync failed:', e.message));
-        } catch (e) {
-            console.log('Sync error:', e.message);
-        }
-        
-        // Emit real-time update to admin clients
         io.emit('resortUpdated', updatedResort);
-    // Log event to sync_events table
-    const { addSyncEvent } = require('./database');
-    await addSyncEvent('resort_updated', updatedResort);
-        
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
         console.error('Error updating resort:', error);
@@ -328,77 +204,22 @@ app.put('/api/resorts/:id', async (req, res) => {
     }
 });
 
-app.patch('/api/resorts/:id/availability', async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        const { available } = req.body;
-        
-        await db().run('UPDATE resorts SET available = ? WHERE id = ?', [available ? 1 : 0, id]);
-        
-        // Broadcast to all connected clients
-        io.emit('resortAvailabilityUpdated', { id, available });
-        
-        res.json({ message: 'Resort availability updated successfully' });
-    } catch (error) {
-        console.error('Error updating availability:', error);
-        res.status(500).json({ error: 'Failed to update availability' });
-    }
-});
-
 app.delete('/api/resorts/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        
         const result = await db().run('DELETE FROM resorts WHERE id = ?', [id]);
         
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Real-time sync to main website
-        await syncServices('resort-deleted', { id });
-        
-        // Emit real-time update to admin clients
         io.emit('resortDeleted', { id });
-        
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
         console.error('Error deleting resort:', error);
         res.status(500).json({ error: 'Failed to delete resort' });
     }
 });
-
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-    console.log('Admin client connected:', socket.id);
-    
-    // Send current dashboard data on connect
-    socket.emit('dashboardUpdate', 'connected');
-    
-    socket.on('disconnect', () => {
-        console.log('Admin client disconnected:', socket.id);
-    });
-});
-
-// Direct service sync function
-async function syncServices(action, data) {
-    try {
-        const services = [
-            `http://${process.env.SERVER_IP || 'localhost'}:3000`, // Main Website
-            `http://${process.env.SERVER_IP || 'localhost'}:3002`  // Booking History
-        ];
-        
-        const promises = services.map(service => 
-            axios.post(`${service}/api/sync/${action.replace('-', '-')}`, data)
-                .catch(e => console.log(`Sync to ${service} failed:`, e.message))
-        );
-        
-        await Promise.all(promises);
-        console.log(`Synced ${action} to all services`);
-    } catch (error) {
-        console.error('Service sync error:', error);
-    }
-}
 
 // Discount codes API
 app.get('/api/discount-codes', async (req, res) => {
@@ -424,6 +245,33 @@ app.post('/api/discount-codes', async (req, res) => {
     } catch (error) {
         console.error('Error creating discount code:', error);
         res.status(500).json({ error: 'Failed to create discount code' });
+    }
+});
+
+// Calendar bookings endpoint
+app.get('/api/calendar/bookings', async (req, res) => {
+    try {
+        const bookings = await db().all(`
+            SELECT 
+                b.id,
+                b.guest_name,
+                b.check_in,
+                b.check_out,
+                b.guests,
+                b.payment_status,
+                r.name as resort_name,
+                r.location
+            FROM bookings b
+            JOIN resorts r ON b.resort_id = r.id
+            WHERE b.check_in >= date('now', '-30 days')
+            AND b.check_in <= date('now', '+90 days')
+            ORDER BY b.check_in
+        `);
+        
+        res.json(bookings);
+    } catch (error) {
+        console.error('Error fetching calendar bookings:', error);
+        res.status(500).json({ error: 'Failed to fetch calendar data' });
     }
 });
 
@@ -478,7 +326,6 @@ app.get('/api/export/:type', async (req, res) => {
         }
         
         if (format === 'csv') {
-            // Simple CSV generation
             if (data.length === 0) {
                 return res.status(404).json({ error: 'No data to export' });
             }
@@ -497,21 +344,8 @@ app.get('/api/export/:type', async (req, res) => {
             res.setHeader('Content-Type', 'text/csv');
             res.setHeader('Content-Disposition', `attachment; filename=${filename}.csv`);
             res.send(csv);
-        } else if (format === 'excel') {
-            // Simple Excel-like format (actually CSV with .xlsx extension)
-            if (data.length === 0) {
-                return res.status(404).json({ error: 'No data to export' });
-            }
-            
-            const headers = Object.keys(data[0]).join('\t');
-            const rows = data.map(row => Object.values(row).join('\t'));
-            const tsv = [headers, ...rows].join('\n');
-            
-            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', `attachment; filename=${filename}.xlsx`);
-            res.send(tsv);
         } else {
-            res.status(400).json({ error: 'Invalid format. Use csv or excel' });
+            res.status(400).json({ error: 'Invalid format. Use csv' });
         }
     } catch (error) {
         console.error('Export error:', error);
@@ -519,93 +353,16 @@ app.get('/api/export/:type', async (req, res) => {
     }
 });
 
-// Calendar bookings endpoint
-app.get('/api/calendar/bookings', async (req, res) => {
-    try {
-        const bookings = await db().all(`
-            SELECT 
-                b.id,
-                b.guest_name,
-                b.check_in,
-                b.check_out,
-                b.guests,
-                b.payment_status,
-                r.name as resort_name,
-                r.location
-            FROM bookings b
-            JOIN resorts r ON b.resort_id = r.id
-            WHERE b.check_in >= date('now', '-30 days')
-            AND b.check_in <= date('now', '+90 days')
-            ORDER BY b.check_in
-        `);
-        
-        res.json(bookings);
-    } catch (error) {
-        console.error('Error fetching calendar bookings:', error);
-        res.status(500).json({ error: 'Failed to fetch calendar data' });
-    }
-});
-
-// Sync endpoints for API Gateway
-app.post('/api/sync/booking-created', (req, res) => {
-    console.log('Booking sync received:', JSON.stringify({ id: req.body.id, guest: req.body.guest_name }));
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('Admin client connected:', socket.id);
+    socket.emit('dashboardUpdate', 'connected');
     
-    // Emit booking created event
-    io.emit('bookingCreated', req.body);
-    
-    // Trigger dashboard reload
-    setTimeout(() => {
-        io.emit('dashboardReload', { reason: 'new_booking' });
-    }, 1000);
-    
-    res.json({ success: true });
+    socket.on('disconnect', () => {
+        console.log('Admin client disconnected:', socket.id);
+    });
 });
-
-app.post('/api/sync/booking-deleted', (req, res) => {
-    console.log('Booking deletion sync received:', JSON.stringify({ id: req.body.id }));
-    
-    // Emit booking deleted event
-    io.emit('bookingDeleted', req.body);
-    
-    res.json({ success: true });
-});
-
-app.post('/api/sync/resort-updated', (req, res) => {
-    console.log('Resort update sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
-    io.emit('resortUpdated', req.body);
-    res.json({ success: true });
-});
-
-app.post('/api/sync/resort-deleted', (req, res) => {
-    console.log('Resort delete sync received:', JSON.stringify({ timestamp: new Date().toISOString() }));
-    io.emit('resortDeleted', req.body);
-    res.json({ success: true });
-});
-
-// Direct service sync function
-async function syncServices(action, data) {
-    try {
-        const axios = require('axios');
-        const services = [
-            `http://${process.env.SERVER_IP || 'localhost'}:3000`, // Main Website
-            `http://${process.env.SERVER_IP || 'localhost'}:3002`  // Booking History
-        ];
-        
-        const promises = services.map(service => 
-            axios.post(`${service}/api/sync/${action}`, data, {
-                headers: { 'x-internal-service': 'admin-server' },
-                timeout: 5000
-            }).catch(e => console.log(`Sync to ${service} failed:`, e.message))
-        );
-        
-        await Promise.allSettled(promises);
-        console.log(`Synced ${action} to all services`);
-    } catch (error) {
-        console.error('Service sync error:', error);
-    }
-}
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🔧 Admin Panel running on http://0.0.0.0:${PORT}`);
-    console.log(`⚡ Lambda triggers enabled`);
 });
