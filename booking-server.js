@@ -17,6 +17,18 @@ async function initDB() {
         filename: './resort_booking.db',
         driver: sqlite3.Database
     });
+    
+    // Create sync_events table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS sync_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_type TEXT NOT NULL,
+            table_name TEXT NOT NULL,
+            record_id INTEGER,
+            data TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 }
 
 // Booking API Routes

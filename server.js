@@ -27,6 +27,18 @@ async function initDB() {
     } catch (error) {
         // Column already exists, ignore error
     }
+    
+    // Create sync_events table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS sync_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_type TEXT NOT NULL,
+            table_name TEXT NOT NULL,
+            record_id INTEGER,
+            data TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 
     // Create tables
     await db.exec(`
