@@ -2,7 +2,20 @@ let bookings = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
+    setupRealTimeSync();
 });
+
+function setupRealTimeSync() {
+    const eventSource = new EventSource('http://localhost:3003/events');
+    
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'booking_created' || data.type === 'booking_deleted') {
+            loadBookings(); // Refresh booking list
+        }
+    };
+}
 
 async function loadBookings() {
     try {

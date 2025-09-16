@@ -121,6 +121,12 @@ app.post('/api/bookings', async (req, res) => {
             status: 'confirmed'
         };
 
+        // Log booking event
+        await db.run(
+            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
+            ['booking_created', 'bookings', result.lastID, JSON.stringify(booking)]
+        );
+        
         res.json(booking);
     } catch (error) {
         console.error('Booking error:', error);

@@ -38,6 +38,12 @@ app.delete('/api/bookings/:id', async (req, res) => {
     try {
         const id = req.params.id;
         await db.run('DELETE FROM bookings WHERE id = ?', [id]);
+        // Log booking deleted event
+        await db.run(
+            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
+            ['booking_deleted', 'bookings', id, JSON.stringify({ id })]
+        );
+        
         res.json({ message: 'Booking deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete booking' });

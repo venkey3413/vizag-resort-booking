@@ -49,6 +49,12 @@ app.post('/api/resorts', async (req, res) => {
             [name, location, parseInt(price), description || '', image || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500', mapLink || '']
         );
         
+        // Log resort added event
+        await db.run(
+            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
+            ['resort_added', 'resorts', result.lastID, JSON.stringify({ name, location, price, description, image, mapLink })]
+        );
+        
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to add resort' });
@@ -65,6 +71,12 @@ app.put('/api/resorts/:id', async (req, res) => {
             [name, location, parseInt(price), description, image, mapLink || '', id]
         );
         
+        // Log resort updated event
+        await db.run(
+            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
+            ['resort_updated', 'resorts', id, JSON.stringify({ name, location, price, description, image, mapLink })]
+        );
+        
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update resort' });
@@ -75,6 +87,12 @@ app.delete('/api/resorts/:id', async (req, res) => {
     try {
         const id = req.params.id;
         await db.run('DELETE FROM resorts WHERE id = ?', [id]);
+        // Log resort deleted event
+        await db.run(
+            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
+            ['resort_deleted', 'resorts', id, JSON.stringify({ id })]
+        );
+        
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete resort' });
