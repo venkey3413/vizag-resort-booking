@@ -37,6 +37,14 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add platform fee columns if they don't exist
+    try {
+        await db.run('ALTER TABLE bookings ADD COLUMN base_price INTEGER');
+        await db.run('ALTER TABLE bookings ADD COLUMN platform_fee INTEGER');
+    } catch (error) {
+        // Columns already exist, ignore error
+    }
+    
 
 
     // Create tables
@@ -117,17 +125,19 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
 
-        // Calculate total price
+        // Calculate total price with platform fee
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
         const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-        const totalPrice = resort.price * nights;
+        const basePrice = resort.price * nights;
+        const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
+        const totalPrice = basePrice + platformFee;
 
         // Create booking
         const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, total_price)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, totalPrice]);
+            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice]);
 
         // Generate UPI payment details
         const paymentDetails = generatePaymentDetails(totalPrice, result.lastID, guestName);
@@ -142,6 +152,8 @@ app.post('/api/bookings', async (req, res) => {
             checkIn,
             checkOut,
             guests,
+            basePrice,
+            platformFee,
             totalPrice,
             status: 'pending_payment',
             paymentDetails: paymentDetails

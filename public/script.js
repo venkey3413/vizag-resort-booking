@@ -106,8 +106,17 @@ function calculateTotal() {
         nights = Math.max(1, Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)));
     }
     
-    const total = price * nights;
-    document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
+    const basePrice = price * nights;
+    const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
+    const total = basePrice + platformFee;
+    
+    document.getElementById('totalAmount').innerHTML = `
+        <div>Base Price: ₹${basePrice.toLocaleString()}</div>
+        <div>Platform Fee (1.5%): ₹${platformFee.toLocaleString()}</div>
+        <div style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 5px;">
+            Total: ₹${total.toLocaleString()}
+        </div>
+    `;
 }
 
 async function handleBooking(e) {
@@ -207,7 +216,9 @@ function showPaymentInterface(booking) {
                 <h3>Booking Details</h3>
                 <p><strong>Resort:</strong> ${booking.resortName}</p>
                 <p><strong>Guest:</strong> ${booking.guestName}</p>
-                <p><strong>Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
+                <p><strong>Base Price:</strong> ₹${booking.basePrice.toLocaleString()}</p>
+                <p><strong>Platform Fee (1.5%):</strong> ₹${booking.platformFee.toLocaleString()}</p>
+                <p><strong>Total Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
                 <p><strong>Reference:</strong> ${booking.bookingReference}</p>
             </div>
             
