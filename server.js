@@ -217,44 +217,7 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
     }
 });
 
-app.post('/api/bookings/:id/payment-proof', async (req, res) => {
-    try {
-        const bookingId = req.params.id;
-        const { transactionId, paymentScreenshot } = req.body;
-        
-        if (!transactionId) {
-            return res.status(400).json({ error: 'Transaction ID is required' });
-        }
-        
-        // Update booking status to confirmed
-        await db.run(
-            'UPDATE bookings SET status = ?, payment_status = ? WHERE id = ?',
-            ['confirmed', 'paid', bookingId]
-        );
-        
-        // Store payment proof
-        await db.run(
-            'INSERT OR REPLACE INTO payment_proofs (booking_id, transaction_id, screenshot_data, created_at) VALUES (?, ?, ?, datetime("now"))',
-            [bookingId, transactionId, paymentScreenshot || '']
-        );
-        
-        // Publish payment confirmed event
-        try {
-            await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
-                bookingId: bookingId,
-                paymentStatus: 'paid',
-                transactionId: transactionId
-            });
-        } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
-        }
-        
-        res.json({ message: 'Payment confirmed successfully', status: 'confirmed' });
-    } catch (error) {
-        console.error('Payment confirmation error:', error);
-        res.status(500).json({ error: 'Failed to confirm payment' });
-    }
-});
+
 
 app.get('/api/bookings', async (req, res) => {
     try {
