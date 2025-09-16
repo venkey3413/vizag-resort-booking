@@ -957,33 +957,20 @@ async function handleBooking(e) {
             body: JSON.stringify(bookingData)
         });
         
-        const responseText = await response.text();
-        let booking;
-        
-        try {
-            booking = JSON.parse(responseText);
-        } catch (e) {
-            booking = null;
-        }
-        
-        if (response.ok && booking) {
-            const bookingId = booking.id || booking.bookingId || 'Unknown';
-            const totalPrice = booking.totalPrice || booking.total_price || 0;
-            showNotification(`Booking confirmed!\n\nBooking ID: RB${String(bookingId).padStart(4, '0')}\nTotal: ₹${totalPrice.toLocaleString()}\n\nPay via WhatsApp now!`, 'success');
+        if (response.ok) {
+            // Booking successful - show success message
+            showNotification(`Booking confirmed!\n\nCheck booking history for details.\n\nPay via WhatsApp now!`, 'success');
             closeModal();
             document.getElementById('bookingForm').reset();
             appliedDiscount = null;
-        } else {
-            console.log('Booking failed with status:', response.status);
-            console.log('Server response:', responseText);
             
-            let errorMsg = 'Please try again';
-            if (booking && booking.error) {
-                errorMsg = booking.error;
-            } else if (responseText) {
-                errorMsg = 'Server error: ' + responseText.substring(0, 100);
-            }
-            showNotification('Booking failed: ' + errorMsg, 'error');
+            // Reload resorts to update availability
+            setTimeout(() => loadResorts(), 1000);
+        } else {
+            const errorText = await response.text();
+            console.log('Booking failed with status:', response.status);
+            console.log('Server response:', errorText);
+            showNotification('Booking failed: ' + (errorText || 'Please try again'), 'error');
         }
     } catch (error) {
         console.error('Booking error:', error);
