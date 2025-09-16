@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vizag Resort Booking</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-container">
+                <h1>🏨 Vizag Resorts</h1>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#resorts">Resorts</a></li>
+                    <li><a href="#bookings">My Bookings</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h2>Welcome to Paradise</h2>
+                <p>Book your dream resort vacation today</p>
+                <button onclick="scrollToSection('resorts')" class="cta-btn">View Resorts</button>
+            </div>
+        </section>
+
+        <section id="resorts" class="resorts-section">
+            <div class="container">
+                <h2>Our Resorts</h2>
+                <div id="resortsGrid" class="resorts-grid">
+                    <!-- Resorts will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="bookings" class="bookings-section">
+            <div class="container">
+                <h2>My Bookings</h2>
+                <div id="bookingsGrid" class="bookings-grid">
+                    <!-- Bookings will be loaded here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalResortName">Book Resort</h2>
+            <form id="bookingForm">
+                <input type="hidden" id="resortId">
+                <input type="hidden" id="resortPrice">
+                
+                <div class="form-group">
+                    <label for="guestName">Full Name:</label>
+                    <input type="text" id="guestName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="tel" id="phone" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="checkIn">Check-in:</label>
+                        <input type="date" id="checkIn" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkOut">Check-out:</label>
+                        <input type="date" id="checkOut" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="guests">Number of Guests:</label>
+                    <input type="number" id="guests" min="1" max="10" value="2" required>
+                </div>
+                
+                <div class="price-summary">
+                    <div class="price-row">
+                        <span>Total Amount:</span>
+                        <span id="totalAmount">₹0</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="book-btn">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
