@@ -37,7 +37,7 @@ npm install
 # Kill existing processes
 echo "🛑 Stopping existing services..."
 sudo pkill -f node || true
-sudo lsof -ti:3000,3001,3002,3003 | xargs sudo kill -9 2>/dev/null || true
+sudo lsof -ti:80,3001,3002,3003 | xargs sudo kill -9 2>/dev/null || true
 
 # Wait for ports to be free
 sleep 3
@@ -51,10 +51,10 @@ sleep 5
 
 # Check if services are running
 echo "✅ Checking service status..."
-if curl -s http://localhost:3000 > /dev/null; then
-    echo "✅ Main site (3000) - Running"
+if curl -s http://localhost:80 > /dev/null; then
+    echo "✅ Main site (80) - Running"
 else
-    echo "❌ Main site (3000) - Failed"
+    echo "❌ Main site (80) - Failed"
 fi
 
 if curl -s http://localhost:3001 > /dev/null; then
@@ -78,9 +78,9 @@ fi
 echo ""
 echo "🎉 Deployment Complete!"
 echo "📱 Access your services:"
-echo "   Main Site: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):3000"
-echo "   Admin Panel: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):3001"
-echo "   Booking Management: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):3002"
+echo "   Main Site: http://vizagresortbooking.in (or http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4))"
+echo "   Admin Panel: http://vizagresortbooking.in:3001"
+echo "   Booking Management: http://vizagresortbooking.in:3002"
 echo ""
 echo "💡 To stop services: sudo pkill -f node"
 echo "💡 To restart: npm run dev"
