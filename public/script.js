@@ -216,9 +216,9 @@ function showPaymentInterface(booking) {
                 <h3>Booking Details</h3>
                 <p><strong>Resort:</strong> ${booking.resortName}</p>
                 <p><strong>Guest:</strong> ${booking.guestName}</p>
-                <p><strong>Base Price:</strong> ₹${booking.basePrice.toLocaleString()}</p>
-                <p><strong>Platform Fee (1.5%):</strong> ₹${booking.platformFee.toLocaleString()}</p>
-                <p><strong>Total Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
+                <p><strong>Base Price:</strong> ₹${(booking.basePrice || 0).toLocaleString()}</p>
+                <p><strong>Platform Fee (1.5%):</strong> ₹${(booking.platformFee || 0).toLocaleString()}</p>
+                <p><strong>Total Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
                 <p><strong>Reference:</strong> ${booking.bookingReference}</p>
             </div>
             
