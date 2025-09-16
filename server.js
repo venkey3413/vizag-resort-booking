@@ -212,10 +212,10 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
             return res.status(400).json({ error: 'Transaction ID is required' });
         }
         
-        // Update booking status to confirmed
+        // Update booking status to pending verification (not paid until manually confirmed)
         await db.run(
             'UPDATE bookings SET status = ?, payment_status = ? WHERE id = ?',
-            ['confirmed', 'paid', bookingId]
+            ['pending_verification', 'pending', bookingId]
         );
         
         // Store payment proof (in production, store in S3)
@@ -224,18 +224,18 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
             [bookingId, transactionId, paymentScreenshot || '']
         );
         
-        // Publish payment confirmed event
+        // Publish payment submitted event
         try {
             await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
                 bookingId: bookingId,
-                paymentStatus: 'paid',
+                paymentStatus: 'pending',
                 transactionId: transactionId
             });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
         
-        res.json({ message: 'Payment confirmed successfully', status: 'confirmed' });
+        res.json({ message: 'Payment submitted for verification', status: 'pending_verification' });
     } catch (error) {
         console.error('Payment confirmation error:', error);
         res.status(500).json({ error: 'Failed to confirm payment' });
