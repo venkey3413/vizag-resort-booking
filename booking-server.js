@@ -45,7 +45,7 @@ app.delete('/api/bookings/:id', async (req, res) => {
 });
 
 initDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`📋 Booking Management running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`📋 Booking Management running on http://0.0.0.0:${PORT}`);
     });
 });
