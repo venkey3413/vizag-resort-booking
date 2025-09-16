@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  resort-booking:
+    build: .
+    ports:
+      - "3000:3000"
+      - "3001:3001" 
+      - "3002:3002"
+    volumes:
+      - ./resort_booking.db:/app/resort_booking.db
+    restart: unless-stopped
