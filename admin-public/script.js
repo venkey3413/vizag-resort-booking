@@ -4,25 +4,7 @@ let editingId = null;
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     setupEventListeners();
-    setupRealTimeSync();
 });
-
-function setupRealTimeSync() {
-    const eventSource = new EventSource(`http://${window.location.hostname}:3003/events`);
-    
-    eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'resort_added' || data.type === 'resort_updated' || data.type === 'resort_deleted') {
-            loadResorts(); // Refresh resort list
-        }
-    };
-    
-    eventSource.onerror = function() {
-        console.log('Admin sync disconnected, retrying...');
-        setTimeout(() => setupRealTimeSync(), 5000);
-    };
-}
 
 function setupEventListeners() {
     document.getElementById('resortForm').addEventListener('submit', handleSubmit);

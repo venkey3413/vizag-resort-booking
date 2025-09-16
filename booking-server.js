@@ -26,17 +26,7 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
-    // Create sync_events table
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS sync_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_type TEXT NOT NULL,
-            table_name TEXT NOT NULL,
-            record_id INTEGER,
-            data TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
+
 }
 
 // Booking API Routes
@@ -83,12 +73,6 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
             }
         }
         
-        // Log payment status updated event
-        await db.run(
-            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
-            ['payment_updated', 'bookings', id, JSON.stringify({ payment_status })]
-        );
-        
         res.json({ message: 'Payment status updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update payment status' });
@@ -99,12 +83,6 @@ app.delete('/api/bookings/:id', async (req, res) => {
     try {
         const id = req.params.id;
         await db.run('DELETE FROM bookings WHERE id = ?', [id]);
-        // Log booking deleted event
-        await db.run(
-            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
-            ['booking_deleted', 'bookings', id, JSON.stringify({ id })]
-        );
-        
         res.json({ message: 'Booking deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete booking' });

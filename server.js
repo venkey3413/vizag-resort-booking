@@ -35,17 +35,7 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
-    // Create sync_events table
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS sync_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_type TEXT NOT NULL,
-            table_name TEXT NOT NULL,
-            record_id INTEGER,
-            data TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
+
 
     // Create tables
     await db.exec(`
@@ -140,12 +130,6 @@ app.post('/api/bookings', async (req, res) => {
             status: 'confirmed'
         };
 
-        // Log booking event
-        await db.run(
-            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
-            ['booking_created', 'bookings', result.lastID, JSON.stringify(booking)]
-        );
-        
         res.json(booking);
     } catch (error) {
         console.error('Booking error:', error);

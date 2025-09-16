@@ -2,25 +2,7 @@ let bookings = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
-    setupRealTimeSync();
 });
-
-function setupRealTimeSync() {
-    const eventSource = new EventSource(`http://${window.location.hostname}:3003/events`);
-    
-    eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'booking_created' || data.type === 'booking_deleted') {
-            loadBookings(); // Refresh booking list
-        }
-    };
-    
-    eventSource.onerror = function() {
-        console.log('Booking sync disconnected, retrying...');
-        setTimeout(() => setupRealTimeSync(), 5000);
-    };
-}
 
 async function loadBookings() {
     try {
