@@ -40,13 +40,23 @@
                         <input type="number" id="price" required>
                     </div>
                     <div class="form-group">
-                        <label for="image">Image URL:</label>
+                        <label for="image">Main Image URL:</label>
                         <input type="url" id="image" placeholder="https://...">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="mapLink">Google Map Link:</label>
-                    <input type="url" id="mapLink" placeholder="https://maps.google.com/?q=location">
+                    <label for="gallery">Additional Images (one per line):</label>
+                    <textarea id="gallery" rows="4" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="videos">Video URLs (one per line):</label>
+                    <textarea id="videos" rows="3" placeholder="https://youtube.com/watch?v=...&#10;https://vimeo.com/..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mapLink">Google Map Link:</label>
+                        <input type="url" id="mapLink" placeholder="https://maps.google.com/?q=location">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="description">Description:</label>

@@ -72,6 +72,8 @@ async function handleSubmit(e) {
         price: document.getElementById('price').value,
         description: document.getElementById('description').value,
         image: document.getElementById('image').value || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500',
+        gallery: document.getElementById('gallery').value,
+        videos: document.getElementById('videos').value,
         mapLink: document.getElementById('mapLink').value
     };
 
@@ -119,6 +121,8 @@ function editResort(id) {
     document.getElementById('price').value = resort.price;
     document.getElementById('description').value = resort.description;
     document.getElementById('image').value = resort.image;
+    document.getElementById('gallery').value = resort.gallery || '';
+    document.getElementById('videos').value = resort.videos || '';
     document.getElementById('mapLink').value = resort.map_link || '';
     
     document.getElementById('submitBtn').textContent = 'Update Resort';

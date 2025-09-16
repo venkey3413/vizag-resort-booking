@@ -19,12 +19,18 @@ async function initDB() {
         driver: sqlite3.Database
     });
     
-    // Add map_link column if it doesn't exist
+    // Add new columns if they don't exist
     try {
         await db.run('ALTER TABLE resorts ADD COLUMN map_link TEXT');
-    } catch (error) {
-        // Column already exists, ignore error
-    }
+    } catch (error) {}
+    
+    try {
+        await db.run('ALTER TABLE resorts ADD COLUMN gallery TEXT');
+    } catch (error) {}
+    
+    try {
+        await db.run('ALTER TABLE resorts ADD COLUMN videos TEXT');
+    } catch (error) {}
     
 
 }
@@ -41,15 +47,15 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const { name, location, price, description, image, mapLink } = req.body;
+        const { name, location, price, description, image, gallery, videos, mapLink } = req.body;
         
         if (!name || !location || !price) {
             return res.status(400).json({ error: 'Name, location, and price are required' });
         }
         
         const result = await db.run(
-            'INSERT INTO resorts (name, location, price, description, image, map_link) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description || '', image || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500', mapLink || '']
+            'INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), description || '', image || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500', gallery || '', videos || '', mapLink || '']
         );
         
         // Publish resort added event
@@ -87,12 +93,12 @@ app.post('/api/resorts', async (req, res) => {
 
 app.put('/api/resorts/:id', async (req, res) => {
     try {
-        const { name, location, price, description, image, mapLink } = req.body;
+        const { name, location, price, description, image, gallery, videos, mapLink } = req.body;
         const id = req.params.id;
         
         await db.run(
-            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, map_link = ? WHERE id = ?',
-            [name, location, parseInt(price), description, image, mapLink || '', id]
+            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, gallery = ?, videos = ?, map_link = ? WHERE id = ?',
+            [name, location, parseInt(price), description, image, gallery || '', videos || '', mapLink || '', id]
         );
         
         // Publish resort updated event

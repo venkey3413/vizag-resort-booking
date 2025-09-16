@@ -101,6 +101,28 @@
         </div>
     </div>
 
+    <!-- Gallery Modal -->
+    <div id="galleryModal" class="gallery-modal">
+        <div class="gallery-content">
+            <span class="gallery-close" onclick="closeGallery()">&times;</span>
+            <div class="gallery-header">
+                <h3 id="galleryTitle"></h3>
+            </div>
+            <div class="gallery-body">
+                <div class="gallery-images">
+                    <img id="galleryMainImage" src="" alt="">
+                    <div class="gallery-controls">
+                        <button id="galleryPrev">&lt;</button>
+                        <button id="galleryNext">&gt;</button>
+                    </div>
+                </div>
+                <div class="gallery-thumbnails" id="galleryThumbnails"></div>
+                <div class="gallery-videos" id="galleryVideos"></div>
+                <div class="gallery-description" id="galleryDescription"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="script.js?v=10"></script>
 </body>

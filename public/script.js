@@ -65,7 +65,15 @@ function displayResorts() {
     const grid = document.getElementById('resortsGrid');
     grid.innerHTML = resorts.map(resort => `
         <div class="resort-card">
-            <img src="${resort.image}" alt="${resort.name}" class="resort-image">
+            <div class="resort-gallery">
+                <img src="${resort.image}" alt="${resort.name}" class="resort-image main-image" onclick="openGallery(${resort.id})">
+                ${resort.gallery ? `
+                    <div class="gallery-nav">
+                        <button class="gallery-prev" onclick="prevImage(${resort.id})">&lt;</button>
+                        <button class="gallery-next" onclick="nextImage(${resort.id})">&gt;</button>
+                    </div>
+                ` : ''}
+            </div>
             <div class="resort-info">
                 <h3>${resort.name}</h3>
                 <p class="resort-location">
@@ -212,6 +220,95 @@ function setupWebSocketSync() {
             // Silent error handling
         }
     }, 3000);
+}
+
+let currentGalleryIndex = 0;
+let currentGalleryImages = [];
+let currentResortId = null;
+
+function openGallery(resortId) {
+    const resort = resorts.find(r => r.id === resortId);
+    if (!resort) return;
+    
+    currentResortId = resortId;
+    currentGalleryImages = [resort.image];
+    
+    if (resort.gallery) {
+        const additionalImages = resort.gallery.split('\n').filter(img => img.trim());
+        currentGalleryImages = currentGalleryImages.concat(additionalImages);
+    }
+    
+    currentGalleryIndex = 0;
+    
+    document.getElementById('galleryTitle').textContent = resort.name;
+    document.getElementById('galleryDescription').innerHTML = `
+        <p><strong>Location:</strong> ${resort.location}</p>
+        <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
+        <p>${resort.description}</p>
+    `;
+    
+    updateGalleryImage();
+    setupGalleryThumbnails();
+    setupGalleryVideos(resort.videos);
+    
+    document.getElementById('galleryModal').style.display = 'block';
+}
+
+function closeGallery() {
+    document.getElementById('galleryModal').style.display = 'none';
+}
+
+function updateGalleryImage() {
+    if (currentGalleryImages.length > 0) {
+        document.getElementById('galleryMainImage').src = currentGalleryImages[currentGalleryIndex];
+    }
+}
+
+function setupGalleryThumbnails() {
+    const thumbnailsContainer = document.getElementById('galleryThumbnails');
+    thumbnailsContainer.innerHTML = currentGalleryImages.map((img, index) => `
+        <img src="${img}" class="gallery-thumbnail ${index === currentGalleryIndex ? 'active' : ''}" 
+             onclick="setGalleryImage(${index})">
+    `).join('');
+}
+
+function setupGalleryVideos(videos) {
+    const videosContainer = document.getElementById('galleryVideos');
+    if (!videos) {
+        videosContainer.innerHTML = '';
+        return;
+    }
+    
+    const videoUrls = videos.split('\n').filter(url => url.trim());
+    videosContainer.innerHTML = videoUrls.map(url => {
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+            return videoId ? `<iframe src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen></iframe>` : '';
+        }
+        return `<video controls><source src="${url}" type="video/mp4"></video>`;
+    }).join('');
+}
+
+function setGalleryImage(index) {
+    currentGalleryIndex = index;
+    updateGalleryImage();
+    setupGalleryThumbnails();
+}
+
+function nextImage(resortId) {
+    if (currentGalleryImages.length > 1) {
+        currentGalleryIndex = (currentGalleryIndex + 1) % currentGalleryImages.length;
+        updateGalleryImage();
+        setupGalleryThumbnails();
+    }
+}
+
+function prevImage(resortId) {
+    if (currentGalleryImages.length > 1) {
+        currentGalleryIndex = currentGalleryIndex === 0 ? currentGalleryImages.length - 1 : currentGalleryIndex - 1;
+        updateGalleryImage();
+        setupGalleryThumbnails();
+    }
 }
 
 
