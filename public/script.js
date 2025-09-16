@@ -225,12 +225,12 @@ function showPaymentInterface(booking) {
             <div class="upi-payment">
                 <h3>🔗 UPI Payment</h3>
                 <div class="qr-section">
-                    <img src="${booking.paymentDetails.qrCodeUrl}" alt="UPI QR Code" class="qr-code">
-                    <p><strong>UPI ID:</strong> ${booking.paymentDetails.upiId}</p>
+                    <img src="${booking.paymentDetails?.qrCodeUrl || ''}" alt="UPI QR Code" class="qr-code">
+                    <p><strong>UPI ID:</strong> ${booking.paymentDetails?.upiId || 'vizagresorts@ybl'}</p>
                 </div>
                 
                 <div class="payment-instructions">
-                    ${booking.paymentDetails.instructions.map(instruction => `<p>• ${instruction}</p>`).join('')}
+                    ${(booking.paymentDetails?.instructions || ['1. Scan QR code', '2. Pay amount', '3. Enter transaction ID']).map(instruction => `<p>• ${instruction}</p>`).join('')}
                 </div>
                 
                 <div class="payment-proof">
