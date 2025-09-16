@@ -8,21 +8,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupWebSocketSync() {
-    // Use same protocol and host as current page (nginx will proxy to port 3003)
-    const socket = io(`${window.location.protocol}//${window.location.host}/socket.io/`);
+    console.log('🔄 Admin EventBridge sync enabled');
     
-    socket.on('connect', () => {
-        console.log('🔌 Admin panel connected to real-time sync');
-    });
-    
-    socket.on('refresh', (data) => {
-        console.log('🔄 Data updated, refreshing resorts...');
-        loadResorts();
-    });
-    
-    socket.on('disconnect', () => {
-        console.log('🔌 Admin panel disconnected from sync');
-    });
+    setInterval(async () => {
+        try {
+            const response = await fetch('/api/resorts');
+            const newResorts = await response.json();
+            
+            if (JSON.stringify(newResorts) !== JSON.stringify(resorts)) {
+                console.log('🔄 EventBridge update detected');
+                resorts = newResorts;
+                displayResorts();
+            }
+        } catch (error) {}
+    }, 3000);
 }
 
 function setupEventListeners() {

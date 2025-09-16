@@ -195,21 +195,23 @@ function setupLogoRotation() {
 }
 
 function setupWebSocketSync() {
-    // Use same protocol and host as main site (nginx will proxy to port 3003)
-    const socket = io(`${window.location.protocol}//${window.location.host}/socket.io/`);
+    console.log('🔄 EventBridge real-time sync enabled');
     
-    socket.on('connect', () => {
-        console.log('🔌 Connected to real-time sync');
-    });
-    
-    socket.on('refresh', (data) => {
-        console.log('🔄 Data updated, refreshing...');
-        loadResorts();
-    });
-    
-    socket.on('disconnect', () => {
-        console.log('🔌 Disconnected from sync');
-    });
+    // Check for updates every 3 seconds (EventBridge triggers are near real-time)
+    setInterval(async () => {
+        try {
+            const response = await fetch('/api/resorts');
+            const newResorts = await response.json();
+            
+            if (JSON.stringify(newResorts) !== JSON.stringify(resorts)) {
+                console.log('🔄 EventBridge update detected, refreshing...');
+                resorts = newResorts;
+                displayResorts();
+            }
+        } catch (error) {
+            // Silent error handling
+        }
+    }, 3000);
 }
 
 

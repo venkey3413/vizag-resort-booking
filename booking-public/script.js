@@ -6,21 +6,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupWebSocketSync() {
-    // Use same protocol and host as current page (nginx will proxy to port 3003)
-    const socket = io(`${window.location.protocol}//${window.location.host}/socket.io/`);
+    console.log('🔄 Booking EventBridge sync enabled');
     
-    socket.on('connect', () => {
-        console.log('🔌 Booking panel connected to real-time sync');
-    });
-    
-    socket.on('refresh', (data) => {
-        console.log('🔄 Data updated, refreshing bookings...');
-        loadBookings();
-    });
-    
-    socket.on('disconnect', () => {
-        console.log('🔌 Booking panel disconnected from sync');
-    });
+    setInterval(async () => {
+        try {
+            const response = await fetch('/api/bookings');
+            const newBookings = await response.json();
+            
+            if (JSON.stringify(newBookings) !== JSON.stringify(bookings)) {
+                console.log('🔄 EventBridge update detected');
+                bookings = newBookings;
+                displayBookings();
+            }
+        } catch (error) {}
+    }, 3000);
 }
 
 async function loadBookings() {
