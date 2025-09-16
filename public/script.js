@@ -139,7 +139,7 @@ async function handleBooking(e) {
 
         if (response.ok) {
             const booking = await response.json();
-            showNotification(`Booking confirmed! Reference: ${booking.bookingReference}`, 'success');
+            showPaymentInterface(booking);
             closeModal();
         } else {
             const error = await response.json();
@@ -196,6 +196,84 @@ function setupWebSocketSync() {
 }
 
 
+
+function showPaymentInterface(booking) {
+    const paymentModal = document.createElement('div');
+    paymentModal.className = 'payment-modal';
+    paymentModal.innerHTML = `
+        <div class="payment-content">
+            <h2>💳 Complete Payment</h2>
+            <div class="booking-summary">
+                <h3>Booking Details</h3>
+                <p><strong>Resort:</strong> ${booking.resortName}</p>
+                <p><strong>Guest:</strong> ${booking.guestName}</p>
+                <p><strong>Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
+                <p><strong>Reference:</strong> ${booking.bookingReference}</p>
+            </div>
+            
+            <div class="upi-payment">
+                <h3>🔗 UPI Payment</h3>
+                <div class="qr-section">
+                    <img src="${booking.paymentDetails.qrCodeUrl}" alt="UPI QR Code" class="qr-code">
+                    <p><strong>UPI ID:</strong> ${booking.paymentDetails.upiId}</p>
+                </div>
+                
+                <div class="payment-instructions">
+                    ${booking.paymentDetails.instructions.map(instruction => `<p>• ${instruction}</p>`).join('')}
+                </div>
+                
+                <div class="payment-proof">
+                    <h4>Upload Payment Proof</h4>
+                    <input type="text" id="transactionId" placeholder="Enter UPI Transaction ID" required>
+                    <button onclick="confirmPayment(${booking.id})" class="confirm-payment-btn">
+                        ✅ Confirm Payment
+                    </button>
+                </div>
+            </div>
+            
+            <button onclick="closePaymentModal()" class="close-payment-btn">Close</button>
+        </div>
+    `;
+    
+    document.body.appendChild(paymentModal);
+}
+
+function closePaymentModal() {
+    const modal = document.querySelector('.payment-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+async function confirmPayment(bookingId) {
+    const transactionId = document.getElementById('transactionId').value;
+    
+    if (!transactionId) {
+        showNotification('Please enter transaction ID', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/bookings/${bookingId}/payment-proof`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ transactionId })
+        });
+        
+        if (response.ok) {
+            showNotification('Payment confirmed! Booking is now confirmed.', 'success');
+            closePaymentModal();
+        } else {
+            const error = await response.json();
+            showNotification(error.error || 'Payment confirmation failed', 'error');
+        }
+    } catch (error) {
+        console.error('Payment confirmation error:', error);
+        showNotification('Network error. Please try again.', 'error');
+    }
+}
 
 function showNotification(message, type) {
     const notification = document.createElement('div');

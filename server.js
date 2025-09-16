@@ -3,6 +3,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
+const { generatePaymentDetails } = require('./upi-service');
 const path = require('path');
 
 const app = express();
@@ -63,8 +64,19 @@ async function initDB() {
             check_out DATE NOT NULL,
             guests INTEGER NOT NULL,
             total_price INTEGER NOT NULL,
-            status TEXT DEFAULT 'confirmed',
+            status TEXT DEFAULT 'pending_payment',
             booking_date DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS payment_proofs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            booking_id INTEGER,
+            transaction_id TEXT NOT NULL,
+            screenshot_data TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (booking_id) REFERENCES bookings (id)
         )
     `);
 
@@ -117,6 +129,9 @@ app.post('/api/bookings', async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `, [resortId, guestName, email, phone, checkIn, checkOut, guests, totalPrice]);
 
+        // Generate UPI payment details
+        const paymentDetails = generatePaymentDetails(totalPrice, result.lastID, guestName);
+        
         const booking = {
             id: result.lastID,
             bookingReference: `RB${String(result.lastID).padStart(4, '0')}`,
@@ -128,7 +143,8 @@ app.post('/api/bookings', async (req, res) => {
             checkOut,
             guests,
             totalPrice,
-            status: 'confirmed'
+            status: 'pending_payment',
+            paymentDetails: paymentDetails
         };
 
         // Publish booking created event
@@ -147,6 +163,45 @@ app.post('/api/bookings', async (req, res) => {
     } catch (error) {
         console.error('Booking error:', error);
         res.status(500).json({ error: 'Failed to create booking' });
+    }
+});
+
+app.post('/api/bookings/:id/payment-proof', async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const { transactionId, paymentScreenshot } = req.body;
+        
+        if (!transactionId) {
+            return res.status(400).json({ error: 'Transaction ID is required' });
+        }
+        
+        // Update booking status to confirmed
+        await db.run(
+            'UPDATE bookings SET status = ?, payment_status = ? WHERE id = ?',
+            ['confirmed', 'paid', bookingId]
+        );
+        
+        // Store payment proof (in production, store in S3)
+        await db.run(
+            'INSERT OR REPLACE INTO payment_proofs (booking_id, transaction_id, screenshot_data, created_at) VALUES (?, ?, ?, datetime("now"))',
+            [bookingId, transactionId, paymentScreenshot || '']
+        );
+        
+        // Publish payment confirmed event
+        try {
+            await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
+                bookingId: bookingId,
+                paymentStatus: 'paid',
+                transactionId: transactionId
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
+        res.json({ message: 'Payment confirmed successfully', status: 'confirmed' });
+    } catch (error) {
+        console.error('Payment confirmation error:', error);
+        res.status(500).json({ error: 'Failed to confirm payment' });
     }
 });
 
