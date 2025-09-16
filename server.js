@@ -342,29 +342,37 @@ app.post('/api/bookings', async (req, res) => {
         
         const bookingId = bookingResult.lastID;
         
-        // Add transaction record
+        // Add transaction record (optional - skip if function doesn't exist)
         console.log('Adding transaction record...');
         try {
-            await addTransaction(bookingId, paymentId || 'CASH_' + Date.now(), totalPrice, 'online', 'completed');
-            console.log('Transaction record added');
+            if (typeof addTransaction === 'function') {
+                await addTransaction(bookingId, paymentId || 'CASH_' + Date.now(), totalPrice, 'online', 'completed');
+                console.log('Transaction record added');
+            } else {
+                console.log('Transaction function not available, skipping...');
+            }
         } catch (transError) {
-            console.error('Transaction error:', transError.message);
+            console.error('Transaction error (non-critical):', transError.message);
         }
         
-        // Add booking history
+        // Add booking history (optional - skip if function doesn't exist)
         console.log('Adding booking history...');
         try {
-            await addBookingHistory(bookingId, 'booking_created', {
-                guestName,
-                email,
-                checkIn,
-                checkOut,
-                guests: guestCount,
-                totalPrice
-            });
-            console.log('Booking history added');
+            if (typeof addBookingHistory === 'function') {
+                await addBookingHistory(bookingId, 'booking_created', {
+                    guestName,
+                    email,
+                    checkIn,
+                    checkOut,
+                    guests: guestCount,
+                    totalPrice
+                });
+                console.log('Booking history added');
+            } else {
+                console.log('Booking history function not available, skipping...');
+            }
         } catch (historyError) {
-            console.error('Booking history error:', historyError.message);
+            console.error('Booking history error (non-critical):', historyError.message);
         }
         
         const bookingReference = `RB${String(bookingId).padStart(4, '0')}`;
