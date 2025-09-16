@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
+const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-service');
 
 const app = express();
 const PORT = 3002;
@@ -58,10 +59,29 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
         const id = req.params.id;
         const { payment_status } = req.body;
         
+        // Get booking details for invoice
+        const booking = await db.get(`
+            SELECT b.*, r.name as resort_name 
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE b.id = ?
+        `, [id]);
+        
         await db.run(
             'UPDATE bookings SET payment_status = ? WHERE id = ?',
             [payment_status, id]
         );
+        
+        // Generate invoice and backup database when marked as paid
+        if (payment_status === 'paid') {
+            try {
+                const invoice = await generateInvoice(booking);
+                await backupDatabase();
+                console.log(`📄 Invoice generated for booking ${id}`);
+            } catch (backupError) {
+                console.error('Backup/Invoice error:', backupError);
+            }
+        }
         
         // Log payment status updated event
         await db.run(
@@ -92,6 +112,9 @@ app.delete('/api/bookings/:id', async (req, res) => {
 });
 
 initDB().then(() => {
+    // Start automatic backups
+    scheduleBackups();
+    
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`📋 Booking Management running on http://0.0.0.0:${PORT}`);
     });
