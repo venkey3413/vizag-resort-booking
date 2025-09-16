@@ -62,6 +62,21 @@ app.post('/api/resorts', async (req, res) => {
             });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
+            // Fallback: Direct webhook call
+            try {
+                const response = await fetch('http://localhost:3003/webhook/eventbridge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        source: 'resort.admin',
+                        'detail-type': 'Resort Added',
+                        detail: { resortId: result.lastID, name, location, price }
+                    })
+                });
+                console.log('✅ Direct webhook fallback successful');
+            } catch (webhookError) {
+                console.error('❌ Webhook fallback failed:', webhookError);
+            }
         }
         
         res.json({ id: result.lastID, message: 'Resort added successfully' });

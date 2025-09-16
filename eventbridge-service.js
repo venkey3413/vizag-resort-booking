@@ -5,7 +5,7 @@ const eventbridge = new AWS.EventBridge({
     region: 'ap-south-1' // Change to your region
 });
 
-const EVENT_BUS_NAME = 'vizag-resort-events';
+const EVENT_BUS_NAME = 'default';
 
 // Publish event to EventBridge
 async function publishEvent(source, detailType, detail) {
