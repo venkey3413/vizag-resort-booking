@@ -4,7 +4,7 @@
   "description": "Resort booking system",
   "main": "server.js",
   "scripts": {
-    "start": "sudo node server.js",
+    "start": "node server.js",
     "admin": "node admin-server.js",
     "bookings": "node booking-server.js",
     "websocket": "node websocket-server.js",
