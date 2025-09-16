@@ -66,13 +66,17 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
         
         // Generate invoice, send email, and backup database when marked as paid
         if (payment_status === 'paid') {
+            console.log(`💰 Payment marked as paid for booking ${id}, processing...`);
             try {
+                console.log('📄 Generating invoice...');
                 const invoice = await generateInvoice(booking);
+                console.log('📧 Sending email...');
                 await sendInvoiceEmail(booking);
+                console.log('💾 Creating backup...');
                 await backupDatabase();
-                console.log(`📄 Invoice generated and email sent for booking ${id}`);
+                console.log(`✅ Invoice generated and email sent for booking ${id}`);
             } catch (error) {
-                console.error('Invoice/Email/Backup error:', error);
+                console.error('❌ Invoice/Email/Backup error:', error);
             }
         }
         
@@ -90,6 +94,40 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
         res.json({ message: 'Payment status updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update payment status' });
+    }
+});
+
+app.post('/api/bookings/:id/send-email', async (req, res) => {
+    try {
+        const id = req.params.id;
+        
+        // Get booking details
+        const booking = await db.get(`
+            SELECT b.*, r.name as resort_name 
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE b.id = ?
+        `, [id]);
+        
+        if (!booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+        
+        if (booking.payment_status !== 'paid') {
+            return res.status(400).json({ error: 'Booking must be marked as paid first' });
+        }
+        
+        // Send email
+        const emailSent = await sendInvoiceEmail(booking);
+        
+        if (emailSent) {
+            res.json({ message: 'Email sent successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to send email' });
+        }
+    } catch (error) {
+        console.error('Manual email error:', error);
+        res.status(500).json({ error: 'Failed to send email' });
     }
 });
 

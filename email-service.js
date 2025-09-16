@@ -11,6 +11,7 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendInvoiceEmail(booking) {
+    console.log('📧 Attempting to send email to:', booking.email);
     try {
         const invoiceHTML = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd;">
@@ -62,10 +63,11 @@ async function sendInvoiceEmail(booking) {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`📧 Invoice email sent to ${booking.email}`);
+        console.log(`📧 Invoice email sent successfully to ${booking.email}`);
         return true;
     } catch (error) {
-        console.error('Email sending failed:', error);
+        console.error('❌ Email sending failed:', error.message);
+        console.error('Full error:', error);
         return false;
     }
 }

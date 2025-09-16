@@ -64,7 +64,8 @@ function displayBookings() {
                 </div>
                 ${(booking.payment_status || 'pending') === 'pending' ? 
                     `<button class="paid-btn" onclick="markAsPaid(${booking.id})">Mark as Paid</button>` : 
-                    `<button class="invoice-btn" onclick="generateInvoice(${booking.id})">Download Invoice</button>`}
+                    `<button class="invoice-btn" onclick="generateInvoice(${booking.id})">Download Invoice</button>
+                     <button class="email-btn" onclick="sendEmailManually(${booking.id})">Send Email</button>`}
                 <button class="delete-btn" onclick="deleteBooking(${booking.id})">
                     Cancel Booking
                 </button>
@@ -113,6 +114,29 @@ async function deleteBooking(id) {
         }
     } catch (error) {
         console.error('Error:', error);
+        showNotification('Network error. Please try again.', 'error');
+    }
+}
+
+async function sendEmailManually(id) {
+    if (!confirm('Send invoice email to customer?')) return;
+
+    try {
+        const response = await fetch(`./api/bookings/${id}/send-email`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            showNotification('Email sent successfully to customer', 'success');
+        } else {
+            const error = await response.json();
+            showNotification(error.error || 'Failed to send email', 'error');
+        }
+    } catch (error) {
+        console.error('Email sending error:', error);
         showNotification('Network error. Please try again.', 'error');
     }
 }
