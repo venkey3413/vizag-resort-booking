@@ -132,12 +132,16 @@ app.post('/api/bookings', async (req, res) => {
         };
 
         // Publish booking created event
-        await publishEvent('resort.booking', EVENTS.BOOKING_CREATED, {
-            bookingId: result.lastID,
-            resortId: resort_id,
-            guestName: guest_name,
-            totalPrice: total_price
-        });
+        try {
+            await publishEvent('resort.booking', EVENTS.BOOKING_CREATED, {
+                bookingId: result.lastID,
+                resortId: resortId,
+                guestName: guestName,
+                totalPrice: totalPrice
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json(booking);
     } catch (error) {

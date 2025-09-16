@@ -75,11 +75,15 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
         }
         
         // Publish payment updated event
-        await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
-            bookingId: id,
-            paymentStatus: payment_status,
-            guestName: booking.guest_name
-        });
+        try {
+            await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
+                bookingId: id,
+                paymentStatus: payment_status,
+                guestName: booking.guest_name
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ message: 'Payment status updated successfully' });
     } catch (error) {
@@ -92,9 +96,13 @@ app.delete('/api/bookings/:id', async (req, res) => {
         const id = req.params.id;
         await db.run('DELETE FROM bookings WHERE id = ?', [id]);
         // Publish booking deleted event
-        await publishEvent('resort.booking', EVENTS.BOOKING_DELETED, {
-            bookingId: id
-        });
+        try {
+            await publishEvent('resort.booking', EVENTS.BOOKING_DELETED, {
+                bookingId: id
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ message: 'Booking deleted successfully' });
     } catch (error) {

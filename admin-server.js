@@ -53,12 +53,16 @@ app.post('/api/resorts', async (req, res) => {
         );
         
         // Publish resort added event
-        await publishEvent('resort.admin', EVENTS.RESORT_ADDED, {
-            resortId: result.lastID,
-            name,
-            location,
-            price
-        });
+        try {
+            await publishEvent('resort.admin', EVENTS.RESORT_ADDED, {
+                resortId: result.lastID,
+                name,
+                location,
+                price
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
@@ -77,12 +81,16 @@ app.put('/api/resorts/:id', async (req, res) => {
         );
         
         // Publish resort updated event
-        await publishEvent('resort.admin', EVENTS.RESORT_UPDATED, {
-            resortId: id,
-            name,
-            location,
-            price
-        });
+        try {
+            await publishEvent('resort.admin', EVENTS.RESORT_UPDATED, {
+                resortId: id,
+                name,
+                location,
+                price
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
@@ -95,9 +103,13 @@ app.delete('/api/resorts/:id', async (req, res) => {
         const id = req.params.id;
         await db.run('DELETE FROM resorts WHERE id = ?', [id]);
         // Publish resort deleted event
-        await publishEvent('resort.admin', EVENTS.RESORT_DELETED, {
-            resortId: id
-        });
+        try {
+            await publishEvent('resort.admin', EVENTS.RESORT_DELETED, {
+                resortId: id
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
