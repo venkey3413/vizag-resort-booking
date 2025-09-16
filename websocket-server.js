@@ -51,17 +51,36 @@ function broadcastRefresh(eventType) {
 // API endpoint to receive EventBridge notifications
 app.post('/webhook/eventbridge', express.json(), (req, res) => {
     try {
+        console.log('📨 Webhook received:', {
+            headers: req.headers,
+            body: req.body
+        });
+        
+        // Validate API key (optional - EventBridge should send it)
+        const apiKey = req.headers['authorization'];
+        if (apiKey && apiKey !== 'vizag-resort-2024') {
+            console.log('❌ Invalid API key:', apiKey);
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
         const { source, 'detail-type': detailType, detail } = req.body;
-        console.log(`📨 Received EventBridge event: ${detailType}`);
+        console.log(`📨 Processing EventBridge event: ${detailType}`);
         
         // Broadcast to all connected WebSocket clients
-        broadcastRefresh(detailType);
+        broadcastRefresh(detailType || 'data_changed');
         
-        res.status(200).json({ message: 'Event processed' });
+        res.status(200).json({ message: 'Event processed successfully' });
     } catch (error) {
-        console.error('Webhook error:', error);
+        console.error('❌ Webhook error:', error);
         res.status(500).json({ error: 'Failed to process event' });
     }
+});
+
+// Test endpoint
+app.get('/webhook/test', (req, res) => {
+    console.log('🧪 Test webhook called');
+    broadcastRefresh('test_event');
+    res.json({ message: 'Test broadcast sent', clients: connectedClients.size });
 });
 
 // Periodic sync removed - only EventBridge events will trigger refresh
