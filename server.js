@@ -45,6 +45,13 @@ async function initDB() {
         // Columns already exist, ignore error
     }
     
+    // Add booking reference column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE bookings ADD COLUMN booking_reference TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
 
 
     // Create tables
@@ -148,18 +155,21 @@ app.post('/api/bookings', async (req, res) => {
         const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
         const totalPrice = basePrice + platformFee;
 
+        // Generate booking reference
+        const bookingReference = `RB${String(Date.now()).slice(-6)}`;
+        
         // Create booking
         const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice]);
+            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice, bookingReference]);
 
         // Generate UPI payment details
         const paymentDetails = generatePaymentDetails(totalPrice, result.lastID, guestName);
         
         const booking = {
             id: result.lastID,
-            bookingReference: `RB${String(result.lastID).padStart(4, '0')}`,
+            bookingReference: bookingReference,
             resortName: resort.name,
             guestName,
             email,
@@ -232,24 +242,16 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
     }
 });
 
-app.get('/payment-proof', (req, res) => {
-    res.json({ message: 'Payment proof endpoint is active', status: 'success' });
-});
 
-
-
-app.get('/payment-proof', (req, res) => {
-    res.json({ message: 'Payment proof endpoint is active', status: 'success' });
-});
-
-app.get('/payment-proof', (req, res) => {
-    res.json({ message: 'Payment proof endpoint is active', status: 'success' });
-});
 
 app.get('/api/bookings', async (req, res) => {
     try {
         const bookings = await db.all(`
-            SELECT b.*, r.name as resort_name, p.transaction_id 
+            SELECT 
+                b.*,
+                r.name as resort_name,
+                p.transaction_id,
+                COALESCE(b.booking_reference, 'RB' || SUBSTR('000000' || b.id, -6)) as booking_ref
             FROM bookings b 
             JOIN resorts r ON b.resort_id = r.id 
             LEFT JOIN payment_proofs p ON b.id = p.booking_id
@@ -257,6 +259,7 @@ app.get('/api/bookings', async (req, res) => {
         `);
         res.json(bookings);
     } catch (error) {
+        console.error('Booking fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch bookings' });
     }
 });
