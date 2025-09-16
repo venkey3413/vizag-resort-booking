@@ -146,6 +146,25 @@ app.post('/api/bookings', async (req, res) => {
         if (!resort) {
             return res.status(404).json({ error: 'Resort not found' });
         }
+        
+        // Check for existing paid bookings on the same dates
+        const conflictingBooking = await db.get(`
+            SELECT COUNT(*) as count 
+            FROM bookings 
+            WHERE resort_id = ? 
+            AND payment_status = 'paid'
+            AND (
+                (check_in <= ? AND check_out > ?) OR
+                (check_in < ? AND check_out >= ?) OR
+                (check_in >= ? AND check_out <= ?)
+            )
+        `, [resortId, checkIn, checkIn, checkOut, checkOut, checkIn, checkOut]);
+        
+        if (conflictingBooking.count > 0) {
+            return res.status(400).json({ 
+                error: 'Resort is not available for the selected dates. Please choose different dates.' 
+            });
+        }
 
         // Calculate total price with platform fee
         const checkInDate = new Date(checkIn);
