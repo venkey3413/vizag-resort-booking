@@ -12,7 +12,7 @@ function setupWebSocketSync() {
     
     setInterval(async () => {
         try {
-            const response = await fetch('/api/resorts');
+            const response = await fetch('./api/resorts');
             const newResorts = await response.json();
             
             if (JSON.stringify(newResorts) !== JSON.stringify(resorts)) {
@@ -30,7 +30,7 @@ function setupEventListeners() {
 
 async function loadResorts() {
     try {
-        const response = await fetch('/api/resorts');
+        const response = await fetch('./api/resorts');
         resorts = await response.json();
         displayResorts();
     } catch (error) {
@@ -80,13 +80,13 @@ async function handleSubmit(e) {
     try {
         let response;
         if (editingId) {
-            response = await fetch(`/api/resorts/${editingId}`, {
+            response = await fetch(`./api/resorts/${editingId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(resortData)
             });
         } else {
-            response = await fetch('/api/resorts', {
+            response = await fetch('./api/resorts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(resortData)
@@ -140,7 +140,7 @@ async function deleteResort(id) {
     if (!confirm('Are you sure you want to delete this resort?')) return;
 
     try {
-        const response = await fetch(`/api/resorts/${id}`, {
+        const response = await fetch(`./api/resorts/${id}`, {
             method: 'DELETE'
         });
 
