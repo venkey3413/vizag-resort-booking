@@ -12,7 +12,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+        origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://3.110.160.192:3000", "http://3.110.160.192:3001", "http://3.110.160.192:3002"],
         methods: ["GET", "POST"],
         credentials: true
     },
@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 3000;
 
 // Basic middleware only
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://3.110.142.138:3000', 'https://3.110.142.138:3000'],
+    origin: ['http://localhost:3000', 'http://3.110.160.192:3000', 'https://3.110.160.192:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
