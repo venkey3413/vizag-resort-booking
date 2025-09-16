@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     setupEventListeners();
     setMinDate();
+    setupLogoRotation();
 });
 
 function setupEventListeners() {
@@ -159,6 +160,18 @@ function setMinDate() {
     document.getElementById('checkIn').value = today;
     document.getElementById('checkOut').min = tomorrowStr;
     document.getElementById('checkOut').value = tomorrowStr;
+}
+
+function setupLogoRotation() {
+    const logo = document.querySelector('.logo-image');
+    if (logo) {
+        logo.addEventListener('click', function() {
+            this.classList.add('rotating');
+            setTimeout(() => {
+                this.classList.remove('rotating');
+            }, 600);
+        });
+    }
 }
 
 function showNotification(message, type) {
