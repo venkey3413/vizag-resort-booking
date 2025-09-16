@@ -17,7 +17,7 @@ function generateUPIUrl(amount, bookingId, guestName) {
 
 // Use fixed QR code image
 function generateQRCodeUrl(upiUrl) {
-    return 'qr-code.png'; // Fixed QR code image
+    return 'qr-code.png.jpeg'; // Fixed QR code image
 }
 
 // Generate payment details
