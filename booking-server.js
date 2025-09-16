@@ -18,6 +18,13 @@ async function initDB() {
         driver: sqlite3.Database
     });
     
+    // Add payment_status column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE bookings ADD COLUMN payment_status TEXT DEFAULT "pending"');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Create sync_events table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS sync_events (
@@ -43,6 +50,28 @@ app.get('/api/bookings', async (req, res) => {
         res.json(bookings);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch bookings' });
+    }
+});
+
+app.put('/api/bookings/:id/payment', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { payment_status } = req.body;
+        
+        await db.run(
+            'UPDATE bookings SET payment_status = ? WHERE id = ?',
+            [payment_status, id]
+        );
+        
+        // Log payment status updated event
+        await db.run(
+            'INSERT INTO sync_events (event_type, table_name, record_id, data) VALUES (?, ?, ?, ?)',
+            ['payment_updated', 'bookings', id, JSON.stringify({ payment_status })]
+        );
+        
+        res.json({ message: 'Payment status updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update payment status' });
     }
 });
 

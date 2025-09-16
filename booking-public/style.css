@@ -119,6 +119,31 @@ nav a:hover {
     background: #c0392b;
 }
 
+.paid-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.paid-btn:hover {
+    background: #218838;
+}
+
+.payment-pending {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.payment-paid {
+    color: #28a745;
+    font-weight: bold;
+}
+
 .notification {
     position: fixed;
     top: 20px;

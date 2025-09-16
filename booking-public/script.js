@@ -52,6 +52,7 @@ function displayBookings() {
                     <p><strong>Dates:</strong> ${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}</p>
                     <p><strong>Guests:</strong> ${booking.guests}</p>
                     <p><strong>Total:</strong> ₹${booking.total_price.toLocaleString()}</p>
+                    <p><strong>Payment:</strong> <span class="payment-${booking.payment_status || 'pending'}">${(booking.payment_status || 'pending').toUpperCase()}</span></p>
                     <p><strong>Booked:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</p>
                 </div>
             </div>
@@ -59,12 +60,38 @@ function displayBookings() {
                 <div class="booking-status status-${booking.status}">
                     ${booking.status.toUpperCase()}
                 </div>
+                ${(booking.payment_status || 'pending') === 'pending' ? 
+                    `<button class="paid-btn" onclick="markAsPaid(${booking.id})">Mark as Paid</button>` : ''}
                 <button class="delete-btn" onclick="deleteBooking(${booking.id})">
                     Cancel Booking
                 </button>
             </div>
         </div>
     `).join('');
+}
+
+async function markAsPaid(id) {
+    if (!confirm('Mark this booking as paid?')) return;
+
+    try {
+        const response = await fetch(`/api/bookings/${id}/payment`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ payment_status: 'paid' })
+        });
+
+        if (response.ok) {
+            showNotification('Booking marked as paid', 'success');
+            loadBookings();
+        } else {
+            showNotification('Failed to update payment status', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Network error. Please try again.', 'error');
+    }
 }
 
 async function deleteBooking(id) {
