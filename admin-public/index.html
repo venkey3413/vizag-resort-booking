@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Resort Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>🏨 Resort Admin Panel</h1>
+            <nav>
+                <a href="http://3.110.160.192:3000">Main Site</a>
+                <a href="http://3.110.160.192:3002">Bookings</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="add-resort">
+            <h2>Add New Resort</h2>
+            <form id="resortForm">
+                <input type="hidden" id="resortId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Resort Name:</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location:</label>
+                        <input type="text" id="location" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price">Price per Night (₹):</label>
+                        <input type="number" id="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="image">Image URL:</label>
+                        <input type="url" id="image" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" rows="3"></textarea>
+                </div>
+                <button type="submit" id="submitBtn">Add Resort</button>
+                <button type="button" id="cancelBtn" onclick="cancelEdit()" style="display:none;">Cancel</button>
+            </form>
+        </section>
+
+        <section class="resorts-list">
+            <h2>Manage Resorts</h2>
+            <div id="resortsGrid" class="resorts-grid">
+                <!-- Resorts will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,9 +1,7 @@
 let resorts = [];
-let bookings = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
-    loadBookings();
     setupEventListeners();
     setMinDate();
 });
@@ -72,40 +70,7 @@ function displayResorts() {
     `).join('');
 }
 
-async function loadBookings() {
-    try {
-        const response = await fetch('/api/bookings');
-        bookings = await response.json();
-        displayBookings();
-    } catch (error) {
-        console.error('Error loading bookings:', error);
-    }
-}
 
-function displayBookings() {
-    const grid = document.getElementById('bookingsGrid');
-    if (bookings.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; color: #666;">No bookings found</p>';
-        return;
-    }
-
-    grid.innerHTML = bookings.map(booking => `
-        <div class="booking-card">
-            <div class="booking-info">
-                <h4>${booking.resort_name}</h4>
-                <div class="booking-details">
-                    <p><strong>Guest:</strong> ${booking.guest_name}</p>
-                    <p><strong>Dates:</strong> ${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}</p>
-                    <p><strong>Guests:</strong> ${booking.guests}</p>
-                    <p><strong>Total:</strong> ₹${booking.total_price.toLocaleString()}</p>
-                </div>
-            </div>
-            <div class="booking-status status-${booking.status}">
-                ${booking.status.toUpperCase()}
-            </div>
-        </div>
-    `).join('');
-}
 
 function openBookingModal(resortId) {
     const resort = resorts.find(r => r.id === resortId);
@@ -171,7 +136,6 @@ async function handleBooking(e) {
             const booking = await response.json();
             showNotification(`Booking confirmed! Reference: ${booking.bookingReference}`, 'success');
             closeModal();
-            loadBookings(); // Refresh bookings
         } else {
             const error = await response.json();
             showNotification(error.error || 'Booking failed', 'error');

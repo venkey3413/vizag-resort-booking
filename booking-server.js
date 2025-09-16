@@ -1,0 +1,51 @@
+const express = require('express');
+const cors = require('cors');
+const sqlite3 = require('sqlite3').verbose();
+const { open } = require('sqlite');
+
+const app = express();
+const PORT = 3002;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static('booking-public'));
+
+let db;
+
+async function initDB() {
+    db = await open({
+        filename: './resort_booking.db',
+        driver: sqlite3.Database
+    });
+}
+
+// Booking API Routes
+app.get('/api/bookings', async (req, res) => {
+    try {
+        const bookings = await db.all(`
+            SELECT b.*, r.name as resort_name 
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            ORDER BY b.booking_date DESC
+        `);
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch bookings' });
+    }
+});
+
+app.delete('/api/bookings/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        await db.run('DELETE FROM bookings WHERE id = ?', [id]);
+        res.json({ message: 'Booking deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete booking' });
+    }
+});
+
+initDB().then(() => {
+    app.listen(PORT, () => {
+        console.log(`📋 Booking Management running on http://localhost:${PORT}`);
+    });
+});
