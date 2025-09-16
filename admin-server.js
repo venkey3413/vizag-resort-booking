@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
+const { publishEvent, EVENTS } = require('./eventbridge-service');
 
 const app = express();
 const PORT = 3001;
@@ -51,6 +52,14 @@ app.post('/api/resorts', async (req, res) => {
             [name, location, parseInt(price), description || '', image || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500', mapLink || '']
         );
         
+        // Publish resort added event
+        await publishEvent('resort.admin', EVENTS.RESORT_ADDED, {
+            resortId: result.lastID,
+            name,
+            location,
+            price
+        });
+        
         res.json({ id: result.lastID, message: 'Resort added successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to add resort' });
@@ -67,6 +76,14 @@ app.put('/api/resorts/:id', async (req, res) => {
             [name, location, parseInt(price), description, image, mapLink || '', id]
         );
         
+        // Publish resort updated event
+        await publishEvent('resort.admin', EVENTS.RESORT_UPDATED, {
+            resortId: id,
+            name,
+            location,
+            price
+        });
+        
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update resort' });
@@ -77,6 +94,11 @@ app.delete('/api/resorts/:id', async (req, res) => {
     try {
         const id = req.params.id;
         await db.run('DELETE FROM resorts WHERE id = ?', [id]);
+        // Publish resort deleted event
+        await publishEvent('resort.admin', EVENTS.RESORT_DELETED, {
+            resortId: id
+        });
+        
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete resort' });

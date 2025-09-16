@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
+const { publishEvent, EVENTS } = require('./eventbridge-service');
 const path = require('path');
 
 const app = express();
@@ -130,6 +131,14 @@ app.post('/api/bookings', async (req, res) => {
             status: 'confirmed'
         };
 
+        // Publish booking created event
+        await publishEvent('resort.booking', EVENTS.BOOKING_CREATED, {
+            bookingId: result.lastID,
+            resortId: resort_id,
+            guestName: guest_name,
+            totalPrice: total_price
+        });
+        
         res.json(booking);
     } catch (error) {
         console.error('Booking error:', error);

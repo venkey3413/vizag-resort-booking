@@ -2,7 +2,16 @@ let bookings = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
+    setupWebSocketSync();
 });
+
+function setupWebSocketSync() {
+    const socket = io(`http://${window.location.hostname}:3003`);
+    
+    socket.on('refresh', () => {
+        loadBookings();
+    });
+}
 
 async function loadBookings() {
     try {

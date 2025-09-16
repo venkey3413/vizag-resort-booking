@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     setMinDate();
     setupLogoRotation();
+    setupWebSocketSync();
 });
 
 function setupEventListeners() {
@@ -175,6 +176,23 @@ function setupLogoRotation() {
             }, 600);
         });
     }
+}
+
+function setupWebSocketSync() {
+    const socket = io(`http://${window.location.hostname}:3003`);
+    
+    socket.on('connect', () => {
+        console.log('🔌 Connected to real-time sync');
+    });
+    
+    socket.on('refresh', (data) => {
+        console.log('🔄 Data updated, refreshing...');
+        loadResorts();
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('🔌 Disconnected from sync');
+    });
 }
 
 

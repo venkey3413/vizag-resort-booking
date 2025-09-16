@@ -4,7 +4,16 @@ let editingId = null;
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     setupEventListeners();
+    setupWebSocketSync();
 });
+
+function setupWebSocketSync() {
+    const socket = io(`http://${window.location.hostname}:3003`);
+    
+    socket.on('refresh', () => {
+        loadResorts();
+    });
+}
 
 function setupEventListeners() {
     document.getElementById('resortForm').addEventListener('submit', handleSubmit);

@@ -7,7 +7,8 @@
     "start": "node server.js",
     "admin": "node admin-server.js",
     "bookings": "node booking-server.js",
-    "dev": "concurrently \"npm start\" \"npm run admin\" \"npm run bookings\""
+    "websocket": "node websocket-server.js",
+    "dev": "concurrently \"npm start\" \"npm run admin\" \"npm run bookings\" \"npm run websocket\""
   },
   "dependencies": {
     "express": "^4.18.2",

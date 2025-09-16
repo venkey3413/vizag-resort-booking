@@ -3,6 +3,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-service');
+const { publishEvent, EVENTS } = require('./eventbridge-service');
 
 const app = express();
 const PORT = 3002;
@@ -73,6 +74,13 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
             }
         }
         
+        // Publish payment updated event
+        await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
+            bookingId: id,
+            paymentStatus: payment_status,
+            guestName: booking.guest_name
+        });
+        
         res.json({ message: 'Payment status updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update payment status' });
@@ -83,6 +91,11 @@ app.delete('/api/bookings/:id', async (req, res) => {
     try {
         const id = req.params.id;
         await db.run('DELETE FROM bookings WHERE id = ?', [id]);
+        // Publish booking deleted event
+        await publishEvent('resort.booking', EVENTS.BOOKING_DELETED, {
+            bookingId: id
+        });
+        
         res.json({ message: 'Booking deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete booking' });
