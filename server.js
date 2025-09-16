@@ -52,6 +52,13 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add transaction_id column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE bookings ADD COLUMN transaction_id TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
 
 
     // Create tables
@@ -231,10 +238,10 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
             return res.status(400).json({ error: 'Transaction ID is required' });
         }
         
-        // Update booking status to pending verification (not paid until manually confirmed)
+        // Update booking status and transaction ID
         await db.run(
-            'UPDATE bookings SET status = ?, payment_status = ? WHERE id = ?',
-            ['pending_verification', 'pending', bookingId]
+            'UPDATE bookings SET status = ?, payment_status = ?, transaction_id = ? WHERE id = ?',
+            ['pending_verification', 'pending', transactionId, bookingId]
         );
         
         // Store payment proof (in production, store in S3)
@@ -269,11 +276,9 @@ app.get('/api/bookings', async (req, res) => {
             SELECT 
                 b.*,
                 r.name as resort_name,
-                p.transaction_id,
                 COALESCE(b.booking_reference, 'RB' || SUBSTR('000000' || b.id, -6)) as booking_ref
             FROM bookings b 
             JOIN resorts r ON b.resort_id = r.id 
-            LEFT JOIN payment_proofs p ON b.id = p.booking_id
             ORDER BY b.booking_date DESC
         `);
         res.json(bookings);
