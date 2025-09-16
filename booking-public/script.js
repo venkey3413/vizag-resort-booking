@@ -51,7 +51,7 @@ function displayBookings() {
                     <p><strong>Phone:</strong> ${booking.phone}</p>
                     <p><strong>Dates:</strong> ${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}</p>
                     <p><strong>Guests:</strong> ${booking.guests}</p>
-                    <p><strong>Booking ID:</strong> RB${String(booking.id).padStart(4, '0')}</p>
+                    <p><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</p>
                     <p><strong>Total:</strong> ₹${booking.total_price.toLocaleString()}</p>
                     <p><strong>Payment:</strong> <span class="payment-${booking.payment_status || 'pending'}">${(booking.payment_status || 'pending').toUpperCase()}</span></p>
                     ${booking.transaction_id ? `<p><strong>Transaction ID:</strong> ${booking.transaction_id}</p>` : ''}
@@ -63,7 +63,8 @@ function displayBookings() {
                     ${booking.status.toUpperCase()}
                 </div>
                 ${(booking.payment_status || 'pending') === 'pending' ? 
-                    `<button class="paid-btn" onclick="markAsPaid(${booking.id})">Mark as Paid</button>` : ''}
+                    `<button class="paid-btn" onclick="markAsPaid(${booking.id})">Mark as Paid</button>` : 
+                    `<button class="invoice-btn" onclick="generateInvoice(${booking.id})">Download Invoice</button>`}
                 <button class="delete-btn" onclick="deleteBooking(${booking.id})">
                     Cancel Booking
                 </button>
@@ -113,6 +114,53 @@ async function deleteBooking(id) {
     } catch (error) {
         console.error('Error:', error);
         showNotification('Network error. Please try again.', 'error');
+    }
+}
+
+async function generateInvoice(id) {
+    try {
+        const booking = bookings.find(b => b.id === id);
+        if (!booking) return;
+        
+        // Create invoice content
+        const invoiceContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="text-align: center; color: #333;">INVOICE</h2>
+                <hr>
+                <div style="margin: 20px 0;">
+                    <h3>Vizag Resorts</h3>
+                    <p>Email: info@vizagresorts.com</p>
+                    <p>Phone: +91 9876543210</p>
+                </div>
+                <hr>
+                <div style="margin: 20px 0;">
+                    <p><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</p>
+                    <p><strong>Guest Name:</strong> ${booking.guest_name}</p>
+                    <p><strong>Email:</strong> ${booking.email}</p>
+                    <p><strong>Phone:</strong> ${booking.phone}</p>
+                    <p><strong>Resort:</strong> ${booking.resort_name}</p>
+                    <p><strong>Check-in:</strong> ${new Date(booking.check_in).toLocaleDateString()}</p>
+                    <p><strong>Check-out:</strong> ${new Date(booking.check_out).toLocaleDateString()}</p>
+                    <p><strong>Guests:</strong> ${booking.guests}</p>
+                    <p><strong>Total Amount:</strong> ₹${booking.total_price.toLocaleString()}</p>
+                    <p><strong>Payment Status:</strong> ${(booking.payment_status || 'pending').toUpperCase()}</p>
+                    <p><strong>Booking Date:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</p>
+                </div>
+                <hr>
+                <p style="text-align: center; margin-top: 20px;">Thank you for choosing Vizag Resorts!</p>
+            </div>
+        `;
+        
+        // Create and download invoice
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(invoiceContent);
+        printWindow.document.close();
+        printWindow.print();
+        
+        showNotification('Invoice generated successfully', 'success');
+    } catch (error) {
+        console.error('Invoice generation error:', error);
+        showNotification('Failed to generate invoice', 'error');
     }
 }
 

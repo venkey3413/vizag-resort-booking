@@ -134,6 +134,21 @@ nav a:hover {
     background: #218838;
 }
 
+.invoice-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.invoice-btn:hover {
+    background: #0056b3;
+}
+
 .payment-pending {
     color: #ffc107;
     font-weight: bold;
