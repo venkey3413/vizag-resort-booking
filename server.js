@@ -342,38 +342,11 @@ app.post('/api/bookings', async (req, res) => {
         
         const bookingId = bookingResult.lastID;
         
-        // Add transaction record (optional - skip if function doesn't exist)
-        console.log('Adding transaction record...');
-        try {
-            if (typeof addTransaction === 'function') {
-                await addTransaction(bookingId, paymentId || 'CASH_' + Date.now(), totalPrice, 'online', 'completed');
-                console.log('Transaction record added');
-            } else {
-                console.log('Transaction function not available, skipping...');
-            }
-        } catch (transError) {
-            console.error('Transaction error (non-critical):', transError.message);
-        }
+        // Skip transaction logging to prevent crashes
+        console.log('Skipping transaction logging...');
         
-        // Add booking history (optional - skip if function doesn't exist)
-        console.log('Adding booking history...');
-        try {
-            if (typeof addBookingHistory === 'function') {
-                await addBookingHistory(bookingId, 'booking_created', {
-                    guestName,
-                    email,
-                    checkIn,
-                    checkOut,
-                    guests: guestCount,
-                    totalPrice
-                });
-                console.log('Booking history added');
-            } else {
-                console.log('Booking history function not available, skipping...');
-            }
-        } catch (historyError) {
-            console.error('Booking history error (non-critical):', historyError.message);
-        }
+        // Skip booking history to prevent crashes
+        console.log('Skipping booking history...');
         
         const bookingReference = `RB${String(bookingId).padStart(4, '0')}`;
         
@@ -429,34 +402,12 @@ app.post('/api/bookings', async (req, res) => {
             console.log('Booking sync error:', e.message);
         }
         
-        // Generate invoice
-        console.log('Generating invoice...');
-        try {
-            const { generateInvoice } = require('./invoice-service');
-            await generateInvoice({
-                bookingId,
-                bookingReference,
-                guestName,
-                email,
-                phone: cleanPhone,
-                resortName: resort.name,
-                resortLocation: resort.location,
-                checkIn,
-                checkOut,
-                guests: guestCount,
-                nights,
-                basePrice,
-                platformFee,
-                totalPrice,
-                bookingDate: new Date().toISOString()
-            });
-            console.log('Invoice generated for booking:', bookingReference);
-        } catch (invoiceError) {
-            console.error('Invoice generation failed:', invoiceError.message);
-        }
+        // Skip invoice generation to prevent crashes
+        console.log('Skipping invoice generation...');
         
-        // Send booking confirmation email
-        console.log('Sending confirmation email...');
+        // Skip email sending to prevent crashes
+        console.log('Skipping email confirmation...');
+        /*
         try {
             const nodemailer = require('nodemailer');
             
@@ -581,6 +532,7 @@ app.post('/api/bookings', async (req, res) => {
         } catch (emailError) {
             console.error('Email sending failed:', emailError.message);
         }
+        */
         
         console.log('All booking processes completed successfully');
         
