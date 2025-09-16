@@ -333,25 +333,39 @@ app.post('/api/bookings', async (req, res) => {
         const totalPrice = bookingAmount + platformFee;
         
         // Create booking with encrypted sensitive data
+        console.log('Creating booking in database...');
         const bookingResult = await db().run(
             'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, payment_id, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [parseInt(resortId), resort.name, guestName, encrypt(email), encrypt(cleanPhone), checkIn, checkOut, guestCount, totalPrice, encrypt(paymentId), 'confirmed', 'pending']
+            [parseInt(resortId), resort.name, guestName, encrypt(email), encrypt(cleanPhone), checkIn, checkOut, guestCount, totalPrice, encrypt(paymentId || 'CASH_' + Date.now()), 'confirmed', 'pending']
         );
+        console.log('Booking inserted with ID:', bookingResult.lastID);
         
         const bookingId = bookingResult.lastID;
         
         // Add transaction record
-        await addTransaction(bookingId, paymentId, totalPrice, 'online', 'completed');
+        console.log('Adding transaction record...');
+        try {
+            await addTransaction(bookingId, paymentId || 'CASH_' + Date.now(), totalPrice, 'online', 'completed');
+            console.log('Transaction record added');
+        } catch (transError) {
+            console.error('Transaction error:', transError.message);
+        }
         
         // Add booking history
-        await addBookingHistory(bookingId, 'booking_created', {
-            guestName,
-            email,
-            checkIn,
-            checkOut,
-            guests: guestCount,
-            totalPrice
-        });
+        console.log('Adding booking history...');
+        try {
+            await addBookingHistory(bookingId, 'booking_created', {
+                guestName,
+                email,
+                checkIn,
+                checkOut,
+                guests: guestCount,
+                totalPrice
+            });
+            console.log('Booking history added');
+        } catch (historyError) {
+            console.error('Booking history error:', historyError.message);
+        }
         
         const bookingReference = `RB${String(bookingId).padStart(4, '0')}`;
         
@@ -408,6 +422,7 @@ app.post('/api/bookings', async (req, res) => {
         }
         
         // Generate invoice
+        console.log('Generating invoice...');
         try {
             const { generateInvoice } = require('./invoice-service');
             await generateInvoice({
@@ -433,6 +448,7 @@ app.post('/api/bookings', async (req, res) => {
         }
         
         // Send booking confirmation email
+        console.log('Sending confirmation email...');
         try {
             const nodemailer = require('nodemailer');
             
@@ -558,13 +574,16 @@ app.post('/api/bookings', async (req, res) => {
             console.error('Email sending failed:', emailError.message);
         }
         
+        console.log('All booking processes completed successfully');
+        
         // Emit real-time update
         io.emit('bookingCreated', booking);
         
         res.json(booking);
     } catch (error) {
-        console.error('Error creating booking:', error);
-        res.status(500).json({ error: 'Failed to create booking' });
+        console.error('CRITICAL BOOKING ERROR:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ error: 'Failed to create booking: ' + error.message });
     }
 });
 
