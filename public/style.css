@@ -510,8 +510,10 @@ input, select {
     background: rgba(0,0,0,0.8);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     z-index: 2000;
+    overflow-y: auto;
+    padding: 20px 0;
 }
 
 .payment-content {
@@ -520,9 +522,9 @@ input, select {
     border-radius: 10px;
     max-width: 500px;
     width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: none;
     text-align: center;
+    margin: auto;
 }
 
 .booking-summary {
@@ -618,13 +620,41 @@ input, select {
 }
 
 @media (max-width: 768px) {
+    .payment-modal {
+        padding: 10px 0;
+        align-items: flex-start;
+    }
+    
     .payment-content {
         width: 95%;
         padding: 1rem;
+        margin: 10px auto;
     }
     
     .qr-code {
         width: 200px;
         height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .payment-modal {
+        padding: 5px 0;
+    }
+    
+    .payment-content {
+        width: 98%;
+        padding: 0.8rem;
+        margin: 5px auto;
+    }
+    
+    .qr-code {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .payment-actions {
+        flex-direction: column;
+        gap: 0.5rem;
     }
 }
