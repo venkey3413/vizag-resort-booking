@@ -4,6 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-service');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
+const { sendInvoiceEmail } = require('./email-service');
 
 const app = express();
 const PORT = 3002;
@@ -63,14 +64,15 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
             [payment_status, id]
         );
         
-        // Generate invoice and backup database when marked as paid
+        // Generate invoice, send email, and backup database when marked as paid
         if (payment_status === 'paid') {
             try {
                 const invoice = await generateInvoice(booking);
+                await sendInvoiceEmail(booking);
                 await backupDatabase();
-                console.log(`📄 Invoice generated for booking ${id}`);
-            } catch (backupError) {
-                console.error('Backup/Invoice error:', backupError);
+                console.log(`📄 Invoice generated and email sent for booking ${id}`);
+            } catch (error) {
+                console.error('Invoice/Email/Backup error:', error);
             }
         }
         
