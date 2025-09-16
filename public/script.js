@@ -949,7 +949,7 @@ async function handleBooking(e) {
     console.log('Sending booking data:', bookingData);
     
     try {
-            const response = await fetch('/api/bookings-simple', {
+            const response = await fetch('/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

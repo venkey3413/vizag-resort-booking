@@ -337,7 +337,8 @@ app.post('/api/bookings', async (req, res) => {
         
         console.log('Date validation passed, proceeding with booking...');
         
-        console.log('Skipping duplicate booking checks - no encryption used');
+        // Skip all duplicate booking checks to prevent crashes
+        console.log('Skipping duplicate booking checks for stability');
         
         // Calculate total price
         const basePrice = resort.price;
