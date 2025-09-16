@@ -10,7 +10,7 @@ function setupWebSocketSync() {
     
     setInterval(async () => {
         try {
-            const response = await fetch('/api/bookings');
+            const response = await fetch('./api/bookings');
             const newBookings = await response.json();
             
             if (JSON.stringify(newBookings) !== JSON.stringify(bookings)) {
@@ -24,7 +24,7 @@ function setupWebSocketSync() {
 
 async function loadBookings() {
     try {
-        const response = await fetch('/api/bookings');
+        const response = await fetch('./api/bookings');
         bookings = await response.json();
         displayBookings();
     } catch (error) {
@@ -77,7 +77,7 @@ async function markAsPaid(id) {
     if (!confirm('Mark this booking as paid?')) return;
 
     try {
-        const response = await fetch(`/api/bookings/${id}/payment`, {
+        const response = await fetch(`./api/bookings/${id}/payment`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -101,7 +101,7 @@ async function deleteBooking(id) {
     if (!confirm('Are you sure you want to cancel this booking?')) return;
 
     try {
-        const response = await fetch(`/api/bookings/${id}`, {
+        const response = await fetch(`./api/bookings/${id}`, {
             method: 'DELETE'
         });
 
