@@ -133,6 +133,20 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(400).json({ error: 'All fields are required' });
         }
         
+        // Date validation
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (checkInDate < today) {
+            return res.status(400).json({ error: 'Check-in date cannot be in the past' });
+        }
+        
+        if (checkOutDate <= checkInDate) {
+            return res.status(400).json({ error: 'Check-out date must be at least one day after check-in date' });
+        }
+        
         // Check for duplicate bookings (max 2 per day per email/phone)
         const today = new Date().toISOString().split('T')[0];
         const existingBookings = await db.get(`

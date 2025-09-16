@@ -151,6 +151,26 @@ async function handleBooking(e) {
         checkOut: document.getElementById('checkOut').value,
         guests: document.getElementById('guests').value
     };
+    
+    // Date validation
+    const checkInDate = new Date(bookingData.checkIn);
+    const checkOutDate = new Date(bookingData.checkOut);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (checkInDate < today) {
+        showNotification('Check-in date cannot be in the past', 'error');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    if (checkOutDate <= checkInDate) {
+        showNotification('Check-out date must be at least one day after check-in date', 'error');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
 
     try {
         const response = await fetch('/api/bookings', {
