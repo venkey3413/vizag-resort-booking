@@ -277,8 +277,11 @@ app.post('/api/bookings', async (req, res) => {
         });
         
         if (isOverlapping) {
+            console.log('Date overlap detected for resort:', resortId, 'dates:', checkIn, 'to', checkOut);
             return res.status(400).json({ error: 'Selected dates are not available. Please choose different dates.' });
         }
+        
+        console.log('Date validation passed, proceeding with booking...');
         
         // Check for duplicate booking by decrypting existing bookings
         const today = new Date().toISOString().split('T')[0];
@@ -368,6 +371,8 @@ app.post('/api/bookings', async (req, res) => {
             status: 'confirmed',
             bookingDate: new Date().toISOString()
         };
+        
+        console.log('Booking created successfully:', bookingReference);
         
         // Real-time sync to all services
         try {
