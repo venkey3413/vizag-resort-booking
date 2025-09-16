@@ -539,6 +539,13 @@ input, select {
     margin: 1rem 0;
     border: 2px solid #27ae60;
     border-radius: 8px;
+    background: #f8f9fa;
+    object-fit: contain;
+    transition: opacity 0.3s ease;
+}
+
+.qr-code:not([src]) {
+    opacity: 0.5;
 }
 
 .payment-instructions {

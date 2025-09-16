@@ -6,7 +6,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setMinDate();
     setupLogoRotation();
     setupWebSocketSync();
+    preloadQRCode();
 });
+
+function preloadQRCode() {
+    const qrImage = new Image();
+    qrImage.src = 'qr-code.png.jpeg';
+    console.log('QR code preloaded for faster display');
+}
 
 function setupEventListeners() {
     // Navigation
@@ -216,8 +223,8 @@ function showPaymentInterface(booking) {
                 <h3>Booking Details</h3>
                 <p><strong>Resort:</strong> ${booking.resortName}</p>
                 <p><strong>Guest:</strong> ${booking.guestName}</p>
-                <p><strong>Base Price:</strong> ₹${(booking.basePrice || 0).toLocaleString()}</p>
-                <p><strong>Platform Fee (1.5%):</strong> ₹${(booking.platformFee || 0).toLocaleString()}</p>
+                <p><strong>Base Price:</strong> ₹${(booking.basePrice || booking.totalPrice || 0).toLocaleString()}</p>
+                <p><strong>Platform Fee (1.5%):</strong> ₹${(booking.platformFee || Math.round((booking.totalPrice || 0) * 0.015)).toLocaleString()}</p>
                 <p><strong>Total Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
                 <p><strong>Reference:</strong> ${booking.bookingReference}</p>
             </div>
@@ -225,8 +232,9 @@ function showPaymentInterface(booking) {
             <div class="upi-payment">
                 <h3>🔗 UPI Payment</h3>
                 <div class="qr-section">
-                    <img src="${booking.paymentDetails?.qrCodeUrl || ''}" alt="UPI QR Code" class="qr-code">
-                    <p><strong>UPI ID:</strong> ${booking.paymentDetails?.upiId || 'vizagresorts@ybl'}</p>
+                    <img src="qr-code.png.jpeg" alt="UPI QR Code" class="qr-code" onload="console.log('QR loaded')" onerror="console.error('QR failed to load')">
+                    <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
+                    <p><strong>Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
                 </div>
                 
                 <div class="payment-instructions">
