@@ -302,7 +302,7 @@ async function confirmPayment(bookingId) {
         });
         
         if (response.ok) {
-            showNotification('Payment confirmed! Booking is now confirmed.', 'success');
+            showNotification('Your booking payment is being verified. You will be notified through email.', 'success');
             closePaymentModal();
         } else {
             const error = await response.json();
