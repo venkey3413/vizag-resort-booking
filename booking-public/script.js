@@ -34,7 +34,7 @@ function initializeSocket() {
 
 async function loadBookings() {
     try {
-    const response = await fetch('http://3.110.142.138:3002/api/bookings');
+    const response = await fetch('http://3.110.160.192:3002/api/bookings');
         const newBookings = await response.json();
         
         // Only update if data changed
@@ -132,7 +132,7 @@ async function markPaymentComplete(bookingId) {
     // Remove confirm dialog for better UX
     
     try {
-    const response = await fetch(`http://3.110.142.138:3002/api/bookings/${bookingId}/payment`, {
+    const response = await fetch(`http://3.110.160.192:3002/api/bookings/${bookingId}/payment`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
@@ -155,7 +155,7 @@ async function deleteBooking(bookingId) {
     // Remove confirm dialog for better UX
     
     try {
-    const response = await fetch(`http://3.110.142.138:3002/api/bookings/${bookingId}`, {
+    const response = await fetch(`http://3.110.160.192:3002/api/bookings/${bookingId}`, {
             method: 'DELETE'
         });
         

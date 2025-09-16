@@ -58,7 +58,7 @@ ENCRYPTION_KEY=your-32-character-encryption-key
 PORT=3000
 ADMIN_PORT=3001
 BOOKING_PORT=3002
-SERVER_IP=3.110.142.138
+SERVER_IP=3.110.160.192
 
 # Security
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
