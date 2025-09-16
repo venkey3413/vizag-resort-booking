@@ -179,7 +179,7 @@ function setupLogoRotation() {
 }
 
 function setupRealTimeSync() {
-    const eventSource = new EventSource('http://localhost:3003/events');
+    const eventSource = new EventSource(`http://${window.location.hostname}:3003/events`);
     
     eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
@@ -191,7 +191,7 @@ function setupRealTimeSync() {
     
     eventSource.onerror = function() {
         console.log('Real-time sync disconnected, retrying...');
-        setTimeout(setupRealTimeSync, 5000);
+        setTimeout(() => setupRealTimeSync(), 5000);
     };
 }
 

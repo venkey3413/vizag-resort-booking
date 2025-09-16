@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupRealTimeSync() {
-    const eventSource = new EventSource('http://localhost:3003/events');
+    const eventSource = new EventSource(`http://${window.location.hostname}:3003/events`);
     
     eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
@@ -14,6 +14,11 @@ function setupRealTimeSync() {
         if (data.type === 'booking_created' || data.type === 'booking_deleted') {
             loadBookings(); // Refresh booking list
         }
+    };
+    
+    eventSource.onerror = function() {
+        console.log('Booking sync disconnected, retrying...');
+        setTimeout(() => setupRealTimeSync(), 5000);
     };
 }
 
