@@ -6,10 +6,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupWebSocketSync() {
-    const socket = io(`http://${window.location.hostname}:3003`);
+    // Use same protocol and host as current page (nginx will proxy to port 3003)
+    const socket = io(`${window.location.protocol}//${window.location.host}/socket.io/`);
     
-    socket.on('refresh', () => {
+    socket.on('connect', () => {
+        console.log('🔌 Booking panel connected to real-time sync');
+    });
+    
+    socket.on('refresh', (data) => {
+        console.log('🔄 Data updated, refreshing bookings...');
         loadBookings();
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('🔌 Booking panel disconnected from sync');
     });
 }
 
