@@ -4,7 +4,6 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const { db, initDatabase, addBookingHistory, addTransaction } = require('./database');
-const { encrypt, decrypt } = require('./crypto-utils');
 const { upload } = require('./s3-config');
 const { startBackupSchedule } = require('./backup-service');
 
