@@ -266,8 +266,8 @@ app.get('/api/bookings', async (req, res) => {
 
 // Initialize and start server
 initDB().then(() => {
-    app.listen(PORT, '3.89.211.227', () => {
-        console.log(`🚀 Resort Booking Server running on http://3.89.211.227:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Resort Booking Server running on http://0.0.0.0:${PORT}`);
     });
 }).catch(error => {
     console.error('Failed to start server:', error);
