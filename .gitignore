@@ -1,9 +1,0 @@
-node_modules/
-.env
-data/
-backups/
-*.db
-*.log
-uploads/
-.DS_Store
-Thumbs.db
