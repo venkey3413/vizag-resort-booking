@@ -17,6 +17,13 @@ async function initDB() {
         filename: './resort_booking.db',
         driver: sqlite3.Database
     });
+    
+    // Add map_link column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE resorts ADD COLUMN map_link TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
 }
 
 // Admin API Routes
