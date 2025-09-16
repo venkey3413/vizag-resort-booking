@@ -1,15 +1,10 @@
+#!/bin/bash
+
+# Update nginx configuration with webhook proxy
+sudo tee /etc/nginx/sites-available/vizagresort << 'EOF'
 server {
     listen 80;
     server_name vizagresortbooking.in www.vizagresortbooking.in;
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name vizagresortbooking.in www.vizagresortbooking.in;
-    
-    ssl_certificate /etc/letsencrypt/live/vizagresortbooking.in/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/vizagresortbooking.in/privkey.pem;
     
     # Main site proxy
     location / {
@@ -29,3 +24,12 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
+EOF
+
+# Test and reload nginx
+sudo nginx -t
+sudo systemctl reload nginx
+
+echo "✅ Nginx configuration updated!"
+echo "🧪 Testing webhook..."
+curl https://vizagresortbooking.in/webhook/test
