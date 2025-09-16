@@ -20,6 +20,10 @@ async function sendInvoiceEmail(booking) {
                     <h2 style="color: #333;">Booking Confirmation & Invoice</h2>
                 </div>
                 
+                <div style="margin: 20px 0;">
+                    <p>Email: vizagresortbooking@gmail.com</p>
+                </div>
+                
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                     <h3 style="color: #27ae60; margin-bottom: 15px;">Dear ${booking.guest_name},</h3>
                     <p>Your payment has been verified and your booking is now confirmed!</p>
@@ -34,6 +38,7 @@ async function sendInvoiceEmail(booking) {
                         <tr><td style="padding: 8px 0; font-weight: bold;">Check-out:</td><td>${new Date(booking.check_out).toLocaleDateString()} (9:00 AM)</td></tr>
                         <tr><td style="padding: 8px 0; font-weight: bold;">Guests:</td><td>${booking.guests}</td></tr>
                         <tr><td style="padding: 8px 0; font-weight: bold;">Total Amount:</td><td style="color: #27ae60; font-weight: bold;">₹${booking.total_price.toLocaleString()}</td></tr>
+                        ${booking.transaction_id ? `<tr><td style="padding: 8px 0; font-weight: bold;">Transaction ID:</td><td>${booking.transaction_id}</td></tr>` : ''}
                         <tr><td style="padding: 8px 0; font-weight: bold;">Payment Status:</td><td style="color: #27ae60; font-weight: bold;">PAID</td></tr>
                     </table>
                 </div>
