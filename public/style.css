@@ -39,6 +39,29 @@ header {
     align-items: center;
 }
 
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-text {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.logo-image {
+    height: 40px;
+    width: auto;
+}
+
+.logo-container h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
 nav ul {
     display: flex;
     list-style: none;
