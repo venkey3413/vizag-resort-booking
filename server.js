@@ -188,8 +188,6 @@ app.post('/api/bookings', async (req, res) => {
         }
 
         // Calculate total price with platform fee
-        const checkInDate = new Date(checkIn);
-        const checkOutDate = new Date(checkOut);
         const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
         const basePrice = resort.price * nights;
         const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
