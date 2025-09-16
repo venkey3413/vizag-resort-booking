@@ -967,10 +967,10 @@ async function handleBooking(e) {
             // Reload resorts to update availability
             setTimeout(() => loadResorts(), 1000);
         } else {
-            const errorText = await response.text();
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
             console.log('Booking failed with status:', response.status);
-            console.log('Server response:', errorText);
-            showNotification('Booking failed: ' + (errorText || 'Please try again'), 'error');
+            console.log('Server response:', errorData);
+            showNotification('Booking failed: ' + (errorData.error || 'Please try again'), 'error');
         }
     } catch (error) {
         console.error('Booking error:', error);
