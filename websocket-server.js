@@ -64,12 +64,7 @@ app.post('/webhook/eventbridge', express.json(), (req, res) => {
     }
 });
 
-// Fallback: Periodic refresh every 10 seconds for reliability
-setInterval(() => {
-    if (connectedClients.size > 0) {
-        broadcastRefresh('periodic_sync');
-    }
-}, 10000);
+// Periodic sync removed - only EventBridge events will trigger refresh
 
 server.listen(PORT, () => {
     console.log(`🌐 WebSocket server running on port ${PORT}`);

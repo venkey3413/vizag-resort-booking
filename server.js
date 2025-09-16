@@ -232,14 +232,27 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
     }
 });
 
+app.get('/payment-proof', (req, res) => {
+    res.json({ message: 'Payment proof endpoint is active', status: 'success' });
+});
 
+
+
+app.get('/payment-proof', (req, res) => {
+    res.json({ message: 'Payment proof endpoint is active', status: 'success' });
+});
+
+app.get('/payment-proof', (req, res) => {
+    res.json({ message: 'Payment proof endpoint is active', status: 'success' });
+});
 
 app.get('/api/bookings', async (req, res) => {
     try {
         const bookings = await db.all(`
-            SELECT b.*, r.name as resort_name 
+            SELECT b.*, r.name as resort_name, p.transaction_id 
             FROM bookings b 
             JOIN resorts r ON b.resort_id = r.id 
+            LEFT JOIN payment_proofs p ON b.id = p.booking_id
             ORDER BY b.booking_date DESC
         `);
         res.json(bookings);

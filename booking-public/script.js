@@ -42,8 +42,10 @@ function displayBookings() {
                     <p><strong>Phone:</strong> ${booking.phone}</p>
                     <p><strong>Dates:</strong> ${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}</p>
                     <p><strong>Guests:</strong> ${booking.guests}</p>
+                    <p><strong>Booking ID:</strong> RB${String(booking.id).padStart(4, '0')}</p>
                     <p><strong>Total:</strong> ₹${booking.total_price.toLocaleString()}</p>
                     <p><strong>Payment:</strong> <span class="payment-${booking.payment_status || 'pending'}">${(booking.payment_status || 'pending').toUpperCase()}</span></p>
+                    ${booking.transaction_id ? `<p><strong>Transaction ID:</strong> ${booking.transaction_id}</p>` : ''}
                     <p><strong>Booked:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</p>
                 </div>
             </div>
