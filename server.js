@@ -57,6 +57,45 @@ app.post('/api/test-booking', async (req, res) => {
     res.json({ success: true, message: 'Test booking successful', data: req.body });
 });
 
+// Minimal booking endpoint for testing
+app.post('/api/bookings-simple', async (req, res) => {
+    try {
+        console.log('Simple booking request:', req.body);
+        const { resortId, guestName, email, phone, checkIn, checkOut, guests } = req.body;
+        
+        // Basic validation only
+        if (!resortId || !guestName || !email || !phone || !checkIn || !checkOut || !guests) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        
+        // Create booking with minimal data
+        const bookingResult = await db().run(
+            'INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, total_price, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [parseInt(resortId), guestName, email, phone, checkIn, checkOut, parseInt(guests), 5000, 'confirmed']
+        );
+        
+        const booking = {
+            id: bookingResult.lastID,
+            bookingReference: `RB${String(bookingResult.lastID).padStart(4, '0')}`,
+            resortId: parseInt(resortId),
+            guestName,
+            email,
+            phone,
+            checkIn,
+            checkOut,
+            guests: parseInt(guests),
+            totalPrice: 5000,
+            status: 'confirmed'
+        };
+        
+        console.log('Simple booking created:', booking.bookingReference);
+        res.json(booking);
+    } catch (error) {
+        console.error('Simple booking error:', error);
+        res.status(500).json({ error: 'Booking failed: ' + error.message });
+    }
+});
+
 // Initialize database on startup
 initDatabase();
 
