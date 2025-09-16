@@ -148,13 +148,13 @@ app.post('/api/bookings', async (req, res) => {
         }
         
         // Check for duplicate bookings (max 2 per day per email/phone)
-        const today = new Date().toISOString().split('T')[0];
+        const todayStr = new Date().toISOString().split('T')[0];
         const existingBookings = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE (email = ? OR phone = ?) 
             AND DATE(booking_date) = ?
-        `, [email, phone, today]);
+        `, [email, phone, todayStr]);
         
         if (existingBookings.count >= 2) {
             return res.status(400).json({ 
