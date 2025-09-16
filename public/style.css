@@ -190,6 +190,19 @@ section {
     margin-bottom: 1rem;
 }
 
+.view-map-btn {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.view-map-btn:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
 .resort-price {
     font-size: clamp(1.1rem, 2.5vw, 1.3rem);
     font-weight: 700;

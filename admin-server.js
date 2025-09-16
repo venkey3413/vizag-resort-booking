@@ -31,15 +31,15 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const { name, location, price, description, image } = req.body;
+        const { name, location, price, description, image, mapLink } = req.body;
         
         if (!name || !location || !price) {
             return res.status(400).json({ error: 'Name, location, and price are required' });
         }
         
         const result = await db.run(
-            'INSERT INTO resorts (name, location, price, description, image) VALUES (?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description || '', image || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500']
+            'INSERT INTO resorts (name, location, price, description, image, map_link) VALUES (?, ?, ?, ?, ?, ?)',
+            [name, location, parseInt(price), description || '', image || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500', mapLink || '']
         );
         
         res.json({ id: result.lastID, message: 'Resort added successfully' });
@@ -50,12 +50,12 @@ app.post('/api/resorts', async (req, res) => {
 
 app.put('/api/resorts/:id', async (req, res) => {
     try {
-        const { name, location, price, description, image } = req.body;
+        const { name, location, price, description, image, mapLink } = req.body;
         const id = req.params.id;
         
         await db.run(
-            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ? WHERE id = ?',
-            [name, location, parseInt(price), description, image, id]
+            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, map_link = ? WHERE id = ?',
+            [name, location, parseInt(price), description, image, mapLink || '', id]
         );
         
         res.json({ message: 'Resort updated successfully' });

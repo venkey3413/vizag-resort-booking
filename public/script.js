@@ -60,7 +60,10 @@ function displayResorts() {
             <img src="${resort.image}" alt="${resort.name}" class="resort-image">
             <div class="resort-info">
                 <h3>${resort.name}</h3>
-                <p class="resort-location">📍 ${resort.location}</p>
+                <p class="resort-location">
+                    📍 ${resort.location}
+                    ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="view-map-btn">🗺️ View Map</a>` : ''}
+                </p>
                 <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
                 <p class="resort-description">${resort.description}</p>
                 <button class="book-btn" onclick="openBookingModal(${resort.id})">

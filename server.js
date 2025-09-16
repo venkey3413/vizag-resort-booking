@@ -30,7 +30,8 @@ async function initDB() {
             price INTEGER NOT NULL,
             description TEXT,
             image TEXT,
-            available INTEGER DEFAULT 1
+            available INTEGER DEFAULT 1,
+            map_link TEXT
         )
     `);
 
@@ -54,10 +55,10 @@ async function initDB() {
     const resortCount = await db.get('SELECT COUNT(*) as count FROM resorts');
     if (resortCount.count === 0) {
         await db.run(`
-            INSERT INTO resorts (name, location, price, description, image) VALUES
-            ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500'),
-            ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500'),
-            ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500')
+            INSERT INTO resorts (name, location, price, description, image, map_link) VALUES
+            ('Paradise Beach Resort', 'Goa', 5000, 'Luxury beachfront resort with stunning ocean views', 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500', 'https://maps.google.com/?q=Goa'),
+            ('Mountain View Resort', 'Manali', 4000, 'Peaceful mountain retreat with breathtaking views', 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500', 'https://maps.google.com/?q=Manali'),
+            ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500', 'https://maps.google.com/?q=Udaipur')
         `);
     }
 }
