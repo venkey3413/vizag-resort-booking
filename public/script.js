@@ -549,11 +549,11 @@ function displayResorts(filteredResorts = resorts) {
                                 if (isVideo) {
                                     return `<video src="${media}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" controls muted loop preload="metadata"></video>`;
                                 } else {
-                                    return `<img src="${media}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 200\\"><rect fill=\\"%23ecf0f1\\" width=\\"400\\" height=\\"200\\"/><text x=\\"200\\" y=\\"100\\" text-anchor=\\"middle\\" fill=\\"%237f8c8d\\" font-size=\\"16\\">Image Error</text></svg>'">`;
+                                    return `<img src="${media}" alt="${resort.name}" class="resort-image ${index === 0 ? 'active' : ''}" data-resort="${resort.id}" data-index="${index}" loading="lazy" onerror="this.style.display='none'">`;
                                 }
                             }).join('');
                         }
-                        return '<img src="data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 200\\"><rect fill=\\"%23ecf0f1\\" width=\\"400\\" height=\\"200\\"/><text x=\\"200\\" y=\\"100\\" text-anchor=\\"middle\\" fill=\\"%237f8c8d\\" font-size=\\"16\\">No Media</text></svg>" alt="${resort.name}" class="resort-image active">';
+                        return `<div class="resort-image active no-image">No Image Available</div>`;
                     })()}
                 </div>
                 ${resort.images && resort.images.length > 1 ? `
@@ -1153,7 +1153,7 @@ function openResortDetails(resortId) {
     if (resort.images && Array.isArray(resort.images) && resort.images.length > 0) {
         currentResortImages = resort.images;
     } else {
-        currentResortImages = ['data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect fill="%23ecf0f1" width="400" height="200"/><text x="200" y="100" text-anchor="middle" fill="%237f8c8d" font-size="16">No Image Available</text></svg>'];
+        currentResortImages = ['/placeholder-image.jpg'];
     }
     
     currentImageIndex = 0;
