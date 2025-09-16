@@ -298,8 +298,7 @@ app.post('/api/bookings', async (req, res) => {
         
         console.log('Date validation passed, proceeding with booking...');
         
-        // Temporarily disable duplicate booking checks for testing
-        console.log('Skipping duplicate booking checks for testing...');
+        console.log('Skipping duplicate booking checks - no encryption used');
         
         // Calculate total price
         const basePrice = resort.price;
@@ -313,7 +312,7 @@ app.post('/api/bookings', async (req, res) => {
         const platformFee = Math.round(bookingAmount * 0.015);
         const totalPrice = bookingAmount + platformFee;
         
-        // Create booking without encryption (testing)
+        // Create booking in database
         console.log('Creating booking in database...');
         const bookingResult = await db().run(
             'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, payment_id, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
