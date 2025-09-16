@@ -195,9 +195,21 @@ function setupLogoRotation() {
 }
 
 function setupWebSocketSync() {
-    console.log('🔌 WebSocket temporarily disabled - using EventBridge fallback');
-    // WebSocket disabled due to SSL issues
-    // EventBridge webhook will trigger direct refresh
+    // Use same protocol and host as main site (nginx will proxy to port 3003)
+    const socket = io(`${window.location.protocol}//${window.location.host}/socket.io/`);
+    
+    socket.on('connect', () => {
+        console.log('🔌 Connected to real-time sync');
+    });
+    
+    socket.on('refresh', (data) => {
+        console.log('🔄 Data updated, refreshing...');
+        loadResorts();
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('🔌 Disconnected from sync');
+    });
 }
 
 
