@@ -389,8 +389,46 @@ app.post('/api/bookings', async (req, res) => {
         
         console.log('Booking created successfully:', bookingReference);
         
-        // Skip sync calls to prevent crashes
-        console.log('Skipping service sync calls...');
+        // Real-time sync to all services
+        try {
+            const bookingData = {
+                id: bookingId,
+                resort_id: parseInt(resortId),
+                resort_name: resort.name,
+                guest_name: guestName,
+                email,
+                phone: cleanPhone,
+                check_in: checkIn,
+                check_out: checkOut,
+                guests: guestCount,
+                total_price: totalPrice,
+                payment_id: paymentId || 'CASH_' + Date.now(),
+                status: 'confirmed',
+                booking_date: new Date().toISOString()
+            };
+            
+            // Use fetch instead of axios to prevent crashes
+            fetch(`http://3.110.160.192:3002/api/sync/booking-created`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-internal-service': 'main-server'
+                },
+                body: JSON.stringify(bookingData)
+            }).catch(e => console.log('Booking history sync failed:', e.message));
+            
+            fetch(`http://3.110.160.192:3001/api/sync/booking-created`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-internal-service': 'main-server'
+                },
+                body: JSON.stringify(bookingData)
+            }).catch(e => console.log('Admin panel sync failed:', e.message));
+            
+        } catch (e) {
+            console.log('Booking sync error:', e.message);
+        }
         
         // Skip invoice generation to prevent crashes
         console.log('Skipping invoice generation...');
