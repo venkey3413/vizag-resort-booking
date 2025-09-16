@@ -242,7 +242,10 @@ function showPaymentInterface(booking) {
                 </div>
             </div>
             
-            <button onclick="closePaymentModal()" class="close-payment-btn">Close</button>
+            <div class="payment-actions">
+                <button onclick="cancelPayment()" class="cancel-payment-btn">Cancel Payment</button>
+                <button onclick="closePaymentModal()" class="close-payment-btn">Close</button>
+            </div>
         </div>
     `;
     
@@ -253,6 +256,15 @@ function closePaymentModal() {
     const modal = document.querySelector('.payment-modal');
     if (modal) {
         modal.remove();
+    }
+}
+
+function cancelPayment() {
+    if (confirm('Are you sure you want to cancel this payment? You will return to the main page.')) {
+        closePaymentModal();
+        // Scroll to top of page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showNotification('Payment cancelled. You can try booking again.', 'error');
     }
 }
 

@@ -577,6 +577,26 @@ input, select {
     background: #219a52;
 }
 
+.payment-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.cancel-payment-btn {
+    background: #dc3545;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cancel-payment-btn:hover {
+    background: #c82333;
+}
+
 .close-payment-btn {
     background: #6c757d;
     color: white;
@@ -584,7 +604,10 @@ input, select {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 1rem;
+}
+
+.close-payment-btn:hover {
+    background: #5a6268;
 }
 
 @media (max-width: 768px) {

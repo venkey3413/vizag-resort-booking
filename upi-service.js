@@ -15,10 +15,9 @@ function generateUPIUrl(amount, bookingId, guestName) {
     return `upi://pay?${params.toString()}`;
 }
 
-// Generate QR code URL (using Google Charts API - free)
+// Use fixed QR code image
 function generateQRCodeUrl(upiUrl) {
-    const encodedUrl = encodeURIComponent(upiUrl);
-    return `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodedUrl}`;
+    return 'qr-code.png'; // Fixed QR code image
 }
 
 // Generate payment details
