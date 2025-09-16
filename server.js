@@ -332,11 +332,11 @@ app.post('/api/bookings', async (req, res) => {
         const platformFee = Math.round(bookingAmount * 0.015);
         const totalPrice = bookingAmount + platformFee;
         
-        // Create booking with encrypted sensitive data
+        // Create booking without encryption (testing)
         console.log('Creating booking in database...');
         const bookingResult = await db().run(
             'INSERT INTO bookings (resort_id, resort_name, guest_name, email, phone, check_in, check_out, guests, total_price, payment_id, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [parseInt(resortId), resort.name, guestName, encrypt(email), encrypt(cleanPhone), checkIn, checkOut, guestCount, totalPrice, encrypt(paymentId || 'CASH_' + Date.now()), 'confirmed', 'pending']
+            [parseInt(resortId), resort.name, guestName, email, cleanPhone, checkIn, checkOut, guestCount, totalPrice, paymentId || 'CASH_' + Date.now(), 'confirmed', 'pending']
         );
         console.log('Booking inserted with ID:', bookingResult.lastID);
         
