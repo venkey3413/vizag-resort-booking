@@ -242,14 +242,17 @@ app.post('/api/resorts', async (req, res) => {
 
 // Book a resort (public endpoint - no validation required)
 app.post('/api/bookings', async (req, res) => {
-    console.log('Booking request received:', {
+    console.log('=== BOOKING REQUEST START ===');
+    console.log('Full request body:', req.body);
+    console.log('Individual fields:', {
         resortId: req.body.resortId,
         guestName: req.body.guestName,
         email: req.body.email,
         phone: req.body.phone,
         checkIn: req.body.checkIn,
         checkOut: req.body.checkOut,
-        guests: req.body.guests
+        guests: req.body.guests,
+        paymentId: req.body.paymentId
     });
     
     // Validate required fields
