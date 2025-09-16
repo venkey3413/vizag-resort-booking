@@ -50,7 +50,7 @@ async function sendInvoiceEmail(booking) {
                 
                 <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
                     <p style="color: #666;">Thank you for choosing Vizag Resorts!</p>
-                    <p style="color: #666;">For any queries, contact us at info@vizagresorts.com or +91 9876543210</p>
+                    <p style="color: #666;">For any queries, contact us at vizagresortbooking@gmail.com</p>
                 </div>
             </div>
         `;
