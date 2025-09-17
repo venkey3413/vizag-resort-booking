@@ -177,6 +177,8 @@ section {
     width: 100%;
     height: 250px;
     object-fit: cover;
+    display: block;
+    background: #f0f0f0;
 }
 
 .resort-info {
@@ -409,6 +411,15 @@ input, select {
         padding: 1rem 0;
     }
     
+    .resort-card {
+        overflow: hidden;
+    }
+    
+    .resort-gallery {
+        width: 100%;
+        overflow: hidden;
+    }
+    
     .nav-container {
         flex-direction: row;
         justify-content: space-between;
@@ -474,7 +485,14 @@ input, select {
     }
     
     .resort-image {
-        height: 200px;
+        height: 220px;
+        width: 100%;
+        object-fit: cover;
+        display: block;
+        max-width: 100%;
+        min-width: 100%;
+        background-color: #f0f0f0;
+        border-radius: 0;
     }
     
     section {
@@ -528,7 +546,12 @@ input, select {
     }
     
     .resort-image {
-        height: 180px;
+        height: 200px;
+        width: 100%;
+        object-fit: cover;
+        display: block;
+        max-width: 100%;
+        background: #f0f0f0;
     }
     
     .cta-btn {
