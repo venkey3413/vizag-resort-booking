@@ -446,7 +446,18 @@ input, select {
 
     .hero {
         margin-top: 60px;
-        min-height: 70vh;
+        min-height: 85vh;
+        padding: 40px 20px;
+    }
+    
+    .hero-content h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-content p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
     }
 
     .resorts-grid {

@@ -324,9 +324,11 @@ function updateGalleryImage() {
             let videoHtml = '';
             if (currentItem.url.includes('youtube.com') || currentItem.url.includes('youtu.be')) {
                 const videoId = currentItem.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-                videoHtml = videoId ? `<iframe src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="width:100%;height:400px;"></iframe>` : '';
+                videoHtml = videoId ? `<iframe src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>` : '';
+            } else if (currentItem.url.includes('.mp4') || currentItem.url.includes('.webm') || currentItem.url.includes('.ogg')) {
+                videoHtml = `<video controls style="width:100%;height:400px;border-radius:8px;"><source src="${currentItem.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
             } else {
-                videoHtml = `<video controls style="width:100%;height:400px;"><source src="${currentItem.url}" type="video/mp4"></video>`;
+                videoHtml = `<div style="width:100%;height:400px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:8px;"><p>Video format not supported</p></div>`;
             }
             
             container.innerHTML = `
