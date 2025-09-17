@@ -4,6 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { generatePaymentDetails } = require('./upi-service');
+const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const path = require('path');
 
 const app = express();
@@ -222,6 +223,26 @@ app.post('/api/bookings', async (req, res) => {
             paymentDetails: paymentDetails
         };
 
+        // Send Telegram notification for new booking
+        try {
+            const bookingWithResort = {
+                id: result.lastID,
+                guest_name: guestName,
+                email,
+                phone,
+                resort_name: resort.name,
+                check_in: checkIn,
+                check_out: checkOut,
+                guests,
+                total_price: totalPrice,
+                payment_status: 'pending'
+            };
+            const message = formatBookingNotification(bookingWithResort);
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
         // Publish booking created event
         try {
             await publishEvent('resort.booking', EVENTS.BOOKING_CREATED, {
