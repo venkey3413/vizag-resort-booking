@@ -150,6 +150,17 @@ app.delete('/api/bookings/:id', async (req, res) => {
     }
 });
 
+app.post('/api/test-backup', async (req, res) => {
+    try {
+        console.log('🧪 Manual backup test triggered');
+        const result = await backupDatabase();
+        res.json({ message: 'Backup completed successfully', location: result });
+    } catch (error) {
+        console.error('Manual backup failed:', error);
+        res.status(500).json({ error: 'Backup failed', details: error.message });
+    }
+});
+
 initDB().then(() => {
     // Start automatic backups
     scheduleBackups();
