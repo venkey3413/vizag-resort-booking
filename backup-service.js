@@ -7,7 +7,7 @@ const s3 = new AWS.S3({
     region: 'ap-south-1' // Change to your region
 });
 
-const BUCKET_NAME = 'vizag-resort-backups'; // Change to your bucket name
+const BUCKET_NAME = 'vizag-resort-backups';
 
 // Backup database to S3
 async function backupDatabase() {
