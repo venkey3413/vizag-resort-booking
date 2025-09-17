@@ -29,8 +29,12 @@ function setupEventListeners() {
     document.querySelector('.close').addEventListener('click', closeModal);
     window.addEventListener('click', function(event) {
         const modal = document.getElementById('bookingModal');
+        const galleryModal = document.getElementById('galleryModal');
         if (event.target === modal) {
             closeModal();
+        }
+        if (event.target === galleryModal) {
+            closeGallery();
         }
     });
 
@@ -305,21 +309,27 @@ function openGallery(resortId) {
 
 function closeGallery() {
     // Stop all videos before closing
-    const videos = document.querySelectorAll('#galleryModal video');
+    const videos = document.querySelectorAll('video');
     videos.forEach(video => {
         video.pause();
         video.currentTime = 0;
+        video.load(); // Reset video completely
     });
     
-    // Stop YouTube videos
-    const iframes = document.querySelectorAll('#galleryModal iframe');
+    // Stop YouTube videos by removing and re-adding
+    const iframes = document.querySelectorAll('iframe');
     iframes.forEach(iframe => {
-        const src = iframe.src;
-        iframe.src = '';
-        iframe.src = src;
+        if (iframe.src.includes('youtube')) {
+            iframe.src = 'about:blank';
+        }
     });
     
     document.getElementById('galleryModal').style.display = 'none';
+    
+    // Clear gallery content to fully stop videos
+    setTimeout(() => {
+        document.querySelector('.gallery-images').innerHTML = '';
+    }, 100);
 }
 
 function updateGalleryImage() {
@@ -341,7 +351,7 @@ function updateGalleryImage() {
                 const videoId = currentItem.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
                 videoHtml = videoId ? `<iframe src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>` : '';
             } else if (currentItem.url.includes('.mp4') || currentItem.url.includes('.webm') || currentItem.url.includes('.ogg')) {
-                videoHtml = `<video controls preload="metadata" style="width:100%;height:400px;border-radius:8px;" onloadstart="this.volume=0.5"><source src="${currentItem.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                videoHtml = `<video controls preload="none" style="width:100%;height:400px;border-radius:8px;" poster="" onloadstart="this.volume=0.5"><source src="${currentItem.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
             } else {
                 videoHtml = `<div style="width:100%;height:400px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:8px;"><p>Video format not supported</p></div>`;
             }
@@ -367,7 +377,8 @@ function setupGalleryThumbnails() {
         if (item.type === 'image') {
             return `<img src="${item.url}" class="gallery-thumbnail ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})">`;
         } else {
-            return `<div class="gallery-thumbnail video-thumb ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})">🎥</div>`;
+            // Create video thumbnail with play icon
+            return `<div class="gallery-thumbnail video-thumb ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})" style="background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>'); background-size: 30px; background-repeat: no-repeat; background-position: center; background-color: #333;">📹</div>`;
         }
     }).join('');
 }
