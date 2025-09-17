@@ -4,11 +4,15 @@ const TELEGRAM_BOT_TOKEN = '8187811852:AAHAJ967MJRc0fO8Z07g1ljGhedGPW76G6o';
 const TELEGRAM_CHAT_ID = '1815102420';
 
 async function sendTelegramNotification(message) {
+    if (!message || message.trim() === '') {
+        console.error('❌ Empty message, skipping Telegram notification');
+        return false;
+    }
+    
     return new Promise((resolve, reject) => {
         const data = JSON.stringify({
             chat_id: TELEGRAM_CHAT_ID,
-            text: message,
-            parse_mode: 'HTML'
+            text: message
         });
 
         const options = {
@@ -49,20 +53,23 @@ async function sendTelegramNotification(message) {
 }
 
 function formatBookingNotification(booking) {
-    return `🏨 <b>NEW BOOKING RECEIVED!</b>
+    const message = `🏨 NEW BOOKING RECEIVED!
 
-📋 <b>Booking ID:</b> ${booking.id}
-👤 <b>Guest:</b> ${booking.guest_name}
-📧 <b>Email:</b> ${booking.email}
-📱 <b>Phone:</b> ${booking.phone}
-🏖️ <b>Resort:</b> ${booking.resort_name}
-📅 <b>Check-in:</b> ${booking.check_in}
-📅 <b>Check-out:</b> ${booking.check_out}
-👥 <b>Guests:</b> ${booking.guests}
-💰 <b>Total:</b> ₹${booking.total_price.toLocaleString()}
-💳 <b>Status:</b> ${booking.payment_status}
+📋 Booking ID: ${booking.id}
+👤 Guest: ${booking.guest_name}
+📧 Email: ${booking.email}
+📱 Phone: ${booking.phone}
+🏖️ Resort: ${booking.resort_name}
+📅 Check-in: ${booking.check_in}
+📅 Check-out: ${booking.check_out}
+👥 Guests: ${booking.guests}
+💰 Total: ₹${booking.total_price.toLocaleString()}
+💳 Status: ${booking.payment_status}
 
-⏰ <b>Booked at:</b> ${new Date().toLocaleString('en-IN')}`;
+⏰ Booked at: ${new Date().toLocaleString('en-IN')}`;
+    
+    console.log('📱 Telegram message:', message);
+    return message;
 }
 
 module.exports = {
