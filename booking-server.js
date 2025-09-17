@@ -65,19 +65,17 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
             [payment_status, id]
         );
         
-        // Generate invoice, send email, and backup database when marked as paid
+        // Generate invoice and backup database when marked as paid
         if (payment_status === 'paid') {
             console.log(`💰 Payment marked as paid for booking ${id}, processing...`);
             try {
                 console.log('📄 Generating invoice...');
                 const invoice = await generateInvoice(booking);
-                console.log('📧 Sending email...');
-                await sendInvoiceEmail(booking);
                 console.log('💾 Creating backup...');
                 await backupDatabase();
-                console.log(`✅ Invoice generated and email sent for booking ${id}`);
+                console.log(`✅ Invoice generated and backup created for booking ${id}`);
             } catch (error) {
-                console.error('❌ Invoice/Email/Backup error:', error);
+                console.error('❌ Invoice/Backup error:', error);
             }
         }
         
