@@ -360,14 +360,17 @@ app.post('/api/chat-message', (req, res) => {
 app.get('/api/chat-replies/:sessionId', (req, res) => {
     const { sessionId } = req.params;
     const messages = chatMessages.get(sessionId) || [];
-    const unread = messages.find(msg => !msg.replied && msg.reply);
     
-    if (unread) {
-        unread.replied = true;
-        res.json({ reply: unread.reply });
-    } else {
-        res.json({ reply: null });
+    // Find unreplied message with a reply
+    for (let i = messages.length - 1; i >= 0; i--) {
+        if (!messages[i].replied && messages[i].reply) {
+            messages[i].replied = true;
+            console.log(`📨 Sending reply: ${messages[i].reply}`);
+            return res.json({ reply: messages[i].reply });
+        }
     }
+    
+    res.json({ reply: null });
 });
 
 // Manual reply via Telegram command
@@ -379,11 +382,20 @@ app.post('/api/telegram-webhook', (req, res) => {
         const sessionId = parts[1];
         const reply = parts.slice(2).join(' ');
         
+        console.log(`📱 Processing reply for session ${sessionId}: ${reply}`);
+        
         const messages = chatMessages.get(sessionId);
         if (messages && messages.length > 0) {
-            const lastMessage = messages[messages.length - 1];
-            lastMessage.reply = reply;
-            console.log(`📱 Manual reply set for session ${sessionId}: ${reply}`);
+            // Find the last unreplied message
+            for (let i = messages.length - 1; i >= 0; i--) {
+                if (!messages[i].replied && !messages[i].reply) {
+                    messages[i].reply = reply;
+                    console.log(`✅ Reply set for message ${i}: ${reply}`);
+                    break;
+                }
+            }
+        } else {
+            console.log(`❌ No messages found for session ${sessionId}`);
         }
     }
     
