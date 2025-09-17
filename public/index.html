@@ -190,26 +190,6 @@
         </div>
     </footer>
 
-    <!-- Free Chatbot Widget -->
-    <div id="chatbot-widget">
-        <div id="chatbot-button" onclick="toggleChatbot()">
-            💬
-        </div>
-        <div id="chatbot-window" style="display:none;">
-            <div class="chatbot-header">
-                <span>Vizag Resorts Chat</span>
-                <span onclick="toggleChatbot()" style="cursor:pointer;float:right;">✕</span>
-            </div>
-            <div class="chatbot-messages" id="chatbot-messages">
-                <div class="bot-message">Hi! How can I help you with resort bookings?</div>
-            </div>
-            <div class="chatbot-input">
-                <input type="text" id="chatbot-input" placeholder="Type your message..." onkeypress="handleChatEnter(event)">
-                <button onclick="sendChatMessage()">Send</button>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="script.js?v=10"></script>
 </body>

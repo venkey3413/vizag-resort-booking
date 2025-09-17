@@ -6,8 +6,7 @@ const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { generatePaymentDetails } = require('./upi-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 
-// Chat message storage
-const chatMessages = new Map();
+
 const path = require('path');
 
 const app = express();
@@ -334,83 +333,7 @@ app.get('/api/bookings', async (req, res) => {
     }
 });
 
-// Chat message endpoint
-app.post('/api/chat-message', (req, res) => {
-    const { message, timestamp, sessionId } = req.body;
-    
-    // Store message
-    if (!chatMessages.has(sessionId)) {
-        chatMessages.set(sessionId, []);
-    }
-    chatMessages.get(sessionId).push({ message, timestamp, replied: false });
-    
-    // Send to Telegram for admin notification
-    const telegramMessage = `💬 NEW CHAT MESSAGE\n\nSession: ${sessionId}\nMessage: ${message}\nTime: ${new Date(timestamp).toLocaleString('en-IN')}\n\nReply with: /reply ${sessionId} your_response`;
-    
-    console.log('📧 Sending chat notification to Telegram:', telegramMessage);
-    sendTelegramNotification(telegramMessage).catch(err => 
-        console.error('Telegram chat notification failed:', err)
-    );
-    
-    console.log('✅ Chat message stored and notification sent');
-    res.json({ success: true });
-});
 
-// Chat reply endpoint
-app.get('/api/chat-replies/:sessionId', (req, res) => {
-    const { sessionId } = req.params;
-    const messages = chatMessages.get(sessionId) || [];
-    
-    // Find unreplied message with a reply
-    for (let i = messages.length - 1; i >= 0; i--) {
-        if (!messages[i].replied && messages[i].reply) {
-            messages[i].replied = true;
-            console.log(`📨 Sending reply: ${messages[i].reply}`);
-            return res.json({ reply: messages[i].reply });
-        }
-    }
-    
-    res.json({ reply: null });
-});
-
-// Manual reply via Telegram command
-app.post('/api/telegram-webhook', (req, res) => {
-    const { message } = req.body;
-    
-    if (message && message.text && message.text.startsWith('/reply ')) {
-        const parts = message.text.split(' ');
-        const sessionId = parts[1];
-        const reply = parts.slice(2).join(' ');
-        
-        console.log(`📱 Processing reply for session ${sessionId}: ${reply}`);
-        
-        const messages = chatMessages.get(sessionId);
-        if (messages && messages.length > 0) {
-            // Find the last unreplied message
-            for (let i = messages.length - 1; i >= 0; i--) {
-                if (!messages[i].replied && !messages[i].reply) {
-                    messages[i].reply = reply;
-                    console.log(`✅ Reply set for message ${i}: ${reply}`);
-                    break;
-                }
-            }
-        } else {
-            console.log(`❌ No messages found for session ${sessionId}`);
-        }
-    }
-    
-    res.json({ ok: true });
-});
-
-// Global function to handle manual replies (for testing)
-global.handleTelegramReply = function(sessionId, reply) {
-    const messages = chatMessages.get(sessionId);
-    if (messages && messages.length > 0) {
-        const lastMessage = messages[messages.length - 1];
-        lastMessage.reply = reply;
-        console.log(`📱 Manual reply set: ${reply}`);
-    }
-};
 
 // Initialize and start server
 initDB().then(() => {
