@@ -66,12 +66,11 @@ function displayResorts() {
     grid.innerHTML = resorts.map(resort => `
         <div class="resort-card">
             <div class="resort-gallery">
-                <img src="${resort.image}" alt="${resort.name}" class="resort-image main-image" onclick="openGallery(${resort.id})">
-                ${resort.gallery ? `
-                    <div class="gallery-nav">
-                        <button class="gallery-prev" onclick="prevImage(${resort.id})">&lt;</button>
-                        <button class="gallery-next" onclick="nextImage(${resort.id})">&gt;</button>
-                    </div>
+                <img src="${resort.image}" alt="${resort.name}" class="resort-image main-image">
+                ${(resort.gallery || resort.videos) ? `
+                    <button class="view-more-btn" onclick="openGallery(${resort.id})">
+                        📸 View More
+                    </button>
                 ` : ''}
             </div>
             <div class="resort-info">
