@@ -564,6 +564,61 @@ function showNotification(message, type) {
     }, 5000);
 }
 
+// Chatbot functionality
+function toggleChatbot() {
+    const window = document.getElementById('chatbot-window');
+    window.style.display = window.style.display === 'none' ? 'block' : 'none';
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chatbot-input');
+    const message = input.value.trim();
+    if (!message) return;
+    
+    // Add user message
+    addChatMessage(message, 'user');
+    input.value = '';
+    
+    // Simple bot responses
+    setTimeout(() => {
+        const response = getBotResponse(message);
+        addChatMessage(response, 'bot');
+    }, 1000);
+}
+
+function addChatMessage(message, type) {
+    const messages = document.getElementById('chatbot-messages');
+    const div = document.createElement('div');
+    div.className = type + '-message';
+    div.textContent = message;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function getBotResponse(message) {
+    const msg = message.toLowerCase();
+    
+    if (msg.includes('price') || msg.includes('cost')) {
+        return 'Our resort prices start from ₹2,000 per night. Check our resorts above for exact pricing!';
+    } else if (msg.includes('booking') || msg.includes('book')) {
+        return 'To book a resort, click "Book Now" on any resort card above. We accept UPI payments!';
+    } else if (msg.includes('location') || msg.includes('where')) {
+        return 'We have resorts in Vizag, S.R Puram, S Kota, Narava, Pinagadi, and Pendurthi areas.';
+    } else if (msg.includes('contact') || msg.includes('phone')) {
+        return 'You can contact us at vizagresortbooking@gmail.com or book directly through our website!';
+    } else if (msg.includes('hi') || msg.includes('hello')) {
+        return 'Hello! Welcome to Vizag Resorts. How can I help you with your booking today?';
+    } else {
+        return 'I can help you with resort bookings, prices, locations, and contact information. What would you like to know?';
+    }
+}
+
+function handleChatEnter(event) {
+    if (event.key === 'Enter') {
+        sendChatMessage();
+    }
+}
+
 // Rating functionality
 function setupRatingStars() {
     document.querySelectorAll('.rating-container').forEach(container => {
