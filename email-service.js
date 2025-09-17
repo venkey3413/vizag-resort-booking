@@ -38,7 +38,7 @@ async function sendInvoiceEmail(booking) {
                         <tr><td style="padding: 8px 0; font-weight: bold;">Check-out:</td><td>${new Date(booking.check_out).toLocaleDateString()} (9:00 AM)</td></tr>
                         <tr><td style="padding: 8px 0; font-weight: bold;">Guests:</td><td>${booking.guests}</td></tr>
                         <tr><td style="padding: 8px 0; font-weight: bold;">Total Amount:</td><td style="color: #27ae60; font-weight: bold;">₹${booking.total_price.toLocaleString()}</td></tr>
-                        ${booking.transaction_id ? `<tr><td style="padding: 8px 0; font-weight: bold;">Transaction ID:</td><td>${booking.transaction_id}</td></tr>` : ''}
+                        ${booking.transaction_id ? `<tr><td style="padding: 8px 0; font-weight: bold;">UTR ID:</td><td>${booking.transaction_id}</td></tr>` : ''}
                         <tr><td style="padding: 8px 0; font-weight: bold;">Payment Status:</td><td style="color: #27ae60; font-weight: bold;">PAID</td></tr>
                     </table>
                 </div>

@@ -54,7 +54,7 @@ function displayBookings() {
                     <p><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</p>
                     <p><strong>Total:</strong> ₹${booking.total_price.toLocaleString()}</p>
                     <p><strong>Payment:</strong> <span class="payment-${booking.payment_status || 'pending'}">${(booking.payment_status || 'pending').toUpperCase()}</span></p>
-                    ${booking.transaction_id ? `<p><strong>Transaction ID:</strong> ${booking.transaction_id}</p>` : '<p><strong>Transaction ID:</strong> Not provided</p>'}
+                    ${booking.transaction_id ? `<p><strong>UTR ID:</strong> ${booking.transaction_id}</p>` : '<p><strong>UTR ID:</strong> Not provided</p>'}
                     <p><strong>Booked:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</p>
                 </div>
             </div>
@@ -167,7 +167,7 @@ async function generateInvoice(id) {
                     <p><strong>Check-out:</strong> ${new Date(booking.check_out).toLocaleDateString()}</p>
                     <p><strong>Guests:</strong> ${booking.guests}</p>
                     <p><strong>Total Amount:</strong> ₹${booking.total_price.toLocaleString()}</p>
-                    ${booking.transaction_id ? `<p><strong>Transaction ID:</strong> ${booking.transaction_id}</p>` : '<p><strong>Transaction ID:</strong> Not provided</p>'}
+                    ${booking.transaction_id ? `<p><strong>UTR ID:</strong> ${booking.transaction_id}</p>` : '<p><strong>UTR ID:</strong> Not provided</p>'}
                     <p><strong>Payment Status:</strong> ${(booking.payment_status || 'pending').toUpperCase()}</p>
                     <p><strong>Booking Date:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</p>
                 </div>
