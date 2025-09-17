@@ -608,7 +608,11 @@ function addChatMessage(message, type) {
     div.className = type + '-message';
     div.textContent = message;
     messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
+    
+    // Auto-scroll to bottom
+    setTimeout(() => {
+        messages.scrollTop = messages.scrollHeight;
+    }, 100);
 }
 
 function getBotResponse(message) {
@@ -645,20 +649,33 @@ function getSessionId() {
 }
 
 // Listen for admin replies
-setInterval(() => {
+let replyCheckInterval = setInterval(() => {
     fetch(`/api/chat-replies/${getSessionId()}`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
         .then(data => {
             if (data.reply) {
                 // Replace typing message with admin reply
                 const lastMessage = document.querySelector('.bot-message:last-child');
                 if (lastMessage && lastMessage.textContent === 'Admin is typing...') {
                     lastMessage.textContent = data.reply;
+                    // Auto-scroll after reply
+                    const messages = document.getElementById('chatbot-messages');
+                    setTimeout(() => {
+                        messages.scrollTop = messages.scrollHeight;
+                    }, 100);
                 }
             }
         })
-        .catch(err => console.error('Reply check error:', err));
-}, 3000);
+        .catch(err => {
+            // Silently handle errors to avoid console spam
+            if (err.message !== 'Network response was not ok') {
+                console.error('Reply check error:', err);
+            }
+        });
+}, 5000); // Increased interval to reduce server load
 
 // Rating functionality
 function setupRatingStars() {

@@ -930,14 +930,18 @@ footer p {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    max-height: 280px;
+    scroll-behavior: smooth;
 }
 
 .bot-message {
     background: #f0f0f0;
     padding: 10px;
     border-radius: 10px;
-    max-width: 80%;
+    max-width: 85%;
     align-self: flex-start;
+    word-wrap: break-word;
+    margin-bottom: 5px;
 }
 
 .user-message {
@@ -945,8 +949,10 @@ footer p {
     color: white;
     padding: 10px;
     border-radius: 10px;
-    max-width: 80%;
+    max-width: 85%;
     align-self: flex-end;
+    word-wrap: break-word;
+    margin-bottom: 5px;
 }
 
 .chatbot-input {

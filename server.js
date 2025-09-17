@@ -14,7 +14,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:3000', 'https://vizagresortbooking.in'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -344,10 +347,12 @@ app.post('/api/chat-message', (req, res) => {
     // Send to Telegram for admin notification
     const telegramMessage = `💬 NEW CHAT MESSAGE\n\nSession: ${sessionId}\nMessage: ${message}\nTime: ${new Date(timestamp).toLocaleString('en-IN')}\n\nReply with: /reply ${sessionId} your_response`;
     
+    console.log('📧 Sending chat notification to Telegram:', telegramMessage);
     sendTelegramNotification(telegramMessage).catch(err => 
         console.error('Telegram chat notification failed:', err)
     );
     
+    console.log('✅ Chat message stored and notification sent');
     res.json({ success: true });
 });
 
@@ -364,6 +369,36 @@ app.get('/api/chat-replies/:sessionId', (req, res) => {
         res.json({ reply: null });
     }
 });
+
+// Manual reply via Telegram command
+app.post('/api/telegram-webhook', (req, res) => {
+    const { message } = req.body;
+    
+    if (message && message.text && message.text.startsWith('/reply ')) {
+        const parts = message.text.split(' ');
+        const sessionId = parts[1];
+        const reply = parts.slice(2).join(' ');
+        
+        const messages = chatMessages.get(sessionId);
+        if (messages && messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            lastMessage.reply = reply;
+            console.log(`📱 Manual reply set for session ${sessionId}: ${reply}`);
+        }
+    }
+    
+    res.json({ ok: true });
+});
+
+// Global function to handle manual replies (for testing)
+global.handleTelegramReply = function(sessionId, reply) {
+    const messages = chatMessages.get(sessionId);
+    if (messages && messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        lastMessage.reply = reply;
+        console.log(`📱 Manual reply set: ${reply}`);
+    }
+};
 
 // Initialize and start server
 initDB().then(() => {
