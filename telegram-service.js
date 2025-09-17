@@ -1,7 +1,7 @@
 const https = require('https');
 
-const TELEGRAM_BOT_TOKEN = '8187811852:AAHAJ967MJRc0fO8Z07g1ljGhedGPW76G6o';
-const TELEGRAM_CHAT_ID = '1815102420';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8187811852:AAHAJ967MJRc0fO8Z07g1ljGhedGPW76G6o';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '1815102420';
 
 async function sendTelegramNotification(message) {
     if (!message || message.trim() === '') {
