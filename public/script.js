@@ -304,6 +304,21 @@ function openGallery(resortId) {
 }
 
 function closeGallery() {
+    // Stop all videos before closing
+    const videos = document.querySelectorAll('#galleryModal video');
+    videos.forEach(video => {
+        video.pause();
+        video.currentTime = 0;
+    });
+    
+    // Stop YouTube videos
+    const iframes = document.querySelectorAll('#galleryModal iframe');
+    iframes.forEach(iframe => {
+        const src = iframe.src;
+        iframe.src = '';
+        iframe.src = src;
+    });
+    
     document.getElementById('galleryModal').style.display = 'none';
 }
 
@@ -326,7 +341,7 @@ function updateGalleryImage() {
                 const videoId = currentItem.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
                 videoHtml = videoId ? `<iframe src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>` : '';
             } else if (currentItem.url.includes('.mp4') || currentItem.url.includes('.webm') || currentItem.url.includes('.ogg')) {
-                videoHtml = `<video controls style="width:100%;height:400px;border-radius:8px;"><source src="${currentItem.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                videoHtml = `<video controls preload="metadata" style="width:100%;height:400px;border-radius:8px;" onloadstart="this.volume=0.5"><source src="${currentItem.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
             } else {
                 videoHtml = `<div style="width:100%;height:400px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:8px;"><p>Video format not supported</p></div>`;
             }
