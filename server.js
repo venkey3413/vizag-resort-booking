@@ -223,31 +223,6 @@ app.post('/api/bookings', async (req, res) => {
             paymentDetails: paymentDetails
         };
 
-        // Send Telegram notification for new booking
-        try {
-            const bookingWithResort = {
-                id: result.lastID,
-                guest_name: guestName,
-                email: email,
-                phone: phone,
-                resort_name: resort.name,
-                check_in: checkIn,
-                check_out: checkOut,
-                guests: guests,
-                total_price: totalPrice,
-                payment_status: 'pending'
-            };
-            console.log('📋 Booking data for Telegram:', JSON.stringify(bookingWithResort, null, 2));
-            const message = formatBookingNotification(bookingWithResort);
-            if (message && message.trim()) {
-                await sendTelegramNotification(message);
-            } else {
-                console.error('❌ Generated message is empty');
-            }
-        } catch (telegramError) {
-            console.error('Telegram notification failed:', telegramError);
-        }
-        
         // Publish booking created event
         try {
             await publishEvent('resort.booking', EVENTS.BOOKING_CREATED, {
