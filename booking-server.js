@@ -5,6 +5,7 @@ const { open } = require('sqlite');
 const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-service');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { sendInvoiceEmail } = require('./email-service');
+const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 
 const app = express();
 const PORT = 3002;
@@ -77,6 +78,16 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
                 console.log(`✅ Invoice generated and email sent for booking ${id}`);
             } catch (error) {
                 console.error('❌ Invoice/Email/Backup error:', error);
+            }
+        }
+        
+        // Send Telegram notification for new paid booking
+        if (payment_status === 'paid') {
+            try {
+                const message = formatBookingNotification(booking);
+                await sendTelegramNotification(message);
+            } catch (telegramError) {
+                console.error('Telegram notification failed:', telegramError);
             }
         }
         
