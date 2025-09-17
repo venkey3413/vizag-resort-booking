@@ -288,6 +288,33 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
             [bookingId, transactionId, paymentScreenshot || '']
         );
         
+        // Send Telegram notification for payment submission
+        try {
+            const bookingDetails = await db.get(`
+                SELECT b.*, r.name as resort_name 
+                FROM bookings b 
+                JOIN resorts r ON b.resort_id = r.id 
+                WHERE b.id = ?
+            `, [bookingId]);
+            
+            if (bookingDetails) {
+                const message = `💳 PAYMENT SUBMITTED!
+
+📋 Booking ID: ${bookingDetails.id}
+👤 Guest: ${bookingDetails.guest_name}
+🏖️ Resort: ${bookingDetails.resort_name}
+💰 Amount: ₹${bookingDetails.total_price.toLocaleString()}
+🔢 UTR ID: ${transactionId}
+⚠️ Status: Pending Verification
+
+⏰ Submitted at: ${new Date().toLocaleString('en-IN')}`;
+                
+                await sendTelegramNotification(message);
+            }
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
         // Publish payment submitted event
         try {
             await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
