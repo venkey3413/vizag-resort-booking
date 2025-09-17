@@ -308,28 +308,18 @@ function openGallery(resortId) {
 }
 
 function closeGallery() {
-    // Stop all videos before closing
-    const videos = document.querySelectorAll('video');
-    videos.forEach(video => {
-        video.pause();
-        video.currentTime = 0;
-        video.load(); // Reset video completely
-    });
-    
-    // Stop YouTube videos by removing and re-adding
-    const iframes = document.querySelectorAll('iframe');
-    iframes.forEach(iframe => {
-        if (iframe.src.includes('youtube')) {
-            iframe.src = 'about:blank';
+    // Stop current video
+    const currentVideo = document.getElementById('currentVideo');
+    if (currentVideo) {
+        if (currentVideo.tagName === 'VIDEO') {
+            currentVideo.pause();
+            currentVideo.currentTime = 0;
+        } else if (currentVideo.tagName === 'IFRAME') {
+            currentVideo.src = currentVideo.src; // Reload iframe to stop
         }
-    });
+    }
     
     document.getElementById('galleryModal').style.display = 'none';
-    
-    // Clear gallery content to fully stop videos
-    setTimeout(() => {
-        document.querySelector('.gallery-images').innerHTML = '';
-    }, 100);
 }
 
 function updateGalleryImage() {
@@ -349,9 +339,9 @@ function updateGalleryImage() {
             let videoHtml = '';
             if (currentItem.url.includes('youtube.com') || currentItem.url.includes('youtu.be')) {
                 const videoId = currentItem.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-                videoHtml = videoId ? `<iframe src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>` : '';
+                videoHtml = videoId ? `<iframe id="currentVideo" src="https://www.youtube.com/embed/${videoId[1]}?enablejsapi=1" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>` : '';
             } else if (currentItem.url.includes('.mp4') || currentItem.url.includes('.webm') || currentItem.url.includes('.ogg')) {
-                videoHtml = `<video controls preload="none" style="width:100%;height:400px;border-radius:8px;" poster="" onloadstart="this.volume=0.5"><source src="${currentItem.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                videoHtml = `<video id="currentVideo" controls preload="metadata" style="width:100%;height:400px;border-radius:8px;" onloadstart="this.volume=0.5"><source src="${currentItem.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
             } else {
                 videoHtml = `<div style="width:100%;height:400px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:8px;"><p>Video format not supported</p></div>`;
             }
@@ -377,8 +367,16 @@ function setupGalleryThumbnails() {
         if (item.type === 'image') {
             return `<img src="${item.url}" class="gallery-thumbnail ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})">`;
         } else {
-            // Create video thumbnail with play icon
-            return `<div class="gallery-thumbnail video-thumb ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})" style="background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>'); background-size: 30px; background-repeat: no-repeat; background-position: center; background-color: #333;">📹</div>`;
+            // Create video thumbnail with proper play icon
+            let videoThumb = '';
+            if (item.url.includes('youtube.com') || item.url.includes('youtu.be')) {
+                const videoId = item.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+                const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId[1]}/mqdefault.jpg` : '';
+                videoThumb = `<img src="${thumbUrl}" class="gallery-thumbnail ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})" style="position:relative;"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:20px;">▶</div>`;
+            } else {
+                videoThumb = `<div class="gallery-thumbnail video-thumb ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})" style="background:#333;color:white;display:flex;align-items:center;justify-content:center;font-size:24px;">▶</div>`;
+            }
+            return videoThumb;
         }
     }).join('');
 }

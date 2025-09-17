@@ -1035,6 +1035,14 @@ footer p {
     cursor: pointer;
     opacity: 0.7;
     transition: opacity 0.3s;
+    position: relative;
+}
+
+.video-thumb::after {
+    content: '▶';
+    position: absolute;
+    color: white;
+    font-size: 20px;
 }
 
 .video-thumb.active {
