@@ -84,6 +84,15 @@ function displayResorts() {
                 <button class="book-btn" onclick="openBookingModal(${resort.id})">
                     Book Now
                 </button>
+                <div class="resort-footer">
+                    <div class="review-stars">
+                        <span class="stars">★★★★☆</span>
+                        <span class="review-text">4.2 (128 reviews)</span>
+                    </div>
+                    <div class="cancellation-policy">
+                        <span class="policy-text">Free cancellation up to 24hrs</span>
+                    </div>
+                </div>
             </div>
         </div>
     `).join('');

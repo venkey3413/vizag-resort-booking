@@ -712,6 +712,41 @@ input, select {
     transform: scale(1.05);
 }
 
+.resort-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.review-stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stars {
+    color: #ffa500;
+    font-size: 0.8rem;
+}
+
+.review-text {
+    font-size: 0.7rem;
+    color: #888;
+}
+
+.cancellation-policy {
+    text-align: right;
+}
+
+.policy-text {
+    font-size: 0.7rem;
+    color: #28a745;
+    font-weight: 500;
+}
+
 .resort-image {
     cursor: pointer;
     transition: transform 0.3s;
