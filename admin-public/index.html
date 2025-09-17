@@ -14,7 +14,7 @@
             <h1>🏨 Resort Admin Panel</h1>
             <nav>
                 <a href="https://vizagresortbooking.in">Main Site</a>
-                <a href="https://vizagresortbooking.in/bookings">Bookings</a>
+                <a href="https://vizagresortbooking.in:3002">Bookings</a>
             </nav>
         </div>
     </header>
@@ -40,17 +40,20 @@
                         <input type="number" id="price" required>
                     </div>
                     <div class="form-group">
-                        <label for="image">Main Image URL:</label>
-                        <input type="url" id="image" placeholder="https://...">
+                        <label for="image">Main Image:</label>
+                        <input type="url" id="image" placeholder="https://..." readonly>
+                        <button type="button" onclick="uploadMainImage()" class="upload-btn">📷 Upload Image</button>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="gallery">Additional Images (one per line):</label>
-                    <textarea id="gallery" rows="4" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                    <label for="gallery">Additional Images:</label>
+                    <textarea id="gallery" rows="4" placeholder="Uploaded image URLs will appear here" readonly></textarea>
+                    <button type="button" onclick="uploadGalleryImages()" class="upload-btn">🖼️ Upload Gallery Images</button>
                 </div>
                 <div class="form-group">
-                    <label for="videos">Video URLs (one per line):</label>
-                    <textarea id="videos" rows="3" placeholder="https://youtube.com/watch?v=...&#10;https://vimeo.com/..."></textarea>
+                    <label for="videos">Videos:</label>
+                    <textarea id="videos" rows="3" placeholder="Uploaded video URLs will appear here" readonly></textarea>
+                    <button type="button" onclick="uploadVideos()" class="upload-btn">🎥 Upload Videos</button>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -75,7 +78,65 @@
         </section>
     </main>
 
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // Replace with your Cloudinary cloud name
+        const CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUD_NAME';
+        
+        function uploadMainImage() {
+            cloudinary.openUploadWidget({
+                cloudName: CLOUDINARY_CLOUD_NAME,
+                uploadPreset: 'resort_images',
+                sources: ['local', 'url'],
+                multiple: false,
+                resourceType: 'image',
+                maxFileSize: 10000000,
+                cropping: true,
+                croppingAspectRatio: 16/9
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    document.getElementById('image').value = result.info.secure_url;
+                }
+            });
+        }
+        
+        function uploadGalleryImages() {
+            cloudinary.openUploadWidget({
+                cloudName: CLOUDINARY_CLOUD_NAME,
+                uploadPreset: 'resort_images',
+                sources: ['local', 'url'],
+                multiple: true,
+                resourceType: 'image',
+                maxFileSize: 10000000
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    const currentGallery = document.getElementById('gallery').value;
+                    const newUrl = result.info.secure_url;
+                    const updatedGallery = currentGallery ? currentGallery + '\n' + newUrl : newUrl;
+                    document.getElementById('gallery').value = updatedGallery;
+                }
+            });
+        }
+        
+        function uploadVideos() {
+            cloudinary.openUploadWidget({
+                cloudName: CLOUDINARY_CLOUD_NAME,
+                uploadPreset: 'resort_videos',
+                sources: ['local', 'url'],
+                multiple: true,
+                resourceType: 'video',
+                maxFileSize: 100000000
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    const currentVideos = document.getElementById('videos').value;
+                    const newUrl = result.info.secure_url;
+                    const updatedVideos = currentVideos ? currentVideos + '\n' + newUrl : newUrl;
+                    document.getElementById('videos').value = updatedVideos;
+                }
+            });
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
