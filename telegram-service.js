@@ -53,23 +53,34 @@ async function sendTelegramNotification(message) {
 }
 
 function formatBookingNotification(booking) {
-    const message = `🏨 NEW BOOKING RECEIVED!
+    try {
+        if (!booking) {
+            console.error('❌ Booking data is null or undefined');
+            return null;
+        }
+        
+        const message = `🏨 NEW BOOKING RECEIVED!
 
-📋 Booking ID: ${booking.id}
-👤 Guest: ${booking.guest_name}
-📧 Email: ${booking.email}
-📱 Phone: ${booking.phone}
-🏖️ Resort: ${booking.resort_name}
-📅 Check-in: ${booking.check_in}
-📅 Check-out: ${booking.check_out}
-👥 Guests: ${booking.guests}
-💰 Total: ₹${booking.total_price.toLocaleString()}
-💳 Status: ${booking.payment_status}
+📋 Booking ID: ${booking.id || 'N/A'}
+👤 Guest: ${booking.guest_name || 'N/A'}
+📧 Email: ${booking.email || 'N/A'}
+📱 Phone: ${booking.phone || 'N/A'}
+🏖️ Resort: ${booking.resort_name || 'N/A'}
+📅 Check-in: ${booking.check_in || 'N/A'}
+📅 Check-out: ${booking.check_out || 'N/A'}
+👥 Guests: ${booking.guests || 'N/A'}
+💰 Total: ₹${booking.total_price ? booking.total_price.toLocaleString() : 'N/A'}
+💳 Status: ${booking.payment_status || 'N/A'}
 
 ⏰ Booked at: ${new Date().toLocaleString('en-IN')}`;
-    
-    console.log('📱 Telegram message:', message);
-    return message;
+        
+        console.log('📱 Generated Telegram message length:', message.length);
+        console.log('📱 Message preview:', message.substring(0, 100) + '...');
+        return message;
+    } catch (error) {
+        console.error('❌ Error formatting booking notification:', error);
+        return null;
+    }
 }
 
 module.exports = {
