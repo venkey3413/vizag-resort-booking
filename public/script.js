@@ -411,7 +411,7 @@ function showPaymentInterface(booking) {
                 
                 <div class="payment-proof">
                     <h4>Upload Payment Proof</h4>
-                    <input type="text" id="transactionId" placeholder="Please enter your 12-digit transaction ID" maxlength="12" pattern="[0-9]{12}" required>
+                    <input type="text" id="transactionId" placeholder="Please enter your 12-digit UTR number" maxlength="12" pattern="[0-9]{12}" required>
                     <button onclick="confirmPayment(${booking.id})" class="confirm-payment-btn">
                         ✅ Confirm Payment
                     </button>
@@ -448,12 +448,12 @@ async function confirmPayment(bookingId) {
     const transactionId = document.getElementById('transactionId').value;
     
     if (!transactionId) {
-        showNotification('Please enter your 12-digit transaction ID', 'error');
+        showNotification('Please enter your 12-digit UTR number', 'error');
         return;
     }
     
     if (!/^[0-9]{12}$/.test(transactionId)) {
-        showNotification('Transaction ID must be exactly 12 digits', 'error');
+        showNotification('UTR number must be exactly 12 digits', 'error');
         return;
     }
     
