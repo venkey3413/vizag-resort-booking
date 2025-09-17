@@ -81,16 +81,6 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
             }
         }
         
-        // Send Telegram notification for new paid booking
-        if (payment_status === 'paid') {
-            try {
-                const message = formatBookingNotification(booking);
-                await sendTelegramNotification(message);
-            } catch (telegramError) {
-                console.error('Telegram notification failed:', telegramError);
-            }
-        }
-        
         // Publish payment updated event
         try {
             await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
