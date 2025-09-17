@@ -10,10 +10,13 @@ async function sendTelegramNotification(message) {
     }
     
     return new Promise((resolve, reject) => {
-        const data = JSON.stringify({
+        const payload = {
             chat_id: TELEGRAM_CHAT_ID,
-            text: message
-        });
+            text: message.toString()
+        };
+        
+        const data = JSON.stringify(payload);
+        console.log('📤 Sending to Telegram:', data);
 
         const options = {
             hostname: 'api.telegram.org',
@@ -22,7 +25,7 @@ async function sendTelegramNotification(message) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Content-Length': data.length
+                'Content-Length': Buffer.byteLength(data)
             }
         };
 
