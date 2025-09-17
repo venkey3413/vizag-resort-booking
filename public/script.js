@@ -86,11 +86,17 @@ function displayResorts() {
                 </button>
                 <div class="resort-footer">
                     <div class="review-stars">
-                        <span class="stars">★★★★☆</span>
-                        <span class="review-text">4.2 (128 reviews)</span>
+                        <div class="rating-container" data-resort-id="${resort.id}">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                        <span class="review-text">Rate this resort</span>
                     </div>
                     <div class="cancellation-policy">
-                        <span class="policy-text">Free cancellation up to 24hrs</span>
+                        <a href="Booking cancellation_policy.pdf" target="_blank" class="policy-text">Cancellation Policy</a>
                     </div>
                 </div>
             </div>
@@ -483,4 +489,82 @@ function showNotification(message, type) {
     setTimeout(() => {
         notification.remove();
     }, 5000);
+}
+
+// Rating functionality
+function setupRatingStars() {
+    document.querySelectorAll('.rating-container').forEach(container => {
+        const stars = container.querySelectorAll('.star');
+        
+        stars.forEach((star, index) => {
+            star.addEventListener('mouseenter', () => {
+                highlightStars(stars, index + 1);
+            });
+            
+            star.addEventListener('mouseleave', () => {
+                const rating = container.dataset.userRating || 0;
+                highlightStars(stars, rating);
+            });
+            
+            star.addEventListener('click', () => {
+                const rating = index + 1;
+                container.dataset.userRating = rating;
+                highlightStars(stars, rating);
+                showNotification(`You rated this resort ${rating} star${rating > 1 ? 's' : ''}!`, 'success');
+            });
+        });
+    });
+}
+
+function highlightStars(stars, rating) {
+    stars.forEach((star, index) => {
+        star.textContent = index < rating ? '★' : '☆';
+    });
+}
+
+// Call setup after resorts are displayed
+function displayResorts() {
+    const grid = document.getElementById('resortsGrid');
+    grid.innerHTML = resorts.map(resort => `
+        <div class="resort-card">
+            <div class="resort-gallery">
+                <img src="${resort.image}" alt="${resort.name}" class="resort-image main-image">
+                ${(resort.gallery || resort.videos) ? `
+                    <button class="view-more-btn" onclick="openGallery(${resort.id})">
+                        📸 View More
+                    </button>
+                ` : ''}
+            </div>
+            <div class="resort-info">
+                <h3>${resort.name}</h3>
+                <p class="resort-location">
+                    📍 ${resort.location}
+                    ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="view-map-btn">🗺️ View Map</a>` : ''}
+                </p>
+                <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
+                <p class="resort-description">${resort.description}</p>
+                <button class="book-btn" onclick="openBookingModal(${resort.id})">
+                    Book Now
+                </button>
+                <div class="resort-footer">
+                    <div class="review-stars">
+                        <div class="rating-container" data-resort-id="${resort.id}">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                        <span class="review-text">Rate this resort</span>
+                    </div>
+                    <div class="cancellation-policy">
+                        <a href="Booking cancellation_policy.pdf" target="_blank" class="policy-text">Cancellation Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Setup rating functionality after DOM is updated
+    setTimeout(setupRatingStars, 100);
 }

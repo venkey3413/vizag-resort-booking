@@ -727,14 +727,26 @@ input, select {
     gap: 4px;
 }
 
-.stars {
+.rating-container {
+    display: flex;
+    gap: 2px;
+}
+
+.star {
     color: #ffa500;
     font-size: 0.8rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star:hover {
+    color: #ff8c00;
 }
 
 .review-text {
     font-size: 0.7rem;
     color: #888;
+    margin-left: 5px;
 }
 
 .cancellation-policy {
@@ -743,8 +755,14 @@ input, select {
 
 .policy-text {
     font-size: 0.7rem;
-    color: #28a745;
+    color: #007bff;
+    text-decoration: none;
     font-weight: 500;
+}
+
+.policy-text:hover {
+    text-decoration: underline;
+    color: #0056b3;
 }
 
 .resort-image {
