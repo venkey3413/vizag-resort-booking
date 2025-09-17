@@ -1,9 +1,15 @@
 const https = require('https');
+require('dotenv').config();
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8187811852:AAHAJ967MJRc0fO8Z07g1ljGhedGPW76G6o';
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '1815102420';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 async function sendTelegramNotification(message) {
+    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+        console.error('❌ Telegram credentials not configured');
+        return false;
+    }
+    
     if (!message || message.trim() === '') {
         console.error('❌ Empty message, skipping Telegram notification');
         return false;
