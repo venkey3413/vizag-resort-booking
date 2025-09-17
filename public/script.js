@@ -322,6 +322,37 @@ function closeGallery() {
     document.getElementById('galleryModal').style.display = 'none';
 }
 
+function showBuffering() {
+    const spinner = document.getElementById('bufferingSpinner');
+    if (spinner) spinner.style.display = 'flex';
+}
+
+function hideBuffering() {
+    const spinner = document.getElementById('bufferingSpinner');
+    if (spinner) spinner.style.display = 'none';
+    
+    // Show mobile pause button on mobile devices
+    if (window.innerWidth <= 768) {
+        const pauseBtn = document.getElementById('mobilePauseBtn');
+        if (pauseBtn) pauseBtn.style.display = 'block';
+    }
+}
+
+function toggleVideoPlayback() {
+    const video = document.getElementById('currentVideo');
+    const pauseBtn = document.getElementById('mobilePauseBtn');
+    
+    if (video && video.tagName === 'VIDEO') {
+        if (video.paused) {
+            video.play();
+            pauseBtn.innerHTML = '⏸️';
+        } else {
+            video.pause();
+            pauseBtn.innerHTML = '▶️';
+        }
+    }
+}
+
 function updateGalleryImage() {
     if (currentGalleryImages.length > 0) {
         const currentItem = currentGalleryImages[currentGalleryIndex];
@@ -341,7 +372,23 @@ function updateGalleryImage() {
                 const videoId = currentItem.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
                 videoHtml = videoId ? `<iframe id="currentVideo" src="https://www.youtube.com/embed/${videoId[1]}?enablejsapi=1" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>` : '';
             } else if (currentItem.url.includes('.mp4') || currentItem.url.includes('.webm') || currentItem.url.includes('.ogg')) {
-                videoHtml = `<video id="currentVideo" controls preload="metadata" style="width:100%;height:400px;border-radius:8px;" onloadstart="this.volume=0.5"><source src="${currentItem.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                videoHtml = `
+                    <div class="video-container" style="position:relative;width:100%;height:400px;">
+                        <video id="currentVideo" controls preload="metadata" style="width:100%;height:100%;border-radius:8px;" 
+                               onloadstart="this.volume=0.5" 
+                               onloadstart="showBuffering()" 
+                               oncanplay="hideBuffering()" 
+                               onwaiting="showBuffering()" 
+                               onplaying="hideBuffering()">
+                            <source src="${currentItem.url}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div id="bufferingSpinner" class="buffering-spinner" style="display:none;">
+                            <div class="spinner"></div>
+                            <p>Loading...</p>
+                        </div>
+                        <button id="mobilePauseBtn" class="mobile-pause-btn" onclick="toggleVideoPlayback()" style="display:none;">⏸️</button>
+                    </div>`;
             } else {
                 videoHtml = `<div style="width:100%;height:400px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:8px;"><p>Video format not supported</p></div>`;
             }
@@ -371,10 +418,10 @@ function setupGalleryThumbnails() {
             let videoThumb = '';
             if (item.url.includes('youtube.com') || item.url.includes('youtu.be')) {
                 const videoId = item.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-                const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId[1]}/mqdefault.jpg` : '';
-                videoThumb = `<img src="${thumbUrl}" class="gallery-thumbnail ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})" style="position:relative;"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:20px;">▶</div>`;
+                const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId[1]}/hqdefault.jpg` : '';
+                videoThumb = `<div class="gallery-thumbnail video-thumbnail ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})" style="background-image:url('${thumbUrl}');background-size:cover;background-position:center;position:relative;"><div class="play-overlay">▶</div></div>`;
             } else {
-                videoThumb = `<div class="gallery-thumbnail video-thumb ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})" style="background:#333;color:white;display:flex;align-items:center;justify-content:center;font-size:24px;">▶</div>`;
+                videoThumb = `<div class="gallery-thumbnail video-thumb ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})" style="background:#333;color:white;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;"><div class="play-overlay">▶</div></div>`;
             }
             return videoThumb;
         }
