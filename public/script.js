@@ -579,11 +579,27 @@ function sendChatMessage() {
     addChatMessage(message, 'user');
     input.value = '';
     
-    // Simple bot responses
+    // Send message to admin and show typing indicator
+    addChatMessage('Admin is typing...', 'bot');
+    
+    // Send to admin via API
+    fetch('/api/chat-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            message: message,
+            timestamp: new Date().toISOString(),
+            sessionId: getSessionId()
+        })
+    }).catch(err => console.error('Chat error:', err));
+    
+    // Auto-response after 30 seconds if no manual reply
     setTimeout(() => {
-        const response = getBotResponse(message);
-        addChatMessage(response, 'bot');
-    }, 1000);
+        const lastMessage = document.querySelector('.bot-message:last-child');
+        if (lastMessage && lastMessage.textContent === 'Admin is typing...') {
+            lastMessage.textContent = getBotResponse(message);
+        }
+    }, 30000);
 }
 
 function addChatMessage(message, type) {
@@ -618,6 +634,31 @@ function handleChatEnter(event) {
         sendChatMessage();
     }
 }
+
+function getSessionId() {
+    let sessionId = localStorage.getItem('chatSessionId');
+    if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('chatSessionId', sessionId);
+    }
+    return sessionId;
+}
+
+// Listen for admin replies
+setInterval(() => {
+    fetch(`/api/chat-replies/${getSessionId()}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.reply) {
+                // Replace typing message with admin reply
+                const lastMessage = document.querySelector('.bot-message:last-child');
+                if (lastMessage && lastMessage.textContent === 'Admin is typing...') {
+                    lastMessage.textContent = data.reply;
+                }
+            }
+        })
+        .catch(err => console.error('Reply check error:', err));
+}, 3000);
 
 // Rating functionality
 function setupRatingStars() {

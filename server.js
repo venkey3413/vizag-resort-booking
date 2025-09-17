@@ -5,6 +5,9 @@ const { open } = require('sqlite');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { generatePaymentDetails } = require('./upi-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
+
+// Chat message storage
+const chatMessages = new Map();
 const path = require('path');
 
 const app = express();
@@ -325,6 +328,40 @@ app.get('/api/bookings', async (req, res) => {
     } catch (error) {
         console.error('Booking fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch bookings' });
+    }
+});
+
+// Chat message endpoint
+app.post('/api/chat-message', (req, res) => {
+    const { message, timestamp, sessionId } = req.body;
+    
+    // Store message
+    if (!chatMessages.has(sessionId)) {
+        chatMessages.set(sessionId, []);
+    }
+    chatMessages.get(sessionId).push({ message, timestamp, replied: false });
+    
+    // Send to Telegram for admin notification
+    const telegramMessage = `💬 NEW CHAT MESSAGE\n\nSession: ${sessionId}\nMessage: ${message}\nTime: ${new Date(timestamp).toLocaleString('en-IN')}\n\nReply with: /reply ${sessionId} your_response`;
+    
+    sendTelegramNotification(telegramMessage).catch(err => 
+        console.error('Telegram chat notification failed:', err)
+    );
+    
+    res.json({ success: true });
+});
+
+// Chat reply endpoint
+app.get('/api/chat-replies/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    const messages = chatMessages.get(sessionId) || [];
+    const unread = messages.find(msg => !msg.replied && msg.reply);
+    
+    if (unread) {
+        unread.replied = true;
+        res.json({ reply: unread.reply });
+    } else {
+        res.json({ reply: null });
     }
 });
 
