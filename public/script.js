@@ -593,13 +593,7 @@ function sendChatMessage() {
         })
     }).catch(err => console.error('Chat error:', err));
     
-    // Auto-response after 30 seconds if no manual reply
-    setTimeout(() => {
-        const lastMessage = document.querySelector('.bot-message:last-child');
-        if (lastMessage && lastMessage.textContent === 'Admin is typing...') {
-            lastMessage.textContent = getBotResponse(message);
-        }
-    }, 30000);
+    // No auto-response - only manual replies
 }
 
 function addChatMessage(message, type) {
