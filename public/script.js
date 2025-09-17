@@ -251,11 +251,27 @@ function openGallery(resortId) {
     if (!resort) return;
     
     currentResortId = resortId;
-    currentGalleryImages = [resort.image];
+    currentGalleryImages = [];
     
+    // Add main image
+    if (resort.image) {
+        currentGalleryImages.push({type: 'image', url: resort.image});
+    }
+    
+    // Add gallery images
     if (resort.gallery) {
         const additionalImages = resort.gallery.split('\n').filter(img => img.trim());
-        currentGalleryImages = currentGalleryImages.concat(additionalImages);
+        additionalImages.forEach(img => {
+            currentGalleryImages.push({type: 'image', url: img});
+        });
+    }
+    
+    // Add videos
+    if (resort.videos) {
+        const videoUrls = resort.videos.split('\n').filter(url => url.trim());
+        videoUrls.forEach(video => {
+            currentGalleryImages.push({type: 'video', url: video});
+        });
     }
     
     currentGalleryIndex = 0;
@@ -269,7 +285,6 @@ function openGallery(resortId) {
     
     updateGalleryImage();
     setupGalleryThumbnails();
-    setupGalleryVideos(resort.videos);
     
     document.getElementById('galleryModal').style.display = 'block';
 }
@@ -280,34 +295,53 @@ function closeGallery() {
 
 function updateGalleryImage() {
     if (currentGalleryImages.length > 0) {
-        document.getElementById('galleryMainImage').src = currentGalleryImages[currentGalleryIndex];
+        const currentItem = currentGalleryImages[currentGalleryIndex];
+        const container = document.querySelector('.gallery-images');
+        
+        if (currentItem.type === 'image') {
+            container.innerHTML = `
+                <img id="galleryMainImage" src="${currentItem.url}" alt="">
+                <div class="gallery-controls">
+                    <button id="galleryPrev">&lt;</button>
+                    <button id="galleryNext">&gt;</button>
+                </div>
+            `;
+        } else if (currentItem.type === 'video') {
+            let videoHtml = '';
+            if (currentItem.url.includes('youtube.com') || currentItem.url.includes('youtu.be')) {
+                const videoId = currentItem.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+                videoHtml = videoId ? `<iframe src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="width:100%;height:400px;"></iframe>` : '';
+            } else {
+                videoHtml = `<video controls style="width:100%;height:400px;"><source src="${currentItem.url}" type="video/mp4"></video>`;
+            }
+            
+            container.innerHTML = `
+                ${videoHtml}
+                <div class="gallery-controls">
+                    <button id="galleryPrev">&lt;</button>
+                    <button id="galleryNext">&gt;</button>
+                </div>
+            `;
+        }
+        
+        // Re-attach event listeners
+        document.getElementById('galleryPrev').onclick = () => prevImage(currentResortId);
+        document.getElementById('galleryNext').onclick = () => nextImage(currentResortId);
     }
 }
 
 function setupGalleryThumbnails() {
     const thumbnailsContainer = document.getElementById('galleryThumbnails');
-    thumbnailsContainer.innerHTML = currentGalleryImages.map((img, index) => `
-        <img src="${img}" class="gallery-thumbnail ${index === currentGalleryIndex ? 'active' : ''}" 
-             onclick="setGalleryImage(${index})">
-    `).join('');
-}
-
-function setupGalleryVideos(videos) {
-    const videosContainer = document.getElementById('galleryVideos');
-    if (!videos) {
-        videosContainer.innerHTML = '';
-        return;
-    }
-    
-    const videoUrls = videos.split('\n').filter(url => url.trim());
-    videosContainer.innerHTML = videoUrls.map(url => {
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-            return videoId ? `<iframe src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen></iframe>` : '';
+    thumbnailsContainer.innerHTML = currentGalleryImages.map((item, index) => {
+        if (item.type === 'image') {
+            return `<img src="${item.url}" class="gallery-thumbnail ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})">`;
+        } else {
+            return `<div class="gallery-thumbnail video-thumb ${index === currentGalleryIndex ? 'active' : ''}" onclick="setGalleryImage(${index})">🎥</div>`;
         }
-        return `<video controls><source src="${url}" type="video/mp4"></video>`;
     }).join('');
 }
+
+// Remove separate video section - videos now in slideshow
 
 function setGalleryImage(index) {
     currentGalleryIndex = index;
