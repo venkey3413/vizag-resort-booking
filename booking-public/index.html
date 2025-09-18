@@ -22,8 +22,31 @@
     <main class="container">
         <section class="bookings-section">
             <h2>All Bookings</h2>
+            <div class="admin-actions">
+                <button onclick="showAddResortForm()" class="add-resort-btn">+ Add Resort</button>
+            </div>
             <div id="bookingsGrid" class="bookings-grid">
                 <!-- Bookings will be loaded here -->
+            </div>
+            
+            <!-- Add Resort Modal -->
+            <div id="addResortModal" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeAddResortModal()">&times;</span>
+                    <h3>Add New Resort</h3>
+                    <form id="addResortForm">
+                        <input type="text" id="resortName" placeholder="Resort Name" required>
+                        <input type="text" id="resortLocation" placeholder="Location" required>
+                        <input type="number" id="resortPrice" placeholder="Price per night" required>
+                        <textarea id="resortDescription" placeholder="Description" required></textarea>
+                        <textarea id="resortAmenities" placeholder="Amenities (one per line)\nWiFi\nSwimming Pool\nRestaurant" rows="4"></textarea>
+                        <input type="url" id="resortImage" placeholder="Main image URL" required>
+                        <textarea id="resortGallery" placeholder="Gallery URLs (one per line)" rows="3"></textarea>
+                        <textarea id="resortVideos" placeholder="Video URLs (one per line)" rows="2"></textarea>
+                        <input type="url" id="resortMapLink" placeholder="Google Maps link">
+                        <button type="submit">Add Resort</button>
+                    </form>
+                </div>
             </div>
         </section>
     </main>
