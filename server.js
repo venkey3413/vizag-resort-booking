@@ -36,6 +36,13 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add amenities column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE resorts ADD COLUMN amenities TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Add payment_status column if it doesn't exist
     try {
         await db.run('ALTER TABLE bookings ADD COLUMN payment_status TEXT DEFAULT "pending"');

@@ -618,6 +618,16 @@ function displayResorts() {
                 </p>
                 <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
                 <p class="resort-description">${resort.description}</p>
+                ${resort.amenities ? `
+                    <div class="resort-amenities">
+                        <h4>🏨 Amenities:</h4>
+                        <div class="amenities-list">
+                            ${resort.amenities.split('\n').filter(a => a.trim()).map(amenity => 
+                                `<span class="amenity-tag">${amenity.trim()}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
                 <button class="book-btn" onclick="openBookingModal(${resort.id})">
                     Book Now
                 </button>
