@@ -168,23 +168,18 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(400).json({ error: 'Check-out date must be at least one day after check-in date' });
         }
         
-        // Check for payment method specific booking limits per resort per day
-        const todayStr = new Date().toISOString().split('T')[0];
-        const existingBookings = await db.get(`
+        // Check for unpaid bookings for this resort today (max 2 total)
+        const unpaidBookingsToday = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
-            AND (email = ? OR phone = ?) 
             AND DATE(booking_date) = ?
             AND payment_status != 'paid'
-        `, [resortId, email, phone, todayStr]);
+        `, [resortId, todayStr]);
         
-        // For UPI: max 2 bookings, For Card: max 1 booking per resort per day
-        const maxBookings = 2; // This will be checked later based on payment method
-        
-        if (existingBookings.count >= maxBookings) {
+        if (unpaidBookingsToday.count >= 2) {
             return res.status(400).json({ 
-                error: 'Maximum booking limit reached for this resort today. Please try a different resort or date.' 
+                error: 'Maximum 2 pending bookings allowed per resort per day. Please wait for verification or choose another resort.' 
             });
         }
 
@@ -194,22 +189,18 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Check for existing paid bookings on the same dates
-        const conflictingBooking = await db.get(`
+        // Check if resort is already booked (any paid booking) for today
+        const paidBookingToday = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
             AND payment_status = 'paid'
-            AND (
-                (check_in <= ? AND check_out > ?) OR
-                (check_in < ? AND check_out >= ?) OR
-                (check_in >= ? AND check_out <= ?)
-            )
-        `, [resortId, checkIn, checkIn, checkOut, checkOut, checkIn, checkOut]);
+            AND DATE(booking_date) = ?
+        `, [resortId, todayStr]);
         
-        if (conflictingBooking.count > 0) {
+        if (paidBookingToday.count > 0) {
             return res.status(400).json({ 
-                error: 'Resort is not available for the selected dates. Please choose different dates.' 
+                error: 'This resort is already booked for today. Please choose a different resort or date.' 
             });
         }
 
@@ -544,21 +535,33 @@ app.post('/api/check-card-limit', async (req, res) => {
         
         const todayStr = new Date().toISOString().split('T')[0];
         
-        // Check existing card payments for same resort, email/phone, today (unpaid only)
-        const existingCardBookings = await db.get(`
+        // Check if resort already has paid booking today
+        const paidBookingToday = await db.get(`
             SELECT COUNT(*) as count 
-            FROM bookings b
-            JOIN payment_proofs p ON b.id = p.booking_id
-            WHERE b.resort_id = ? 
-            AND (b.email = ? OR b.phone = ?) 
-            AND DATE(b.booking_date) = ?
-            AND b.payment_status != 'paid'
-            AND p.transaction_id LIKE 'pay_%'
-        `, [booking.resort_id, booking.email, booking.phone, todayStr]);
+            FROM bookings 
+            WHERE resort_id = ? 
+            AND payment_status = 'paid'
+            AND DATE(booking_date) = ?
+        `, [booking.resort_id, todayStr]);
         
-        if (existingCardBookings.count >= 1) {
+        if (paidBookingToday.count > 0) {
             return res.status(400).json({ 
-                error: 'Only 1 card payment allowed per resort per day. Use UPI for additional bookings.' 
+                error: 'This resort is already booked for today. Please choose a different resort.' 
+            });
+        }
+        
+        // Check unpaid bookings limit (max 2 total)
+        const unpaidBookingsToday = await db.get(`
+            SELECT COUNT(*) as count 
+            FROM bookings 
+            WHERE resort_id = ? 
+            AND DATE(booking_date) = ?
+            AND payment_status != 'paid'
+        `, [booking.resort_id, todayStr]);
+        
+        if (unpaidBookingsToday.count >= 2) {
+            return res.status(400).json({ 
+                error: 'Maximum 2 pending bookings allowed per resort per day. Please wait for verification.' 
             });
         }
         
