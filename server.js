@@ -439,6 +439,11 @@ app.post('/api/eventbridge-notify', (req, res) => {
     res.json({ success: true });
 });
 
+// Endpoint to get Razorpay key for frontend
+app.get('/api/razorpay-key', (req, res) => {
+    res.json({ key: process.env.RAZORPAY_KEY_ID });
+});
+
 // Initialize and start server
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {

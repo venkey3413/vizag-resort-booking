@@ -627,35 +627,43 @@ function showPaymentMethod(method) {
     event.target.classList.add('active');
 }
 
-function payWithRazorpay(bookingId, amount, name, email, phone) {
-    const options = {
-        key: 'rzp_test_YOUR_KEY_HERE', // Replace with your Razorpay key
-        amount: amount * 100, // Amount in paise
-        currency: 'INR',
-        name: 'Vizag Resorts',
-        description: 'Resort Booking Payment',
-        handler: function(response) {
-            // Payment successful
-            confirmRazorpayPayment(bookingId, response.razorpay_payment_id);
-        },
-        prefill: {
-            name: name,
-            email: email,
-            contact: phone
-        },
-        theme: {
-            color: '#667eea'
-        },
-        method: {
-            upi: false,
-            wallet: false,
-            netbanking: false,
-            card: true
-        }
-    };
-    
-    const rzp = new Razorpay(options);
-    rzp.open();
+async function payWithRazorpay(bookingId, amount, name, email, phone) {
+    try {
+        // Get Razorpay key from server
+        const keyResponse = await fetch('/api/razorpay-key');
+        const { key } = await keyResponse.json();
+        
+        const options = {
+            key: key,
+            amount: amount * 100, // Amount in paise
+            currency: 'INR',
+            name: 'Vizag Resorts',
+            description: 'Resort Booking Payment',
+            handler: function(response) {
+                // Payment successful
+                confirmRazorpayPayment(bookingId, response.razorpay_payment_id);
+            },
+            prefill: {
+                name: name,
+                email: email,
+                contact: phone
+            },
+            theme: {
+                color: '#667eea'
+            },
+            method: {
+                upi: false,
+                wallet: false,
+                netbanking: false,
+                card: true
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+    } catch (error) {
+        showNotification('Payment system error. Please try UPI payment.', 'error');
+    }
 }
 
 async function confirmRazorpayPayment(bookingId, paymentId) {
