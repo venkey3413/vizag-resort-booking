@@ -61,6 +61,7 @@ async function initDB() {
     try {
         await db.run('ALTER TABLE bookings ADD COLUMN base_price INTEGER');
         await db.run('ALTER TABLE bookings ADD COLUMN platform_fee INTEGER');
+        await db.run('ALTER TABLE bookings ADD COLUMN transaction_fee INTEGER DEFAULT 0');
     } catch (error) {
         // Columns already exist, ignore error
     }
@@ -268,16 +269,21 @@ app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
         const bookingId = req.params.id;
         const { paymentId, cardLastFour } = req.body;
         
-        // Store card payment proof (similar to UPI)
+        // Get booking details to calculate transaction fee
+        const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [bookingId]);
+        const transactionFee = Math.round(booking.total_price * 0.015);
+        const totalCardAmount = booking.total_price + transactionFee;
+        
+        // Store card payment proof with transaction fee
         await db.run(`
             INSERT INTO payment_proofs (booking_id, transaction_id, card_last_four, created_at)
             VALUES (?, ?, ?, datetime('now'))
         `, [bookingId, paymentId, cardLastFour]);
         
-        // Update booking status to pending verification (like UPI)
+        // Update booking with transaction fee for card payments
         await db.run(
-            'UPDATE bookings SET status = ?, transaction_id = ? WHERE id = ?',
-            ['pending_verification', paymentId, bookingId]
+            'UPDATE bookings SET status = ?, transaction_id = ?, transaction_fee = ? WHERE id = ?',
+            ['pending_verification', paymentId, transactionFee, bookingId]
         );
         
         // Get booking details for notification
@@ -296,7 +302,9 @@ app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
 📋 Booking ID: ${bookingDetails.id}
 👤 Guest: ${bookingDetails.guest_name}
 🏨 Resort: ${bookingDetails.resort_name}
-💰 Amount: ₹${bookingDetails.total_price.toLocaleString()}
+💰 Base Amount: ₹${bookingDetails.total_price.toLocaleString()}
+💳 Transaction Fee: ₹${transactionFee.toLocaleString()}
+💰 Total Paid: ₹${totalCardAmount.toLocaleString()}
 🔢 Payment ID: ${paymentId}
 💳 Card Last 4: ****${cardLastFour}
 ⚠️ Status: Pending Verification

@@ -547,10 +547,16 @@ function showPaymentInterface(booking) {
                 
                 <div id="card-payment" class="payment-method">
                     <div class="card-section">
-                        <p><strong>Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
+                        <div class="card-pricing">
+                            <p><strong>Base Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
+                            <p><strong>Transaction Fee (1.5%):</strong> ₹${Math.round((booking.totalPrice || 0) * 0.015).toLocaleString()}</p>
+                            <p style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 5px;">
+                                <strong>Total Card Payment:</strong> ₹${((booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)).toLocaleString()}
+                            </p>
+                        </div>
                         <p>Pay securely with Debit/Credit Card</p>
-                        <button onclick="payWithRazorpay(${booking.id}, ${booking.totalPrice || 0}, '${booking.guestName}', '${booking.email}', '${booking.phone}')" class="razorpay-btn">
-                            💳 Pay with Card
+                        <button onclick="payWithRazorpay(${booking.id}, ${(booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)}, '${booking.guestName}', '${booking.email}', '${booking.phone}')" class="razorpay-btn">
+                            💳 Pay ₹${((booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)).toLocaleString()} with Card
                         </button>
                     </div>
                 </div>
@@ -677,23 +683,49 @@ function showCardConfirmation(bookingId, paymentId) {
         <div class="payment-content">
             <h2>💳 Confirm Card Payment</h2>
             <div class="card-confirmation">
-                <p>✅ Payment successful via Razorpay!</p>
-                <p><strong>Payment ID:</strong> ${paymentId}</p>
-                <p>Please enter the last 4 digits of your card to confirm:</p>
+                <div class="success-message">
+                    <p>✅ <strong>Payment Successful!</strong></p>
+                    <p>Payment ID: <code>${paymentId}</code></p>
+                </div>
                 
-                <input type="text" id="cardLastFour" placeholder="Last 4 digits of card" maxlength="4" pattern="[0-9]{4}" required>
-                <button onclick="confirmCardPayment('${bookingId}', '${paymentId}')" class="confirm-payment-btn">
-                    ✅ Confirm Card Payment
-                </button>
+                <div class="confirmation-step">
+                    <h4>Final Step: Verify Your Card</h4>
+                    <p>Enter the last 4 digits of the card you used for payment:</p>
+                    
+                    <div class="card-input-group">
+                        <span class="card-prefix">****</span>
+                        <input type="text" id="cardLastFour" placeholder="1234" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" required>
+                    </div>
+                    
+                    <button onclick="confirmCardPayment('${bookingId}', '${paymentId}')" class="confirm-payment-btn">
+                        ✅ Confirm Booking
+                    </button>
+                </div>
             </div>
             
             <div class="payment-actions">
-                <button onclick="closeCardConfirmation()" class="close-payment-btn">Close</button>
+                <button onclick="closeCardConfirmation()" class="close-payment-btn">Cancel</button>
             </div>
         </div>
     `;
     
     document.body.appendChild(confirmModal);
+    
+    // Auto-focus on input and add validation
+    const input = document.getElementById('cardLastFour');
+    input.focus();
+    
+    // Only allow numbers
+    input.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+    
+    // Submit on Enter key
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && e.target.value.length === 4) {
+            confirmCardPayment(bookingId, paymentId);
+        }
+    });
 }
 
 function closeCardConfirmation() {
@@ -703,11 +735,25 @@ function closeCardConfirmation() {
 
 async function confirmCardPayment(bookingId, paymentId) {
     const cardLastFour = document.getElementById('cardLastFour').value;
+    const submitBtn = document.querySelector('.confirm-payment-btn');
     
-    if (!cardLastFour || !/^[0-9]{4}$/.test(cardLastFour)) {
+    // Validation
+    if (!cardLastFour) {
         showNotification('Please enter the last 4 digits of your card', 'error');
+        document.getElementById('cardLastFour').focus();
         return;
     }
+    
+    if (!/^[0-9]{4}$/.test(cardLastFour)) {
+        showNotification('Please enter exactly 4 digits', 'error');
+        document.getElementById('cardLastFour').focus();
+        return;
+    }
+    
+    // Disable button during submission
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Confirming...';
+    submitBtn.disabled = true;
     
     try {
         const response = await fetch(`/api/bookings/${bookingId}/card-payment-proof`, {
@@ -725,6 +771,9 @@ async function confirmCardPayment(bookingId, paymentId) {
         }
     } catch (error) {
         showNotification('Network error. Please try again.', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
