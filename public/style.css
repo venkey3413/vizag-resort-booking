@@ -1118,33 +1118,109 @@ footer p {
     }
 }
 
-/* Amenities Styles */
+/* Modern Amenities Styles */
 .resort-amenities {
-    margin: 15px 0;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    margin: 20px 0;
+    padding: 18px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border-left: 4px solid #007bff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.resort-amenities:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 
 .resort-amenities h4 {
-    margin: 0 0 8px 0;
-    color: #333;
-    font-size: 0.9rem;
+    margin: 0 0 15px 0;
+    color: #495057;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .amenities-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 10px;
+    margin-top: 12px;
 }
 
 .amenity-tag {
-    background: #27ae60;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     color: white;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
     white-space: nowrap;
+    box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: default;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.amenity-tag:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+}
+
+.amenity-tag:nth-child(even) {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+}
+
+.amenity-tag:nth-child(even):hover {
+    background: linear-gradient(135deg, #0056b3 0%, #520dc2 100%);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+}
+
+.amenity-tag:nth-child(3n) {
+    background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+    box-shadow: 0 3px 8px rgba(253, 126, 20, 0.3);
+}
+
+.amenity-tag:nth-child(3n):hover {
+    background: linear-gradient(135deg, #dc6502 0%, #c2185b 100%);
+    box-shadow: 0 6px 15px rgba(253, 126, 20, 0.4);
+}
+
+.amenity-tag:nth-child(4n) {
+    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    box-shadow: 0 3px 8px rgba(111, 66, 193, 0.3);
+}
+
+.amenity-tag:nth-child(4n):hover {
+    background: linear-gradient(135deg, #59359a 0%, #c2185b 100%);
+    box-shadow: 0 6px 15px rgba(111, 66, 193, 0.4);
+}
+
+@media (max-width: 768px) {
+    .resort-amenities {
+        margin: 15px 0;
+        padding: 15px;
+    }
+    
+    .amenities-list {
+        gap: 8px;
+    }
+    
+    .amenity-tag {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .resort-amenities h4 {
+        font-size: 1rem;
+    }
 }
 
 .video-thumb.active {
