@@ -588,7 +588,7 @@ async function confirmPayment(bookingId) {
         });
         
         if (response.ok) {
-            showNotification('Your booking payment is being verified. You will be notified through email.', 'success');
+            showNotification('Your booking payment is being verified. You will be notified through email and WhatsApp.', 'success');
             closePaymentModal();
         } else {
             const error = await response.json();
@@ -607,9 +607,12 @@ function showNotification(message, type) {
     
     document.body.appendChild(notification);
     
+    // Longer duration for success messages, especially payment confirmations
+    const duration = type === 'success' ? 8000 : 5000;
+    
     setTimeout(() => {
         notification.remove();
-    }, 5000);
+    }, duration);
 }
 
 
