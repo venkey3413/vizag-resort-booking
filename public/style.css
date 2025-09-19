@@ -680,6 +680,68 @@ input, select {
     background: #5a6268;
 }
 
+/* Payment Method Tabs */
+.payment-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.payment-tab {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    background: #f8f9fa;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.payment-tab.active {
+    background: #667eea;
+    color: white;
+    border-bottom: 3px solid #667eea;
+}
+
+.payment-tab:hover {
+    background: #e9ecef;
+}
+
+.payment-tab.active:hover {
+    background: #5a6fd8;
+}
+
+.payment-method {
+    display: none;
+}
+
+.payment-method.active {
+    display: block;
+}
+
+.razorpay-btn {
+    background: #667eea;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.razorpay-btn:hover {
+    background: #5a6fd8;
+}
+
+.card-section {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
 @media (max-width: 768px) {
     .payment-modal {
         padding: 10px 0;

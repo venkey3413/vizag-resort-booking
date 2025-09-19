@@ -518,24 +518,41 @@ function showPaymentInterface(booking) {
                 <p><strong>Reference:</strong> ${booking.bookingReference}</p>
             </div>
             
-            <div class="upi-payment">
-                <h3>🔗 UPI Payment</h3>
-                <div class="qr-section">
-                    <img src="qr-code.png.jpeg" alt="UPI QR Code" class="qr-code" onload="console.log('QR loaded')" onerror="console.error('QR failed to load')">
-                    <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
-                    <p><strong>Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
+            <div class="payment-methods">
+                <div class="payment-tabs">
+                    <button class="payment-tab active" onclick="showPaymentMethod('upi')">🔗 UPI Payment</button>
+                    <button class="payment-tab" onclick="showPaymentMethod('card')">💳 Card Payment</button>
                 </div>
                 
-                <div class="payment-instructions">
-                    ${(booking.paymentDetails?.instructions || ['1. Scan QR code', '2. Pay amount', '3. Enter transaction ID']).map(instruction => `<p>• ${instruction}</p>`).join('')}
+                <div id="upi-payment" class="payment-method active">
+                    <div class="qr-section">
+                        <img src="qr-code.png.jpeg" alt="UPI QR Code" class="qr-code">
+                        <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
+                        <p><strong>Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
+                    </div>
+                    
+                    <div class="payment-instructions">
+                        <p>• Scan QR code or use UPI ID</p>
+                        <p>• Pay exact amount</p>
+                        <p>• Enter 12-digit UTR number below</p>
+                    </div>
+                    
+                    <div class="payment-proof">
+                        <input type="text" id="transactionId" placeholder="Enter 12-digit UTR number" maxlength="12" pattern="[0-9]{12}" required>
+                        <button onclick="confirmPayment(${booking.id})" class="confirm-payment-btn">
+                            ✅ Confirm UPI Payment
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="payment-proof">
-                    <h4>Upload Payment Proof</h4>
-                    <input type="text" id="transactionId" placeholder="Please enter your 12-digit UTR number" maxlength="12" pattern="[0-9]{12}" required>
-                    <button onclick="confirmPayment(${booking.id})" class="confirm-payment-btn">
-                        ✅ Confirm Payment
-                    </button>
+                <div id="card-payment" class="payment-method">
+                    <div class="card-section">
+                        <p><strong>Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
+                        <p>Pay securely with Debit/Credit Card</p>
+                        <button onclick="payWithRazorpay(${booking.id}, ${booking.totalPrice || 0}, '${booking.guestName}', '${booking.email}', '${booking.phone}')" class="razorpay-btn">
+                            💳 Pay with Card
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -597,6 +614,66 @@ async function confirmPayment(bookingId) {
     } catch (error) {
         console.error('Payment confirmation error:', error);
         showNotification('Network error. Please try again.', 'error');
+    }
+}
+
+function showPaymentMethod(method) {
+    // Hide all payment methods
+    document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.payment-tab').forEach(el => el.classList.remove('active'));
+    
+    // Show selected method
+    document.getElementById(`${method}-payment`).classList.add('active');
+    event.target.classList.add('active');
+}
+
+function payWithRazorpay(bookingId, amount, name, email, phone) {
+    const options = {
+        key: 'rzp_test_YOUR_KEY_HERE', // Replace with your Razorpay key
+        amount: amount * 100, // Amount in paise
+        currency: 'INR',
+        name: 'Vizag Resorts',
+        description: 'Resort Booking Payment',
+        handler: function(response) {
+            // Payment successful
+            confirmRazorpayPayment(bookingId, response.razorpay_payment_id);
+        },
+        prefill: {
+            name: name,
+            email: email,
+            contact: phone
+        },
+        theme: {
+            color: '#667eea'
+        },
+        method: {
+            upi: false,
+            wallet: false,
+            netbanking: false,
+            card: true
+        }
+    };
+    
+    const rzp = new Razorpay(options);
+    rzp.open();
+}
+
+async function confirmRazorpayPayment(bookingId, paymentId) {
+    try {
+        const response = await fetch(`/api/bookings/${bookingId}/razorpay-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId })
+        });
+        
+        if (response.ok) {
+            showNotification('Payment successful! Your booking is confirmed. You will be notified through email and WhatsApp.', 'success');
+            closePaymentModal();
+        } else {
+            showNotification('Payment verification failed. Please contact support.', 'error');
+        }
+    } catch (error) {
+        showNotification('Network error. Please contact support.', 'error');
     }
 }
 

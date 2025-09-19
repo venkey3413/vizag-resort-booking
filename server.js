@@ -256,6 +256,52 @@ app.post('/api/bookings', async (req, res) => {
     }
 });
 
+app.post('/api/bookings/:id/razorpay-payment', async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const { paymentId } = req.body;
+        
+        // Update booking status to paid
+        await db.run(
+            'UPDATE bookings SET status = ?, payment_status = ?, transaction_id = ? WHERE id = ?',
+            ['confirmed', 'paid', paymentId, bookingId]
+        );
+        
+        // Get booking details for notification
+        const bookingDetails = await db.get(`
+            SELECT b.*, r.name as resort_name 
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE b.id = ?
+        `, [bookingId]);
+        
+        if (bookingDetails) {
+            // Send Telegram notification
+            try {
+                const message = `💳 CARD PAYMENT SUCCESSFUL!
+
+📋 Booking ID: ${bookingDetails.id}
+👤 Guest: ${bookingDetails.guest_name}
+🏨 Resort: ${bookingDetails.resort_name}
+💰 Amount: ₹${bookingDetails.total_price.toLocaleString()}
+🔢 Payment ID: ${paymentId}
+✅ Status: Confirmed
+
+⏰ Paid at: ${new Date().toLocaleString('en-IN')}`;
+                
+                await sendTelegramNotification(message);
+            } catch (telegramError) {
+                console.error('Telegram notification failed:', telegramError);
+            }
+        }
+        
+        res.json({ message: 'Payment confirmed successfully', status: 'confirmed' });
+    } catch (error) {
+        console.error('Razorpay payment confirmation error:', error);
+        res.status(500).json({ error: 'Failed to confirm payment' });
+    }
+});
+
 app.post('/api/bookings/:id/payment-proof', async (req, res) => {
     try {
         const bookingId = req.params.id;
