@@ -337,10 +337,10 @@ app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
             VALUES (?, ?, ?, datetime('now'))
         `, [bookingId, paymentId, cardLastFour]);
         
-        // Update booking with transaction fee for card payments
+        // Update booking status to pending verification
         await db.run(
-            'UPDATE bookings SET status = ?, transaction_id = ?, transaction_fee = ? WHERE id = ?',
-            ['pending_verification', paymentId, transactionFee, bookingId]
+            'UPDATE bookings SET status = ? WHERE id = ?',
+            ['pending_verification', bookingId]
         );
         
         // Get booking details for notification
