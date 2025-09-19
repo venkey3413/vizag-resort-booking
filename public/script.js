@@ -45,6 +45,20 @@ function setupEventListeners() {
     document.getElementById('checkIn').addEventListener('change', calculateTotal);
     document.getElementById('checkOut').addEventListener('change', calculateTotal);
     document.getElementById('guests').addEventListener('change', calculateTotal);
+    
+    // Phone number validation
+    document.getElementById('phone').addEventListener('input', function(e) {
+        let value = e.target.value;
+        // Auto-add +91 if not present
+        if (value && !value.startsWith('+91')) {
+            value = '+91' + value.replace(/\D/g, '').substring(0, 10);
+        }
+        // Ensure only +91 followed by 10 digits
+        if (value.startsWith('+91')) {
+            value = '+91' + value.substring(3).replace(/\D/g, '').substring(0, 10);
+        }
+        e.target.value = value;
+    });
 }
 
 function scrollToSection(sectionId) {
@@ -185,6 +199,24 @@ async function handleBooking(e) {
     
     if (checkOutDate <= checkInDate) {
         showNotification('Check-out date must be at least one day after check-in date', 'error');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    // Phone validation
+    const phonePattern = /^\+91[0-9]{10}$/;
+    if (!phonePattern.test(bookingData.phone)) {
+        showNotification('Please enter a valid Indian WhatsApp number (+91 followed by 10 digits)', 'error');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    // Email validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(bookingData.email)) {
+        showNotification('Please enter a valid working email address', 'error');
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
         return;
