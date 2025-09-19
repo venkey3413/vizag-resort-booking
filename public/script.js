@@ -640,8 +640,8 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
             name: 'Vizag Resorts',
             description: 'Resort Booking Payment',
             handler: function(response) {
-                // Payment successful
-                confirmRazorpayPayment(bookingId, response.razorpay_payment_id);
+                // Payment successful, now ask for card confirmation
+                showCardConfirmation(bookingId, response.razorpay_payment_id);
             },
             prefill: {
                 name: name,
@@ -666,22 +666,65 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
     }
 }
 
-async function confirmRazorpayPayment(bookingId, paymentId) {
+function showCardConfirmation(bookingId, paymentId) {
+    // Close Razorpay modal first
+    closePaymentModal();
+    
+    // Show card confirmation modal
+    const confirmModal = document.createElement('div');
+    confirmModal.className = 'payment-modal';
+    confirmModal.innerHTML = `
+        <div class="payment-content">
+            <h2>💳 Confirm Card Payment</h2>
+            <div class="card-confirmation">
+                <p>✅ Payment successful via Razorpay!</p>
+                <p><strong>Payment ID:</strong> ${paymentId}</p>
+                <p>Please enter the last 4 digits of your card to confirm:</p>
+                
+                <input type="text" id="cardLastFour" placeholder="Last 4 digits of card" maxlength="4" pattern="[0-9]{4}" required>
+                <button onclick="confirmCardPayment('${bookingId}', '${paymentId}')" class="confirm-payment-btn">
+                    ✅ Confirm Card Payment
+                </button>
+            </div>
+            
+            <div class="payment-actions">
+                <button onclick="closeCardConfirmation()" class="close-payment-btn">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(confirmModal);
+}
+
+function closeCardConfirmation() {
+    const modal = document.querySelector('.payment-modal');
+    if (modal) modal.remove();
+}
+
+async function confirmCardPayment(bookingId, paymentId) {
+    const cardLastFour = document.getElementById('cardLastFour').value;
+    
+    if (!cardLastFour || !/^[0-9]{4}$/.test(cardLastFour)) {
+        showNotification('Please enter the last 4 digits of your card', 'error');
+        return;
+    }
+    
     try {
-        const response = await fetch(`/api/bookings/${bookingId}/razorpay-payment`, {
+        const response = await fetch(`/api/bookings/${bookingId}/card-payment-proof`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId })
+            body: JSON.stringify({ paymentId, cardLastFour })
         });
         
         if (response.ok) {
-            showNotification('Payment successful! Your booking is confirmed. You will be notified through email and WhatsApp.', 'success');
-            closePaymentModal();
+            showNotification('Card payment submitted for verification. You will be notified through email and WhatsApp.', 'success');
+            closeCardConfirmation();
         } else {
-            showNotification('Payment verification failed. Please contact support.', 'error');
+            const error = await response.json();
+            showNotification(error.error || 'Payment confirmation failed', 'error');
         }
     } catch (error) {
-        showNotification('Network error. Please contact support.', 'error');
+        showNotification('Network error. Please try again.', 'error');
     }
 }
 

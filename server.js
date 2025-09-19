@@ -50,6 +50,13 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add card_last_four column to payment_proofs if it doesn't exist
+    try {
+        await db.run('ALTER TABLE payment_proofs ADD COLUMN card_last_four TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Add platform fee columns if they don't exist
     try {
         await db.run('ALTER TABLE bookings ADD COLUMN base_price INTEGER');
@@ -256,15 +263,21 @@ app.post('/api/bookings', async (req, res) => {
     }
 });
 
-app.post('/api/bookings/:id/razorpay-payment', async (req, res) => {
+app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
     try {
         const bookingId = req.params.id;
-        const { paymentId } = req.body;
+        const { paymentId, cardLastFour } = req.body;
         
-        // Update booking status to paid
+        // Store card payment proof (similar to UPI)
+        await db.run(`
+            INSERT INTO payment_proofs (booking_id, transaction_id, card_last_four, created_at)
+            VALUES (?, ?, ?, datetime('now'))
+        `, [bookingId, paymentId, cardLastFour]);
+        
+        // Update booking status to pending verification (like UPI)
         await db.run(
-            'UPDATE bookings SET status = ?, payment_status = ?, transaction_id = ? WHERE id = ?',
-            ['confirmed', 'paid', paymentId, bookingId]
+            'UPDATE bookings SET status = ?, transaction_id = ? WHERE id = ?',
+            ['pending_verification', paymentId, bookingId]
         );
         
         // Get booking details for notification
@@ -276,18 +289,21 @@ app.post('/api/bookings/:id/razorpay-payment', async (req, res) => {
         `, [bookingId]);
         
         if (bookingDetails) {
-            // Send Telegram notification
+            // Send Telegram notification for manual verification
             try {
-                const message = `💳 CARD PAYMENT SUCCESSFUL!
+                const message = `💳 CARD PAYMENT RECEIVED - NEEDS VERIFICATION
 
 📋 Booking ID: ${bookingDetails.id}
 👤 Guest: ${bookingDetails.guest_name}
 🏨 Resort: ${bookingDetails.resort_name}
 💰 Amount: ₹${bookingDetails.total_price.toLocaleString()}
 🔢 Payment ID: ${paymentId}
-✅ Status: Confirmed
+💳 Card Last 4: ****${cardLastFour}
+⚠️ Status: Pending Verification
 
-⏰ Paid at: ${new Date().toLocaleString('en-IN')}`;
+⏰ Submitted at: ${new Date().toLocaleString('en-IN')}
+
+👉 Please verify and mark as paid in booking panel`;
                 
                 await sendTelegramNotification(message);
             } catch (telegramError) {
@@ -295,10 +311,10 @@ app.post('/api/bookings/:id/razorpay-payment', async (req, res) => {
             }
         }
         
-        res.json({ message: 'Payment confirmed successfully', status: 'confirmed' });
+        res.json({ message: 'Card payment submitted for verification' });
     } catch (error) {
-        console.error('Razorpay payment confirmation error:', error);
-        res.status(500).json({ error: 'Failed to confirm payment' });
+        console.error('Card payment proof error:', error);
+        res.status(500).json({ error: 'Failed to submit payment proof' });
     }
 });
 
