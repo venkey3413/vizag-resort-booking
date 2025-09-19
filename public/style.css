@@ -1118,59 +1118,55 @@ footer p {
     }
 }
 
-/* Modern Amenities Styles */
+/* Compact Amenities Styles */
 .resort-amenities {
-    margin: 20px 0;
-    padding: 18px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 15px;
-    border-left: 4px solid #007bff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.resort-amenities:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    margin: 12px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
 }
 
 .resort-amenities h4 {
-    margin: 0 0 15px 0;
+    margin: 0 0 6px 0;
     color: #495057;
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 0.7rem;
+    font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 8px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    gap: 4px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    letter-spacing: 0.3px;
 }
 
 .amenities-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 12px;
+    gap: 6px;
+    margin-top: 6px;
 }
 
 .amenity-tag {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: #28a745;
     color: white;
-    padding: 8px 16px;
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.6rem;
+    font-weight: 400;
     white-space: nowrap;
-    box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
     border: none;
     cursor: default;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    font-family: 'Inter', -apple-system, sans-serif;
+    letter-spacing: 0.2px;
+    text-transform: capitalize;
 }
 
 .amenity-tag:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
-    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    background: #218838;
 }
 
 .amenity-tag:nth-child(even) {
@@ -1205,21 +1201,21 @@ footer p {
 
 @media (max-width: 768px) {
     .resort-amenities {
-        margin: 15px 0;
-        padding: 15px;
+        margin: 8px 0;
+        padding: 6px;
     }
     
     .amenities-list {
-        gap: 8px;
+        gap: 3px;
     }
     
     .amenity-tag {
-        padding: 6px 12px;
-        font-size: 0.85rem;
+        padding: 1px 4px;
+        font-size: 0.55rem;
     }
     
     .resort-amenities h4 {
-        font-size: 1rem;
+        font-size: 0.65rem;
     }
 }
 
