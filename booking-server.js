@@ -186,22 +186,36 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
         // Send cancellation email if requested
         if (sendEmail) {
             try {
-                const { sendEmail: emailService } = require('./email-service');
-                const subject = 'Booking Cancellation - Vizag Resorts';
-                const message = `
-                    <h2>Booking Cancelled</h2>
-                    <p>Dear ${booking.guest_name},</p>
-                    <p>Your booking has been cancelled:</p>
-                    <ul>
-                        <li><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</li>
-                        <li><strong>Resort:</strong> ${booking.resort_name}</li>
-                        <li><strong>Dates:</strong> ${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}</li>
-                    </ul>
-                    <p>If you have any questions, please contact us.</p>
-                    <p>Thank you,<br>Vizag Resorts Team</p>
-                `;
+                const nodemailer = require('nodemailer');
                 
-                await emailService(booking.email, subject, message);
+                const transporter = nodemailer.createTransporter({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL_USER,
+                        pass: process.env.EMAIL_APP_PASSWORD
+                    }
+                });
+                
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: booking.email,
+                    subject: 'Booking Cancellation - Vizag Resorts',
+                    html: `
+                        <h2>Booking Cancelled</h2>
+                        <p>Dear ${booking.guest_name},</p>
+                        <p>Your booking has been cancelled:</p>
+                        <ul>
+                            <li><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</li>
+                            <li><strong>Resort:</strong> ${booking.resort_name}</li>
+                            <li><strong>Dates:</strong> ${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}</li>
+                        </ul>
+                        <p>If you have any questions, please contact us.</p>
+                        <p>Thank you,<br>Vizag Resorts Team</p>
+                    `
+                };
+                
+                await transporter.sendMail(mailOptions);
+                console.log('Cancellation email sent to:', booking.email);
             } catch (emailError) {
                 console.error('Failed to send cancellation email:', emailError);
             }
