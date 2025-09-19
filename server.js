@@ -289,7 +289,7 @@ app.post('/api/bookings/:id/notify-card-payment', async (req, res) => {
             try {
                 const message = `💳 CARD PAYMENT SUCCESSFUL!
 
-📋 Booking ID: ${bookingDetails.id}
+📋 Booking ID: ${bookingDetails.booking_reference || `RB${String(bookingDetails.id).padStart(6, '0')}`}
 👤 Guest: ${bookingDetails.guest_name}
 📧 Email: ${bookingDetails.email}
 📱 Phone: ${bookingDetails.phone}
@@ -354,7 +354,7 @@ app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
             try {
                 const message = `💳 CARD PAYMENT RECEIVED - NEEDS VERIFICATION
 
-📋 Booking ID: ${bookingDetails.id}
+📋 Booking ID: ${bookingDetails.booking_reference || `RB${String(bookingDetails.id).padStart(6, '0')}`}
 👤 Guest: ${bookingDetails.guest_name}
 🏨 Resort: ${bookingDetails.resort_name}
 💰 Base Amount: ₹${bookingDetails.total_price.toLocaleString()}
@@ -414,7 +414,7 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
             if (bookingDetails) {
                 const message = `💳 PAYMENT SUBMITTED!
 
-📋 Booking ID: ${bookingDetails.id}
+📋 Booking ID: ${bookingDetails.booking_reference || `RB${String(bookingDetails.id).padStart(6, '0')}`}
 👤 Guest: ${bookingDetails.guest_name}
 🏖️ Resort: ${bookingDetails.resort_name}
 💰 Amount: ₹${bookingDetails.total_price.toLocaleString()}
