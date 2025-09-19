@@ -154,13 +154,16 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(400).json({ error: 'All fields are required' });
         }
         
-        // Date validation
+        // Date validation using Indian timezone
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
         
-        if (checkInDate < today) {
+        // Convert to Indian timezone for comparison
+        const indianTime = new Date(today.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+        indianTime.setHours(0, 0, 0, 0);
+        
+        if (checkInDate < indianTime) {
             return res.status(400).json({ error: 'Check-in date cannot be in the past' });
         }
         
