@@ -168,6 +168,9 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(400).json({ error: 'Check-out date must be at least one day after check-in date' });
         }
         
+        // Define today string for queries
+        const todayStr = new Date().toISOString().split('T')[0];
+        
         // Check for unpaid bookings for this resort today (max 2 total)
         const unpaidBookingsToday = await db.get(`
             SELECT COUNT(*) as count 
