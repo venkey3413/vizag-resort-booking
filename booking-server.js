@@ -221,7 +221,7 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
                             
                             <p>Refund (if applicable) will be processed within 1-2 business days for UPI and 3-5 days for card to your original payment method.</p>
                             
-                            <p>If you wish to reschedule or need any assistance, please contact us at info@vizagresortbooking.in</p>
+                            <p>If you wish to reschedule or need any assistance, please contact us at vizagresortbooking@gmail.com</p>
                             
                             <p>We'd be delighted to welcome you again in the future.</p>
                             
