@@ -646,7 +646,8 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
             name: 'Vizag Resorts',
             description: 'Resort Booking Payment',
             handler: function(response) {
-                // Payment successful, now ask for card confirmation
+                // Payment successful, store temporarily and ask for card confirmation
+                storeTemporaryCardPayment(bookingId, response.razorpay_payment_id);
                 showCardConfirmation(bookingId, response.razorpay_payment_id);
             },
             prefill: {
@@ -669,6 +670,19 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
         rzp.open();
     } catch (error) {
         showNotification('Payment system error. Please try UPI payment.', 'error');
+    }
+}
+
+async function storeTemporaryCardPayment(bookingId, paymentId) {
+    try {
+        // Mark booking as temporary card payment (not confirmed yet)
+        await fetch(`/api/bookings/${bookingId}/temp-card-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId })
+        });
+    } catch (error) {
+        console.error('Failed to store temporary payment:', error);
     }
 }
 

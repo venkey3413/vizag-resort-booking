@@ -39,6 +39,7 @@ app.get('/api/bookings', async (req, res) => {
             SELECT b.*, r.name as resort_name 
             FROM bookings b 
             JOIN resorts r ON b.resort_id = r.id 
+            WHERE b.status != 'temp_card_payment'
             ORDER BY b.booking_date DESC
         `);
         res.json(bookings);
@@ -157,6 +158,26 @@ app.post('/api/test-backup', async (req, res) => {
     } catch (error) {
         console.error('Manual backup failed:', error);
         res.status(500).json({ error: 'Backup failed', details: error.message });
+    }
+});
+
+// Endpoint to get payment proof details for invoice generation
+app.get('/api/payment-proof/:bookingId', async (req, res) => {
+    try {
+        const bookingId = req.params.bookingId;
+        const proof = await db.get(
+            'SELECT transaction_id, card_last_four FROM payment_proofs WHERE booking_id = ? ORDER BY created_at DESC LIMIT 1',
+            [bookingId]
+        );
+        
+        if (proof) {
+            res.json(proof);
+        } else {
+            res.json({ transaction_id: null, card_last_four: null });
+        }
+    } catch (error) {
+        console.error('Payment proof fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch payment proof' });
     }
 });
 

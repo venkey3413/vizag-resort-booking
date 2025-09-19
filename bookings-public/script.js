@@ -164,6 +164,44 @@ async function generateInvoice(id) {
         const booking = bookings.find(b => b.id === id);
         if (!booking) return;
         
+        // Determine payment method and details
+        let paymentMethodInfo = '';
+        if (booking.transaction_id) {
+            // Check if it's a card payment (Razorpay payment IDs start with 'pay_')
+            if (booking.transaction_id.startsWith('pay_')) {
+                // Get card last 4 digits from payment_proofs table
+                try {
+                    const response = await fetch(`/api/payment-proof/${booking.id}`);
+                    const proofData = await response.json();
+                    if (proofData.card_last_four) {
+                        paymentMethodInfo = `
+                            <p><strong>Payment Method:</strong> Card Payment</p>
+                            <p><strong>Payment ID:</strong> ${booking.transaction_id}</p>
+                            <p><strong>Card Number:</strong> ****-****-****-${proofData.card_last_four}</p>
+                        `;
+                    } else {
+                        paymentMethodInfo = `
+                            <p><strong>Payment Method:</strong> Card Payment</p>
+                            <p><strong>Payment ID:</strong> ${booking.transaction_id}</p>
+                        `;
+                    }
+                } catch (error) {
+                    paymentMethodInfo = `
+                        <p><strong>Payment Method:</strong> Card Payment</p>
+                        <p><strong>Payment ID:</strong> ${booking.transaction_id}</p>
+                    `;
+                }
+            } else {
+                // UPI Payment
+                paymentMethodInfo = `
+                    <p><strong>Payment Method:</strong> UPI Payment</p>
+                    <p><strong>UTR ID:</strong> ${booking.transaction_id}</p>
+                `;
+            }
+        } else {
+            paymentMethodInfo = '<p><strong>Payment Method:</strong> Not specified</p>';
+        }
+        
         // Create invoice content
         const invoiceContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -184,8 +222,11 @@ async function generateInvoice(id) {
                     <p><strong>Check-in:</strong> ${new Date(booking.check_in).toLocaleDateString()}</p>
                     <p><strong>Check-out:</strong> ${new Date(booking.check_out).toLocaleDateString()}</p>
                     <p><strong>Guests:</strong> ${booking.guests}</p>
-                    <p><strong>Total Amount:</strong> ₹${booking.total_price.toLocaleString()}</p>
-                    ${booking.transaction_id ? `<p><strong>UTR ID:</strong> ${booking.transaction_id}</p>` : '<p><strong>UTR ID:</strong> Not provided</p>'}
+                    <p><strong>Base Amount:</strong> ₹${(booking.base_price || booking.total_price).toLocaleString()}</p>
+                    ${booking.platform_fee ? `<p><strong>Platform Fee:</strong> ₹${booking.platform_fee.toLocaleString()}</p>` : ''}
+                    ${booking.transaction_fee ? `<p><strong>Transaction Fee:</strong> ₹${booking.transaction_fee.toLocaleString()}</p>` : ''}
+                    <p><strong>Total Amount:</strong> ₹${(booking.total_price + (booking.transaction_fee || 0)).toLocaleString()}</p>
+                    ${paymentMethodInfo}
                     <p><strong>Payment Status:</strong> ${(booking.payment_status || 'pending').toUpperCase()}</p>
                     <p><strong>Booking Date:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</p>
                 </div>
