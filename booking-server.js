@@ -8,7 +8,7 @@ const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 
 const app = express();
-const PORT = 3001;
+const PORT = 3002;
 
 app.use(cors());
 app.use(express.json());
@@ -158,6 +158,26 @@ app.post('/api/test-backup', async (req, res) => {
         console.error('Manual backup failed:', error);
         res.status(500).json({ error: 'Backup failed', details: error.message });
     }
+});
+
+// EventBridge Server-Sent Events endpoint
+app.get('/api/events', (req, res) => {
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+    });
+    
+    res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
+    
+    const keepAlive = setInterval(() => {
+        res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
+    }, 30000);
+    
+    req.on('close', () => {
+        clearInterval(keepAlive);
+    });
 });
 
 

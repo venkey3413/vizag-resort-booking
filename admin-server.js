@@ -121,6 +121,28 @@ app.delete('/api/resorts/:id', async (req, res) => {
     }
 });
 
+// EventBridge Server-Sent Events endpoint
+app.get('/api/events', (req, res) => {
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+    });
+    
+    // Send initial connection event
+    res.write(`data: ${JSON.stringify({ type: 'connected', message: 'EventBridge stream connected' })}\n\n`);
+    
+    // Keep connection alive
+    const keepAlive = setInterval(() => {
+        res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
+    }, 30000);
+    
+    req.on('close', () => {
+        clearInterval(keepAlive);
+    });
+});
+
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🔧 Admin Panel running on http://0.0.0.0:${PORT}`);

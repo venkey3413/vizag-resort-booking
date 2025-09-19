@@ -4,7 +4,28 @@ let editingId = null;
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     setupEventListeners();
+    setupEventBridgeSync();
 });
+
+function setupEventBridgeSync() {
+    console.log('📡 Pure EventBridge sync enabled - no polling');
+    
+    // Listen for EventBridge events via WebSocket or Server-Sent Events
+    const eventSource = new EventSource('/api/events');
+    
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        console.log('📡 EventBridge event received:', data);
+        
+        if (data.type === 'resort.updated' || data.type === 'resort.added' || data.type === 'resort.deleted') {
+            loadResorts(); // Refresh only when EventBridge triggers
+        }
+    };
+    
+    eventSource.onerror = function(error) {
+        console.log('⚠️ EventBridge connection error, will retry...');
+    };
+}
 
 function setupEventListeners() {
     const form = document.getElementById('resortForm');

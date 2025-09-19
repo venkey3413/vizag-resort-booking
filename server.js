@@ -342,6 +342,26 @@ app.get('/api/bookings', async (req, res) => {
 
 
 
+// EventBridge Server-Sent Events endpoint
+app.get('/api/events', (req, res) => {
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+    });
+    
+    res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
+    
+    const keepAlive = setInterval(() => {
+        res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
+    }, 30000);
+    
+    req.on('close', () => {
+        clearInterval(keepAlive);
+    });
+});
+
 // Initialize and start server
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {
