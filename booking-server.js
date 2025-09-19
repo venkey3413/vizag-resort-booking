@@ -161,6 +161,59 @@ app.post('/api/test-backup', async (req, res) => {
     }
 });
 
+// Endpoint to cancel booking with optional email
+app.post('/api/bookings/:id/cancel', async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const { sendEmail } = req.body;
+        
+        // Get booking details before deletion
+        const booking = await db.get(`
+            SELECT b.*, r.name as resort_name 
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE b.id = ?
+        `, [bookingId]);
+        
+        if (!booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+        
+        // Delete the booking
+        await db.run('DELETE FROM bookings WHERE id = ?', [bookingId]);
+        await db.run('DELETE FROM payment_proofs WHERE booking_id = ?', [bookingId]);
+        
+        // Send cancellation email if requested
+        if (sendEmail) {
+            try {
+                const { sendEmail: emailService } = require('./email-service');
+                const subject = 'Booking Cancellation - Vizag Resorts';
+                const message = `
+                    <h2>Booking Cancelled</h2>
+                    <p>Dear ${booking.guest_name},</p>
+                    <p>Your booking has been cancelled:</p>
+                    <ul>
+                        <li><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</li>
+                        <li><strong>Resort:</strong> ${booking.resort_name}</li>
+                        <li><strong>Dates:</strong> ${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}</li>
+                    </ul>
+                    <p>If you have any questions, please contact us.</p>
+                    <p>Thank you,<br>Vizag Resorts Team</p>
+                `;
+                
+                await emailService(booking.email, subject, message);
+            } catch (emailError) {
+                console.error('Failed to send cancellation email:', emailError);
+            }
+        }
+        
+        res.json({ message: 'Booking cancelled successfully' });
+    } catch (error) {
+        console.error('Cancel booking error:', error);
+        res.status(500).json({ error: 'Failed to cancel booking' });
+    }
+});
+
 // Endpoint to get payment proof details for invoice generation
 app.get('/api/payment-proof/:bookingId', async (req, res) => {
     try {
