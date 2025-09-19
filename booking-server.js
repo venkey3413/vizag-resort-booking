@@ -201,16 +201,35 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
                     to: booking.email,
                     subject: 'Booking Cancellation - Vizag Resorts',
                     html: `
-                        <h2>Booking Cancelled</h2>
-                        <p>Dear ${booking.guest_name},</p>
-                        <p>Your booking has been cancelled:</p>
-                        <ul>
-                            <li><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</li>
-                            <li><strong>Resort:</strong> ${booking.resort_name}</li>
-                            <li><strong>Dates:</strong> ${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}</li>
-                        </ul>
-                        <p>If you have any questions, please contact us.</p>
-                        <p>Thank you,<br>Vizag Resorts Team</p>
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                            <h2 style="color: #333;">Booking Cancellation</h2>
+                            
+                            <p>Dear ${booking.guest_name},</p>
+                            
+                            <p>We have cancelled your booking with ${booking.resort_name}.</p>
+                            
+                            <p><strong>Here are the details of your cancelled booking:</strong></p>
+                            
+                            <p><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</p>
+                            <p><strong>Guest Name:</strong> ${booking.guest_name}</p>
+                            <p><strong>Check-in Date:</strong> ${new Date(booking.check_in).toLocaleDateString()}</p>
+                            <p><strong>Check-out Date:</strong> ${new Date(booking.check_out).toLocaleDateString()}</p>
+                            <p><strong>Resort Name:</strong> ${booking.resort_name}</p>
+                            
+                            <p><strong>As per our cancellation policy:</strong></p>
+                            <p>Full refund will be processed</p>
+                            
+                            <p>Refund (if applicable) will be processed within 1-2 business days for UPI and 3-5 days for card to your original payment method.</p>
+                            
+                            <p>If you wish to reschedule or need any assistance, please contact us at info@vizagresortbooking.in</p>
+                            
+                            <p>We'd be delighted to welcome you again in the future.</p>
+                            
+                            <p>Thank you for considering vizagresortbooking.in We hope to host you on your next trip.</p>
+                            
+                            <p>Warm regards,<br>
+                            <a href="https://vizagresortbooking.in/" style="color: #667eea;">https://vizagresortbooking.in/</a></p>
+                        </div>
                     `
                 };
                 
