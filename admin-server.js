@@ -88,6 +88,16 @@ app.put('/api/resorts/:id', async (req, res) => {
                 name: name,
                 amenities: amenities
             });
+            // Notify main server
+            try {
+                await fetch('http://localhost:3000/api/eventbridge-notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'resort.updated', data: { resortId: id } })
+                });
+            } catch (notifyError) {
+                console.error('Failed to notify main server:', notifyError);
+            }
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }

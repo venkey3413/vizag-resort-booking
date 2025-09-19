@@ -243,6 +243,8 @@ app.post('/api/bookings', async (req, res) => {
                 guestName: guestName,
                 totalPrice: totalPrice
             });
+            // Broadcast to SSE clients
+            broadcastToSSE({ type: 'booking.created', bookingId: result.lastID });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -343,6 +345,8 @@ app.get('/api/bookings', async (req, res) => {
 
 
 // EventBridge Server-Sent Events endpoint
+const sseClients = [];
+
 app.get('/api/events', (req, res) => {
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
@@ -350,6 +354,9 @@ app.get('/api/events', (req, res) => {
         'Connection': 'keep-alive',
         'Access-Control-Allow-Origin': '*'
     });
+    
+    // Add client to list
+    sseClients.push(res);
     
     res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
     
@@ -359,7 +366,31 @@ app.get('/api/events', (req, res) => {
     
     req.on('close', () => {
         clearInterval(keepAlive);
+        const index = sseClients.indexOf(res);
+        if (index !== -1) sseClients.splice(index, 1);
     });
+});
+
+// Function to broadcast events to all SSE clients
+function broadcastToSSE(eventData) {
+    const message = `data: ${JSON.stringify(eventData)}\n\n`;
+    sseClients.forEach(client => {
+        try {
+            client.write(message);
+        } catch (error) {
+            // Remove dead clients
+            const index = sseClients.indexOf(client);
+            if (index !== -1) sseClients.splice(index, 1);
+        }
+    });
+}
+
+// Endpoint to receive EventBridge notifications from admin server
+app.post('/api/eventbridge-notify', (req, res) => {
+    const { type, data } = req.body;
+    console.log(`📡 Received EventBridge notification: ${type}`);
+    broadcastToSSE({ type, ...data });
+    res.json({ success: true });
 });
 
 // Initialize and start server
