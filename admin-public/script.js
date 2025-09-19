@@ -71,10 +71,11 @@ async function handleSubmit(e) {
         location: document.getElementById('location').value,
         price: document.getElementById('price').value,
         description: document.getElementById('description').value,
+        amenities: document.getElementById('amenities').value,
         image: document.getElementById('image').value || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500',
         gallery: document.getElementById('gallery').value,
         videos: document.getElementById('videos').value,
-        mapLink: document.getElementById('mapLink').value
+        map_link: document.getElementById('mapLink').value
     };
 
     try {
@@ -120,6 +121,7 @@ function editResort(id) {
     document.getElementById('location').value = resort.location;
     document.getElementById('price').value = resort.price;
     document.getElementById('description').value = resort.description;
+    document.getElementById('amenities').value = resort.amenities || '';
     document.getElementById('image').value = resort.image;
     document.getElementById('gallery').value = resort.gallery || '';
     document.getElementById('videos').value = resort.videos || '';

@@ -130,7 +130,7 @@ async function initDB() {
 // Routes
 app.get('/api/resorts', async (req, res) => {
     try {
-        const resorts = await db.all('SELECT * FROM resorts WHERE available = 1');
+        const resorts = await db.all('SELECT id, name, location, price, description, image, gallery, videos, map_link, amenities, available FROM resorts WHERE available = 1');
         res.json(resorts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch resorts' });
