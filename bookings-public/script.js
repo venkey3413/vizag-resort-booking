@@ -116,16 +116,50 @@ async function markAsPaid(id) {
     }
 }
 
-async function deleteBooking(id) {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
+function deleteBooking(id) {
+    const booking = bookings.find(b => b.id === id);
+    if (!booking) return;
+    
+    // Show confirmation dialog
+    const confirmModal = document.createElement('div');
+    confirmModal.className = 'modal';
+    confirmModal.innerHTML = `
+        <div class="modal-content">
+            <h3>⚠️ Cancel Booking</h3>
+            <p><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</p>
+            <p><strong>Guest:</strong> ${booking.guest_name}</p>
+            <p><strong>Resort:</strong> ${booking.resort_name}</p>
+            <p>Are you sure you want to cancel this booking?</p>
+            
+            <div class="modal-actions">
+                <button onclick="confirmCancelBooking(${id}, true)" class="btn-danger">Yes, Cancel & Send Email</button>
+                <button onclick="confirmCancelBooking(${id}, false)" class="btn-warning">Yes, Cancel Only</button>
+                <button onclick="closeCancelModal()" class="btn-secondary">No, Keep Booking</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(confirmModal);
+}
 
+function closeCancelModal() {
+    const modal = document.querySelector('.modal');
+    if (modal) modal.remove();
+}
+
+async function confirmCancelBooking(id, sendEmail) {
+    closeCancelModal();
+    
     try {
-        const response = await fetch(`/api/bookings/${id}`, {
-            method: 'DELETE'
+        const response = await fetch(`/api/bookings/${id}/cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sendEmail })
         });
 
         if (response.ok) {
-            alert('Booking cancelled successfully');
+            const emailMsg = sendEmail ? ' and cancellation email sent' : '';
+            alert(`Booking cancelled successfully${emailMsg}`);
             loadBookings();
         } else {
             alert('Failed to cancel booking');
