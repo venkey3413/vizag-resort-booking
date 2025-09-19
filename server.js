@@ -168,18 +168,23 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(400).json({ error: 'Check-out date must be at least one day after check-in date' });
         }
         
-        // Check for duplicate bookings (max 2 per day per email/phone)
+        // Check for payment method specific booking limits per resort per day
         const todayStr = new Date().toISOString().split('T')[0];
         const existingBookings = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
-            WHERE (email = ? OR phone = ?) 
+            WHERE resort_id = ? 
+            AND (email = ? OR phone = ?) 
             AND DATE(booking_date) = ?
-        `, [email, phone, todayStr]);
+            AND payment_status != 'paid'
+        `, [resortId, email, phone, todayStr]);
         
-        if (existingBookings.count >= 2) {
+        // For UPI: max 2 bookings, For Card: max 1 booking per resort per day
+        const maxBookings = 2; // This will be checked later based on payment method
+        
+        if (existingBookings.count >= maxBookings) {
             return res.status(400).json({ 
-                error: 'Maximum 2 bookings per day allowed per email/phone number' 
+                error: 'Maximum booking limit reached for this resort today. Please try a different resort or date.' 
             });
         }
 
@@ -524,6 +529,44 @@ app.post('/api/eventbridge-notify', (req, res) => {
 // Endpoint to get Razorpay key for frontend
 app.get('/api/razorpay-key', (req, res) => {
     res.json({ key: process.env.RAZORPAY_KEY_ID });
+});
+
+// Endpoint to check card payment limits
+app.post('/api/check-card-limit', async (req, res) => {
+    try {
+        const { bookingId } = req.body;
+        
+        // Get booking details
+        const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [bookingId]);
+        if (!booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        // Check existing card payments for same resort, email/phone, today (unpaid only)
+        const existingCardBookings = await db.get(`
+            SELECT COUNT(*) as count 
+            FROM bookings b
+            JOIN payment_proofs p ON b.id = p.booking_id
+            WHERE b.resort_id = ? 
+            AND (b.email = ? OR b.phone = ?) 
+            AND DATE(b.booking_date) = ?
+            AND b.payment_status != 'paid'
+            AND p.transaction_id LIKE 'pay_%'
+        `, [booking.resort_id, booking.email, booking.phone, todayStr]);
+        
+        if (existingCardBookings.count >= 1) {
+            return res.status(400).json({ 
+                error: 'Only 1 card payment allowed per resort per day. Use UPI for additional bookings.' 
+            });
+        }
+        
+        res.json({ message: 'Card payment allowed' });
+    } catch (error) {
+        console.error('Card limit check error:', error);
+        res.status(500).json({ error: 'Failed to check card payment limit' });
+    }
 });
 
 // Endpoint to get payment proof details for invoice generation

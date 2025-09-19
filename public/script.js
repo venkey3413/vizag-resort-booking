@@ -635,6 +635,19 @@ function showPaymentMethod(method) {
 
 async function payWithRazorpay(bookingId, amount, name, email, phone) {
     try {
+        // Check card payment limit before proceeding
+        const limitResponse = await fetch('/api/check-card-limit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId })
+        });
+        
+        if (!limitResponse.ok) {
+            const error = await limitResponse.json();
+            showNotification(error.error, 'error');
+            return;
+        }
+        
         // Get Razorpay key from server
         const keyResponse = await fetch('/api/razorpay-key');
         const { key } = await keyResponse.json();
