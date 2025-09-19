@@ -264,7 +264,62 @@ app.post('/api/bookings', async (req, res) => {
     }
 });
 
-// Removed temporary card payment endpoint
+app.post('/api/bookings/:id/notify-card-payment', async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const { paymentId } = req.body;
+        
+        // Update booking with payment ID
+        await db.run(
+            'UPDATE bookings SET transaction_id = ? WHERE id = ?',
+            [paymentId, bookingId]
+        );
+        
+        // Get booking details for immediate notification
+        const bookingDetails = await db.get(`
+            SELECT b.*, r.name as resort_name 
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE b.id = ?
+        `, [bookingId]);
+        
+        if (bookingDetails) {
+            const transactionFee = Math.round(bookingDetails.total_price * 0.015);
+            const totalCardAmount = bookingDetails.total_price + transactionFee;
+            
+            // Send immediate Telegram notification
+            try {
+                const message = `💳 CARD PAYMENT SUCCESSFUL!
+
+📋 Booking ID: ${bookingDetails.id}
+👤 Guest: ${bookingDetails.guest_name}
+📧 Email: ${bookingDetails.email}
+📱 Phone: ${bookingDetails.phone}
+🏨 Resort: ${bookingDetails.resort_name}
+📅 Check-in: ${new Date(bookingDetails.check_in).toLocaleDateString('en-IN')}
+📅 Check-out: ${new Date(bookingDetails.check_out).toLocaleDateString('en-IN')}
+👥 Guests: ${bookingDetails.guests}
+💰 Base Amount: ₹${bookingDetails.total_price.toLocaleString()}
+💳 Transaction Fee: ₹${transactionFee.toLocaleString()}
+💰 Total Paid: ₹${totalCardAmount.toLocaleString()}
+🔢 Payment ID: ${paymentId}
+
+⏰ Paid at: ${new Date().toLocaleString('en-IN')}
+
+👉 Check Razorpay dashboard and mark as paid in booking panel`;
+                
+                await sendTelegramNotification(message);
+            } catch (telegramError) {
+                console.error('Telegram notification failed:', telegramError);
+            }
+        }
+        
+        res.json({ message: 'Card payment notification sent' });
+    } catch (error) {
+        console.error('Card payment notification error:', error);
+        res.status(500).json({ error: 'Failed to send notification' });
+    }
+});
 
 app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
     try {

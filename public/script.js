@@ -646,7 +646,8 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
             name: 'Vizag Resorts',
             description: 'Resort Booking Payment',
             handler: function(response) {
-                // Payment successful, show card confirmation for verification
+                // Payment successful, notify admin immediately
+                notifyCardPaymentSuccess(bookingId, response.razorpay_payment_id);
                 showCardConfirmation(bookingId, response.razorpay_payment_id);
             },
             prefill: {
@@ -672,7 +673,18 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
     }
 }
 
-// Removed temporary storage - booking created immediately after Razorpay success
+async function notifyCardPaymentSuccess(bookingId, paymentId) {
+    try {
+        // Notify admin immediately about card payment success
+        await fetch(`/api/bookings/${bookingId}/notify-card-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId })
+        });
+    } catch (error) {
+        console.error('Failed to notify card payment:', error);
+    }
+}
 
 function showCardConfirmation(bookingId, paymentId) {
     // Close Razorpay modal first
