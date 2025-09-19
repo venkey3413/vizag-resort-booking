@@ -46,6 +46,38 @@ app.get('/api/resorts', async (req, res) => {
     }
 });
 
+// Update resort endpoint
+app.put('/api/resorts/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, location, price, description, amenities, image, gallery, videos, map_link } = req.body;
+        
+        await db.run(`
+            UPDATE resorts SET 
+                name = ?, location = ?, price = ?, description = ?, 
+                amenities = ?, image = ?, gallery = ?, videos = ?, map_link = ?
+            WHERE id = ?
+        `, [name, location, price, description, amenities, image, gallery, videos, map_link, id]);
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Update resort error:', error);
+        res.status(500).json({ error: 'Failed to update resort' });
+    }
+});
+
+// Delete resort endpoint
+app.delete('/api/resorts/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.run('DELETE FROM resorts WHERE id = ?', [id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Delete resort error:', error);
+        res.status(500).json({ error: 'Failed to delete resort' });
+    }
+});
+
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🔧 Admin Panel running on http://0.0.0.0:${PORT}`);
