@@ -275,17 +275,36 @@ app.get('/api/events', (req, res) => {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Cache-Control'
     });
     
     sseClients.push(res);
-    res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
+    
+    try {
+        res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
+    } catch (error) {
+        console.error('SSE write error:', error);
+        return;
+    }
     
     const keepAlive = setInterval(() => {
-        res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
+        try {
+            res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
+        } catch (error) {
+            clearInterval(keepAlive);
+            const index = sseClients.indexOf(res);
+            if (index !== -1) sseClients.splice(index, 1);
+        }
     }, 30000);
     
     req.on('close', () => {
+        clearInterval(keepAlive);
+        const index = sseClients.indexOf(res);
+        if (index !== -1) sseClients.splice(index, 1);
+    });
+    
+    req.on('error', () => {
         clearInterval(keepAlive);
         const index = sseClients.indexOf(res);
         if (index !== -1) sseClients.splice(index, 1);
