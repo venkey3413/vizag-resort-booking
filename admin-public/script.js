@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupEventBridgeSync() {
-    console.log('📡 Pure EventBridge sync enabled - no polling');
+    console.log('📡 EventBridge + fallback polling enabled');
     
     // Listen for EventBridge events via WebSocket or Server-Sent Events
     const eventSource = new EventSource('/api/events');
@@ -23,8 +23,24 @@ function setupEventBridgeSync() {
     };
     
     eventSource.onerror = function(error) {
-        console.log('⚠️ EventBridge connection error, will retry...');
+        console.log('⚠️ EventBridge connection error, fallback active');
     };
+    
+    // Fallback: Polling every 30 seconds as backup
+    setInterval(async () => {
+        try {
+            const response = await fetch('/api/resorts');
+            const newResorts = await response.json();
+            
+            if (JSON.stringify(newResorts) !== JSON.stringify(resorts)) {
+                console.log('🔄 Fallback sync detected changes');
+                resorts = newResorts;
+                displayResorts();
+            }
+        } catch (error) {
+            // Silent fallback
+        }
+    }, 30000);
 }
 
 function setupEventListeners() {

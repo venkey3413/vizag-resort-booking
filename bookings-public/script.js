@@ -6,23 +6,39 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupEventBridgeSync() {
-    console.log('📡 Pure EventBridge sync enabled - no polling');
+    console.log('📡 EventBridge + fallback polling enabled');
     
-    // Listen for EventBridge events via Server-Sent Events
+    // Primary: EventBridge via Server-Sent Events
     const eventSource = new EventSource('/api/events');
     
     eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
         
         if (data.type === 'booking.created' || data.type === 'booking.updated' || data.type === 'payment.updated') {
-            console.log('📡 EventBridge booking update received');
-            loadBookings(); // Refresh only when EventBridge triggers
+            console.log('📡 EventBridge update received');
+            loadBookings();
         }
     };
     
     eventSource.onerror = function(error) {
-        console.log('⚠️ EventBridge connection error');
+        console.log('⚠️ EventBridge connection error, fallback active');
     };
+    
+    // Fallback: Polling every 30 seconds as backup
+    setInterval(async () => {
+        try {
+            const response = await fetch('/api/bookings');
+            const newBookings = await response.json();
+            
+            if (JSON.stringify(newBookings) !== JSON.stringify(bookings)) {
+                console.log('🔄 Fallback sync detected changes');
+                bookings = newBookings;
+                displayBookings();
+            }
+        } catch (error) {
+            // Silent fallback
+        }
+    }, 30000);
 }
 
 async function loadBookings() {
