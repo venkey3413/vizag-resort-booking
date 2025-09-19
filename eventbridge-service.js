@@ -33,6 +33,7 @@ const EVENTS = {
     RESORT_ADDED: 'Resort Added',
     RESORT_UPDATED: 'Resort Updated', 
     RESORT_DELETED: 'Resort Deleted',
+    RESORT_CREATED: 'Resort Created',
     BOOKING_CREATED: 'Booking Created',
     BOOKING_DELETED: 'Booking Deleted',
     PAYMENT_UPDATED: 'Payment Updated'

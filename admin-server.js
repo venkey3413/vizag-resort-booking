@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
+const { publishEvent, EVENTS } = require('./eventbridge-service');
 
 const app = express();
 const PORT = 3001;
@@ -17,6 +18,15 @@ async function initDB() {
         filename: './resort_booking.db',
         driver: sqlite3.Database
     });
+    
+    // Add amenities column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE resorts ADD COLUMN amenities TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
+    console.log('✅ Admin database initialized');
 }
 
 // Add resort endpoint
@@ -28,6 +38,18 @@ app.post('/api/resorts', async (req, res) => {
             INSERT INTO resorts (name, location, price, description, amenities, image, gallery, videos, map_link)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [name, location, price, description, amenities, image, gallery, videos, map_link]);
+        
+        // Publish resort created event
+        try {
+            await publishEvent('resort.admin', EVENTS.RESORT_ADDED, {
+                resortId: result.lastID,
+                name: name,
+                location: location,
+                price: price
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ success: true, id: result.lastID });
     } catch (error) {
@@ -59,6 +81,17 @@ app.put('/api/resorts/:id', async (req, res) => {
             WHERE id = ?
         `, [name, location, price, description, amenities, image, gallery, videos, map_link, id]);
         
+        // Publish resort updated event
+        try {
+            await publishEvent('resort.admin', EVENTS.RESORT_UPDATED, {
+                resortId: id,
+                name: name,
+                amenities: amenities
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
         res.json({ success: true });
     } catch (error) {
         console.error('Update resort error:', error);
@@ -71,6 +104,16 @@ app.delete('/api/resorts/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await db.run('DELETE FROM resorts WHERE id = ?', [id]);
+        
+        // Publish resort deleted event
+        try {
+            await publishEvent('resort.admin', EVENTS.RESORT_DELETED, {
+                resortId: id
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
         res.json({ success: true });
     } catch (error) {
         console.error('Delete resort error:', error);
