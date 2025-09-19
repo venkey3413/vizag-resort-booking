@@ -249,6 +249,8 @@ app.get('/api/payment-proof/:bookingId', async (req, res) => {
 });
 
 // EventBridge Server-Sent Events endpoint
+const sseClients = [];
+
 app.get('/api/events', (req, res) => {
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
@@ -257,6 +259,7 @@ app.get('/api/events', (req, res) => {
         'Access-Control-Allow-Origin': '*'
     });
     
+    sseClients.push(res);
     res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
     
     const keepAlive = setInterval(() => {
@@ -265,6 +268,8 @@ app.get('/api/events', (req, res) => {
     
     req.on('close', () => {
         clearInterval(keepAlive);
+        const index = sseClients.indexOf(res);
+        if (index !== -1) sseClients.splice(index, 1);
     });
 });
 
