@@ -16,7 +16,7 @@ async function sendInvoiceEmail(booking) {
         const invoiceHTML = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <img src="https://vizagresortbooking.in/logo.png" alt="Vizag Resort Booking" style="max-width: 150px; height: auto;">
+                    <img src="https://vizagresortbooking.in/cropped_circle_image.png" alt="Vizag Resort Booking" style="max-width: 150px; height: auto;">
                 </div>
                 <h2 style="color: #333; text-align: center;">Booking Confirmation</h2>
                 
