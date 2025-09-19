@@ -8,7 +8,7 @@ const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 
 const app = express();
-const PORT = 3002;
+const PORT = 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -160,22 +160,7 @@ app.post('/api/test-backup', async (req, res) => {
     }
 });
 
-// Add resort endpoint
-app.post('/api/resorts', async (req, res) => {
-    try {
-        const { name, location, price, description, amenities, image, gallery, videos, map_link } = req.body;
-        
-        const result = await db.run(`
-            INSERT INTO resorts (name, location, price, description, amenities, image, gallery, videos, map_link)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [name, location, price, description, amenities, image, gallery, videos, map_link]);
-        
-        res.json({ success: true, id: result.lastID });
-    } catch (error) {
-        console.error('Add resort error:', error);
-        res.status(500).json({ error: 'Failed to add resort' });
-    }
-});
+
 
 initDB().then(() => {
     // Start automatic backups

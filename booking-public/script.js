@@ -3,58 +3,9 @@ let bookings = [];
 document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
     setupWebSocketSync();
-    setupEventListeners();
 });
 
-function setupEventListeners() {
-    // Add resort form submission
-    const form = document.getElementById('addResortForm');
-    if (form) {
-        form.addEventListener('submit', handleAddResort);
-    }
-}
 
-function showAddResortForm() {
-    document.getElementById('addResortModal').style.display = 'block';
-}
-
-function closeAddResortModal() {
-    document.getElementById('addResortModal').style.display = 'none';
-    document.getElementById('addResortForm').reset();
-}
-
-async function handleAddResort(e) {
-    e.preventDefault();
-    
-    const resortData = {
-        name: document.getElementById('resortName').value,
-        location: document.getElementById('resortLocation').value,
-        price: parseInt(document.getElementById('resortPrice').value),
-        description: document.getElementById('resortDescription').value,
-        amenities: document.getElementById('resortAmenities').value,
-        image: document.getElementById('resortImage').value,
-        gallery: document.getElementById('resortGallery').value,
-        videos: document.getElementById('resortVideos').value,
-        map_link: document.getElementById('resortMapLink').value
-    };
-    
-    try {
-        const response = await fetch('/api/resorts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(resortData)
-        });
-        
-        if (response.ok) {
-            showNotification('Resort added successfully!', 'success');
-            closeAddResortModal();
-        } else {
-            showNotification('Failed to add resort', 'error');
-        }
-    } catch (error) {
-        showNotification('Error adding resort', 'error');
-    }
-}
 
 function setupWebSocketSync() {
     console.log('🔄 Booking EventBridge sync enabled');

@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
-const { publishEvent, EVENTS } = require('./eventbridge-service');
 
 const app = express();
 const PORT = 3001;
@@ -18,123 +17,32 @@ async function initDB() {
         filename: './resort_booking.db',
         driver: sqlite3.Database
     });
-    
-    // Add new columns if they don't exist
-    try {
-        await db.run('ALTER TABLE resorts ADD COLUMN map_link TEXT');
-    } catch (error) {}
-    
-    try {
-        await db.run('ALTER TABLE resorts ADD COLUMN gallery TEXT');
-    } catch (error) {}
-    
-    try {
-        await db.run('ALTER TABLE resorts ADD COLUMN videos TEXT');
-    } catch (error) {}
-    
-
 }
 
-// Admin API Routes
+// Add resort endpoint
+app.post('/api/resorts', async (req, res) => {
+    try {
+        const { name, location, price, description, amenities, image, gallery, videos, map_link } = req.body;
+        
+        const result = await db.run(`
+            INSERT INTO resorts (name, location, price, description, amenities, image, gallery, videos, map_link)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [name, location, price, description, amenities, image, gallery, videos, map_link]);
+        
+        res.json({ success: true, id: result.lastID });
+    } catch (error) {
+        console.error('Add resort error:', error);
+        res.status(500).json({ error: 'Failed to add resort' });
+    }
+});
+
+// Get resorts endpoint
 app.get('/api/resorts', async (req, res) => {
     try {
         const resorts = await db.all('SELECT * FROM resorts ORDER BY id DESC');
         res.json(resorts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch resorts' });
-    }
-});
-
-app.post('/api/resorts', async (req, res) => {
-    try {
-        const { name, location, price, description, image, gallery, videos, mapLink } = req.body;
-        
-        if (!name || !location || !price) {
-            return res.status(400).json({ error: 'Name, location, and price are required' });
-        }
-        
-        const result = await db.run(
-            'INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, location, parseInt(price), description || '', image || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500', gallery || '', videos || '', mapLink || '']
-        );
-        
-        // Publish resort added event
-        try {
-            await publishEvent('resort.admin', EVENTS.RESORT_ADDED, {
-                resortId: result.lastID,
-                name,
-                location,
-                price
-            });
-        } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
-            // Fallback: Direct webhook call
-            try {
-                const response = await fetch('http://localhost:3003/webhook/eventbridge', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        source: 'resort.admin',
-                        'detail-type': 'Resort Added',
-                        detail: { resortId: result.lastID, name, location, price }
-                    })
-                });
-                console.log('✅ Direct webhook fallback successful');
-            } catch (webhookError) {
-                console.error('❌ Webhook fallback failed:', webhookError);
-            }
-        }
-        
-        res.json({ id: result.lastID, message: 'Resort added successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to add resort' });
-    }
-});
-
-app.put('/api/resorts/:id', async (req, res) => {
-    try {
-        const { name, location, price, description, image, gallery, videos, mapLink } = req.body;
-        const id = req.params.id;
-        
-        await db.run(
-            'UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, image = ?, gallery = ?, videos = ?, map_link = ? WHERE id = ?',
-            [name, location, parseInt(price), description, image, gallery || '', videos || '', mapLink || '', id]
-        );
-        
-        // Publish resort updated event
-        try {
-            await publishEvent('resort.admin', EVENTS.RESORT_UPDATED, {
-                resortId: id,
-                name,
-                location,
-                price
-            });
-        } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
-        }
-        
-        res.json({ message: 'Resort updated successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to update resort' });
-    }
-});
-
-app.delete('/api/resorts/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
-        await db.run('DELETE FROM resorts WHERE id = ?', [id]);
-        // Publish resort deleted event
-        try {
-            await publishEvent('resort.admin', EVENTS.RESORT_DELETED, {
-                resortId: id
-            });
-        } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
-        }
-        
-        res.json({ message: 'Resort deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to delete resort' });
     }
 });
 
