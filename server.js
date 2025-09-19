@@ -264,23 +264,7 @@ app.post('/api/bookings', async (req, res) => {
     }
 });
 
-app.post('/api/bookings/:id/temp-card-payment', async (req, res) => {
-    try {
-        const bookingId = req.params.id;
-        const { paymentId } = req.body;
-        
-        // Update booking status to temporary card payment (not visible in booking list yet)
-        await db.run(
-            'UPDATE bookings SET status = ?, transaction_id = ? WHERE id = ?',
-            ['temp_card_payment', paymentId, bookingId]
-        );
-        
-        res.json({ message: 'Temporary card payment stored' });
-    } catch (error) {
-        console.error('Temporary card payment error:', error);
-        res.status(500).json({ error: 'Failed to store temporary payment' });
-    }
-});
+// Removed temporary card payment endpoint
 
 app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
     try {
@@ -421,7 +405,7 @@ app.get('/api/bookings', async (req, res) => {
                 COALESCE(b.booking_reference, 'RB' || SUBSTR('000000' || b.id, -6)) as booking_ref
             FROM bookings b 
             JOIN resorts r ON b.resort_id = r.id 
-            WHERE b.status != 'temp_card_payment'
+
             ORDER BY b.booking_date DESC
         `);
         res.json(bookings);
