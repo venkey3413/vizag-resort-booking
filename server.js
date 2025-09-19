@@ -304,7 +304,7 @@ app.post('/api/bookings/:id/notify-card-payment', async (req, res) => {
 💰 Total Paid: ₹${totalCardAmount.toLocaleString()}
 🔢 Payment ID: ${paymentId}
 
-⏰ Paid at: ${new Date().toLocaleString('en-IN')}
+⏰ Paid at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
 
 👉 Check Razorpay dashboard and mark as paid in booking panel`;
                 
@@ -366,7 +366,7 @@ app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
 💳 Card Last 4: ****${cardLastFour}
 ⚠️ Status: Pending Verification
 
-⏰ Submitted at: ${new Date().toLocaleString('en-IN')}
+⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
 
 👉 Please verify and mark as paid in booking panel`;
                 
@@ -423,7 +423,7 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
 🔢 UTR ID: ${transactionId}
 ⚠️ Status: Pending Verification
 
-⏰ Submitted at: ${new Date().toLocaleString('en-IN')}`;
+⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
                 
                 await sendTelegramNotification(message);
             }
