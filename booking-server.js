@@ -12,7 +12,7 @@ const PORT = 3001;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('booking-public'));
+app.use(express.static('bookings-public'));
 
 let db;
 
