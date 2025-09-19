@@ -14,7 +14,10 @@ async function sendInvoiceEmail(booking) {
     console.log('📧 Attempting to send email to:', booking.email);
     try {
         const invoiceHTML = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-image: url('https://vizagresortbooking.in/logo.png'); background-repeat: no-repeat; background-position: center; background-size: 200px; background-attachment: fixed; opacity: 0.1;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="https://vizagresortbooking.in/logo.png" alt="Vizag Resort Booking" style="max-width: 150px; height: auto;">
+                </div>
                 <h2 style="color: #333; text-align: center;">Booking Confirmation</h2>
                 
                 <p>Dear ${booking.guest_name},</p>
