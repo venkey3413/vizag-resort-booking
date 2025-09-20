@@ -236,6 +236,7 @@
     </footer>
 
     <script>
+    console.log('Inline script loaded');
     // Define applyCoupon function inline to ensure it's available
     function applyCoupon() {
         console.log('Inline applyCoupon called');
@@ -245,6 +246,9 @@
             console.error('applyCouponImpl not loaded yet');
         }
     }
+    console.log('applyCoupon function defined:', typeof applyCoupon);
+    window.applyCoupon = applyCoupon;
+    console.log('applyCoupon assigned to window:', typeof window.applyCoupon);
     </script>
     <script src="script.js?v=19"></script>
     
