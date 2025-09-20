@@ -964,6 +964,40 @@ function applyCoupon() {
     }
 }
 
+function applyCoupon() {
+    const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
+    const messageDiv = document.getElementById('couponMessage');
+    
+    if (!couponCode) {
+        messageDiv.innerHTML = '<span class="coupon-error">Please enter a coupon code</span>';
+        return;
+    }
+    
+    if (coupons[couponCode]) {
+        const coupon = coupons[couponCode];
+        appliedCoupon = couponCode;
+        
+        // Calculate discount
+        const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
+        
+        if (coupon.type === 'percentage') {
+            discountAmount = Math.round(baseAmount * coupon.discount / 100);
+        } else {
+            discountAmount = coupon.discount;
+        }
+        
+        // Update UI
+        document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
+        document.getElementById('discountRow').style.display = 'flex';
+        messageDiv.innerHTML = `<span class="coupon-success">Coupon applied! You saved ₹${discountAmount.toLocaleString()}</span>`;
+        
+        // Update total
+        updateTotalPrice();
+    } else {
+        messageDiv.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
+    }
+}
+
 function updateTotalPrice() {
     const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
     const finalAmount = baseAmount - discountAmount;
