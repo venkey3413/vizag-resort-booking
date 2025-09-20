@@ -1,4 +1,13 @@
 let resorts = [];
+let appliedCoupon = null;
+let discountAmount = 0;
+
+// Coupon codes and discounts
+const coupons = {
+    'WELCOME10': { discount: 10, type: 'percentage' },
+    'SAVE500': { discount: 500, type: 'fixed' },
+    'FIRST20': { discount: 20, type: 'percentage' }
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
@@ -157,13 +166,15 @@ function calculateTotal() {
     const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
     const total = basePrice + platformFee;
     
-    document.getElementById('totalAmount').innerHTML = `
-        <div>Base Price: ₹${basePrice.toLocaleString()}</div>
-        <div>Platform Fee (1.5%): ₹${platformFee.toLocaleString()}</div>
-        <div style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 5px;">
-            Total: ₹${total.toLocaleString()}
-        </div>
-    `;
+    document.getElementById('baseAmount').textContent = `₹${total.toLocaleString()}`;
+    document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
+    
+    // Reset coupon when dates change
+    appliedCoupon = null;
+    discountAmount = 0;
+    document.getElementById('discountRow').style.display = 'none';
+    document.getElementById('couponCode').value = '';
+    document.getElementById('couponMessage').innerHTML = '';
 }
 
 async function handleBooking(e) {
@@ -907,4 +918,43 @@ function displayResorts() {
     
     // Setup rating functionality after DOM is updated
     setTimeout(setupRatingStars, 100);
+}
+function applyCoupon() {
+    const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
+    const messageDiv = document.getElementById('couponMessage');
+    
+    if (!couponCode) {
+        messageDiv.innerHTML = '<span class="coupon-error">Please enter a coupon code</span>';
+        return;
+    }
+    
+    if (coupons[couponCode]) {
+        const coupon = coupons[couponCode];
+        appliedCoupon = couponCode;
+        
+        // Calculate discount
+        const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
+        
+        if (coupon.type === 'percentage') {
+            discountAmount = Math.round(baseAmount * coupon.discount / 100);
+        } else {
+            discountAmount = coupon.discount;
+        }
+        
+        // Update UI
+        document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
+        document.getElementById('discountRow').style.display = 'flex';
+        messageDiv.innerHTML = `<span class="coupon-success">Coupon applied! You saved ₹${discountAmount.toLocaleString()}</span>`;
+        
+        // Update total
+        updateTotalPrice();
+    } else {
+        messageDiv.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
+    }
+}
+
+function updateTotalPrice() {
+    const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
+    const finalAmount = baseAmount - discountAmount;
+    document.getElementById('totalAmount').textContent = `₹${finalAmount.toLocaleString()}`;
 }

@@ -1419,3 +1419,38 @@ footer p {
         height: 250px !important;
     }
 }
+/* Coupon Styles */
+.coupon-input {
+    display: flex;
+    gap: 10px;
+}
+
+.coupon-input input {
+    flex: 1;
+}
+
+.coupon-input button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.coupon-input button:hover {
+    background: #0056b3;
+}
+
+.coupon-message {
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+.coupon-success {
+    color: green;
+}
+
+.coupon-error {
+    color: red;
+}

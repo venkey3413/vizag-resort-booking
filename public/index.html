@@ -179,7 +179,24 @@
                     <input type="number" id="guests" min="1" max="10" value="2" required>
                 </div>
                 
+                <div class="form-group">
+                    <label for="couponCode">Coupon Code (Optional):</label>
+                    <div class="coupon-input">
+                        <input type="text" id="couponCode" placeholder="Enter coupon code">
+                        <button type="button" id="applyCoupon" onclick="applyCoupon()">Apply</button>
+                    </div>
+                    <div id="couponMessage" class="coupon-message"></div>
+                </div>
+                
                 <div class="price-summary">
+                    <div class="price-row">
+                        <span>Base Amount:</span>
+                        <span id="baseAmount">₹0</span>
+                    </div>
+                    <div class="price-row" id="discountRow" style="display: none;">
+                        <span>Discount:</span>
+                        <span id="discountAmount" style="color: green;">-₹0</span>
+                    </div>
                     <div class="price-row">
                         <span>Total Amount:</span>
                         <span id="totalAmount">₹0</span>
