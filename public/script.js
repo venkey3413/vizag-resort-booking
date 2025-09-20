@@ -970,6 +970,10 @@ function displayResorts() {
     // Setup rating functionality after DOM is updated
     setTimeout(setupRatingStars, 100);
 }
+
+// Make applyCoupon globally accessible
+window.applyCoupon = applyCoupon;
+window.updateTotalPrice = updateTotalPrice;
 function applyCoupon() {
     const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
     const messageDiv = document.getElementById('couponMessage');
