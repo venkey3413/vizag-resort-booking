@@ -3,8 +3,8 @@ let appliedCoupon = null;
 let discountAmount = 0;
 let coupons = {};
 
-// Global functions - defined first
-window.applyCoupon = function() {
+// Define applyCoupon globally before anything else
+function applyCoupon() {
     console.log('applyCoupon called');
     const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
     const messageDiv = document.getElementById('couponMessage');
@@ -39,13 +39,17 @@ window.applyCoupon = function() {
     } else {
         messageDiv.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
     }
-};
+}
 
-window.updateTotalPrice = function() {
+function updateTotalPrice() {
     const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
     const finalAmount = baseAmount - discountAmount;
     document.getElementById('totalAmount').textContent = `₹${finalAmount.toLocaleString()}`;
-};
+}
+
+// Make functions globally accessible
+window.applyCoupon = applyCoupon;
+window.updateTotalPrice = updateTotalPrice;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
