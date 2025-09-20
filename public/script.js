@@ -5,11 +5,8 @@ let coupons = {};
 
 // Define applyCoupon implementation
 function applyCouponImpl() {
-    console.log('applyCoupon called');
     const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
     const messageDiv = document.getElementById('couponMessage');
-    console.log('Coupon code entered:', couponCode);
-    console.log('Available coupons:', coupons);
     
     if (!couponCode) {
         messageDiv.innerHTML = '<span class="coupon-error">Please enter a coupon code</span>';
@@ -47,9 +44,7 @@ function updateTotalPrice() {
     document.getElementById('totalAmount').textContent = `₹${finalAmount.toLocaleString()}`;
 }
 
-// Make functions globally accessible
-window.applyCouponImpl = applyCouponImpl;
-window.updateTotalPrice = updateTotalPrice;
+
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
@@ -63,10 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadCoupons() {
     try {
-        console.log('Loading coupons...');
         const response = await fetch('/api/coupons');
         const couponList = await response.json();
-        console.log('Coupons loaded:', couponList);
         coupons = {};
         couponList.forEach(coupon => {
             coupons[coupon.code] = {
@@ -74,7 +67,6 @@ async function loadCoupons() {
                 type: coupon.type
             };
         });
-        console.log('Coupons object:', coupons);
     } catch (error) {
         console.error('Error loading coupons:', error);
     }

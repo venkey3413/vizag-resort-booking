@@ -235,22 +235,8 @@
         </div>
     </footer>
 
-    <script>
-    console.log('Inline script loaded');
-    // Define applyCoupon function inline to ensure it's available
-    function applyCoupon() {
-        console.log('Inline applyCoupon called');
-        if (window.applyCouponImpl) {
-            window.applyCouponImpl();
-        } else {
-            console.error('applyCouponImpl not loaded yet');
-        }
-    }
-    console.log('applyCoupon function defined:', typeof applyCoupon);
-    window.applyCoupon = applyCoupon;
-    console.log('applyCoupon assigned to window:', typeof window.applyCoupon);
-    </script>
-    <script src="script.js?v=20"></script>
+
+    <script src="script.js?v=21"></script>
     
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
