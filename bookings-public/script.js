@@ -281,3 +281,72 @@ async function generateInvoice(id) {
         alert('Failed to generate invoice');
     }
 }
+function showCouponModal() {
+    loadCoupons();
+    document.getElementById('couponModal').style.display = 'block';
+}
+
+function closeCouponModal() {
+    document.getElementById('couponModal').style.display = 'none';
+}
+
+async function loadCoupons() {
+    try {
+        const response = await fetch('/api/coupons');
+        const coupons = await response.json();
+        const list = document.getElementById('couponList');
+        list.innerHTML = coupons.map(coupon => `
+            <div class="coupon-item">
+                <span><strong>${coupon.code}</strong> - ${coupon.type === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount}</span>
+                <button onclick="deleteCoupon('${coupon.code}')">Delete</button>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading coupons:', error);
+    }
+}
+
+async function createCoupon() {
+    const code = document.getElementById('couponCode').value.trim().toUpperCase();
+    const type = document.getElementById('couponType').value;
+    const discount = parseInt(document.getElementById('couponDiscount').value);
+    
+    if (!code || !discount) {
+        alert('Please fill all fields');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/coupons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, type, discount })
+        });
+        
+        if (response.ok) {
+            alert('Coupon created successfully');
+            document.getElementById('couponCode').value = '';
+            document.getElementById('couponDiscount').value = '';
+            loadCoupons();
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Failed to create coupon');
+        }
+    } catch (error) {
+        alert('Network error');
+    }
+}
+
+async function deleteCoupon(code) {
+    if (!confirm(`Delete coupon ${code}?`)) return;
+    
+    try {
+        const response = await fetch(`/api/coupons/${code}`, { method: 'DELETE' });
+        if (response.ok) {
+            alert('Coupon deleted');
+            loadCoupons();
+        }
+    } catch (error) {
+        alert('Failed to delete coupon');
+    }
+}

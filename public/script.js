@@ -1,22 +1,33 @@
 let resorts = [];
 let appliedCoupon = null;
 let discountAmount = 0;
-
-// Coupon codes and discounts
-const coupons = {
-    'WELCOME10': { discount: 10, type: 'percentage' },
-    'SAVE500': { discount: 500, type: 'fixed' },
-    'FIRST20': { discount: 20, type: 'percentage' }
-};
+let coupons = {};
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
+    loadCoupons();
     setupEventListeners();
     setMinDate();
     setupLogoRotation();
     setupWebSocketSync();
     preloadQRCode();
 });
+
+async function loadCoupons() {
+    try {
+        const response = await fetch('/api/coupons');
+        const couponList = await response.json();
+        coupons = {};
+        couponList.forEach(coupon => {
+            coupons[coupon.code] = {
+                discount: coupon.discount,
+                type: coupon.type
+            };
+        });
+    } catch (error) {
+        console.error('Error loading coupons:', error);
+    }
+}
 
 function preloadQRCode() {
     const qrImage = new Image();

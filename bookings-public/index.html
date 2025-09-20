@@ -15,6 +15,7 @@
             <nav>
                 <a href="https://vizagresortbooking.in">Main Site</a>
                 <a href="https://vizagresortbooking.in:3001">Admin Panel</a>
+                <a href="#" onclick="showCouponModal()">Manage Coupons</a>
             </nav>
         </div>
     </header>
@@ -27,6 +28,24 @@
             </div>
         </section>
     </main>
+
+    <!-- Coupon Modal -->
+    <div id="couponModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Manage Coupons</h3>
+            <div class="coupon-form">
+                <input type="text" id="couponCode" placeholder="Coupon Code (e.g., SAVE20)" maxlength="20">
+                <select id="couponType">
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed Amount (₹)</option>
+                </select>
+                <input type="number" id="couponDiscount" placeholder="Discount Value" min="1">
+                <button onclick="createCoupon()">Create Coupon</button>
+            </div>
+            <div class="coupon-list" id="couponList"></div>
+            <button onclick="closeCouponModal()">Close</button>
+        </div>
+    </div>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="script.js"></script>

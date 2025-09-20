@@ -29,6 +29,15 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Create coupons table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS coupons (
+            code TEXT PRIMARY KEY,
+            type TEXT NOT NULL,
+            discount INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 
 }
 
@@ -247,6 +256,44 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
     } catch (error) {
         console.error('Cancel booking error:', error);
         res.status(500).json({ error: 'Failed to cancel booking' });
+    }
+});
+
+// Coupon management endpoints
+app.get('/api/coupons', async (req, res) => {
+    try {
+        const coupons = await db.all('SELECT * FROM coupons ORDER BY created_at DESC');
+        res.json(coupons);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch coupons' });
+    }
+});
+
+app.post('/api/coupons', async (req, res) => {
+    try {
+        const { code, type, discount } = req.body;
+        
+        if (!code || !type || !discount) {
+            return res.status(400).json({ error: 'All fields required' });
+        }
+        
+        await db.run('INSERT INTO coupons (code, type, discount) VALUES (?, ?, ?)', [code, type, discount]);
+        res.json({ message: 'Coupon created successfully' });
+    } catch (error) {
+        if (error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY') {
+            res.status(400).json({ error: 'Coupon code already exists' });
+        } else {
+            res.status(500).json({ error: 'Failed to create coupon' });
+        }
+    }
+});
+
+app.delete('/api/coupons/:code', async (req, res) => {
+    try {
+        await db.run('DELETE FROM coupons WHERE code = ?', [req.params.code]);
+        res.json({ message: 'Coupon deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete coupon' });
     }
 });
 

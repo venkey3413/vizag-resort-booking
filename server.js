@@ -524,6 +524,16 @@ app.get('/api/razorpay-key', (req, res) => {
     res.json({ key: process.env.RAZORPAY_KEY_ID });
 });
 
+// Endpoint to get active coupons
+app.get('/api/coupons', async (req, res) => {
+    try {
+        const coupons = await db.all('SELECT * FROM coupons');
+        res.json(coupons);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch coupons' });
+    }
+});
+
 // Endpoint to check card payment limits
 app.post('/api/check-card-limit', async (req, res) => {
     try {
