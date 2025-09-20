@@ -117,6 +117,9 @@ function setupEventListeners() {
     document.getElementById('checkOut').addEventListener('change', calculateTotal);
     document.getElementById('guests').addEventListener('change', calculateTotal);
     
+    // Coupon button event
+    document.getElementById('applyCouponBtn').addEventListener('click', applyCouponImpl);
+    
     // Phone number validation
     document.getElementById('phone').addEventListener('input', function(e) {
         let value = e.target.value;
