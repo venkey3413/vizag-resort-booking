@@ -260,7 +260,9 @@ async function handleBooking(e) {
         phone: document.getElementById('phone').value,
         checkIn: document.getElementById('checkIn').value,
         checkOut: document.getElementById('checkOut').value,
-        guests: document.getElementById('guests').value
+        guests: document.getElementById('guests').value,
+        couponCode: appliedCoupon,
+        discountAmount: discountAmount
     };
     
     // Date validation

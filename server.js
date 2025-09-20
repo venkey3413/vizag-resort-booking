@@ -147,7 +147,7 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/bookings', async (req, res) => {
     try {
-        const { resortId, guestName, email, phone, checkIn, checkOut, guests } = req.body;
+        const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount } = req.body;
 
         // Basic validation
         if (!resortId || !guestName || !email || !phone || !checkIn || !checkOut || !guests) {
@@ -206,20 +206,30 @@ app.post('/api/bookings', async (req, res) => {
             });
         }
 
-        // Calculate total price with platform fee
+        // Calculate total price with platform fee and discount
         const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
         const basePrice = resort.price * nights;
         const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
-        const totalPrice = basePrice + platformFee;
+        const subtotal = basePrice + platformFee;
+        const discount = discountAmount || 0;
+        const totalPrice = subtotal - discount;
 
         // Generate booking reference
         const bookingReference = `RB${String(Date.now()).slice(-6)}`;
         
+        // Add coupon columns to bookings table if they don't exist
+        try {
+            await db.run('ALTER TABLE bookings ADD COLUMN coupon_code TEXT');
+            await db.run('ALTER TABLE bookings ADD COLUMN discount_amount INTEGER DEFAULT 0');
+        } catch (error) {
+            // Columns already exist, ignore error
+        }
+        
         // Create booking
         const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice, bookingReference]);
+            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount]);
 
         // Generate UPI payment details
         const paymentDetails = generatePaymentDetails(totalPrice, result.lastID, guestName);
