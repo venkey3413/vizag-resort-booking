@@ -3,8 +3,8 @@ let appliedCoupon = null;
 let discountAmount = 0;
 let coupons = {};
 
-// Define applyCoupon globally before anything else
-function applyCoupon() {
+// Define applyCoupon implementation
+function applyCouponImpl() {
     console.log('applyCoupon called');
     const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
     const messageDiv = document.getElementById('couponMessage');
@@ -48,7 +48,7 @@ function updateTotalPrice() {
 }
 
 // Make functions globally accessible
-window.applyCoupon = applyCoupon;
+window.applyCouponImpl = applyCouponImpl;
 window.updateTotalPrice = updateTotalPrice;
 
 document.addEventListener('DOMContentLoaded', function() {
