@@ -3,33 +3,8 @@ let appliedCoupon = null;
 let discountAmount = 0;
 let coupons = {};
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadResorts();
-    loadCoupons();
-    setupEventListeners();
-    setMinDate();
-    setupLogoRotation();
-    setupWebSocketSync();
-    preloadQRCode();
-});
-
-async function loadCoupons() {
-    try {
-        const response = await fetch('/api/coupons');
-        const couponList = await response.json();
-        coupons = {};
-        couponList.forEach(coupon => {
-            coupons[coupon.code] = {
-                discount: coupon.discount,
-                type: coupon.type
-            };
-        });
-    } catch (error) {
-        console.error('Error loading coupons:', error);
-    }
-}
-
-function applyCoupon() {
+// Global functions - defined first
+window.applyCoupon = function() {
     const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
     const messageDiv = document.getElementById('couponMessage');
     
@@ -61,12 +36,38 @@ function applyCoupon() {
     } else {
         messageDiv.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
     }
-}
+};
 
-function updateTotalPrice() {
+window.updateTotalPrice = function() {
     const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
     const finalAmount = baseAmount - discountAmount;
     document.getElementById('totalAmount').textContent = `₹${finalAmount.toLocaleString()}`;
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadResorts();
+    loadCoupons();
+    setupEventListeners();
+    setMinDate();
+    setupLogoRotation();
+    setupWebSocketSync();
+    preloadQRCode();
+});
+
+async function loadCoupons() {
+    try {
+        const response = await fetch('/api/coupons');
+        const couponList = await response.json();
+        coupons = {};
+        couponList.forEach(coupon => {
+            coupons[coupon.code] = {
+                discount: coupon.discount,
+                type: coupon.type
+            };
+        });
+    } catch (error) {
+        console.error('Error loading coupons:', error);
+    }
 }
 
 function preloadQRCode() {
@@ -159,6 +160,16 @@ function displayResorts() {
                 </p>
                 <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
                 <p class="resort-description">${resort.description}</p>
+                ${resort.amenities ? `
+                    <div class="resort-amenities">
+                        <h4>🏨 Amenities:</h4>
+                        <div class="amenities-list">
+                            ${resort.amenities.split('\n').filter(a => a.trim()).map(amenity => 
+                                `<span class="amenity-tag">${amenity.trim()}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
                 <button class="book-btn" onclick="openBookingModal(${resort.id})">
                     Book Now
                 </button>
@@ -180,9 +191,10 @@ function displayResorts() {
             </div>
         </div>
     `).join('');
+    
+    // Setup rating functionality after DOM is updated
+    setTimeout(setupRatingStars, 100);
 }
-
-
 
 function openBookingModal(resortId) {
     const resort = resorts.find(r => r.id === resortId);
@@ -538,8 +550,6 @@ function setupGalleryThumbnails() {
     }).join('');
 }
 
-// Remove separate video section - videos now in slideshow
-
 function setGalleryImage(index) {
     currentGalleryIndex = index;
     updateGalleryImage();
@@ -561,8 +571,6 @@ function prevImage(resortId) {
         setupGalleryThumbnails();
     }
 }
-
-
 
 function showPaymentInterface(booking) {
     const paymentModal = document.createElement('div');
@@ -881,8 +889,6 @@ function showNotification(message, type) {
     }, duration);
 }
 
-
-
 // Rating functionality
 function setupRatingStars() {
     document.querySelectorAll('.rating-container').forEach(container => {
@@ -912,138 +918,4 @@ function highlightStars(stars, rating) {
     stars.forEach((star, index) => {
         star.textContent = index < rating ? '★' : '☆';
     });
-}
-
-// Call setup after resorts are displayed
-function displayResorts() {
-    const grid = document.getElementById('resortsGrid');
-    grid.innerHTML = resorts.map(resort => `
-        <div class="resort-card">
-            <div class="resort-gallery">
-                <img src="${resort.image}" alt="${resort.name}" class="resort-image main-image">
-                ${(resort.gallery || resort.videos) ? `
-                    <button class="view-more-btn" onclick="openGallery(${resort.id})">
-                        📸 View More
-                    </button>
-                ` : ''}
-            </div>
-            <div class="resort-info">
-                <h3>${resort.name}</h3>
-                <p class="resort-location">
-                    📍 ${resort.location}
-                    ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="view-map-btn">🗺️ View Map</a>` : ''}
-                </p>
-                <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
-                <p class="resort-description">${resort.description}</p>
-                ${resort.amenities ? `
-                    <div class="resort-amenities">
-                        <h4>🏨 Amenities:</h4>
-                        <div class="amenities-list">
-                            ${resort.amenities.split('\n').filter(a => a.trim()).map(amenity => 
-                                `<span class="amenity-tag">${amenity.trim()}</span>`
-                            ).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-                <button class="book-btn" onclick="openBookingModal(${resort.id})">
-                    Book Now
-                </button>
-                <div class="resort-footer">
-                    <div class="review-stars">
-                        <div class="rating-container" data-resort-id="${resort.id}">
-                            <span class="star" data-rating="1">☆</span>
-                            <span class="star" data-rating="2">☆</span>
-                            <span class="star" data-rating="3">☆</span>
-                            <span class="star" data-rating="4">☆</span>
-                            <span class="star" data-rating="5">☆</span>
-                        </div>
-                        <span class="review-text">Rate this resort</span>
-                    </div>
-                    <div class="cancellation-policy">
-                        <a href="Booking cancellation_policy.pdf" target="_blank" class="policy-text">Cancellation Policy</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `).join('');
-    
-    // Setup rating functionality after DOM is updated
-    setTimeout(setupRatingStars, 100);
-}
-
-// Make applyCoupon globally accessible
-window.applyCoupon = applyCoupon;
-window.updateTotalPrice = updateTotalPrice;
-function applyCoupon() {
-    const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
-    const messageDiv = document.getElementById('couponMessage');
-    
-    if (!couponCode) {
-        messageDiv.innerHTML = '<span class="coupon-error">Please enter a coupon code</span>';
-        return;
-    }
-    
-    if (coupons[couponCode]) {
-        const coupon = coupons[couponCode];
-        appliedCoupon = couponCode;
-        
-        // Calculate discount
-        const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
-        
-        if (coupon.type === 'percentage') {
-            discountAmount = Math.round(baseAmount * coupon.discount / 100);
-        } else {
-            discountAmount = coupon.discount;
-        }
-        
-        // Update UI
-        document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
-        document.getElementById('discountRow').style.display = 'flex';
-        messageDiv.innerHTML = `<span class="coupon-success">Coupon applied! You saved ₹${discountAmount.toLocaleString()}</span>`;
-        
-        // Update total
-        updateTotalPrice();
-    } else {
-        messageDiv.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
-    }
-}
-
-function applyCoupon() {
-    const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
-    const messageDiv = document.getElementById('couponMessage');
-    
-    if (!couponCode) {
-        messageDiv.innerHTML = '<span class="coupon-error">Please enter a coupon code</span>';
-        return;
-    }
-    
-    if (coupons[couponCode]) {
-        const coupon = coupons[couponCode];
-        appliedCoupon = couponCode;
-        
-        // Calculate discount
-        const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
-        
-        if (coupon.type === 'percentage') {
-            discountAmount = Math.round(baseAmount * coupon.discount / 100);
-        } else {
-            discountAmount = coupon.discount;
-        }
-        
-        // Update UI
-        document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
-        document.getElementById('discountRow').style.display = 'flex';
-        messageDiv.innerHTML = `<span class="coupon-success">Coupon applied! You saved ₹${discountAmount.toLocaleString()}</span>`;
-        
-        // Update total
-        updateTotalPrice();
-    } else {
-        messageDiv.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
-    }
-}
-
-function updateTotalPrice() {
-    const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
-    const finalAmount = baseAmount - discountAmount;
-    document.getElementById('totalAmount').textContent = `₹${finalAmount.toLocaleString()}`;
 }
