@@ -175,9 +175,9 @@ app.post('/api/bookings', async (req, res) => {
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
-            AND check_in = ?
+            AND check_in <= ? AND check_out > ?
             AND payment_status != 'paid'
-        `, [resortId, checkIn]);
+        `, [resortId, checkIn, checkIn]);
         
         if (unpaidBookingsForDate.count >= 2) {
             return res.status(400).json({ 
@@ -192,13 +192,14 @@ app.post('/api/bookings', async (req, res) => {
         }
         
         // Check if resort is already booked for the requested check-in date
+        // Allow booking on checkout date since checkout is 9 AM
         const paidBookingForDate = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
             AND payment_status = 'paid'
-            AND check_in = ?
-        `, [resortId, checkIn]);
+            AND check_in <= ? AND check_out > ?
+        `, [resortId, checkIn, checkIn]);
         
         if (paidBookingForDate.count > 0) {
             return res.status(400).json({ 
@@ -563,8 +564,8 @@ app.post('/api/check-card-limit', async (req, res) => {
             FROM bookings 
             WHERE resort_id = ? 
             AND payment_status = 'paid'
-            AND check_in = ?
-        `, [booking.resort_id, booking.check_in]);
+            AND check_in <= ? AND check_out > ?
+        `, [booking.resort_id, booking.check_in, booking.check_in]);
         
         if (paidBookingForDate.count > 0) {
             return res.status(400).json({ 
@@ -577,9 +578,9 @@ app.post('/api/check-card-limit', async (req, res) => {
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
-            AND check_in = ?
+            AND check_in <= ? AND check_out > ?
             AND payment_status != 'paid'
-        `, [booking.resort_id, booking.check_in]);
+        `, [booking.resort_id, booking.check_in, booking.check_in]);
         
         if (unpaidBookingsForDate.count >= 2) {
             return res.status(400).json({ 
