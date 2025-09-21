@@ -170,18 +170,18 @@ app.post('/api/bookings', async (req, res) => {
         // Define today string for queries
         const todayStr = new Date().toISOString().split('T')[0];
         
-        // Check for unpaid bookings for this resort today (max 2 total)
-        const unpaidBookingsToday = await db.get(`
+        // Check for unpaid bookings for this resort and check-in date (max 2 total)
+        const unpaidBookingsForDate = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
-            AND DATE(booking_date) = ?
+            AND check_in = ?
             AND payment_status != 'paid'
-        `, [resortId, todayStr]);
+        `, [resortId, checkIn]);
         
-        if (unpaidBookingsToday.count >= 2) {
+        if (unpaidBookingsForDate.count >= 2) {
             return res.status(400).json({ 
-                error: 'Maximum 2 pending bookings allowed per resort per day. Please wait for verification or choose another resort.' 
+                error: `Maximum 2 pending bookings allowed for ${new Date(checkIn).toLocaleDateString()}. Please wait for verification or choose another date.` 
             });
         }
 
@@ -191,18 +191,18 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Check if resort is already booked (any paid booking) for today
-        const paidBookingToday = await db.get(`
+        // Check if resort is already booked for the requested check-in date
+        const paidBookingForDate = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
             AND payment_status = 'paid'
-            AND DATE(booking_date) = ?
-        `, [resortId, todayStr]);
+            AND check_in = ?
+        `, [resortId, checkIn]);
         
-        if (paidBookingToday.count > 0) {
+        if (paidBookingForDate.count > 0) {
             return res.status(400).json({ 
-                error: 'This resort is already booked for today. Please choose a different resort or date.' 
+                error: `This resort is already booked for ${new Date(checkIn).toLocaleDateString()}. Please choose a different date.` 
             });
         }
 
@@ -557,33 +557,33 @@ app.post('/api/check-card-limit', async (req, res) => {
         
         const todayStr = new Date().toISOString().split('T')[0];
         
-        // Check if resort already has paid booking today
-        const paidBookingToday = await db.get(`
+        // Check if resort already has paid booking for the check-in date
+        const paidBookingForDate = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
             AND payment_status = 'paid'
-            AND DATE(booking_date) = ?
-        `, [booking.resort_id, todayStr]);
+            AND check_in = ?
+        `, [booking.resort_id, booking.check_in]);
         
-        if (paidBookingToday.count > 0) {
+        if (paidBookingForDate.count > 0) {
             return res.status(400).json({ 
-                error: 'This resort is already booked for today. Please choose a different resort.' 
+                error: `This resort is already booked for ${new Date(booking.check_in).toLocaleDateString()}. Please choose a different date.` 
             });
         }
         
-        // Check unpaid bookings limit (max 2 total)
-        const unpaidBookingsToday = await db.get(`
+        // Check unpaid bookings limit for the check-in date (max 2 total)
+        const unpaidBookingsForDate = await db.get(`
             SELECT COUNT(*) as count 
             FROM bookings 
             WHERE resort_id = ? 
-            AND DATE(booking_date) = ?
+            AND check_in = ?
             AND payment_status != 'paid'
-        `, [booking.resort_id, todayStr]);
+        `, [booking.resort_id, booking.check_in]);
         
-        if (unpaidBookingsToday.count >= 2) {
+        if (unpaidBookingsForDate.count >= 2) {
             return res.status(400).json({ 
-                error: 'Maximum 2 pending bookings allowed per resort per day. Please wait for verification.' 
+                error: `Maximum 2 pending bookings allowed for ${new Date(booking.check_in).toLocaleDateString()}. Please wait for verification.` 
             });
         }
         
