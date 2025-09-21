@@ -669,6 +669,15 @@ async function confirmPayment(bookingId) {
     const transactionId = document.getElementById('transactionId').value;
     
     if (!transactionId) {
+        // Send Telegram notification for booking without UTR
+        try {
+            await fetch(`/api/bookings/${bookingId}/notify-no-utr`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (error) {
+            console.error('Failed to send no-UTR notification:', error);
+        }
         showNotification('Please enter your 12-digit UTR number', 'error');
         return;
     }

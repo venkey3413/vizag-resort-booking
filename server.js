@@ -392,6 +392,51 @@ app.post('/api/bookings/:id/card-payment-proof', async (req, res) => {
     }
 });
 
+app.post('/api/bookings/:id/notify-no-utr', async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        
+        // Get booking details
+        const bookingDetails = await db.get(`
+            SELECT b.*, r.name as resort_name 
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE b.id = ?
+        `, [bookingId]);
+        
+        if (bookingDetails) {
+            // Send Telegram notification
+            try {
+                const message = `⚠️ BOOKING CONFIRMATION WITHOUT UTR!
+
+📋 Booking ID: ${bookingDetails.booking_reference || `RB${String(bookingDetails.id).padStart(6, '0')}`}
+👤 Guest: ${bookingDetails.guest_name}
+📧 Email: ${bookingDetails.email}
+📱 Phone: ${bookingDetails.phone}
+🏨 Resort: ${bookingDetails.resort_name}
+📅 Check-in: ${new Date(bookingDetails.check_in).toLocaleDateString('en-IN')}
+📅 Check-out: ${new Date(bookingDetails.check_out).toLocaleDateString('en-IN')}
+👥 Guests: ${bookingDetails.guests}
+💰 Amount: ₹${bookingDetails.total_price.toLocaleString()}
+
+❌ Customer clicked confirm without entering UTR
+⏰ Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+👉 Follow up with customer for payment`;
+                
+                await sendTelegramNotification(message);
+            } catch (telegramError) {
+                console.error('Telegram notification failed:', telegramError);
+            }
+        }
+        
+        res.json({ message: 'No-UTR notification sent' });
+    } catch (error) {
+        console.error('No-UTR notification error:', error);
+        res.status(500).json({ error: 'Failed to send notification' });
+    }
+});
+
 app.post('/api/bookings/:id/payment-proof', async (req, res) => {
     try {
         const bookingId = req.params.id;
