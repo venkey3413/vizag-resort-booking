@@ -535,6 +535,32 @@ app.get('/api/razorpay-key', (req, res) => {
     res.json({ key: process.env.RAZORPAY_KEY_ID });
 });
 
+// Endpoint to create Razorpay order
+app.post('/api/create-razorpay-order', async (req, res) => {
+    try {
+        const { amount, bookingId } = req.body;
+        
+        const Razorpay = require('razorpay');
+        const razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET
+        });
+        
+        const options = {
+            amount: amount * 100, // amount in paise
+            currency: 'INR',
+            receipt: `booking_${bookingId}`,
+            payment_capture: 1
+        };
+        
+        const order = await razorpay.orders.create(options);
+        res.json({ orderId: order.id, amount: order.amount });
+    } catch (error) {
+        console.error('Razorpay order creation error:', error);
+        res.status(500).json({ error: 'Failed to create order' });
+    }
+});
+
 // Endpoint to get active coupons
 app.get('/api/coupons', async (req, res) => {
     try {

@@ -725,6 +725,14 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
             return;
         }
         
+        // Create Razorpay order
+        const orderResponse = await fetch('/api/create-razorpay-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount, bookingId })
+        });
+        const { orderId } = await orderResponse.json();
+        
         // Get Razorpay key from server
         const keyResponse = await fetch('/api/razorpay-key');
         const { key } = await keyResponse.json();
@@ -732,6 +740,7 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
         const options = {
             key: key,
             amount: amount * 100, // Amount in paise
+            order_id: orderId,
             currency: 'INR',
             name: 'Vizag Resorts',
             description: 'Resort Booking Payment',
