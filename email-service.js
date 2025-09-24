@@ -55,7 +55,7 @@ async function sendInvoiceEmail(booking) {
         const fs = require('fs');
         
         // Try to attach PDF, but don't fail if missing
-        const pdfPath = path.join(__dirname, 'public', 'Cancellation & terms and conditions.pdf');
+        const pdfPath = path.join(__dirname, 'bookings-public', 'Cancellation & terms and conditions.pdf');
         const attachments = [];
         
         if (fs.existsSync(pdfPath)) {
