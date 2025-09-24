@@ -29,6 +29,23 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Create resorts table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS resorts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            location TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            description TEXT,
+            image TEXT,
+            gallery TEXT,
+            videos TEXT,
+            map_link TEXT,
+            amenities TEXT,
+            available INTEGER DEFAULT 1
+        )
+    `);
+    
     // Create coupons table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS coupons (
