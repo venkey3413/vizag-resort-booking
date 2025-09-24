@@ -51,11 +51,19 @@ async function sendInvoiceEmail(booking) {
             </div>
         `;
 
+        const path = require('path');
+        
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: booking.email,
             subject: 'Booking Confirmation – vizagresortbooking.in',
-            html: invoiceHTML
+            html: invoiceHTML,
+            attachments: [
+                {
+                    filename: 'Cancellation & terms and conditions.pdf',
+                    path: path.join(__dirname, 'public', 'Cancellation & terms and conditions.pdf')
+                }
+            ]
         };
 
         await transporter.sendMail(mailOptions);
