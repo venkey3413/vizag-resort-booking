@@ -51,11 +51,29 @@ async function sendInvoiceEmail(booking) {
             </div>
         `;
 
+        const path = require('path');
+        const fs = require('fs');
+        
+        // Try to attach PDF, but don't fail if missing
+        const pdfPath = path.join(__dirname, 'public', 'Cancellation & terms and conditions.pdf');
+        const attachments = [];
+        
+        if (fs.existsSync(pdfPath)) {
+            attachments.push({
+                filename: 'Terms and Conditions.pdf',
+                path: pdfPath
+            });
+            console.log('📎 PDF attachment added');
+        } else {
+            console.log('⚠️ PDF not found, sending email without attachment');
+        }
+        
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: booking.email,
             subject: 'Booking Confirmation – vizagresortbooking.in',
-            html: invoiceHTML
+            html: invoiceHTML,
+            attachments: attachments
         };
 
         await transporter.sendMail(mailOptions);
