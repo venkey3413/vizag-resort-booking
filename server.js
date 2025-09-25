@@ -202,18 +202,22 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Check for blocked dates (temporarily disabled)
-        // const blockedDates = await db.all(
-        //     'SELECT block_date FROM resort_blocks WHERE resort_id = ? AND block_date BETWEEN ? AND ?',
-        //     [resortId, checkIn, checkOut]
-        // );
-        // 
-        // if (blockedDates.length > 0) {
-        //     const blockedDatesList = blockedDates.map(b => new Date(b.block_date).toLocaleDateString()).join(', ');
-        //     return res.status(400).json({ 
-        //         error: `Resort is not available on the following dates: ${blockedDatesList}` 
-        //     });
-        // }
+        // Check for blocked dates
+        try {
+            const blockedDates = await db.all(
+                'SELECT block_date FROM resort_blocks WHERE resort_id = ? AND block_date BETWEEN ? AND ?',
+                [resortId, checkIn, checkOut]
+            );
+            
+            if (blockedDates.length > 0) {
+                const blockedDatesList = blockedDates.map(b => new Date(b.block_date).toLocaleDateString()).join(', ');
+                return res.status(400).json({ 
+                    error: `Resort is not available on the following dates: ${blockedDatesList}` 
+                });
+            }
+        } catch (error) {
+            console.log('Resort blocks table not found, skipping blocked date check');
+        }
         
         // Check if resort is already booked for the requested check-in date
         // Allow booking on checkout date since checkout is 9 AM
