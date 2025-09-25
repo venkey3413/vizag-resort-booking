@@ -77,7 +77,7 @@ app.get('/api/bookings', async (req, res) => {
             SELECT b.*, r.name as resort_name 
             FROM bookings b 
             JOIN resorts r ON b.resort_id = r.id 
-
+            WHERE b.status != 'cancelled'
             ORDER BY b.booking_date DESC
         `);
         res.json(bookings);
