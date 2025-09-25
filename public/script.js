@@ -245,6 +245,8 @@ function calculateTotal() {
     document.getElementById('couponMessage').innerHTML = '';
 }
 
+let pendingBookingData = null;
+
 async function handleBooking(e) {
     e.preventDefault();
     
@@ -304,25 +306,36 @@ async function handleBooking(e) {
     }
 
     try {
-        const response = await fetch('/api/bookings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(bookingData)
-        });
-
-        if (response.ok) {
-            const booking = await response.json();
-            showPaymentInterface(booking);
-            closeModal();
-        } else {
-            const error = await response.json();
-            showNotification(error.error || 'Booking failed', 'error');
+        // Just validate dates and availability, don't create booking yet
+        const resort = resorts.find(r => r.id == bookingData.resortId);
+        if (!resort) {
+            showNotification('Resort not found', 'error');
+            return;
         }
+        
+        // Calculate pricing
+        const checkInDate = new Date(bookingData.checkIn);
+        const checkOutDate = new Date(bookingData.checkOut);
+        const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
+        const basePrice = resort.price * nights;
+        const platformFee = Math.round(basePrice * 0.015);
+        const totalPrice = basePrice + platformFee - discountAmount;
+        
+        // Store booking data temporarily
+        pendingBookingData = {
+            ...bookingData,
+            resortName: resort.name,
+            basePrice,
+            platformFee,
+            totalPrice,
+            bookingReference: `RB${String(Date.now()).slice(-6)}`
+        };
+        
+        showPaymentInterface(pendingBookingData);
+        closeModal();
     } catch (error) {
-        console.error('Booking error:', error);
-        showNotification('Network error. Please try again.', 'error');
+        console.error('Booking validation error:', error);
+        showNotification('Validation failed. Please try again.', 'error');
     } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
@@ -617,7 +630,7 @@ function showPaymentInterface(booking) {
                     
                     <div class="payment-proof">
                         <input type="text" id="transactionId" placeholder="Enter 12-digit UTR number" maxlength="12" pattern="[0-9]{12}" required>
-                        <button onclick="confirmPayment(${booking.id})" class="confirm-payment-btn">
+                        <button onclick="confirmPayment()" class="confirm-payment-btn">
                             ✅ Confirm UPI Payment
                         </button>
                     </div>
@@ -653,24 +666,18 @@ function showPaymentInterface(booking) {
 let currentBookingId = null;
 
 function closePaymentModal() {
-    if (currentBookingId && confirm('Are you sure you want to close? This will cancel your booking.')) {
-        cancelBooking(currentBookingId);
-    }
     const modal = document.querySelector('.payment-modal');
     if (modal) {
         modal.remove();
-        currentBookingId = null;
+        pendingBookingData = null;
     }
 }
 
 function cancelPayment() {
-    if (confirm('Are you sure you want to cancel this payment? This will cancel your booking.')) {
-        if (currentBookingId) {
-            cancelBooking(currentBookingId);
-        }
+    if (confirm('Are you sure you want to cancel this payment?')) {
         closePaymentModal();
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        showNotification('Booking cancelled successfully.', 'error');
+        showNotification('Payment cancelled. No booking was created.', 'error');
     }
 }
 
@@ -685,19 +692,10 @@ async function cancelBooking(bookingId) {
     }
 }
 
-async function confirmPayment(bookingId) {
+async function confirmPayment() {
     const transactionId = document.getElementById('transactionId').value;
     
     if (!transactionId) {
-        // Send Telegram notification for booking without UTR
-        try {
-            await fetch(`/api/bookings/${bookingId}/notify-no-utr`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-        } catch (error) {
-            console.error('Failed to send no-UTR notification:', error);
-        }
         showNotification('Please enter your 12-digit UTR number', 'error');
         return;
     }
@@ -708,23 +706,26 @@ async function confirmPayment(bookingId) {
     }
     
     try {
-        const response = await fetch(`/api/bookings/${bookingId}/payment-proof`, {
+        // Now create the booking with payment info
+        const bookingResponse = await fetch('/api/bookings', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ transactionId })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...pendingBookingData,
+                transactionId
+            })
         });
         
-        if (response.ok) {
+        if (bookingResponse.ok) {
             showNotification('Your booking payment is being verified. You will be notified through email and WhatsApp.', 'success');
             closePaymentModal();
+            pendingBookingData = null;
         } else {
-            const error = await response.json();
-            showNotification(error.error || 'Payment confirmation failed', 'error');
+            const error = await bookingResponse.json();
+            showNotification(error.error || 'Booking failed', 'error');
         }
     } catch (error) {
-        console.error('Payment confirmation error:', error);
+        console.error('Booking creation error:', error);
         showNotification('Network error. Please try again.', 'error');
     }
 }
