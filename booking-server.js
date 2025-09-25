@@ -55,6 +55,18 @@ async function initDB() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
+    
+    // Create resort blocks table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS resort_blocks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resort_id INTEGER NOT NULL,
+            block_date DATE NOT NULL,
+            reason TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts (id)
+        )
+    `);
 
 }
 
@@ -311,6 +323,45 @@ app.delete('/api/coupons/:code', async (req, res) => {
         res.json({ message: 'Coupon deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete coupon' });
+    }
+});
+
+// Resort blocking endpoints
+app.get('/api/resort-blocks', async (req, res) => {
+    try {
+        const blocks = await db.all(`
+            SELECT rb.*, r.name as resort_name 
+            FROM resort_blocks rb 
+            JOIN resorts r ON rb.resort_id = r.id 
+            ORDER BY rb.block_date DESC
+        `);
+        res.json(blocks);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch resort blocks' });
+    }
+});
+
+app.post('/api/resort-blocks', async (req, res) => {
+    try {
+        const { resort_id, block_date, reason } = req.body;
+        
+        await db.run(
+            'INSERT INTO resort_blocks (resort_id, block_date, reason) VALUES (?, ?, ?)',
+            [resort_id, block_date, reason || 'Blocked by admin']
+        );
+        
+        res.json({ message: 'Resort blocked successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to block resort' });
+    }
+});
+
+app.delete('/api/resort-blocks/:id', async (req, res) => {
+    try {
+        await db.run('DELETE FROM resort_blocks WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Resort block removed successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to remove resort block' });
     }
 });
 

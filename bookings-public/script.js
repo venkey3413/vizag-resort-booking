@@ -350,3 +350,86 @@ async function deleteCoupon(code) {
         alert('Failed to delete coupon');
     }
 }
+
+// Resort blocking functions
+function showBlockModal() {
+    loadResorts();
+    loadBlocks();
+    document.getElementById('blockModal').style.display = 'block';
+}
+
+function closeBlockModal() {
+    document.getElementById('blockModal').style.display = 'none';
+}
+
+async function loadResorts() {
+    try {
+        const response = await fetch('/api/resorts');
+        const resorts = await response.json();
+        const select = document.getElementById('blockResortId');
+        select.innerHTML = '<option value="">Select Resort</option>' + 
+            resorts.map(resort => `<option value="${resort.id}">${resort.name}</option>`).join('');
+    } catch (error) {
+        console.error('Error loading resorts:', error);
+    }
+}
+
+async function loadBlocks() {
+    try {
+        const response = await fetch('/api/resort-blocks');
+        const blocks = await response.json();
+        const list = document.getElementById('blockList');
+        list.innerHTML = blocks.map(block => `
+            <div class="block-item">
+                <span><strong>${block.resort_name}</strong> - ${new Date(block.block_date).toLocaleDateString()} - ${block.reason || 'No reason'}</span>
+                <button onclick="removeBlock(${block.id})">Remove</button>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading blocks:', error);
+    }
+}
+
+async function blockResort() {
+    const resort_id = document.getElementById('blockResortId').value;
+    const block_date = document.getElementById('blockDate').value;
+    const reason = document.getElementById('blockReason').value;
+    
+    if (!resort_id || !block_date) {
+        alert('Please select resort and date');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/resort-blocks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resort_id, block_date, reason })
+        });
+        
+        if (response.ok) {
+            alert('Resort date blocked successfully');
+            document.getElementById('blockDate').value = '';
+            document.getElementById('blockReason').value = '';
+            loadBlocks();
+        } else {
+            alert('Failed to block resort date');
+        }
+    } catch (error) {
+        alert('Network error');
+    }
+}
+
+async function removeBlock(id) {
+    if (!confirm('Remove this block?')) return;
+    
+    try {
+        const response = await fetch(`/api/resort-blocks/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            alert('Block removed');
+            loadBlocks();
+        }
+    } catch (error) {
+        alert('Failed to remove block');
+    }
+}

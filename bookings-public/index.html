@@ -16,6 +16,7 @@
                 <a href="https://vizagresortbooking.in">Main Site</a>
                 <a href="https://vizagresortbooking.in:3001">Admin Panel</a>
                 <a href="#" onclick="showCouponModal()">Manage Coupons</a>
+                <a href="#" onclick="showBlockModal()">Block Resorts</a>
             </nav>
         </div>
     </header>
@@ -28,6 +29,23 @@
             </div>
         </section>
     </main>
+
+    <!-- Resort Block Modal -->
+    <div id="blockModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Block Resort Dates</h3>
+            <div class="block-form">
+                <select id="blockResortId">
+                    <option value="">Select Resort</option>
+                </select>
+                <input type="date" id="blockDate" required>
+                <input type="text" id="blockReason" placeholder="Reason (optional)">
+                <button onclick="blockResort()">Block Date</button>
+            </div>
+            <div class="block-list" id="blockList"></div>
+            <button onclick="closeBlockModal()">Close</button>
+        </div>
+    </div>
 
     <!-- Coupon Modal -->
     <div id="couponModal" class="modal" style="display: none;">
