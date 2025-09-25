@@ -313,6 +313,23 @@ async function handleBooking(e) {
             return;
         }
         
+        // Check availability with server
+        const availabilityResponse = await fetch('/api/check-availability', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                resortId: bookingData.resortId,
+                checkIn: bookingData.checkIn,
+                checkOut: bookingData.checkOut
+            })
+        });
+        
+        if (!availabilityResponse.ok) {
+            const error = await availabilityResponse.json();
+            showNotification(error.error || 'Resort not available for selected dates', 'error');
+            return;
+        }
+        
         // Calculate pricing
         const checkInDate = new Date(bookingData.checkIn);
         const checkOutDate = new Date(bookingData.checkOut);

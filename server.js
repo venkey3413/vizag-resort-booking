@@ -156,6 +156,63 @@ app.get('/api/resorts', async (req, res) => {
     }
 });
 
+app.post('/api/check-availability', async (req, res) => {
+    try {
+        const { resortId, checkIn, checkOut } = req.body;
+        
+        // Check for blocked dates
+        try {
+            const blockedCheckIn = await db.get(
+                'SELECT block_date FROM resort_blocks WHERE resort_id = ? AND block_date = ?',
+                [resortId, checkIn]
+            );
+            
+            if (blockedCheckIn) {
+                return res.status(400).json({ 
+                    error: `Resort is not available for check-in on ${new Date(checkIn).toLocaleDateString()}` 
+                });
+            }
+        } catch (error) {
+            console.log('Resort blocks table not found, skipping blocked date check');
+        }
+        
+        // Check if resort is already booked for the requested check-in date
+        const paidBookingForDate = await db.get(`
+            SELECT COUNT(*) as count 
+            FROM bookings 
+            WHERE resort_id = ? 
+            AND payment_status = 'paid'
+            AND check_in <= ? AND check_out > ?
+        `, [resortId, checkIn, checkIn]);
+        
+        if (paidBookingForDate.count > 0) {
+            return res.status(400).json({ 
+                error: `This resort is already booked for ${new Date(checkIn).toLocaleDateString()}. Please choose a different date.` 
+            });
+        }
+        
+        // Check unpaid bookings limit
+        const unpaidBookingsForDate = await db.get(`
+            SELECT COUNT(*) as count 
+            FROM bookings 
+            WHERE resort_id = ? 
+            AND check_in <= ? AND check_out > ?
+            AND payment_status != 'paid'
+        `, [resortId, checkIn, checkIn]);
+        
+        if (unpaidBookingsForDate.count >= 2) {
+            return res.status(400).json({ 
+                error: `Maximum 2 pending bookings allowed for ${new Date(checkIn).toLocaleDateString()}. Please wait for verification or choose another date.` 
+            });
+        }
+        
+        res.json({ available: true });
+    } catch (error) {
+        console.error('Availability check error:', error);
+        res.status(500).json({ error: 'Failed to check availability' });
+    }
+});
+
 app.post('/api/bookings', async (req, res) => {
     try {
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount, transactionId } = req.body;
