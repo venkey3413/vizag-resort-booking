@@ -202,17 +202,17 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
         
-        // Check for blocked dates
+        // Check for blocked dates (only check-in date, not check-out)
         try {
             const blockedDates = await db.all(
-                'SELECT block_date FROM resort_blocks WHERE resort_id = ? AND block_date BETWEEN ? AND ?',
+                'SELECT block_date FROM resort_blocks WHERE resort_id = ? AND block_date >= ? AND block_date < ?',
                 [resortId, checkIn, checkOut]
             );
             
             if (blockedDates.length > 0) {
                 const blockedDatesList = blockedDates.map(b => new Date(b.block_date).toLocaleDateString()).join(', ');
                 return res.status(400).json({ 
-                    error: `Resort is not available on the following dates: ${blockedDatesList}` 
+                    error: `Resort is not available for check-in on: ${blockedDatesList}` 
                 });
             }
         } catch (error) {
