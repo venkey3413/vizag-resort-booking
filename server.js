@@ -122,6 +122,17 @@ async function initDB() {
             FOREIGN KEY (booking_id) REFERENCES bookings (id)
         )
     `);
+    
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS resort_blocks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resort_id INTEGER NOT NULL,
+            block_date DATE NOT NULL,
+            reason TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts (id)
+        )
+    `);
 
     // Insert sample resorts
     const resortCount = await db.get('SELECT COUNT(*) as count FROM resorts');
@@ -189,6 +200,19 @@ app.post('/api/bookings', async (req, res) => {
         const resort = await db.get('SELECT * FROM resorts WHERE id = ?', [resortId]);
         if (!resort) {
             return res.status(404).json({ error: 'Resort not found' });
+        }
+        
+        // Check for blocked dates
+        const blockedDates = await db.all(
+            'SELECT block_date FROM resort_blocks WHERE resort_id = ? AND block_date BETWEEN ? AND ?',
+            [resortId, checkIn, checkOut]
+        );
+        
+        if (blockedDates.length > 0) {
+            const blockedDatesList = blockedDates.map(b => new Date(b.block_date).toLocaleDateString()).join(', ');
+            return res.status(400).json({ 
+                error: `Resort is not available on the following dates: ${blockedDatesList}` 
+            });
         }
         
         // Check if resort is already booked for the requested check-in date
