@@ -580,6 +580,7 @@ function prevImage(resortId) {
 }
 
 function showPaymentInterface(booking) {
+    currentBookingId = booking.id;
     const paymentModal = document.createElement('div');
     paymentModal.className = 'payment-modal';
     paymentModal.innerHTML = `
@@ -649,19 +650,38 @@ function showPaymentInterface(booking) {
     document.body.appendChild(paymentModal);
 }
 
+let currentBookingId = null;
+
 function closePaymentModal() {
+    if (currentBookingId && confirm('Are you sure you want to close? This will cancel your booking.')) {
+        cancelBooking(currentBookingId);
+    }
     const modal = document.querySelector('.payment-modal');
     if (modal) {
         modal.remove();
+        currentBookingId = null;
     }
 }
 
 function cancelPayment() {
-    if (confirm('Are you sure you want to cancel this payment? You will return to the main page.')) {
+    if (confirm('Are you sure you want to cancel this payment? This will cancel your booking.')) {
+        if (currentBookingId) {
+            cancelBooking(currentBookingId);
+        }
         closePaymentModal();
-        // Scroll to top of page
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        showNotification('Payment cancelled. You can try booking again.', 'error');
+        showNotification('Booking cancelled successfully.', 'error');
+    }
+}
+
+async function cancelBooking(bookingId) {
+    try {
+        await fetch(`/api/bookings/${bookingId}/cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
+        console.error('Failed to cancel booking:', error);
     }
 }
 
