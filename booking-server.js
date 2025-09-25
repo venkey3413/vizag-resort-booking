@@ -326,6 +326,31 @@ app.delete('/api/coupons/:code', async (req, res) => {
     }
 });
 
+// Resort management endpoints
+app.get('/api/resorts', async (req, res) => {
+    try {
+        const resorts = await db.all('SELECT * FROM resorts ORDER BY id DESC');
+        res.json(resorts);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch resorts' });
+    }
+});
+
+app.post('/api/resorts', async (req, res) => {
+    try {
+        const { name, location, price, description, image, gallery, videos, map_link, amenities } = req.body;
+        
+        await db.run(`
+            INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link, amenities)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [name, location, price, description, image, gallery, videos, map_link, amenities]);
+        
+        res.json({ message: 'Resort added successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add resort' });
+    }
+});
+
 // Resort blocking endpoints
 app.get('/api/resort-blocks', async (req, res) => {
     try {
