@@ -158,7 +158,7 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/bookings', async (req, res) => {
     try {
-        const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount } = req.body;
+        const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount, transactionId } = req.body;
 
         // Basic validation
         if (!resortId || !guestName || !email || !phone || !checkIn || !checkOut || !guests) {
@@ -253,11 +253,41 @@ app.post('/api/bookings', async (req, res) => {
             // Columns already exist, ignore error
         }
         
+        // Set initial status based on whether payment info is provided
+        const initialStatus = transactionId ? 'pending_verification' : 'pending_payment';
+        const paymentStatus = transactionId ? 'pending' : 'pending';
+        
         // Create booking
         const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount]);
+            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount, status, payment_status, transaction_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount, initialStatus, paymentStatus, transactionId]);
+        
+        // Store payment proof if transactionId provided
+        if (transactionId) {
+            await db.run(
+                'INSERT INTO payment_proofs (booking_id, transaction_id, created_at) VALUES (?, ?, datetime("now"))',
+                [result.lastID, transactionId]
+            );
+            
+            // Send Telegram notification for payment submission
+            try {
+                const message = `💳 PAYMENT SUBMITTED!
+
+📋 Booking ID: ${bookingReference}
+👤 Guest: ${guestName}
+🏖️ Resort: ${resort.name}
+💰 Amount: ₹${totalPrice.toLocaleString()}
+🔢 UTR ID: ${transactionId}
+⚠️ Status: Pending Verification
+
+⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+                
+                await sendTelegramNotification(message);
+            } catch (telegramError) {
+                console.error('Telegram notification failed:', telegramError);
+            }
+        }
 
         // Generate UPI payment details
         const paymentDetails = {
