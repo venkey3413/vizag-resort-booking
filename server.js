@@ -3,7 +3,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
-const { generatePaymentDetails } = require('./upi-service');
+// UPI service removed - generate payment details inline
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 
 
@@ -257,7 +257,11 @@ app.post('/api/bookings', async (req, res) => {
         `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount]);
 
         // Generate UPI payment details
-        const paymentDetails = generatePaymentDetails(totalPrice, result.lastID, guestName);
+        const paymentDetails = {
+            upiId: 'venkatesh3413@paytm',
+            amount: totalPrice,
+            note: `Booking ${bookingReference} - ${guestName}`
+        };
         
         const booking = {
             id: result.lastID,
