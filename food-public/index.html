@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Food - Vizag Resort Booking</title>
+    <link rel="icon" type="image/png" href="../public/cropped_circle_image.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="../public/cropped_circle_image.png" alt="Logo" class="logo-image">
+                <h1>My Food</h1>
+            </div>
+            <nav>
+                <a href="https://vizagresortbooking.in">Home</a>
+                <a href="#menu">Menu</a>
+                <a href="#cart">Cart</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Delicious Food Delivered to Your Resort</h2>
+                <p>Fresh, tasty meals prepared with love and delivered hot to your doorstep</p>
+            </div>
+        </section>
+
+        <section id="menu" class="menu-section">
+            <div class="container">
+                <h2>Our Menu</h2>
+                <div class="menu-grid" id="menuGrid">
+                    <!-- Menu items will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="cart" class="cart-section">
+            <div class="container">
+                <h2>Your Order</h2>
+                <div class="cart-container">
+                    <div id="cartItems" class="cart-items">
+                        <p class="empty-cart">Your cart is empty</p>
+                    </div>
+                    <div class="cart-total">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">₹0</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Delivery Fee:</span>
+                            <span id="deliveryFee">₹50</span>
+                        </div>
+                        <div class="total-row final-total">
+                            <span>Total:</span>
+                            <span id="totalAmount">₹50</span>
+                        </div>
+                        <button id="checkoutBtn" class="checkout-btn" onclick="openBookingModal()" disabled>
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Complete Your Order</h2>
+            <div class="booking-form">
+                <div class="form-group">
+                    <label for="bookingId">Booking ID:</label>
+                    <input type="text" id="bookingId" placeholder="Enter your resort booking ID" required>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number:</label>
+                    <input type="tel" id="phoneNumber" placeholder="+91 9876543210" required>
+                </div>
+                <div class="order-summary">
+                    <h3>Order Summary</h3>
+                    <div id="orderSummary"></div>
+                    <div class="total-summary">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="modalSubtotal">₹0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Delivery Fee:</span>
+                            <span>₹50</span>
+                        </div>
+                        <div class="summary-row final">
+                            <span>Total Amount:</span>
+                            <span id="modalTotal">₹50</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="confirmOrder()" class="confirm-btn">Confirm Order</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="contact">
+        <div class="container">
+            <p>&copy; 2024 My Food - Vizag Resort Booking. All rights reserved.</p>
+            <p>Contact: +91 9876543210 | Email: food@vizagresortbooking.in</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
