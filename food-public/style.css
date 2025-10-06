@@ -68,135 +68,48 @@ nav a:hover {
 
 /* Bulk Order Notice */
 .bulk-order-notice {
-    background: linear-gradient(45deg, #ff6b6b, #ffa500, #ff6b6b);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
+    background: linear-gradient(90deg, #ff6b6b, #ffa500, #ff6b6b);
+    background-size: 200% 100%;
+    animation: gradientShift 3s linear infinite;
     color: white;
-    padding: 15px 0;
+    padding: 8px 0;
     text-align: center;
     position: fixed;
     width: 100%;
-    top: 110px;
-    z-index: 998;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    top: 80px;
+    z-index: 999;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .notice-content {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.notice-icon {
-    font-size: 1.5rem;
-    animation: bounce 2s infinite;
 }
 
 .notice-text {
-    font-weight: bold;
-    font-size: 1rem;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    animation: pulse 2s infinite;
-}
-
-.whatsapp-link {
-    color: white;
-    text-decoration: none;
-    background: rgba(255,255,255,0.2);
-    padding: 8px 15px;
-    border-radius: 25px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    border: 2px solid rgba(255,255,255,0.3);
-}
-
-.whatsapp-link:hover {
-    background: rgba(255,255,255,0.3);
-    transform: scale(1.05);
-    border-color: rgba(255,255,255,0.5);
-}
-
-.whatsapp-icon {
-    font-size: 1.2rem;
-    animation: wiggle 1s ease-in-out infinite;
-}
-
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-10px); }
-    60% { transform: translateY(-5px); }
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
-}
-
-@keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-5deg); }
-    75% { transform: rotate(5deg); }
-}
-
-/* Food Order Notice */
-.food-order-notice {
-    background: linear-gradient(90deg, #ff6b6b, #ffa500, #ff6b6b);
-    background-size: 200% 100%;
-    animation: foodNoticeSlide 3s linear infinite;
-    color: white;
-    padding: 6px 0;
-    position: fixed;
-    width: 100%;
-    top: 80px;
-    z-index: 999;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.food-notice-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.food-notice-text {
     font-size: 0.75rem;
     font-weight: 600;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     letter-spacing: 0.4px;
-    animation: foodTextRun 8s linear infinite;
+    animation: textRun 12s linear infinite;
     white-space: nowrap;
     display: inline-block;
 }
 
-@keyframes foodNoticeSlide {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
-}
-
-@keyframes foodTextRun {
+@keyframes textRun {
     0% { transform: translateX(100vw); }
     100% { transform: translateX(-100%); }
 }
 
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
 /* Main Content */
 main {
-    margin-top: 170px;
+    margin-top: 110px;
 }
 
 .container {
@@ -712,19 +625,14 @@ footer {
         height: 150px;
     }
     
-    .food-order-notice {
-        padding: 5px 0;
-        top: 85px;
-    }
-    
-    .food-notice-text {
-        font-size: 0.7rem;
-        letter-spacing: 0.3px;
-    }
-    
     .bulk-order-notice {
-        padding: 12px 0;
-        top: 115px;
+        padding: 5px 0;
+        top: 75px;
+    }
+    
+    .notice-text {
+        font-size: 0.65rem;
+        letter-spacing: 0.3px;
     }
     
     .notice-content {
@@ -744,6 +652,6 @@ footer {
     }
     
     main {
-        margin-top: 190px;
+        margin-top: 110px;
     }
 }
