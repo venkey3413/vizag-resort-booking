@@ -81,8 +81,8 @@ function preloadQRCode() {
 }
 
 function setupEventListeners() {
-    // Navigation
-    document.querySelectorAll('nav a').forEach(link => {
+    // Navigation - only handle internal anchor links
+    document.querySelectorAll('nav a[href^="#"]').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const target = this.getAttribute('href').substring(1);
