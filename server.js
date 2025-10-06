@@ -6,9 +6,39 @@ const { publishEvent, EVENTS } = require('./eventbridge-service');
 // UPI service removed - generate payment details inline
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
-
+const AWS = require('aws-sdk');
 
 const path = require('path');
+
+// Configure AWS S3
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION || 'ap-south-1'
+});
+
+// S3 backup function
+async function backupInvoiceToS3(invoiceData, type) {
+    try {
+        const invoiceContent = JSON.stringify(invoiceData, null, 2);
+        const fileName = type === 'food' 
+            ? `food-invoices/${invoiceData.orderId}-${Date.now()}.json`
+            : `resort-invoices/${invoiceData.booking_reference || invoiceData.id}-${Date.now()}.json`;
+        
+        const params = {
+            Bucket: 'vizag-resort-backups',
+            Key: fileName,
+            Body: invoiceContent,
+            ContentType: 'application/json'
+        };
+        
+        await s3.upload(params).promise();
+        console.log(`Invoice backed up to S3: ${fileName}`);
+    } catch (error) {
+        console.error('S3 backup error:', error);
+        throw error;
+    }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1049,6 +1079,14 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
             
             await sendInvoiceEmail(invoiceData, 'food');
             console.log(`Food order invoice sent for ${orderId}`);
+            
+            // Backup invoice to S3
+            try {
+                await backupInvoiceToS3(invoiceData, 'food');
+                console.log(`Food order invoice backed up to S3 for ${orderId}`);
+            } catch (s3Error) {
+                console.error('S3 backup failed:', s3Error);
+            }
         } catch (emailError) {
             console.error('Failed to send food order invoice:', emailError);
         }
@@ -1071,6 +1109,49 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to confirm order' });
+    }
+});
+
+// Cancel food order
+app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const order = foodOrders.get(orderId);
+        
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        
+        if (order.status === 'confirmed') {
+            return res.status(400).json({ error: 'Cannot cancel confirmed order' });
+        }
+        
+        // Update order status
+        order.status = 'cancelled';
+        order.cancelledAt = new Date();
+        foodOrders.set(orderId, order);
+        
+        // Send Telegram notification
+        try {
+            const message = `❌ FOOD ORDER CANCELLED!
+
+📋 Order ID: ${orderId}
+🏨 Resort: ${order.resortName}
+👤 Guest: ${order.guestName}
+💰 Amount: ₹${order.total}
+⏰ Cancelled at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Food order cancelled successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to cancel order' });
     }
 });
 

@@ -80,6 +80,14 @@ function displayFoodOrders(orders) {
                     <button class="confirm-food-btn" onclick="confirmFoodOrder('${order.orderId}')">
                         ✅ Confirm Payment & Send Invoice
                     </button>
+                    <button class="cancel-food-btn" onclick="cancelFoodOrder('${order.orderId}')">
+                        ❌ Cancel Order
+                    </button>
+                ` : ''}
+                ${order.status === 'pending_payment' ? `
+                    <button class="cancel-food-btn" onclick="cancelFoodOrder('${order.orderId}')">
+                        ❌ Cancel Order
+                    </button>
                 ` : ''}
             </div>
         </div>
@@ -104,6 +112,28 @@ async function confirmFoodOrder(orderId) {
     } catch (error) {
         console.error('Error confirming food order:', error);
         alert('Error confirming food order');
+    }
+}
+
+async function cancelFoodOrder(orderId) {
+    if (!confirm('Cancel this food order?')) return;
+    
+    try {
+        const response = await fetch(`/api/food-orders/${orderId}/cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            alert('Food order cancelled successfully!');
+            loadFoodOrders();
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Failed to cancel food order');
+        }
+    } catch (error) {
+        console.error('Error cancelling food order:', error);
+        alert('Error cancelling food order');
     }
 }
 

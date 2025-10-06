@@ -405,3 +405,18 @@ body {
     background: #6c757d;
     cursor: not-allowed;
 }
+
+.cancel-food-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.cancel-food-btn:hover {
+    background: #c82333;
+}
