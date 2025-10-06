@@ -308,7 +308,6 @@ app.post('/api/bookings', async (req, res) => {
 
         // Calculate total price with dynamic pricing
         const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-        let basePrice = 0;
         
         // Get dynamic pricing based on check-in date only
         const checkInDayOfWeek = checkInDate.getDay();
