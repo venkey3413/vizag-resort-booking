@@ -159,6 +159,8 @@ async function sendInvoiceEmail(booking, type = 'resort') {
                     
                     <p>We look forward to welcoming you for a memorable stay.</p>
                     
+                    <p><strong>You can order food using this link:</strong> <a href="https://vizagresortbooking.in/food/" style="color: #667eea;">https://vizagresortbooking.in/food/</a></p>
+                    
                     <p>Thank you for choosing vizagresortbooking.in.</p>
                     
                     <p>Warm regards,<br>
