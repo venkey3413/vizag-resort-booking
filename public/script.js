@@ -56,15 +56,17 @@ document.addEventListener('DOMContentLoaded', function() {
     preloadQRCode();
 });
 
-async function loadCoupons() {
+async function loadCoupons(checkIn = null) {
     try {
-        const response = await fetch('/api/coupons');
+        const url = checkIn ? `/api/coupons?checkIn=${checkIn}` : '/api/coupons';
+        const response = await fetch(url);
         const couponList = await response.json();
         coupons = {};
         couponList.forEach(coupon => {
             coupons[coupon.code] = {
                 discount: coupon.discount,
-                type: coupon.type
+                type: coupon.type,
+                day_type: coupon.day_type
             };
         });
     } catch (error) {
@@ -275,12 +277,15 @@ function calculateTotal() {
     document.getElementById('baseAmount').textContent = `₹${total.toLocaleString()}`;
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
     
-    // Reset coupon when dates change
+    // Reset coupon when dates change and reload applicable coupons
     appliedCoupon = null;
     discountAmount = 0;
     document.getElementById('discountRow').style.display = 'none';
     document.getElementById('couponCode').value = '';
     document.getElementById('couponMessage').innerHTML = '';
+    
+    // Reload coupons based on check-in date
+    loadCoupons(checkIn);
 }
 
 let pendingBookingData = null;

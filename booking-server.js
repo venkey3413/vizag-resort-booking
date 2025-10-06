@@ -52,6 +52,7 @@ async function initDB() {
             code TEXT PRIMARY KEY,
             type TEXT NOT NULL,
             discount INTEGER NOT NULL,
+            day_type TEXT DEFAULT 'all',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
@@ -303,7 +304,23 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
 // Coupon management endpoints
 app.get('/api/coupons', async (req, res) => {
     try {
-        const coupons = await db.all('SELECT * FROM coupons ORDER BY created_at DESC');
+        const { checkIn } = req.query;
+        let coupons;
+        
+        if (checkIn) {
+            const checkInDate = new Date(checkIn);
+            const dayOfWeek = checkInDate.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const dayType = isWeekend ? 'weekend' : 'weekday';
+            
+            coupons = await db.all(
+                'SELECT * FROM coupons WHERE day_type = ? OR day_type = "all" ORDER BY created_at DESC',
+                [dayType]
+            );
+        } else {
+            coupons = await db.all('SELECT * FROM coupons ORDER BY created_at DESC');
+        }
+        
         res.json(coupons);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch coupons' });
@@ -312,13 +329,13 @@ app.get('/api/coupons', async (req, res) => {
 
 app.post('/api/coupons', async (req, res) => {
     try {
-        const { code, type, discount } = req.body;
+        const { code, type, discount, day_type } = req.body;
         
         if (!code || !type || !discount) {
             return res.status(400).json({ error: 'All fields required' });
         }
         
-        await db.run('INSERT INTO coupons (code, type, discount) VALUES (?, ?, ?)', [code, type, discount]);
+        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', [code, type, discount, day_type || 'all']);
         res.json({ message: 'Coupon created successfully' });
     } catch (error) {
         if (error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY') {

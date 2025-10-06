@@ -743,7 +743,23 @@ app.get('/api/razorpay-key', (req, res) => {
 // Endpoint to get active coupons
 app.get('/api/coupons', async (req, res) => {
     try {
-        const coupons = await db.all('SELECT * FROM coupons');
+        const { checkIn } = req.query;
+        let coupons;
+        
+        if (checkIn) {
+            const checkInDate = new Date(checkIn);
+            const dayOfWeek = checkInDate.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const dayType = isWeekend ? 'weekend' : 'weekday';
+            
+            coupons = await db.all(
+                'SELECT * FROM coupons WHERE day_type = ? OR day_type = "all" ORDER BY created_at DESC',
+                [dayType]
+            );
+        } else {
+            coupons = await db.all('SELECT * FROM coupons ORDER BY created_at DESC');
+        }
+        
         res.json(coupons);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch coupons' });
