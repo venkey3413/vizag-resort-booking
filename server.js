@@ -845,6 +845,42 @@ app.get('/food', (req, res) => {
     res.sendFile(__dirname + '/food-public/index.html');
 });
 
+// Validate booking ID for food orders
+app.get('/api/validate-booking/:bookingId', async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        
+        // Check if booking exists and is confirmed (paid)
+        const booking = await db.get(`
+            SELECT b.id, b.booking_reference, b.guest_name, b.email, b.phone, r.name as resort_name
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE (b.booking_reference = ? OR b.id = ?) AND b.payment_status = 'paid'
+        `, [bookingId, bookingId]);
+        
+        if (!booking) {
+            return res.status(404).json({ 
+                valid: false, 
+                error: 'Invalid booking ID or booking not confirmed' 
+            });
+        }
+        
+        res.json({ 
+            valid: true, 
+            booking: {
+                id: booking.id,
+                reference: booking.booking_reference,
+                guestName: booking.guest_name,
+                email: booking.email,
+                phone: booking.phone,
+                resortName: booking.resort_name
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to validate booking' });
+    }
+});
+
 // Store food orders in memory (in production, use database)
 const foodOrders = new Map();
 
@@ -853,10 +889,26 @@ app.post('/api/food-orders', async (req, res) => {
     try {
         const { bookingId, phoneNumber, customerEmail, items, subtotal, deliveryFee, total } = req.body;
         
+        // Validate booking ID first
+        const booking = await db.get(`
+            SELECT b.id, b.booking_reference, b.guest_name, r.name as resort_name
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE (b.booking_reference = ? OR b.id = ?) AND b.payment_status = 'paid'
+        `, [bookingId, bookingId]);
+        
+        if (!booking) {
+            return res.status(400).json({ 
+                error: 'Invalid booking ID or booking not confirmed' 
+            });
+        }
+        
         const orderId = `FO${Date.now()}`;
         const orderData = {
             orderId,
             bookingId,
+            resortName: booking.resort_name,
+            guestName: booking.guest_name,
             phoneNumber,
             customerEmail,
             items,
@@ -981,7 +1033,9 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
         try {
             const invoiceData = {
                 orderId: order.orderId,
-                customerName: 'Food Order Customer',
+                bookingId: order.bookingId,
+                resortName: order.resortName,
+                customerName: order.guestName,
                 email: order.customerEmail,
                 phone: order.phoneNumber,
                 orderDate: order.orderTime,

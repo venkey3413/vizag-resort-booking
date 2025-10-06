@@ -171,6 +171,26 @@ async function confirmOrder() {
         return;
     }
     
+    // Validate booking ID first
+    try {
+        const validationResponse = await fetch(`/api/validate-booking/${bookingId}`);
+        const validationResult = await validationResponse.json();
+        
+        if (!validationResult.valid) {
+            showNotification('Invalid booking ID or booking not confirmed. Only confirmed resort bookings can order food.', 'error');
+            return;
+        }
+        
+        // Auto-fill guest details if available
+        if (validationResult.booking) {
+            document.getElementById('customerEmail').value = validationResult.booking.email;
+            document.getElementById('phoneNumber').value = validationResult.booking.phone;
+        }
+    } catch (error) {
+        showNotification('Error validating booking ID. Please try again.', 'error');
+        return;
+    }
+    
     // Phone validation
     const phonePattern = /^(\+91|91)?[6-9]\d{9}$/;
     if (!phonePattern.test(phoneNumber.replace(/\s+/g, ''))) {

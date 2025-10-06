@@ -36,6 +36,8 @@ async function sendInvoiceEmail(booking, type = 'resort') {
                     
                     <p><strong>Order ID:</strong> ${booking.orderId}</p>
                     <p><strong>Booking ID:</strong> ${booking.bookingId}</p>
+                    <p><strong>Resort:</strong> ${booking.resortName}</p>
+                    <p><strong>Guest Name:</strong> ${booking.customerName}</p>
                     <p><strong>Phone:</strong> ${booking.phone}</p>
                     <p><strong>Order Date:</strong> ${new Date(booking.orderDate).toLocaleDateString()}</p>
                     
