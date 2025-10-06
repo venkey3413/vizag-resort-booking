@@ -182,7 +182,7 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-function confirmOrder() {
+async function confirmOrder() {
     const bookingId = document.getElementById('bookingId').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
     
@@ -215,9 +215,27 @@ function confirmOrder() {
         total
     };
     
-    // Show payment interface
-    showPaymentInterface(orderData);
-    closeModal();
+    try {
+        // Create food order first
+        const response = await fetch('/api/food-orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            orderData.orderId = result.orderId;
+            
+            // Show payment interface
+            showPaymentInterface(orderData);
+            closeModal();
+        } else {
+            showNotification('Failed to create order. Please try again.', 'error');
+        }
+    } catch (error) {
+        showNotification('Network error. Please try again.', 'error');
+    }
 }
 
 function showPaymentInterface(order) {
@@ -228,6 +246,7 @@ function showPaymentInterface(order) {
             <h2>💳 Complete Payment</h2>
             <div class="booking-summary">
                 <h3>Order Details</h3>
+                <p><strong>Order ID:</strong> ${order.orderId}</p>
                 <p><strong>Booking ID:</strong> ${order.bookingId}</p>
                 <p><strong>Phone:</strong> ${order.phoneNumber}</p>
                 <p><strong>Items:</strong> ${order.items.length} items</p>
@@ -318,23 +337,22 @@ async function confirmFoodPayment() {
     }
     
     try {
-        const response = await fetch('/api/food-orders', {
+        const response = await fetch(`/api/food-orders/${window.currentFoodOrder.orderId}/payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                ...window.currentFoodOrder,
                 transactionId,
                 paymentMethod: 'upi'
             })
         });
         
         if (response.ok) {
-            showNotification('Food order confirmed! We will deliver within 45 minutes.', 'success');
+            showNotification('Food order payment confirmed! We will deliver within 45 minutes.', 'success');
             cart = [];
             updateCart();
             closeFoodPaymentModal();
         } else {
-            showNotification('Order failed. Please try again.', 'error');
+            showNotification('Payment confirmation failed. Please try again.', 'error');
         }
     } catch (error) {
         showNotification('Network error. Please try again.', 'error');
@@ -372,23 +390,22 @@ async function payFoodWithCard(amount) {
 
 async function handleFoodCardPayment(paymentId) {
     try {
-        const response = await fetch('/api/food-orders', {
+        const response = await fetch(`/api/food-orders/${window.currentFoodOrder.orderId}/payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                ...window.currentFoodOrder,
                 paymentId,
                 paymentMethod: 'card'
             })
         });
         
         if (response.ok) {
-            showNotification('Food order confirmed! We will deliver within 45 minutes.', 'success');
+            showNotification('Food order payment confirmed! We will deliver within 45 minutes.', 'success');
             cart = [];
             updateCart();
             closeFoodPaymentModal();
         } else {
-            showNotification('Order failed. Please try again.', 'error');
+            showNotification('Payment confirmation failed. Please try again.', 'error');
         }
     } catch (error) {
         showNotification('Network error. Please try again.', 'error');

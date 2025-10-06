@@ -844,27 +844,56 @@ app.get('/food', (req, res) => {
     res.sendFile(__dirname + '/food-public/index.html');
 });
 
+// Create food order (pending payment)
 app.post('/api/food-orders', (req, res) => {
     try {
         const { bookingId, phoneNumber, items, subtotal, deliveryFee, total } = req.body;
         
-        console.log('Food order received:', {
+        const orderId = `FO${Date.now()}`;
+        
+        console.log('Food order created:', {
+            orderId,
             bookingId,
             phoneNumber,
             items,
             subtotal,
             deliveryFee,
             total,
+            status: 'pending_payment',
             orderTime: new Date()
         });
         
         res.json({ 
             success: true, 
-            message: 'Order received successfully',
-            orderId: `FO${Date.now()}`
+            message: 'Order created successfully',
+            orderId
         });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to process order' });
+        res.status(500).json({ error: 'Failed to create order' });
+    }
+});
+
+// Confirm food order payment
+app.post('/api/food-orders/:orderId/payment', (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { transactionId, paymentId, paymentMethod } = req.body;
+        
+        console.log('Food order payment confirmed:', {
+            orderId,
+            transactionId,
+            paymentId,
+            paymentMethod,
+            status: 'paid',
+            paidAt: new Date()
+        });
+        
+        res.json({ 
+            success: true, 
+            message: 'Payment confirmed successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to confirm payment' });
     }
 });
 
