@@ -30,7 +30,7 @@ async function sendInvoiceEmail(booking, type = 'resort') {
                     
                     <p>Dear Customer,</p>
                     
-                    <p>Thank you for your food order! Your order has been confirmed and will be delivered within 45 minutes.</p>
+                    <p>Thank you for your food order! Your order has been confirmed and will be delivered within Your Delivery slot time.</p>
                     
                     <p><strong>Order Details:</strong></p>
                     
@@ -61,7 +61,7 @@ async function sendInvoiceEmail(booking, type = 'resort') {
                     <p><strong>Payment Method:</strong> ${booking.paymentMethod?.toUpperCase()}</p>
                     ${booking.transactionId ? `<p><strong>Transaction ID:</strong> ${booking.transactionId}</p>` : ''}
                     
-                    <p>Your food will be delivered to your resort location within 45 minutes.</p>
+                    <p>Your food will be delivered to your resort location within Your Delivery slot time.</p>
                     
                     <p>For any queries, please contact us at vizagresortbooking@gmail.com</p>
                     
