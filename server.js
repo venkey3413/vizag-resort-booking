@@ -968,7 +968,7 @@ app.post('/api/food-orders', async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [orderId, bookingId, booking.resort_name, booking.guest_name, phoneNumber, customerEmail, deliveryTime, JSON.stringify(items), subtotal, deliveryFee, total, 'pending_payment']);
         
-        console.log('Food order created:', orderData);
+        console.log('Food order created:', { orderId, bookingId, total });
         
         // Publish food order created event
         try {
