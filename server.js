@@ -885,7 +885,7 @@ app.get('/api/validate-booking/:bookingId', async (req, res) => {
         
         // Check if booking exists and is confirmed (paid)
         const booking = await db.get(`
-            SELECT b.id, b.booking_reference, b.guest_name, b.email, b.phone, r.name as resort_name
+            SELECT b.id, b.booking_reference, b.guest_name, b.email, b.phone, b.check_in, r.name as resort_name
             FROM bookings b 
             JOIN resorts r ON b.resort_id = r.id 
             WHERE (b.booking_reference = ? OR b.id = ?) AND b.payment_status = 'paid'
@@ -898,6 +898,31 @@ app.get('/api/validate-booking/:bookingId', async (req, res) => {
             });
         }
         
+        // Check if current time is past 10 PM on check-in date
+        const now = new Date();
+        const checkInDate = new Date(booking.check_in);
+        const checkIn10PM = new Date(checkInDate);
+        checkIn10PM.setHours(22, 0, 0, 0);
+        
+        // Only allow orders on check-in date and before 10 PM
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        checkInDate.setHours(0, 0, 0, 0);
+        
+        if (checkInDate.getTime() !== today.getTime()) {
+            return res.status(400).json({ 
+                valid: false, 
+                error: 'Food orders are only available on your check-in date' 
+            });
+        }
+        
+        if (now > checkIn10PM) {
+            return res.status(400).json({ 
+                valid: false, 
+                error: 'Food orders are only accepted until 10 PM on the check-in date' 
+            });
+        }
+        
         res.json({ 
             valid: true, 
             booking: {
@@ -906,7 +931,8 @@ app.get('/api/validate-booking/:bookingId', async (req, res) => {
                 guestName: booking.guest_name,
                 email: booking.email,
                 phone: booking.phone,
-                resortName: booking.resort_name
+                resortName: booking.resort_name,
+                checkIn: booking.check_in
             }
         });
     } catch (error) {
@@ -948,7 +974,7 @@ app.post('/api/food-orders', async (req, res) => {
         
         // Validate booking ID first
         const booking = await db.get(`
-            SELECT b.id, b.booking_reference, b.guest_name, r.name as resort_name
+            SELECT b.id, b.booking_reference, b.guest_name, b.check_in, r.name as resort_name
             FROM bookings b 
             JOIN resorts r ON b.resort_id = r.id 
             WHERE (b.booking_reference = ? OR b.id = ?) AND b.payment_status = 'paid'
@@ -960,6 +986,37 @@ app.post('/api/food-orders', async (req, res) => {
             });
         }
         
+        // Check if current time is past 10 PM on check-in date
+        const now = new Date();
+        const checkInDate = new Date(booking.check_in);
+        const checkIn10PM = new Date(checkInDate);
+        checkIn10PM.setHours(22, 0, 0, 0);
+        
+        // Only allow orders on check-in date and before 10 PM
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        checkInDate.setHours(0, 0, 0, 0);
+        
+        if (checkInDate.getTime() !== today.getTime()) {
+            return res.status(400).json({ 
+                error: 'Food orders are only available on your check-in date' 
+            });
+        }
+        
+        if (now > checkIn10PM) {
+            return res.status(400).json({ 
+                error: 'Food orders are only accepted until 10 PM on the check-in date' 
+            });
+        }
+        
+        // Validate delivery time is within allowed slots (until 10 PM on check-in date)
+        const deliveryDateTime = new Date(deliveryTime);
+        if (deliveryDateTime > checkIn10PM) {
+            return res.status(400).json({ 
+                error: 'Delivery time must be before 10 PM on the check-in date' 
+            });
+        }
+        
         const orderId = `FO${Date.now()}`;
         
         // Store order in database
@@ -968,7 +1025,7 @@ app.post('/api/food-orders', async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [orderId, bookingId, booking.resort_name, booking.guest_name, phoneNumber, customerEmail, deliveryTime, JSON.stringify(items), subtotal, deliveryFee, total, 'pending_payment']);
         
-        console.log('Food order created:', { orderId, bookingId, total });
+        console.log('Food order created:', { orderId, bookingId, total, checkInDate: booking.check_in });
         
         // Publish food order created event
         try {

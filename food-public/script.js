@@ -129,6 +129,16 @@ function updateCart() {
 function openBookingModal() {
     if (cart.length === 0) return;
     
+    // Check if current time is past 10 PM
+    const now = new Date();
+    const today10PM = new Date();
+    today10PM.setHours(22, 0, 0, 0);
+    
+    if (now > today10PM) {
+        showNotification('Food orders are only accepted until 10 PM on the check-in date', 'error');
+        return;
+    }
+    
     const modal = document.getElementById('bookingModal');
     const orderSummary = document.getElementById('orderSummary');
     const modalSubtotal = document.getElementById('modalSubtotal');
@@ -165,9 +175,16 @@ function generateDeliveryTimeSlots() {
     // Clear existing options except the first one
     deliveryTimeSelect.innerHTML = '<option value="">Select delivery time</option>';
     
-    // Generate time slots for next 12 hours (every hour)
-    for (let i = 0; i < 12; i++) {
-        const slotTime = new Date(minDeliveryTime.getTime() + i * 60 * 60 * 1000);
+    // Get check-in date from booking validation (we'll need to store this)
+    // For now, limit to same day until 10 PM
+    const today = new Date();
+    const maxTime = new Date(today);
+    maxTime.setHours(22, 0, 0, 0); // 10 PM today
+    
+    // Generate time slots until 10 PM on check-in date (every hour)
+    let slotTime = new Date(minDeliveryTime);
+    
+    while (slotTime <= maxTime && slotTime.getDate() === today.getDate()) {
         const timeString = slotTime.toLocaleTimeString('en-IN', { 
             hour: '2-digit', 
             minute: '2-digit',
@@ -180,6 +197,18 @@ function generateDeliveryTimeSlots() {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = displayText;
+        deliveryTimeSelect.appendChild(option);
+        
+        // Move to next hour
+        slotTime = new Date(slotTime.getTime() + 60 * 60 * 1000);
+    }
+    
+    // If no slots available, show message
+    if (deliveryTimeSelect.children.length === 1) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No delivery slots available (orders close at 10 PM)';
+        option.disabled = true;
         deliveryTimeSelect.appendChild(option);
     }
 }
@@ -218,6 +247,16 @@ async function confirmOrder() {
         return;
     }
     
+    // Check if current time is past 10 PM on check-in date
+    const now = new Date();
+    const today10PM = new Date();
+    today10PM.setHours(22, 0, 0, 0);
+    
+    if (now > today10PM) {
+        showNotification('Food orders are only accepted until 10 PM on the check-in date', 'error');
+        return;
+    }
+    
     // Validate booking ID first
     try {
         const validationResponse = await fetch(`/api/validate-booking/${bookingId}`);
@@ -233,6 +272,9 @@ async function confirmOrder() {
             document.getElementById('customerEmail').value = validationResult.booking.email;
             document.getElementById('phoneNumber').value = validationResult.booking.phone;
         }
+        
+        // Store check-in date for delivery slot validation
+        window.checkInDate = validationResult.booking.checkIn;
     } catch (error) {
         showNotification('Error validating booking ID. Please try again.', 'error');
         return;
