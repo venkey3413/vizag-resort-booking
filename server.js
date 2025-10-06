@@ -849,7 +849,7 @@ app.get('/food', (req, res) => {
 const foodOrders = new Map();
 
 // Create food order (pending payment)
-app.post('/api/food-orders', (req, res) => {
+app.post('/api/food-orders', async (req, res) => {
     try {
         const { bookingId, phoneNumber, items, subtotal, deliveryFee, total } = req.body;
         
@@ -873,10 +873,12 @@ app.post('/api/food-orders', (req, res) => {
         
         // Publish food order created event
         try {
-            await publishEvent('food.order', 'food.order.created', {
+            publishEvent('food.order', 'food.order.created', {
                 orderId: orderId,
                 bookingId: bookingId,
                 total: total
+            }).catch(eventError => {
+                console.error('EventBridge publish failed:', eventError);
             });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
@@ -920,10 +922,12 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
         
         // Publish food payment updated event
         try {
-            await publishEvent('food.order', 'food.payment.updated', {
+            publishEvent('food.order', 'food.payment.updated', {
                 orderId: orderId,
                 paymentMethod: paymentMethod,
                 status: 'pending_verification'
+            }).catch(eventError => {
+                console.error('EventBridge publish failed:', eventError);
             });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
@@ -996,9 +1000,11 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
         
         // Publish food order confirmed event
         try {
-            await publishEvent('food.order', 'food.order.updated', {
+            publishEvent('food.order', 'food.order.updated', {
                 orderId: orderId,
                 status: 'confirmed'
+            }).catch(eventError => {
+                console.error('EventBridge publish failed:', eventError);
             });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
