@@ -5,6 +5,7 @@ const { open } = require('sqlite');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
 // UPI service removed - generate payment details inline
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
+const { sendInvoiceEmail } = require('./email-service');
 
 
 const path = require('path');
@@ -844,14 +845,16 @@ app.get('/food', (req, res) => {
     res.sendFile(__dirname + '/food-public/index.html');
 });
 
+// Store food orders in memory (in production, use database)
+const foodOrders = new Map();
+
 // Create food order (pending payment)
 app.post('/api/food-orders', (req, res) => {
     try {
         const { bookingId, phoneNumber, items, subtotal, deliveryFee, total } = req.body;
         
         const orderId = `FO${Date.now()}`;
-        
-        console.log('Food order created:', {
+        const orderData = {
             orderId,
             bookingId,
             phoneNumber,
@@ -861,7 +864,12 @@ app.post('/api/food-orders', (req, res) => {
             total,
             status: 'pending_payment',
             orderTime: new Date()
-        });
+        };
+        
+        // Store order data
+        foodOrders.set(orderId, orderData);
+        
+        console.log('Food order created:', orderData);
         
         res.json({ 
             success: true, 
@@ -878,6 +886,17 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
     try {
         const { orderId } = req.params;
         const { transactionId, paymentId, paymentMethod } = req.body;
+        
+        // Update order with payment info
+        const order = foodOrders.get(orderId);
+        if (order) {
+            order.transactionId = transactionId;
+            order.paymentId = paymentId;
+            order.paymentMethod = paymentMethod;
+            order.status = 'pending_verification';
+            order.paymentSubmittedAt = new Date();
+            foodOrders.set(orderId, order);
+        }
         
         console.log('Food order payment submitted for verification:', {
             orderId,
@@ -913,6 +932,62 @@ ${paymentId ? `🔢 Payment ID: ${paymentId}` : ''}
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to submit payment' });
+    }
+});
+
+// Confirm food order payment (admin endpoint)
+app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const order = foodOrders.get(orderId);
+        
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        
+        // Update order status
+        order.status = 'confirmed';
+        order.confirmedAt = new Date();
+        foodOrders.set(orderId, order);
+        
+        // Generate and send invoice
+        try {
+            const invoiceData = {
+                orderId: order.orderId,
+                customerName: 'Food Order Customer',
+                email: 'customer@example.com', // In production, get from order
+                phone: order.phoneNumber,
+                orderDate: order.orderTime,
+                items: order.items,
+                subtotal: order.subtotal,
+                deliveryFee: order.deliveryFee,
+                total: order.total,
+                paymentMethod: order.paymentMethod,
+                transactionId: order.transactionId || order.paymentId
+            };
+            
+            await sendInvoiceEmail(invoiceData, 'food');
+            console.log(`Food order invoice sent for ${orderId}`);
+        } catch (emailError) {
+            console.error('Failed to send food order invoice:', emailError);
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Food order confirmed and invoice sent'
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to confirm order' });
+    }
+});
+
+// Get food orders (admin endpoint)
+app.get('/api/food-orders', (req, res) => {
+    try {
+        const orders = Array.from(foodOrders.values()).sort((a, b) => new Date(b.orderTime) - new Date(a.orderTime));
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch food orders' });
     }
 });
 
