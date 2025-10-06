@@ -209,22 +209,187 @@ function confirmOrder() {
         items: cart,
         subtotal,
         deliveryFee: 50,
-        total,
-        orderTime: new Date().toISOString()
+        total
     };
     
-    // Simulate order submission
-    console.log('Order submitted:', orderData);
-    
-    showNotification('Order confirmed! We will deliver your food within 45 minutes.', 'success');
-    
-    // Clear cart and close modal
-    cart = [];
-    updateCart();
+    // Show payment interface
+    showPaymentInterface(orderData);
     closeModal();
+}
+
+function showPaymentInterface(order) {
+    const paymentModal = document.createElement('div');
+    paymentModal.className = 'payment-modal';
+    paymentModal.innerHTML = `
+        <div class="payment-content">
+            <h2>💳 Complete Payment</h2>
+            <div class="booking-summary">
+                <h3>Order Details</h3>
+                <p><strong>Booking ID:</strong> ${order.bookingId}</p>
+                <p><strong>Phone:</strong> ${order.phoneNumber}</p>
+                <p><strong>Items:</strong> ${order.items.length} items</p>
+                <p><strong>Subtotal:</strong> ₹${order.subtotal.toLocaleString()}</p>
+                <p><strong>Delivery Fee:</strong> ₹${order.deliveryFee}</p>
+                <p><strong>Total Amount:</strong> ₹${order.total.toLocaleString()}</p>
+            </div>
+            
+            <div class="payment-methods">
+                <div class="payment-tabs">
+                    <button class="payment-tab active" onclick="showPaymentMethod('upi')">🔗 UPI Payment</button>
+                    <button class="payment-tab" onclick="showPaymentMethod('card')">💳 Card Payment</button>
+                </div>
+                
+                <div id="upi-payment" class="payment-method active">
+                    <div class="qr-section">
+                        <img src="/qr-code.png.jpeg" alt="UPI QR Code" class="qr-code">
+                        <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
+                        <p><strong>Amount:</strong> ₹${order.total.toLocaleString()}</p>
+                    </div>
+                    
+                    <div class="payment-instructions">
+                        <p>• Scan QR code or use UPI ID</p>
+                        <p>• Pay exact amount</p>
+                        <p>• Enter 12-digit UTR number below</p>
+                    </div>
+                    
+                    <div class="payment-proof">
+                        <input type="text" id="transactionId" placeholder="Enter 12-digit UTR number" maxlength="12" pattern="[0-9]{12}" required>
+                        <button onclick="confirmFoodPayment()" class="confirm-payment-btn">
+                            ✅ Confirm UPI Payment
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="card-payment" class="payment-method">
+                    <div class="card-section">
+                        <div class="card-pricing">
+                            <p><strong>Base Amount:</strong> ₹${order.total.toLocaleString()}</p>
+                            <p><strong>Transaction Fee (1.5%):</strong> ₹${Math.round(order.total * 0.015).toLocaleString()}</p>
+                            <p style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 5px;">
+                                <strong>Total Card Payment:</strong> ₹${(order.total + Math.round(order.total * 0.015)).toLocaleString()}
+                            </p>
+                        </div>
+                        <p>Pay securely with Debit/Credit Card</p>
+                        <button onclick="payFoodWithCard(${order.total + Math.round(order.total * 0.015)})" class="razorpay-btn">
+                            💳 Pay ₹${(order.total + Math.round(order.total * 0.015)).toLocaleString()} with Card
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-actions">
+                <button onclick="closeFoodPaymentModal()" class="close-payment-btn">Close</button>
+            </div>
+        </div>
+    `;
     
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.appendChild(paymentModal);
+    window.currentFoodOrder = order;
+}
+
+function showPaymentMethod(method) {
+    document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.payment-tab').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(`${method}-payment`).classList.add('active');
+    event.target.classList.add('active');
+}
+
+function closeFoodPaymentModal() {
+    const modal = document.querySelector('.payment-modal');
+    if (modal) modal.remove();
+    window.currentFoodOrder = null;
+}
+
+async function confirmFoodPayment() {
+    const transactionId = document.getElementById('transactionId').value;
+    
+    if (!transactionId) {
+        showNotification('Please enter your 12-digit UTR number', 'error');
+        return;
+    }
+    
+    if (!/^[0-9]{12}$/.test(transactionId)) {
+        showNotification('UTR number must be exactly 12 digits', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/food-orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...window.currentFoodOrder,
+                transactionId,
+                paymentMethod: 'upi'
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Food order confirmed! We will deliver within 45 minutes.', 'success');
+            cart = [];
+            updateCart();
+            closeFoodPaymentModal();
+        } else {
+            showNotification('Order failed. Please try again.', 'error');
+        }
+    } catch (error) {
+        showNotification('Network error. Please try again.', 'error');
+    }
+}
+
+async function payFoodWithCard(amount) {
+    try {
+        const keyResponse = await fetch('/api/razorpay-key');
+        const { key } = await keyResponse.json();
+        
+        const options = {
+            key: key,
+            amount: amount * 100,
+            currency: 'INR',
+            name: 'My Food - Vizag Resorts',
+            description: 'Food Order Payment',
+            handler: function(response) {
+                handleFoodCardPayment(response.razorpay_payment_id);
+            },
+            prefill: {
+                contact: window.currentFoodOrder.phoneNumber
+            },
+            theme: {
+                color: '#667eea'
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+    } catch (error) {
+        showNotification('Payment system error. Please try UPI payment.', 'error');
+    }
+}
+
+async function handleFoodCardPayment(paymentId) {
+    try {
+        const response = await fetch('/api/food-orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...window.currentFoodOrder,
+                paymentId,
+                paymentMethod: 'card'
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Food order confirmed! We will deliver within 45 minutes.', 'success');
+            cart = [];
+            updateCart();
+            closeFoodPaymentModal();
+        } else {
+            showNotification('Order failed. Please try again.', 'error');
+        }
+    } catch (error) {
+        showNotification('Network error. Please try again.', 'error');
+    }
 }
 
 function showNotification(message, type = 'success') {
