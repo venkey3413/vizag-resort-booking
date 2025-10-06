@@ -347,12 +347,12 @@ async function confirmFoodPayment() {
         });
         
         if (response.ok) {
-            showNotification('Food order payment confirmed! We will deliver within 45 minutes.', 'success');
+            showNotification('Food order payment submitted for verification. You will be notified once confirmed.', 'success');
             cart = [];
             updateCart();
             closeFoodPaymentModal();
         } else {
-            showNotification('Payment confirmation failed. Please try again.', 'error');
+            showNotification('Payment submission failed. Please try again.', 'error');
         }
     } catch (error) {
         showNotification('Network error. Please try again.', 'error');
@@ -400,12 +400,12 @@ async function handleFoodCardPayment(paymentId) {
         });
         
         if (response.ok) {
-            showNotification('Food order payment confirmed! We will deliver within 45 minutes.', 'success');
+            showNotification('Food order payment submitted for verification. You will be notified once confirmed.', 'success');
             cart = [];
             updateCart();
             closeFoodPaymentModal();
         } else {
-            showNotification('Payment confirmation failed. Please try again.', 'error');
+            showNotification('Payment submission failed. Please try again.', 'error');
         }
     } catch (error) {
         showNotification('Network error. Please try again.', 'error');

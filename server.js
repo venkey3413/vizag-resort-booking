@@ -873,27 +873,46 @@ app.post('/api/food-orders', (req, res) => {
     }
 });
 
-// Confirm food order payment
-app.post('/api/food-orders/:orderId/payment', (req, res) => {
+// Submit food order payment for verification
+app.post('/api/food-orders/:orderId/payment', async (req, res) => {
     try {
         const { orderId } = req.params;
         const { transactionId, paymentId, paymentMethod } = req.body;
         
-        console.log('Food order payment confirmed:', {
+        console.log('Food order payment submitted for verification:', {
             orderId,
             transactionId,
             paymentId,
             paymentMethod,
-            status: 'paid',
-            paidAt: new Date()
+            status: 'pending_verification',
+            submittedAt: new Date()
         });
+        
+        // Send Telegram notification for manual verification
+        try {
+            const message = `🍽️ FOOD ORDER PAYMENT SUBMITTED!
+
+📋 Order ID: ${orderId}
+💳 Payment Method: ${paymentMethod.toUpperCase()}
+${transactionId ? `🔢 UTR ID: ${transactionId}` : ''}
+${paymentId ? `🔢 Payment ID: ${paymentId}` : ''}
+⚠️ Status: Pending Verification
+
+⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+👉 Please verify and confirm in admin panel`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
         
         res.json({ 
             success: true, 
-            message: 'Payment confirmed successfully'
+            message: 'Payment submitted for verification'
         });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to confirm payment' });
+        res.status(500).json({ error: 'Failed to submit payment' });
     }
 });
 
