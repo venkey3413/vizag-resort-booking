@@ -232,6 +232,82 @@ button.delete:hover {
     margin-left: 1rem;
 }
 
+.food-management {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+}
+
+.food-management h2 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+.food-form {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.food-form h3 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.food-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.food-item-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.food-item-card h4 {
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.food-item-card .price {
+    font-weight: bold;
+    color: #27ae60;
+    font-size: 1.1em;
+    margin-bottom: 0.5rem;
+}
+
+.food-item-card .category {
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.food-item-card .description {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 1rem;
+}
+
+.food-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.food-item-actions button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8em;
+}
+
 @media (max-width: 768px) {
     .form-row {
         grid-template-columns: 1fr;
@@ -251,5 +327,9 @@ button.delete:hover {
         width: 100%;
         margin-left: 0;
         margin-top: 0.25rem;
+    }
+    
+    .food-items-grid {
+        grid-template-columns: 1fr;
     }
 }

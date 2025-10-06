@@ -1,8 +1,11 @@
 let resorts = [];
+let foodItems = [];
 let editingId = null;
+let editingFoodId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
+    loadFoodItems();
     setupEventListeners();
     setupEventBridgeSync();
 });
@@ -47,6 +50,11 @@ function setupEventListeners() {
     const form = document.getElementById('resortForm');
     if (form) {
         form.addEventListener('submit', handleSubmit);
+    }
+    
+    const foodForm = document.getElementById('foodForm');
+    if (foodForm) {
+        foodForm.addEventListener('submit', handleFoodSubmit);
     }
 }
 
@@ -219,6 +227,128 @@ async function deleteResort(id) {
             loadResorts();
         } else {
             alert('Failed to delete resort');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+// Food Item Management Functions
+async function loadFoodItems() {
+    try {
+        const response = await fetch('/api/food-items');
+        foodItems = await response.json();
+        displayFoodItems();
+    } catch (error) {
+        console.error('Error loading food items:', error);
+    }
+}
+
+function displayFoodItems() {
+    const grid = document.getElementById('foodItemsGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = foodItems.map(item => `
+        <div class="food-item-card">
+            <h4>${item.name}</h4>
+            <div class="price">₹${item.price}</div>
+            <div class="category">${item.category}</div>
+            ${item.description ? `<div class="description">${item.description}</div>` : ''}
+            <div class="food-item-actions">
+                <button class="edit" onclick="editFoodItem(${item.id})">Edit</button>
+                <button class="delete" onclick="deleteFoodItem(${item.id})">Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function handleFoodSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('foodSubmitBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Processing...';
+    submitBtn.disabled = true;
+
+    const foodData = {
+        name: document.getElementById('foodName').value,
+        price: parseInt(document.getElementById('foodPrice').value),
+        category: document.getElementById('foodCategory').value,
+        description: document.getElementById('foodDescription').value,
+        image: document.getElementById('foodImage').value
+    };
+
+    try {
+        let response;
+        if (editingFoodId) {
+            response = await fetch(`/api/food-items/${editingFoodId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(foodData)
+            });
+        } else {
+            response = await fetch('/api/food-items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(foodData)
+            });
+        }
+
+        if (response.ok) {
+            alert(editingFoodId ? 'Food item updated successfully' : 'Food item added successfully');
+            document.getElementById('foodForm').reset();
+            cancelFoodEdit();
+            loadFoodItems();
+        } else {
+            alert('Operation failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+function editFoodItem(id) {
+    const item = foodItems.find(f => f.id === id);
+    if (!item) return;
+
+    editingFoodId = id;
+    document.getElementById('foodName').value = item.name;
+    document.getElementById('foodPrice').value = item.price;
+    document.getElementById('foodCategory').value = item.category;
+    document.getElementById('foodDescription').value = item.description || '';
+    document.getElementById('foodImage').value = item.image || '';
+    
+    document.getElementById('foodSubmitBtn').textContent = 'Update Food Item';
+    const cancelBtn = document.getElementById('foodCancelBtn');
+    if (cancelBtn) cancelBtn.style.display = 'inline-block';
+}
+
+function cancelFoodEdit() {
+    editingFoodId = null;
+    document.getElementById('foodForm').reset();
+    document.getElementById('foodSubmitBtn').textContent = 'Add Food Item';
+    const cancelBtn = document.getElementById('foodCancelBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
+async function deleteFoodItem(id) {
+    if (!confirm('Are you sure you want to delete this food item?')) return;
+
+    try {
+        const response = await fetch(`/api/food-items/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Food item deleted successfully');
+            loadFoodItems();
+        } else {
+            alert('Failed to delete food item');
         }
     } catch (error) {
         console.error('Error:', error);
