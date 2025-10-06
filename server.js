@@ -871,6 +871,17 @@ app.post('/api/food-orders', (req, res) => {
         
         console.log('Food order created:', orderData);
         
+        // Publish food order created event
+        try {
+            await publishEvent('food.order', 'food.order.created', {
+                orderId: orderId,
+                bookingId: bookingId,
+                total: total
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
         res.json({ 
             success: true, 
             message: 'Order created successfully',
@@ -906,6 +917,17 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
             status: 'pending_verification',
             submittedAt: new Date()
         });
+        
+        // Publish food payment updated event
+        try {
+            await publishEvent('food.order', 'food.payment.updated', {
+                orderId: orderId,
+                paymentMethod: paymentMethod,
+                status: 'pending_verification'
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         // Send Telegram notification for manual verification
         try {
@@ -970,6 +992,16 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
             console.log(`Food order invoice sent for ${orderId}`);
         } catch (emailError) {
             console.error('Failed to send food order invoice:', emailError);
+        }
+        
+        // Publish food order confirmed event
+        try {
+            await publishEvent('food.order', 'food.order.updated', {
+                orderId: orderId,
+                status: 'confirmed'
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
         }
         
         res.json({ 

@@ -23,6 +23,7 @@ async function loadFoodOrders() {
     try {
         const response = await fetch('/api/food-orders');
         const orders = await response.json();
+        window.currentFoodOrders = orders;
         displayFoodOrders(orders);
     } catch (error) {
         console.error('Error loading food orders:', error);
@@ -119,6 +120,11 @@ function setupEventBridgeSync() {
             console.log('📡 EventBridge update received');
             loadBookings();
         }
+        
+        if (data.type === 'food.order.created' || data.type === 'food.order.updated' || data.type === 'food.payment.updated') {
+            console.log('📡 Food order EventBridge update received');
+            loadFoodOrders();
+        }
     };
     
     eventSource.onerror = function(error) {
@@ -135,6 +141,16 @@ function setupEventBridgeSync() {
                 console.log('🔄 Fallback sync detected changes');
                 bookings = newBookings;
                 displayBookings();
+            }
+            
+            // Also sync food orders
+            const foodResponse = await fetch('/api/food-orders');
+            const newFoodOrders = await foodResponse.json();
+            
+            if (JSON.stringify(newFoodOrders) !== JSON.stringify(window.currentFoodOrders || [])) {
+                console.log('🔄 Food orders fallback sync detected changes');
+                window.currentFoodOrders = newFoodOrders;
+                displayFoodOrders(newFoodOrders);
             }
         } catch (error) {
             // Silent fallback
