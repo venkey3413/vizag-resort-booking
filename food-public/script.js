@@ -1,83 +1,51 @@
 let cart = [];
-let menuItems = [
-    {
-        id: 1,
-        name: "Chicken Biryani",
-        description: "Aromatic basmati rice with tender chicken pieces and traditional spices",
-        price: 250,
-        image: "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=400"
-    },
-    {
-        id: 2,
-        name: "Paneer Butter Masala",
-        description: "Creamy tomato-based curry with soft paneer cubes",
-        price: 180,
-        image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400"
-    },
-    {
-        id: 3,
-        name: "Fish Curry",
-        description: "Fresh fish cooked in coconut-based spicy curry",
-        price: 220,
-        image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400"
-    },
-    {
-        id: 4,
-        name: "Veg Fried Rice",
-        description: "Wok-tossed rice with fresh vegetables and soy sauce",
-        price: 150,
-        image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400"
-    },
-    {
-        id: 5,
-        name: "Mutton Curry",
-        description: "Tender mutton pieces in rich, spicy gravy",
-        price: 300,
-        image: "https://images.unsplash.com/photo-1574653853027-5d3ac9b9e7c7?w=400"
-    },
-    {
-        id: 6,
-        name: "Dal Tadka",
-        description: "Yellow lentils tempered with cumin and spices",
-        price: 120,
-        image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400"
-    },
-    {
-        id: 7,
-        name: "Chicken Tikka",
-        description: "Grilled chicken marinated in yogurt and spices",
-        price: 200,
-        image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400"
-    },
-    {
-        id: 8,
-        name: "Naan Bread",
-        description: "Soft, fluffy Indian bread baked in tandoor",
-        price: 40,
-        image: "https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?w=400"
-    }
-];
+let menuItems = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadMenu();
     updateCart();
+    setupMenuSync();
 });
 
-function loadMenu() {
-    const menuGrid = document.getElementById('menuGrid');
-    menuGrid.innerHTML = menuItems.map(item => `
-        <div class="menu-item">
-            <img src="${item.image}" alt="${item.name}">
-            <div class="menu-item-content">
-                <h3>${item.name}</h3>
-                <p>${item.description}</p>
-                <div class="menu-item-footer">
-                    <span class="price">₹${item.price}</span>
-                    <button class="add-btn" onclick="addToCart(${item.id})">Add to Cart</button>
+function setupMenuSync() {
+    const eventSource = new EventSource('/api/events');
+    
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'food.item.created' || data.type === 'food.item.updated' || data.type === 'food.item.deleted') {
+            console.log('Menu update received');
+            loadMenu();
+        }
+    };
+    
+    setInterval(() => {
+        loadMenu();
+    }, 60000);
+}
+
+async function loadMenu() {
+    try {
+        const response = await fetch('/api/food-items');
+        menuItems = await response.json();
+        
+        const menuGrid = document.getElementById('menuGrid');
+        menuGrid.innerHTML = menuItems.map(item => `
+            <div class="menu-item">
+                <img src="${item.image}" alt="${item.name}">
+                <div class="menu-item-content">
+                    <h3>${item.name}</h3>
+                    <p>${item.description}</p>
+                    <div class="menu-item-footer">
+                        <span class="price">₹${item.price}</span>
+                        <button class="add-btn" onclick="addToCart(${item.id})">Add to Cart</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+    } catch (error) {
+        console.error('Error loading menu:', error);
+    }
 }
 
 function addToCart(itemId) {
