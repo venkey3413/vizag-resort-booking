@@ -19,6 +19,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/food', express.static('food-public'));
 
 // Database
 let db;
@@ -836,10 +837,40 @@ app.get('/api/payment-proof/:bookingId', async (req, res) => {
     }
 });
 
+// Food service routes
+app.get('/food', (req, res) => {
+    res.sendFile(__dirname + '/food-public/index.html');
+});
+
+app.post('/api/food-orders', (req, res) => {
+    try {
+        const { bookingId, phoneNumber, items, subtotal, deliveryFee, total } = req.body;
+        
+        console.log('Food order received:', {
+            bookingId,
+            phoneNumber,
+            items,
+            subtotal,
+            deliveryFee,
+            total,
+            orderTime: new Date()
+        });
+        
+        res.json({ 
+            success: true, 
+            message: 'Order received successfully',
+            orderId: `FO${Date.now()}`
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to process order' });
+    }
+});
+
 // Initialize and start server
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Resort Booking Server running on http://0.0.0.0:${PORT}`);
+        console.log(`🍽️ My Food Service available at http://0.0.0.0:${PORT}/food`);
     });
 }).catch(error => {
     console.error('Failed to start server:', error);
