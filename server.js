@@ -177,8 +177,9 @@ async function initDB() {
         `);
     }
     
-    // Initialize food orders table
+    // Initialize food orders and items tables
     await initFoodOrdersTable();
+    await initFoodItemsTable();
 }
 
 // Routes
@@ -1277,33 +1278,58 @@ app.get('/api/food-orders', async (req, res) => {
     }
 });
 
-// Food item management endpoints
-let foodItems = [
-    { id: 1, name: "Chicken Biryani", description: "Aromatic basmati rice with tender chicken pieces", price: 250, image: "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=400" },
-    { id: 2, name: "Paneer Butter Masala", description: "Creamy tomato-based curry with soft paneer cubes", price: 180, image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400" },
-    { id: 3, name: "Fish Curry", description: "Fresh fish cooked in coconut-based spicy curry", price: 220, image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400" },
-    { id: 4, name: "Veg Fried Rice", description: "Wok-tossed rice with fresh vegetables", price: 150, image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400" },
-    { id: 5, name: "Mutton Curry", description: "Tender mutton pieces in rich, spicy gravy", price: 300, image: "https://images.unsplash.com/photo-1574653853027-5d3ac9b9e7c7?w=400" },
-    { id: 6, name: "Dal Tadka", description: "Yellow lentils tempered with cumin and spices", price: 120, image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400" },
-    { id: 7, name: "Chicken Tikka", description: "Grilled chicken marinated in yogurt and spices", price: 200, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400" },
-    { id: 8, name: "Naan Bread", description: "Soft, fluffy Indian bread baked in tandoor", price: 40, image: "https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?w=400" }
-];
+// Initialize food items table
+async function initFoodItemsTable() {
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS food_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            price INTEGER NOT NULL,
+            image TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    // Insert default items if table is empty
+    const count = await db.get('SELECT COUNT(*) as count FROM food_items');
+    if (count.count === 0) {
+        const defaultItems = [
+            { name: "Chicken Biryani", description: "Aromatic basmati rice with tender chicken pieces", price: 250, image: "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=400" },
+            { name: "Paneer Butter Masala", description: "Creamy tomato-based curry with soft paneer cubes", price: 180, image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400" },
+            { name: "Fish Curry", description: "Fresh fish cooked in coconut-based spicy curry", price: 220, image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400" },
+            { name: "Veg Fried Rice", description: "Wok-tossed rice with fresh vegetables", price: 150, image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400" },
+            { name: "Mutton Curry", description: "Tender mutton pieces in rich, spicy gravy", price: 300, image: "https://images.unsplash.com/photo-1574653853027-5d3ac9b9e7c7?w=400" },
+            { name: "Dal Tadka", description: "Yellow lentils tempered with cumin and spices", price: 120, image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400" },
+            { name: "Chicken Tikka", description: "Grilled chicken marinated in yogurt and spices", price: 200, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400" },
+            { name: "Naan Bread", description: "Soft, fluffy Indian bread baked in tandoor", price: 40, image: "https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?w=400" }
+        ];
+        
+        for (const item of defaultItems) {
+            await db.run('INSERT INTO food_items (name, description, price, image) VALUES (?, ?, ?, ?)', 
+                [item.name, item.description, item.price, item.image]);
+        }
+    }
+}
 
-app.get('/api/food-items', (req, res) => {
-    res.json(foodItems);
+app.get('/api/food-items', async (req, res) => {
+    try {
+        const foodItems = await db.all('SELECT * FROM food_items ORDER BY id');
+        res.json(foodItems);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch food items' });
+    }
 });
 
 app.post('/api/food-items', async (req, res) => {
     try {
         const { name, description, price, image } = req.body;
-        const newItem = {
-            id: Math.max(...foodItems.map(item => item.id)) + 1,
-            name,
-            description,
-            price: parseInt(price),
-            image
-        };
-        foodItems.push(newItem);
+        const result = await db.run(
+            'INSERT INTO food_items (name, description, price, image) VALUES (?, ?, ?, ?)',
+            [name, description, parseInt(price), image]
+        );
+        
+        const newItem = { id: result.lastID, name, description, price: parseInt(price), image };
         
         publishEvent('food.menu', 'food.item.created', { itemId: newItem.id, name }).catch(console.error);
         
@@ -1317,17 +1343,21 @@ app.put('/api/food-items/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         const { name, description, price, image } = req.body;
-        const itemIndex = foodItems.findIndex(item => item.id === id);
         
-        if (itemIndex === -1) {
+        const result = await db.run(
+            'UPDATE food_items SET name = ?, description = ?, price = ?, image = ? WHERE id = ?',
+            [name, description, parseInt(price), image, id]
+        );
+        
+        if (result.changes === 0) {
             return res.status(404).json({ error: 'Food item not found' });
         }
         
-        foodItems[itemIndex] = { id, name, description, price: parseInt(price), image };
+        const updatedItem = { id, name, description, price: parseInt(price), image };
         
         publishEvent('food.menu', 'food.item.updated', { itemId: id, name }).catch(console.error);
         
-        res.json({ success: true, item: foodItems[itemIndex] });
+        res.json({ success: true, item: updatedItem });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update food item' });
     }
@@ -1336,15 +1366,15 @@ app.put('/api/food-items/:id', async (req, res) => {
 app.delete('/api/food-items/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const itemIndex = foodItems.findIndex(item => item.id === id);
         
-        if (itemIndex === -1) {
+        const item = await db.get('SELECT name FROM food_items WHERE id = ?', [id]);
+        if (!item) {
             return res.status(404).json({ error: 'Food item not found' });
         }
         
-        const deletedItem = foodItems.splice(itemIndex, 1)[0];
+        await db.run('DELETE FROM food_items WHERE id = ?', [id]);
         
-        publishEvent('food.menu', 'food.item.deleted', { itemId: id, name: deletedItem.name }).catch(console.error);
+        publishEvent('food.menu', 'food.item.deleted', { itemId: id, name: item.name }).catch(console.error);
         
         res.json({ success: true, message: 'Food item deleted' });
     } catch (error) {

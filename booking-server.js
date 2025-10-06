@@ -6,6 +6,7 @@ const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-s
 const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
+const fetch = require('node-fetch');
 
 const app = express();
 const PORT = 3002;
@@ -607,6 +608,28 @@ app.get('/api/events', (req, res) => {
         const index = sseClients.indexOf(res);
         if (index !== -1) sseClients.splice(index, 1);
     });
+});
+
+// Function to broadcast events to all SSE clients
+function broadcastToSSE(eventData) {
+    const message = `data: ${JSON.stringify(eventData)}\n\n`;
+    sseClients.forEach(client => {
+        try {
+            client.write(message);
+        } catch (error) {
+            // Remove dead clients
+            const index = sseClients.indexOf(client);
+            if (index !== -1) sseClients.splice(index, 1);
+        }
+    });
+}
+
+// Endpoint to receive EventBridge notifications
+app.post('/api/eventbridge-notify', (req, res) => {
+    const { type, source, ...data } = req.body;
+    console.log(`📡 Received EventBridge notification: ${type}`);
+    broadcastToSSE({ type, source, ...data });
+    res.json({ success: true });
 });
 
 
