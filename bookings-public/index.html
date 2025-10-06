@@ -22,10 +22,22 @@
     </header>
 
     <main class="container">
-        <section class="bookings-section">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('bookings')">Resort Bookings</button>
+            <button class="tab-btn" onclick="showTab('food-orders')">Food Orders</button>
+        </div>
+        
+        <section id="bookings-tab" class="tab-content active">
             <h2>All Bookings</h2>
             <div id="bookingsGrid" class="bookings-grid">
                 <!-- Bookings will be loaded here -->
+            </div>
+        </section>
+        
+        <section id="food-orders-tab" class="tab-content">
+            <h2>Food Orders</h2>
+            <div id="foodOrdersGrid" class="food-orders-grid">
+                <!-- Food orders will be loaded here -->
             </div>
         </section>
     </main>

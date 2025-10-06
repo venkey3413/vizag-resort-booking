@@ -2,8 +2,109 @@ let bookings = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
+    loadFoodOrders();
     setupEventBridgeSync();
 });
+
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    document.getElementById(tabName + '-tab').classList.add('active');
+    event.target.classList.add('active');
+}
+
+async function loadFoodOrders() {
+    try {
+        const response = await fetch('/api/food-orders');
+        const orders = await response.json();
+        displayFoodOrders(orders);
+    } catch (error) {
+        console.error('Error loading food orders:', error);
+        document.getElementById('foodOrdersGrid').innerHTML = '<p>Error loading food orders</p>';
+    }
+}
+
+function displayFoodOrders(orders) {
+    const grid = document.getElementById('foodOrdersGrid');
+    
+    if (orders.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No food orders found</div>';
+        return;
+    }
+    
+    grid.innerHTML = orders.map(order => `
+        <div class="food-order-card">
+            <div class="food-order-header">
+                <div class="food-order-id">🍽️ ${order.orderId}</div>
+                <div class="food-order-status ${order.status}">${order.status.replace('_', ' ').toUpperCase()}</div>
+            </div>
+            
+            <div class="food-order-details">
+                <div>
+                    <p><strong>Booking ID:</strong> ${order.bookingId}</p>
+                    <p><strong>Phone:</strong> ${order.phoneNumber}</p>
+                    <p><strong>Order Time:</strong> ${new Date(order.orderTime).toLocaleString()}</p>
+                </div>
+                <div>
+                    <p><strong>Subtotal:</strong> ₹${order.subtotal}</p>
+                    <p><strong>Delivery Fee:</strong> ₹${order.deliveryFee}</p>
+                    <p><strong>Total:</strong> ₹${order.total}</p>
+                </div>
+            </div>
+            
+            <div class="food-order-items">
+                <h4>Items:</h4>
+                ${order.items.map(item => `
+                    <div class="food-item">
+                        <span>${item.name} x ${item.quantity}</span>
+                        <span>₹${item.price * item.quantity}</span>
+                    </div>
+                `).join('')}
+            </div>
+            
+            ${order.paymentMethod ? `
+                <p><strong>Payment Method:</strong> ${order.paymentMethod.toUpperCase()}</p>
+                ${order.transactionId ? `<p><strong>Transaction ID:</strong> ${order.transactionId}</p>` : ''}
+                ${order.paymentId ? `<p><strong>Payment ID:</strong> ${order.paymentId}</p>` : ''}
+            ` : ''}
+            
+            <div class="food-order-actions">
+                ${order.status === 'pending_verification' ? `
+                    <button class="confirm-food-btn" onclick="confirmFoodOrder('${order.orderId}')">
+                        ✅ Confirm Payment & Send Invoice
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function confirmFoodOrder(orderId) {
+    if (!confirm('Confirm this food order payment and send invoice?')) return;
+    
+    try {
+        const response = await fetch(`/api/food-orders/${orderId}/confirm`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            alert('Food order confirmed and invoice sent!');
+            loadFoodOrders();
+        } else {
+            alert('Failed to confirm food order');
+        }
+    } catch (error) {
+        console.error('Error confirming food order:', error);
+        alert('Error confirming food order');
+    }
+}
 
 function setupEventBridgeSync() {
     console.log('📡 EventBridge + fallback polling enabled');

@@ -528,6 +528,30 @@ app.get('/api/payment-proof/:bookingId', async (req, res) => {
     }
 });
 
+// Food order management endpoints
+app.get('/api/food-orders', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/food-orders');
+        const orders = await response.json();
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch food orders' });
+    }
+});
+
+app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/food-orders/${req.params.orderId}/confirm`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to confirm food order' });
+    }
+});
+
 // EventBridge Server-Sent Events endpoint
 const sseClients = [];
 
