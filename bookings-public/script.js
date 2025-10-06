@@ -295,12 +295,16 @@ async function loadCoupons() {
         const response = await fetch('/api/coupons');
         const coupons = await response.json();
         const list = document.getElementById('couponList');
-        list.innerHTML = coupons.map(coupon => `
-            <div class="coupon-item">
-                <span><strong>${coupon.code}</strong> - ${coupon.type === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount}</span>
-                <button onclick="deleteCoupon('${coupon.code}')">Delete</button>
-            </div>
-        `).join('');
+        list.innerHTML = coupons.map(coupon => {
+            const dayTypeText = coupon.day_type === 'weekday' ? 'Weekdays' : 
+                               coupon.day_type === 'weekend' ? 'Weekends' : 'All Days';
+            return `
+                <div class="coupon-item">
+                    <span><strong>${coupon.code}</strong> - ${coupon.type === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount} (${dayTypeText})</span>
+                    <button onclick="deleteCoupon('${coupon.code}')">Delete</button>
+                </div>
+            `;
+        }).join('');
     } catch (error) {
         console.error('Error loading coupons:', error);
     }
@@ -310,6 +314,7 @@ async function createCoupon() {
     const code = document.getElementById('couponCode').value.trim().toUpperCase();
     const type = document.getElementById('couponType').value;
     const discount = parseInt(document.getElementById('couponDiscount').value);
+    const day_type = document.getElementById('couponDayType').value;
     
     if (!code || !discount) {
         alert('Please fill all fields');
@@ -320,13 +325,14 @@ async function createCoupon() {
         const response = await fetch('/api/coupons', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, type, discount })
+            body: JSON.stringify({ code, type, discount, day_type })
         });
         
         if (response.ok) {
             alert('Coupon created successfully');
             document.getElementById('couponCode').value = '';
             document.getElementById('couponDiscount').value = '';
+            document.getElementById('couponDayType').value = 'all';
             loadCoupons();
         } else {
             const error = await response.json();

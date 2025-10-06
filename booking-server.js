@@ -29,6 +29,13 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add day_type column to coupons if it doesn't exist
+    try {
+        await db.run('ALTER TABLE coupons ADD COLUMN day_type TEXT DEFAULT "all"');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Create resorts table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS resorts (

@@ -58,6 +58,11 @@
                     <option value="fixed">Fixed Amount (₹)</option>
                 </select>
                 <input type="number" id="couponDiscount" placeholder="Discount Value" min="1">
+                <select id="couponDayType">
+                    <option value="all">All Days</option>
+                    <option value="weekday">Weekdays (Mon-Fri)</option>
+                    <option value="weekend">Weekends (Sat-Sun)</option>
+                </select>
                 <button onclick="createCoupon()">Create Coupon</button>
             </div>
             <div class="coupon-list" id="couponList"></div>
