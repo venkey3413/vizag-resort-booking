@@ -19,7 +19,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.static('public'));
-app.use('/food', express.static('food-public'));
+
 
 // Database
 let db;
@@ -838,6 +838,8 @@ app.get('/api/payment-proof/:bookingId', async (req, res) => {
 });
 
 // Food service routes
+app.use('/food', express.static('food-public'));
+
 app.get('/food', (req, res) => {
     res.sendFile(__dirname + '/food-public/index.html');
 });
