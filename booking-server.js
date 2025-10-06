@@ -552,6 +552,19 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
     }
 });
 
+app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/food-orders/${req.params.orderId}/cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to cancel food order' });
+    }
+});
+
 // EventBridge Server-Sent Events endpoint
 const sseClients = [];
 
