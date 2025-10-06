@@ -69,6 +69,24 @@
                     <label for="amenities">Amenities (one per line):</label>
                     <textarea id="amenities" rows="4" placeholder="WiFi\nSwimming Pool\nRestaurant\nFree Parking\nGym\nSpa"></textarea>
                 </div>
+                <div class="form-group">
+                    <label>Dynamic Pricing:</label>
+                    <div class="pricing-container">
+                        <div class="pricing-row">
+                            <label>Weekday (Mon-Thu):</label>
+                            <input type="number" id="weekdayPrice" placeholder="₹ per night">
+                        </div>
+                        <div class="pricing-row">
+                            <label>Weekend (Fri-Sun):</label>
+                            <input type="number" id="weekendPrice" placeholder="₹ per night">
+                        </div>
+                        <div class="pricing-row">
+                            <label>Holiday/Festival:</label>
+                            <input type="number" id="holidayPrice" placeholder="₹ per night">
+                        </div>
+                    </div>
+                    <small>Leave empty to use base price for that day type</small>
+                </div>
                 <button type="submit" id="submitBtn">Add Resort</button>
                 <button type="button" id="cancelBtn" onclick="cancelEdit()" style="display:none;">Cancel</button>
             </form>

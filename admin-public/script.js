@@ -64,22 +64,34 @@ function displayResorts() {
     const grid = document.getElementById('resortsGrid');
     if (!grid) return;
     
-    grid.innerHTML = resorts.map(resort => `
-        <div class="resort-item">
-            <img src="${resort.image}" alt="${resort.name}" class="resort-image">
-            <div class="resort-info">
-                <h3>${resort.name}</h3>
-                <p><strong>Location:</strong> ${resort.location}</p>
-                <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
-                <p><strong>Description:</strong> ${resort.description}</p>
-                ${resort.amenities ? `<p><strong>Amenities:</strong> ${resort.amenities.replace(/\n/g, ', ')}</p>` : ''}
+    grid.innerHTML = resorts.map(resort => {
+        let pricingInfo = `<p><strong>Base Price:</strong> ₹${resort.price.toLocaleString()}/night</p>`;
+        
+        if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+            pricingInfo += '<p><strong>Dynamic Pricing:</strong></p>';
+            resort.dynamic_pricing.forEach(pricing => {
+                const dayType = pricing.day_type.charAt(0).toUpperCase() + pricing.day_type.slice(1);
+                pricingInfo += `<p style="margin-left: 15px; font-size: 0.9em;">• ${dayType}: ₹${pricing.price.toLocaleString()}/night</p>`;
+            });
+        }
+        
+        return `
+            <div class="resort-item">
+                <img src="${resort.image}" alt="${resort.name}" class="resort-image">
+                <div class="resort-info">
+                    <h3>${resort.name}</h3>
+                    <p><strong>Location:</strong> ${resort.location}</p>
+                    ${pricingInfo}
+                    <p><strong>Description:</strong> ${resort.description}</p>
+                    ${resort.amenities ? `<p><strong>Amenities:</strong> ${resort.amenities.replace(/\n/g, ', ')}</p>` : ''}
+                </div>
+                <div class="resort-actions">
+                    <button class="edit" onclick="editResort(${resort.id})">Edit</button>
+                    <button class="delete" onclick="deleteResort(${resort.id})">Delete</button>
+                </div>
             </div>
-            <div class="resort-actions">
-                <button class="edit" onclick="editResort(${resort.id})">Edit</button>
-                <button class="delete" onclick="deleteResort(${resort.id})">Delete</button>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 async function handleSubmit(e) {
@@ -90,6 +102,16 @@ async function handleSubmit(e) {
     submitBtn.textContent = 'Processing...';
     submitBtn.disabled = true;
 
+    // Collect dynamic pricing data
+    const dynamicPricing = [];
+    const weekdayPrice = document.getElementById('weekdayPrice').value;
+    const weekendPrice = document.getElementById('weekendPrice').value;
+    const holidayPrice = document.getElementById('holidayPrice').value;
+    
+    if (weekdayPrice) dynamicPricing.push({ day_type: 'weekday', price: parseInt(weekdayPrice) });
+    if (weekendPrice) dynamicPricing.push({ day_type: 'weekend', price: parseInt(weekendPrice) });
+    if (holidayPrice) dynamicPricing.push({ day_type: 'holiday', price: parseInt(holidayPrice) });
+
     const resortData = {
         name: document.getElementById('name').value,
         location: document.getElementById('location').value,
@@ -99,7 +121,8 @@ async function handleSubmit(e) {
         image: document.getElementById('image').value,
         gallery: document.getElementById('gallery').value,
         videos: document.getElementById('videos').value,
-        map_link: document.getElementById('mapLink').value
+        map_link: document.getElementById('mapLink').value,
+        dynamic_pricing: dynamicPricing
     };
 
     try {
@@ -150,6 +173,23 @@ function editResort(id) {
     document.getElementById('videos').value = resort.videos || '';
     document.getElementById('mapLink').value = resort.map_link || '';
     
+    // Load dynamic pricing
+    document.getElementById('weekdayPrice').value = '';
+    document.getElementById('weekendPrice').value = '';
+    document.getElementById('holidayPrice').value = '';
+    
+    if (resort.dynamic_pricing) {
+        resort.dynamic_pricing.forEach(pricing => {
+            if (pricing.day_type === 'weekday') {
+                document.getElementById('weekdayPrice').value = pricing.price;
+            } else if (pricing.day_type === 'weekend') {
+                document.getElementById('weekendPrice').value = pricing.price;
+            } else if (pricing.day_type === 'holiday') {
+                document.getElementById('holidayPrice').value = pricing.price;
+            }
+        });
+    }
+    
     document.getElementById('submitBtn').textContent = 'Update Resort';
     const cancelBtn = document.getElementById('cancelBtn');
     if (cancelBtn) cancelBtn.style.display = 'inline-block';
@@ -158,6 +198,9 @@ function editResort(id) {
 function cancelEdit() {
     editingId = null;
     document.getElementById('resortForm').reset();
+    document.getElementById('weekdayPrice').value = '';
+    document.getElementById('weekendPrice').value = '';
+    document.getElementById('holidayPrice').value = '';
     document.getElementById('submitBtn').textContent = 'Add Resort';
     const cancelBtn = document.getElementById('cancelBtn');
     if (cancelBtn) cancelBtn.style.display = 'none';

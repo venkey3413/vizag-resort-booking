@@ -203,6 +203,35 @@ button.delete:hover {
     background: #138496;
 }
 
+.pricing-container {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    background: #f9f9f9;
+}
+
+.pricing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.pricing-row:last-child {
+    margin-bottom: 0;
+}
+
+.pricing-row label {
+    margin-bottom: 0;
+    font-weight: normal;
+    width: 150px;
+}
+
+.pricing-row input {
+    width: 200px;
+    margin-left: 1rem;
+}
+
 @media (max-width: 768px) {
     .form-row {
         grid-template-columns: 1fr;
@@ -211,5 +240,16 @@ button.delete:hover {
     .resort-item {
         grid-template-columns: 1fr;
         text-align: center;
+    }
+    
+    .pricing-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .pricing-row input {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0.25rem;
     }
 }

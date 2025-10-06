@@ -67,6 +67,18 @@ async function initDB() {
             FOREIGN KEY (resort_id) REFERENCES resorts (id)
         )
     `);
+    
+    // Create dynamic pricing table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS dynamic_pricing (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resort_id INTEGER NOT NULL,
+            day_type TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts (id)
+        )
+    `);
 
 }
 
@@ -330,6 +342,16 @@ app.delete('/api/coupons/:code', async (req, res) => {
 app.get('/api/resorts', async (req, res) => {
     try {
         const resorts = await db.all('SELECT * FROM resorts ORDER BY id DESC');
+        
+        // Add dynamic pricing to each resort
+        for (let resort of resorts) {
+            const pricing = await db.all(
+                'SELECT day_type, price FROM dynamic_pricing WHERE resort_id = ?',
+                [resort.id]
+            );
+            resort.dynamic_pricing = pricing;
+        }
+        
         res.json(resorts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch resorts' });
@@ -338,16 +360,54 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const { name, location, price, description, image, gallery, videos, map_link, amenities } = req.body;
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing } = req.body;
         
-        await db.run(`
+        const result = await db.run(`
             INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link, amenities)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [name, location, price, description, image, gallery, videos, map_link, amenities]);
         
+        // Add dynamic pricing if provided
+        if (dynamic_pricing && dynamic_pricing.length > 0) {
+            for (const item of dynamic_pricing) {
+                await db.run(
+                    'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                    [result.lastID, item.day_type, item.price]
+                );
+            }
+        }
+        
         res.json({ message: 'Resort added successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to add resort' });
+    }
+});
+
+app.put('/api/resorts/:id', async (req, res) => {
+    try {
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing } = req.body;
+        const resortId = req.params.id;
+        
+        await db.run(`
+            UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, 
+            image = ?, gallery = ?, videos = ?, map_link = ?, amenities = ?
+            WHERE id = ?
+        `, [name, location, price, description, image, gallery, videos, map_link, amenities, resortId]);
+        
+        // Update dynamic pricing
+        await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
+        if (dynamic_pricing && dynamic_pricing.length > 0) {
+            for (const item of dynamic_pricing) {
+                await db.run(
+                    'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                    [resortId, item.day_type, item.price]
+                );
+            }
+        }
+        
+        res.json({ message: 'Resort updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update resort' });
     }
 });
 
@@ -387,6 +447,40 @@ app.delete('/api/resort-blocks/:id', async (req, res) => {
         res.json({ message: 'Resort block removed successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to remove resort block' });
+    }
+});
+
+// Dynamic pricing endpoints
+app.get('/api/dynamic-pricing/:resortId', async (req, res) => {
+    try {
+        const pricing = await db.all(
+            'SELECT * FROM dynamic_pricing WHERE resort_id = ? ORDER BY day_type',
+            [req.params.resortId]
+        );
+        res.json(pricing);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch dynamic pricing' });
+    }
+});
+
+app.post('/api/dynamic-pricing', async (req, res) => {
+    try {
+        const { resort_id, pricing } = req.body;
+        
+        // Delete existing pricing for this resort
+        await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resort_id]);
+        
+        // Insert new pricing
+        for (const item of pricing) {
+            await db.run(
+                'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                [resort_id, item.day_type, item.price]
+            );
+        }
+        
+        res.json({ message: 'Dynamic pricing updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update dynamic pricing' });
     }
 });
 
