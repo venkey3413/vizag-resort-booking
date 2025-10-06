@@ -84,17 +84,19 @@ function updateCart() {
     const subtotalEl = document.getElementById('subtotal');
     const totalAmountEl = document.getElementById('totalAmount');
     const checkoutBtn = document.getElementById('checkoutBtn');
+    const deliveryFeeEl = document.getElementById('deliveryFee');
     
     if (cart.length === 0) {
         cartItems.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
         subtotalEl.textContent = '₹0';
+        deliveryFeeEl.textContent = '₹50';
         totalAmountEl.textContent = '₹50';
         checkoutBtn.disabled = true;
         return;
     }
     
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const deliveryFee = 50;
+    const deliveryFee = subtotal >= 1000 ? 0 : 50;
     const total = subtotal + deliveryFee;
     
     cartItems.innerHTML = cart.map(item => `
@@ -113,8 +115,15 @@ function updateCart() {
     `).join('');
     
     subtotalEl.textContent = `₹${subtotal}`;
+    deliveryFeeEl.textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
     totalAmountEl.textContent = `₹${total}`;
-    checkoutBtn.disabled = false;
+    checkoutBtn.disabled = subtotal < 600;
+    
+    if (subtotal < 600) {
+        checkoutBtn.textContent = `Minimum order ₹600 (₹${600 - subtotal} more needed)`;
+    } else {
+        checkoutBtn.textContent = 'Place Order';
+    }
 }
 
 function openBookingModal() {
@@ -126,7 +135,8 @@ function openBookingModal() {
     const modalTotal = document.getElementById('modalTotal');
     
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const total = subtotal + 50;
+    const deliveryFee = subtotal >= 1000 ? 0 : 50;
+    const total = subtotal + deliveryFee;
     
     orderSummary.innerHTML = cart.map(item => `
         <div class="summary-item">
@@ -136,6 +146,7 @@ function openBookingModal() {
     `).join('');
     
     modalSubtotal.textContent = `₹${subtotal}`;
+    document.querySelector('.total-summary .summary-row:nth-child(2) span:last-child').textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
     modalTotal.textContent = `₹${total}`;
     
     // Generate delivery time slots (minimum 3 hours from now)
@@ -242,7 +253,8 @@ async function confirmOrder() {
     }
     
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const total = subtotal + 50;
+    const deliveryFee = subtotal >= 1000 ? 0 : 50;
+    const total = subtotal + deliveryFee;
     
     const orderData = {
         bookingId,
@@ -251,7 +263,7 @@ async function confirmOrder() {
         deliveryTime,
         items: cart,
         subtotal,
-        deliveryFee: 50,
+        deliveryFee,
         total
     };
     
