@@ -1131,6 +1131,29 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
         order.cancelledAt = new Date();
         foodOrders.set(orderId, order);
         
+        // Send cancellation email to customer
+        try {
+            const cancellationData = {
+                orderId: order.orderId,
+                bookingId: order.bookingId,
+                resortName: order.resortName,
+                customerName: order.guestName,
+                email: order.customerEmail,
+                phone: order.phoneNumber,
+                orderDate: order.orderTime,
+                items: order.items,
+                subtotal: order.subtotal,
+                deliveryFee: order.deliveryFee,
+                total: order.total,
+                cancelledAt: new Date()
+            };
+            
+            await sendInvoiceEmail(cancellationData, 'food_cancelled');
+            console.log(`Food order cancellation email sent for ${orderId}`);
+        } catch (emailError) {
+            console.error('Failed to send cancellation email:', emailError);
+        }
+        
         // Send Telegram notification
         try {
             const message = `❌ FOOD ORDER CANCELLED!

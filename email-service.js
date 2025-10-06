@@ -72,6 +72,61 @@ async function sendInvoiceEmail(booking, type = 'resort') {
                     🌐 <a href="https://vizagresortbooking.in/food" style="color: #667eea;">https://vizagresortbooking.in/food</a></p>
                 </div>
             `;
+        } else if (type === 'food_cancelled') {
+            // Food order cancellation email
+            const itemsList = booking.items.map(item => 
+                `<tr><td>${item.name}</td><td>${item.quantity}</td><td>₹${item.price}</td><td>₹${item.price * item.quantity}</td></tr>`
+            ).join('');
+            
+            invoiceHTML = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="https://vizagresortbooking.in/cropped_circle_image.png" alt="My Food - Vizag Resort Booking" style="max-width: 150px; height: auto;">
+                    </div>
+                    <h2 style="color: #dc3545; text-align: center;">Food Order Cancelled</h2>
+                    
+                    <p>Dear ${booking.customerName},</p>
+                    
+                    <p>We regret to inform you that your food order has been cancelled.</p>
+                    
+                    <p><strong>Cancelled Order Details:</strong></p>
+                    
+                    <p><strong>Order ID:</strong> ${booking.orderId}</p>
+                    <p><strong>Booking ID:</strong> ${booking.bookingId}</p>
+                    <p><strong>Resort:</strong> ${booking.resortName}</p>
+                    <p><strong>Phone:</strong> ${booking.phone}</p>
+                    <p><strong>Order Date:</strong> ${new Date(booking.orderDate).toLocaleDateString()}</p>
+                    <p><strong>Cancelled Date:</strong> ${new Date(booking.cancelledAt).toLocaleDateString()}</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Item</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Qty</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Price</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsList}
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>Subtotal:</strong> ₹${booking.subtotal}</p>
+                    <p><strong>Delivery Fee:</strong> ₹${booking.deliveryFee}</p>
+                    <p><strong>Total Amount:</strong> ₹${booking.total}</p>
+                    
+                    <p style="color: #dc3545; font-weight: bold;">If you made any payment, it will be refunded within 3-5 business days.</p>
+                    
+                    <p>For any queries, please contact us at vizagresortbooking@gmail.com</p>
+                    
+                    <p>We apologize for any inconvenience caused.</p>
+                    
+                    <p>Best regards,<br>
+                    My Food Team<br>
+                    🌐 <a href="https://vizagresortbooking.in/food" style="color: #667eea;">https://vizagresortbooking.in/food</a></p>
+                </div>
+            `;
         } else {
             // Resort booking invoice
             invoiceHTML = `
@@ -130,7 +185,9 @@ async function sendInvoiceEmail(booking, type = 'resort') {
             console.log('⚠️ PDF not found, sending email without attachment');
         }
         
-        const subject = type === 'food' ? 'Food Order Confirmation – My Food' : 'Booking Confirmation – vizagresortbooking.in';
+        const subject = type === 'food' ? 'Food Order Confirmation – My Food' : 
+                        type === 'food_cancelled' ? 'Food Order Cancelled – My Food' : 
+                        'Booking Confirmation – vizagresortbooking.in';
         
         const mailOptions = {
             from: process.env.EMAIL_USER,
