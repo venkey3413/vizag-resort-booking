@@ -851,13 +851,14 @@ const foodOrders = new Map();
 // Create food order (pending payment)
 app.post('/api/food-orders', async (req, res) => {
     try {
-        const { bookingId, phoneNumber, items, subtotal, deliveryFee, total } = req.body;
+        const { bookingId, phoneNumber, customerEmail, items, subtotal, deliveryFee, total } = req.body;
         
         const orderId = `FO${Date.now()}`;
         const orderData = {
             orderId,
             bookingId,
             phoneNumber,
+            customerEmail,
             items,
             subtotal,
             deliveryFee,
@@ -981,7 +982,7 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
             const invoiceData = {
                 orderId: order.orderId,
                 customerName: 'Food Order Customer',
-                email: 'customer@example.com', // In production, get from order
+                email: order.customerEmail,
                 phone: order.phoneNumber,
                 orderDate: order.orderTime,
                 items: order.items,

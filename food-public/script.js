@@ -179,12 +179,14 @@ function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
     document.getElementById('bookingId').value = '';
     document.getElementById('phoneNumber').value = '';
+    document.getElementById('customerEmail').value = '';
     document.body.style.overflow = 'auto';
 }
 
 async function confirmOrder() {
     const bookingId = document.getElementById('bookingId').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const customerEmail = document.getElementById('customerEmail').value.trim();
     
     if (!bookingId) {
         showNotification('Please enter your booking ID', 'error');
@@ -196,10 +198,22 @@ async function confirmOrder() {
         return;
     }
     
+    if (!customerEmail) {
+        showNotification('Please enter your email', 'error');
+        return;
+    }
+    
     // Phone validation
     const phonePattern = /^(\+91|91)?[6-9]\d{9}$/;
     if (!phonePattern.test(phoneNumber.replace(/\s+/g, ''))) {
         showNotification('Please enter a valid phone number', 'error');
+        return;
+    }
+    
+    // Email validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(customerEmail)) {
+        showNotification('Please enter a valid email address', 'error');
         return;
     }
     
@@ -209,6 +223,7 @@ async function confirmOrder() {
     const orderData = {
         bookingId,
         phoneNumber,
+        customerEmail,
         items: cart,
         subtotal,
         deliveryFee: 50,
