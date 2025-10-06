@@ -911,8 +911,34 @@ app.get('/api/validate-booking/:bookingId', async (req, res) => {
     }
 });
 
-// Store food orders in memory (in production, use database)
-const foodOrders = new Map();
+// Initialize food orders table
+async function initFoodOrdersTable() {
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS food_orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT UNIQUE NOT NULL,
+            booking_id TEXT NOT NULL,
+            resort_name TEXT NOT NULL,
+            guest_name TEXT NOT NULL,
+            phone_number TEXT NOT NULL,
+            customer_email TEXT NOT NULL,
+            delivery_time TEXT,
+            items TEXT NOT NULL,
+            subtotal INTEGER NOT NULL,
+            delivery_fee INTEGER NOT NULL,
+            total INTEGER NOT NULL,
+            status TEXT DEFAULT 'pending_payment',
+            payment_method TEXT,
+            transaction_id TEXT,
+            payment_id TEXT,
+            order_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+            confirmed_at DATETIME,
+            cancelled_at DATETIME
+        )
+    `);
+}
+
+initFoodOrdersTable();
 
 // Create food order (pending payment)
 app.post('/api/food-orders', async (req, res) => {
@@ -934,24 +960,12 @@ app.post('/api/food-orders', async (req, res) => {
         }
         
         const orderId = `FO${Date.now()}`;
-        const orderData = {
-            orderId,
-            bookingId,
-            resortName: booking.resort_name,
-            guestName: booking.guest_name,
-            phoneNumber,
-            customerEmail,
-            deliveryTime,
-            items,
-            subtotal,
-            deliveryFee,
-            total,
-            status: 'pending_payment',
-            orderTime: new Date()
-        };
         
-        // Store order data
-        foodOrders.set(orderId, orderData);
+        // Store order in database
+        await db.run(`
+            INSERT INTO food_orders (order_id, booking_id, resort_name, guest_name, phone_number, customer_email, delivery_time, items, subtotal, delivery_fee, total, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [orderId, bookingId, booking.resort_name, booking.guest_name, phoneNumber, customerEmail, deliveryTime, JSON.stringify(items), subtotal, deliveryFee, total, 'pending_payment']);
         
         console.log('Food order created:', orderData);
         
@@ -985,15 +999,10 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
         const { transactionId, paymentId, paymentMethod } = req.body;
         
         // Update order with payment info
-        const order = foodOrders.get(orderId);
-        if (order) {
-            order.transactionId = transactionId;
-            order.paymentId = paymentId;
-            order.paymentMethod = paymentMethod;
-            order.status = 'pending_verification';
-            order.paymentSubmittedAt = new Date();
-            foodOrders.set(orderId, order);
-        }
+        await db.run(`
+            UPDATE food_orders SET transaction_id = ?, payment_id = ?, payment_method = ?, status = ?
+            WHERE order_id = ?
+        `, [transactionId, paymentId, paymentMethod, 'pending_verification', orderId]);
         
         console.log('Food order payment submitted for verification:', {
             orderId,
@@ -1049,33 +1058,31 @@ ${paymentId ? `🔢 Payment ID: ${paymentId}` : ''}
 app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
     try {
         const { orderId } = req.params;
-        const order = foodOrders.get(orderId);
+        const order = await db.get('SELECT * FROM food_orders WHERE order_id = ?', [orderId]);
         
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
         
         // Update order status
-        order.status = 'confirmed';
-        order.confirmedAt = new Date();
-        foodOrders.set(orderId, order);
+        await db.run('UPDATE food_orders SET status = ?, confirmed_at = datetime("now") WHERE order_id = ?', ['confirmed', orderId]);
         
         // Generate and send invoice
         try {
             const invoiceData = {
-                orderId: order.orderId,
-                bookingId: order.bookingId,
-                resortName: order.resortName,
-                customerName: order.guestName,
-                email: order.customerEmail,
-                phone: order.phoneNumber,
-                orderDate: order.orderTime,
-                items: order.items,
+                orderId: order.order_id,
+                bookingId: order.booking_id,
+                resortName: order.resort_name,
+                customerName: order.guest_name,
+                email: order.customer_email,
+                phone: order.phone_number,
+                orderDate: order.order_time,
+                items: JSON.parse(order.items),
                 subtotal: order.subtotal,
-                deliveryFee: order.deliveryFee,
+                deliveryFee: order.delivery_fee,
                 total: order.total,
-                paymentMethod: order.paymentMethod,
-                transactionId: order.transactionId || order.paymentId
+                paymentMethod: order.payment_method,
+                transactionId: order.transaction_id || order.payment_id
             };
             
             await sendInvoiceEmail(invoiceData, 'food');
@@ -1117,7 +1124,7 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
 app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
     try {
         const { orderId } = req.params;
-        const order = foodOrders.get(orderId);
+        const order = await db.get('SELECT * FROM food_orders WHERE order_id = ?', [orderId]);
         
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
@@ -1128,23 +1135,21 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
         }
         
         // Update order status
-        order.status = 'cancelled';
-        order.cancelledAt = new Date();
-        foodOrders.set(orderId, order);
+        await db.run('UPDATE food_orders SET status = ?, cancelled_at = datetime("now") WHERE order_id = ?', ['cancelled', orderId]);
         
         // Send cancellation email to customer
         try {
             const cancellationData = {
-                orderId: order.orderId,
-                bookingId: order.bookingId,
-                resortName: order.resortName,
-                customerName: order.guestName,
-                email: order.customerEmail,
-                phone: order.phoneNumber,
-                orderDate: order.orderTime,
-                items: order.items,
+                orderId: order.order_id,
+                bookingId: order.booking_id,
+                resortName: order.resort_name,
+                customerName: order.guest_name,
+                email: order.customer_email,
+                phone: order.phone_number,
+                orderDate: order.order_time,
+                items: JSON.parse(order.items),
                 subtotal: order.subtotal,
-                deliveryFee: order.deliveryFee,
+                deliveryFee: order.delivery_fee,
                 total: order.total,
                 cancelledAt: new Date()
             };
@@ -1160,8 +1165,8 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
             const message = `❌ FOOD ORDER CANCELLED!
 
 📋 Order ID: ${orderId}
-🏨 Resort: ${order.resortName}
-👤 Guest: ${order.guestName}
+🏨 Resort: ${order.resort_name}
+👤 Guest: ${order.guest_name}
 💰 Amount: ₹${order.total}
 ⏰ Cancelled at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
             
@@ -1180,9 +1185,33 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
 });
 
 // Get food orders (admin endpoint)
-app.get('/api/food-orders', (req, res) => {
+app.get('/api/food-orders', async (req, res) => {
     try {
-        const orders = Array.from(foodOrders.values()).sort((a, b) => new Date(b.orderTime) - new Date(a.orderTime));
+        const orders = await db.all(`
+            SELECT *, 
+                   order_id as orderId,
+                   booking_id as bookingId,
+                   resort_name as resortName,
+                   guest_name as guestName,
+                   phone_number as phoneNumber,
+                   customer_email as customerEmail,
+                   delivery_time as deliveryTime,
+                   delivery_fee as deliveryFee,
+                   order_time as orderTime,
+                   payment_method as paymentMethod,
+                   transaction_id as transactionId,
+                   payment_id as paymentId
+            FROM food_orders 
+            ORDER BY order_time DESC
+        `);
+        
+        // Parse items JSON for each order
+        orders.forEach(order => {
+            if (order.items) {
+                order.items = JSON.parse(order.items);
+            }
+        });
+        
         res.json(orders);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch food orders' });
