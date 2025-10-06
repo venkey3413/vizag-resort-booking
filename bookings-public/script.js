@@ -49,6 +49,8 @@ function displayFoodOrders(orders) {
             <div class="food-order-details">
                 <div>
                     <p><strong>Booking ID:</strong> ${order.bookingId}</p>
+                    <p><strong>Guest Name:</strong> ${order.guestName}</p>
+                    <p><strong>Resort:</strong> ${order.resortName}</p>
                     <p><strong>Phone:</strong> ${order.phoneNumber}</p>
                     <p><strong>Order Time:</strong> ${new Date(order.orderTime).toLocaleString()}</p>
                 </div>
