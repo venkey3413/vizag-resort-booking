@@ -150,6 +150,21 @@ async function initDB() {
 app.get('/api/resorts', async (req, res) => {
     try {
         const resorts = await db.all('SELECT id, name, location, price, description, image, gallery, videos, map_link, amenities, available FROM resorts WHERE available = 1');
+        
+        // Add dynamic pricing to each resort
+        for (let resort of resorts) {
+            try {
+                const pricing = await db.all(
+                    'SELECT day_type, price FROM dynamic_pricing WHERE resort_id = ?',
+                    [resort.id]
+                );
+                resort.dynamic_pricing = pricing;
+            } catch (error) {
+                // Dynamic pricing table might not exist yet
+                resort.dynamic_pricing = [];
+            }
+        }
+        
         res.json(resorts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch resorts' });
@@ -291,9 +306,43 @@ app.post('/api/bookings', async (req, res) => {
             });
         }
 
-        // Calculate total price with platform fee and discount
+        // Calculate total price with dynamic pricing
         const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-        const basePrice = resort.price * nights;
+        let basePrice = 0;
+        
+        // Calculate price for each night using dynamic pricing
+        for (let i = 0; i < nights; i++) {
+            const currentDate = new Date(checkInDate);
+            currentDate.setDate(currentDate.getDate() + i);
+            const dayOfWeek = currentDate.getDay();
+            
+            let dayPrice = resort.price; // Default to base price
+            
+            try {
+                // Get dynamic pricing for this resort
+                const dynamicPricing = await db.all(
+                    'SELECT day_type, price FROM dynamic_pricing WHERE resort_id = ?',
+                    [resortId]
+                );
+                
+                if (dynamicPricing.length > 0) {
+                    // Check if it's weekend (Friday=5, Saturday=6, Sunday=0)
+                    if (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) {
+                        const weekendPrice = dynamicPricing.find(p => p.day_type === 'weekend');
+                        if (weekendPrice) dayPrice = weekendPrice.price;
+                    } else {
+                        // Weekday (Monday=1 to Thursday=4)
+                        const weekdayPrice = dynamicPricing.find(p => p.day_type === 'weekday');
+                        if (weekdayPrice) dayPrice = weekdayPrice.price;
+                    }
+                }
+            } catch (error) {
+                // Dynamic pricing table might not exist yet, use base price
+            }
+            
+            basePrice += dayPrice;
+        }
+        
         const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
         const subtotal = basePrice + platformFee;
         const discount = discountAmount || 0;

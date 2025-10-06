@@ -147,55 +147,73 @@ async function loadResorts() {
 
 function displayResorts() {
     const grid = document.getElementById('resortsGrid');
-    grid.innerHTML = resorts.map(resort => `
-        <div class="resort-card">
-            <div class="resort-gallery">
-                <img src="${resort.image}" alt="${resort.name}" class="resort-image main-image">
-                ${(resort.gallery || resort.videos) ? `
-                    <button class="view-more-btn" onclick="openGallery(${resort.id})">
-                        📸 View More
+    grid.innerHTML = resorts.map(resort => {
+        let pricingDisplay = `₹${resort.price.toLocaleString()}/night`;
+        
+        if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+            pricingDisplay = `From ₹${resort.price.toLocaleString()}/night`;
+            const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+            const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
+            
+            if (weekdayPrice || weekendPrice) {
+                pricingDisplay += '<br><small>';
+                if (weekdayPrice) pricingDisplay += `Weekday: ₹${weekdayPrice.price.toLocaleString()}`;
+                if (weekdayPrice && weekendPrice) pricingDisplay += ' | ';
+                if (weekendPrice) pricingDisplay += `Weekend: ₹${weekendPrice.price.toLocaleString()}`;
+                pricingDisplay += '</small>';
+            }
+        }
+        
+        return `
+            <div class="resort-card">
+                <div class="resort-gallery">
+                    <img src="${resort.image}" alt="${resort.name}" class="resort-image main-image">
+                    ${(resort.gallery || resort.videos) ? `
+                        <button class="view-more-btn" onclick="openGallery(${resort.id})">
+                            📸 View More
+                        </button>
+                    ` : ''}
+                </div>
+                <div class="resort-info">
+                    <h3>${resort.name}</h3>
+                    <p class="resort-location">
+                        📍 ${resort.location}
+                        ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="view-map-btn">🗺️ View Map</a>` : ''}
+                    </p>
+                    <p class="resort-price">${pricingDisplay}</p>
+                    <p class="resort-description">${resort.description}</p>
+                    ${resort.amenities ? `
+                        <div class="resort-amenities">
+                            <h4>🏨 Amenities:</h4>
+                            <div class="amenities-list">
+                                ${resort.amenities.split('\n').filter(a => a.trim()).map(amenity => 
+                                    `<span class="amenity-tag">${amenity.trim()}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    <button class="book-btn" onclick="openBookingModal(${resort.id})">
+                        Book Now
                     </button>
-                ` : ''}
-            </div>
-            <div class="resort-info">
-                <h3>${resort.name}</h3>
-                <p class="resort-location">
-                    📍 ${resort.location}
-                    ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="view-map-btn">🗺️ View Map</a>` : ''}
-                </p>
-                <p class="resort-price">₹${resort.price.toLocaleString()}/night</p>
-                <p class="resort-description">${resort.description}</p>
-                ${resort.amenities ? `
-                    <div class="resort-amenities">
-                        <h4>🏨 Amenities:</h4>
-                        <div class="amenities-list">
-                            ${resort.amenities.split('\n').filter(a => a.trim()).map(amenity => 
-                                `<span class="amenity-tag">${amenity.trim()}</span>`
-                            ).join('')}
+                    <div class="resort-footer">
+                        <div class="review-stars">
+                            <div class="rating-container" data-resort-id="${resort.id}">
+                                <span class="star" data-rating="1">☆</span>
+                                <span class="star" data-rating="2">☆</span>
+                                <span class="star" data-rating="3">☆</span>
+                                <span class="star" data-rating="4">☆</span>
+                                <span class="star" data-rating="5">☆</span>
+                            </div>
+                            <span class="review-text">Rate this resort</span>
                         </div>
-                    </div>
-                ` : ''}
-                <button class="book-btn" onclick="openBookingModal(${resort.id})">
-                    Book Now
-                </button>
-                <div class="resort-footer">
-                    <div class="review-stars">
-                        <div class="rating-container" data-resort-id="${resort.id}">
-                            <span class="star" data-rating="1">☆</span>
-                            <span class="star" data-rating="2">☆</span>
-                            <span class="star" data-rating="3">☆</span>
-                            <span class="star" data-rating="4">☆</span>
-                            <span class="star" data-rating="5">☆</span>
+                        <div class="cancellation-policy">
+                            <a href="Booking cancellation_policy.pdf" target="_blank" class="policy-text">Cancellation Policy</a>
                         </div>
-                        <span class="review-text">Rate this resort</span>
-                    </div>
-                    <div class="cancellation-policy">
-                        <a href="Booking cancellation_policy.pdf" target="_blank" class="policy-text">Cancellation Policy</a>
                     </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
     
     // Setup rating functionality after DOM is updated
     setTimeout(setupRatingStars, 100);
