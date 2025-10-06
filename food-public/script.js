@@ -138,9 +138,39 @@ function openBookingModal() {
     modalSubtotal.textContent = `₹${subtotal}`;
     modalTotal.textContent = `₹${total}`;
     
+    // Generate delivery time slots (minimum 3 hours from now)
+    generateDeliveryTimeSlots();
+    
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function generateDeliveryTimeSlots() {
+    const deliveryTimeSelect = document.getElementById('deliveryTime');
+    const now = new Date();
+    const minDeliveryTime = new Date(now.getTime() + 3 * 60 * 60 * 1000); // 3 hours from now
+    
+    // Clear existing options except the first one
+    deliveryTimeSelect.innerHTML = '<option value="">Select delivery time</option>';
+    
+    // Generate time slots for next 12 hours (every hour)
+    for (let i = 0; i < 12; i++) {
+        const slotTime = new Date(minDeliveryTime.getTime() + i * 60 * 60 * 1000);
+        const timeString = slotTime.toLocaleTimeString('en-IN', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
+        const dateString = slotTime.toLocaleDateString('en-IN');
+        const displayText = `${dateString} at ${timeString}`;
+        const value = slotTime.toISOString();
+        
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = displayText;
+        deliveryTimeSelect.appendChild(option);
+    }
 }
 
 function closeModal() {
@@ -155,6 +185,7 @@ async function confirmOrder() {
     const bookingId = document.getElementById('bookingId').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
     const customerEmail = document.getElementById('customerEmail').value.trim();
+    const deliveryTime = document.getElementById('deliveryTime').value;
     
     if (!bookingId) {
         showNotification('Please enter your booking ID', 'error');
@@ -168,6 +199,11 @@ async function confirmOrder() {
     
     if (!customerEmail) {
         showNotification('Please enter your email', 'error');
+        return;
+    }
+    
+    if (!deliveryTime) {
+        showNotification('Please select a delivery time', 'error');
         return;
     }
     
@@ -212,6 +248,7 @@ async function confirmOrder() {
         bookingId,
         phoneNumber,
         customerEmail,
+        deliveryTime,
         items: cart,
         subtotal,
         deliveryFee: 50,

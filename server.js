@@ -917,7 +917,7 @@ const foodOrders = new Map();
 // Create food order (pending payment)
 app.post('/api/food-orders', async (req, res) => {
     try {
-        const { bookingId, phoneNumber, customerEmail, items, subtotal, deliveryFee, total } = req.body;
+        const { bookingId, phoneNumber, customerEmail, deliveryTime, items, subtotal, deliveryFee, total } = req.body;
         
         // Validate booking ID first
         const booking = await db.get(`
@@ -941,6 +941,7 @@ app.post('/api/food-orders', async (req, res) => {
             guestName: booking.guest_name,
             phoneNumber,
             customerEmail,
+            deliveryTime,
             items,
             subtotal,
             deliveryFee,

@@ -53,6 +53,7 @@ function displayFoodOrders(orders) {
                     <p><strong>Resort:</strong> ${order.resortName}</p>
                     <p><strong>Phone:</strong> ${order.phoneNumber}</p>
                     <p><strong>Order Time:</strong> ${new Date(order.orderTime).toLocaleString()}</p>
+                    <p><strong>Delivery Time:</strong> ${new Date(order.deliveryTime).toLocaleString()}</p>
                 </div>
                 <div>
                     <p><strong>Subtotal:</strong> ₹${order.subtotal}</p>
