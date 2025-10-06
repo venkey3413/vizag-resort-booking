@@ -176,6 +176,9 @@ async function initDB() {
             ('Sunset Villa Resort', 'Udaipur', 6000, 'Royal heritage resort with lake views', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500', 'https://maps.google.com/?q=Udaipur')
         `);
     }
+    
+    // Initialize food orders table
+    await initFoodOrdersTable();
 }
 
 // Routes
@@ -938,8 +941,6 @@ async function initFoodOrdersTable() {
     `);
 }
 
-initFoodOrdersTable();
-
 // Create food order (pending payment)
 app.post('/api/food-orders', async (req, res) => {
     try {
@@ -988,6 +989,7 @@ app.post('/api/food-orders', async (req, res) => {
             orderId
         });
     } catch (error) {
+        console.error('Food order creation error:', error);
         res.status(500).json({ error: 'Failed to create order' });
     }
 });
