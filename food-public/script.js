@@ -171,12 +171,15 @@ function openBookingModal() {
     modalTotal.textContent = `₹${total}`;
     
     modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
     document.getElementById('bookingId').value = '';
     document.getElementById('phoneNumber').value = '';
+    document.body.style.overflow = 'auto';
 }
 
 function confirmOrder() {
