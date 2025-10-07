@@ -141,54 +141,9 @@ async function cancelFoodOrder(orderId) {
 }
 
 function setupEventBridgeSync() {
-    console.log('📡 EventBridge + fallback polling enabled');
-    
-    // Primary: EventBridge via Server-Sent Events
-    const eventSource = new EventSource('/api/events');
-    
-    eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'booking.created' || data.type === 'booking.updated' || data.type === 'payment.updated') {
-            console.log('📡 EventBridge update received');
-            loadBookings();
-        }
-        
-        if (data.type === 'food.order.created' || data.type === 'food.order.updated' || data.type === 'food.payment.updated') {
-            console.log('📡 Food order EventBridge update received');
-            loadFoodOrders();
-        }
-    };
-    
-    eventSource.onerror = function(error) {
-        console.log('⚠️ EventBridge connection error, fallback active');
-    };
-    
-    // Fallback: Polling every 30 seconds as backup
-    setInterval(async () => {
-        try {
-            const response = await fetch('/api/bookings');
-            const newBookings = await response.json();
-            
-            if (JSON.stringify(newBookings) !== JSON.stringify(bookings)) {
-                console.log('🔄 Fallback sync detected changes');
-                bookings = newBookings;
-                displayBookings();
-            }
-            
-            // Also sync food orders
-            const foodResponse = await fetch('/api/food-orders');
-            const newFoodOrders = await foodResponse.json();
-            
-            if (JSON.stringify(newFoodOrders) !== JSON.stringify(window.currentFoodOrders || [])) {
-                console.log('🔄 Food orders fallback sync detected changes');
-                window.currentFoodOrders = newFoodOrders;
-                displayFoodOrders(newFoodOrders);
-            }
-        } catch (error) {
-            // Silent fallback
-        }
-    }, 30000);
+    console.log('📡 EventBridge enabled (AWS Lambda triggers)');
+    // EventBridge events will trigger Lambda functions that update the UI
+    // No client-side SSE needed - all updates happen server-side
 }
 
 async function loadBookings() {

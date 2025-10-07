@@ -1,85 +1,40 @@
 const AWS = require('aws-sdk');
 
-// Configure EventBridge with fallback
-let eventbridge = null;
-let eventBridgeEnabled = false;
-
-try {
-    // Initialize EventBridge - will use IAM role if attached to EC2
-    eventbridge = new AWS.EventBridge({
-        region: process.env.AWS_REGION || 'ap-south-1'
-    });
-    eventBridgeEnabled = true;
-    console.log('✅ EventBridge initialized (using IAM role or environment credentials)');
-} catch (error) {
-    console.log('⚠️ EventBridge initialization failed:', error.message);
-    eventBridgeEnabled = false;
-}
+// Initialize EventBridge with IAM role (EC2 instance profile)
+const eventbridge = new AWS.EventBridge({
+    region: process.env.AWS_REGION || 'ap-south-1'
+});
 
 const EVENT_BUS_NAME = 'vizag-resort-events';
 
-// Publish event to EventBridge with fallback to direct SSE
+// Publish event to EventBridge only
 async function publishEvent(source, detailType, detail) {
     try {
-        if (eventBridgeEnabled && eventbridge) {
-            const params = {
-                Entries: [{
-                    Source: source,
-                    DetailType: detailType,
-                    Detail: JSON.stringify(detail)
-                    // Using default event bus
-                }]
-            };
-            
-            const result = await eventbridge.putEvents(params).promise();
-            console.log(`📡 EventBridge published: ${detailType}`);
-            return result;
-        } else {
-            // Fallback: Direct notification to other services
-            console.log(`📡 Direct SSE broadcast: ${detailType}`);
-            await notifyOtherServices(source, detailType, detail);
-            return { success: true, method: 'direct' };
-        }
+        const params = {
+            Entries: [{
+                Source: source,
+                DetailType: detailType,
+                Detail: JSON.stringify(detail),
+                EventBusName: EVENT_BUS_NAME
+            }]
+        };
+        
+        const result = await eventbridge.putEvents(params).promise();
+        console.log(`📡 EventBridge published: ${detailType}`);
+        return result;
     } catch (error) {
-        console.error('❌ EventBridge publish failed, using direct notification:', error.message);
-        // Fallback to direct notification
-        await notifyOtherServices(source, detailType, detail);
-        return { success: true, method: 'fallback' };
+        console.error('❌ EventBridge publish failed:', error.message);
+        throw error;
     }
-}
-
-// Direct notification fallback
-async function notifyOtherServices(source, detailType, detail) {
-    const eventData = { type: detailType, source, ...detail };
-    
-    // Notify booking server (port 3002)
-    try {
-        await fetch('http://localhost:3002/api/eventbridge-notify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(eventData)
-        }).catch(() => {});
-    } catch (error) {}
-    
-    // Notify main server (port 3000)
-    try {
-        await fetch('http://localhost:3000/api/eventbridge-notify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(eventData)
-        }).catch(() => {});
-    } catch (error) {}
 }
 
 // Event types
 const EVENTS = {
-    RESORT_ADDED: 'Resort Added',
-    RESORT_UPDATED: 'Resort Updated', 
-    RESORT_DELETED: 'Resort Deleted',
-    RESORT_CREATED: 'Resort Created',
-    BOOKING_CREATED: 'Booking Created',
-    BOOKING_DELETED: 'Booking Deleted',
-    PAYMENT_UPDATED: 'Payment Updated'
+    BOOKING_CREATED: 'booking.created',
+    BOOKING_UPDATED: 'booking.updated', 
+    PAYMENT_UPDATED: 'payment.updated',
+    FOOD_ORDER_CREATED: 'food.order.created',
+    FOOD_ORDER_UPDATED: 'food.order.updated'
 };
 
 module.exports = {

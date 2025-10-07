@@ -91,7 +91,7 @@ async function initDB() {
 
 }
 
-// Booking API Routes
+// Booking API Routes - Admin only, no public access
 app.get('/api/bookings', async (req, res) => {
     try {
         const bookings = await db.all(`
@@ -141,11 +141,13 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
         
         // Publish payment updated event
         try {
-            await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
+            await publishEvent('vizag.resort', EVENTS.PAYMENT_UPDATED, {
                 bookingId: id,
                 paymentStatus: payment_status,
                 guestName: booking.guest_name
             });
+            
+
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -196,9 +198,12 @@ app.delete('/api/bookings/:id', async (req, res) => {
         await db.run('DELETE FROM bookings WHERE id = ?', [id]);
         // Publish booking deleted event
         try {
-            await publishEvent('resort.booking', EVENTS.BOOKING_DELETED, {
-                bookingId: id
+            await publishEvent('vizag.resort', EVENTS.BOOKING_UPDATED, {
+                bookingId: id,
+                status: 'deleted'
             });
+            
+
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -648,71 +653,11 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
     }
 });
 
-// EventBridge Server-Sent Events endpoint
-const sseClients = [];
 
-app.get('/api/events', (req, res) => {
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Cache-Control'
-    });
-    
-    sseClients.push(res);
-    
-    try {
-        res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
-    } catch (error) {
-        console.error('SSE write error:', error);
-        return;
-    }
-    
-    const keepAlive = setInterval(() => {
-        try {
-            res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
-        } catch (error) {
-            clearInterval(keepAlive);
-            const index = sseClients.indexOf(res);
-            if (index !== -1) sseClients.splice(index, 1);
-        }
-    }, 30000);
-    
-    req.on('close', () => {
-        clearInterval(keepAlive);
-        const index = sseClients.indexOf(res);
-        if (index !== -1) sseClients.splice(index, 1);
-    });
-    
-    req.on('error', () => {
-        clearInterval(keepAlive);
-        const index = sseClients.indexOf(res);
-        if (index !== -1) sseClients.splice(index, 1);
-    });
-});
 
-// Function to broadcast events to all SSE clients
-function broadcastToSSE(eventData) {
-    const message = `data: ${JSON.stringify(eventData)}\n\n`;
-    sseClients.forEach(client => {
-        try {
-            client.write(message);
-        } catch (error) {
-            // Remove dead clients
-            const index = sseClients.indexOf(client);
-            if (index !== -1) sseClients.splice(index, 1);
-        }
-    });
-}
 
-// Endpoint to receive EventBridge notifications
-app.post('/api/eventbridge-notify', (req, res) => {
-    const { type, source, ...data } = req.body;
-    console.log(`📡 Received EventBridge notification: ${type}`);
-    broadcastToSSE({ type, source, ...data });
-    res.json({ success: true });
-});
+
+
 
 
 

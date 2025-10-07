@@ -508,14 +508,12 @@ app.post('/api/bookings', async (req, res) => {
 
         // Publish booking created event
         try {
-            await publishEvent('resort.booking', EVENTS.BOOKING_CREATED, {
+            await publishEvent('vizag.resort', EVENTS.BOOKING_CREATED, {
                 bookingId: result.lastID,
                 resortId: resortId,
                 guestName: guestName,
                 totalPrice: totalPrice
             });
-            // Broadcast to SSE clients
-            broadcastToSSE({ type: 'booking.created', bookingId: result.lastID });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -741,7 +739,7 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
         
         // Publish payment submitted event
         try {
-            await publishEvent('resort.booking', EVENTS.PAYMENT_UPDATED, {
+            await publishEvent('vizag.resort', EVENTS.PAYMENT_UPDATED, {
                 bookingId: bookingId,
                 paymentStatus: 'pending',
                 transactionId: transactionId
@@ -780,54 +778,11 @@ app.get('/api/bookings', async (req, res) => {
 
 
 
-// EventBridge Server-Sent Events endpoint
-const sseClients = [];
 
-app.get('/api/events', (req, res) => {
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*'
-    });
-    
-    // Add client to list
-    sseClients.push(res);
-    
-    res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
-    
-    const keepAlive = setInterval(() => {
-        res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
-    }, 30000);
-    
-    req.on('close', () => {
-        clearInterval(keepAlive);
-        const index = sseClients.indexOf(res);
-        if (index !== -1) sseClients.splice(index, 1);
-    });
-});
 
-// Function to broadcast events to all SSE clients
-function broadcastToSSE(eventData) {
-    const message = `data: ${JSON.stringify(eventData)}\n\n`;
-    sseClients.forEach(client => {
-        try {
-            client.write(message);
-        } catch (error) {
-            // Remove dead clients
-            const index = sseClients.indexOf(client);
-            if (index !== -1) sseClients.splice(index, 1);
-        }
-    });
-}
 
-// Endpoint to receive EventBridge notifications from admin server
-app.post('/api/eventbridge-notify', (req, res) => {
-    const { type, data } = req.body;
-    console.log(`📡 Received EventBridge notification: ${type}`);
-    broadcastToSSE({ type, ...data });
-    res.json({ success: true });
-});
+
+
 
 // Endpoint to get Razorpay key for frontend
 app.get('/api/razorpay-key', (req, res) => {
@@ -1122,12 +1077,10 @@ app.post('/api/food-orders', async (req, res) => {
         
         // Publish food order created event
         try {
-            publishEvent('food.order', 'food.order.created', {
+            await publishEvent('vizag.food', EVENTS.FOOD_ORDER_CREATED, {
                 orderId: orderId,
                 bookingId: bookingId,
                 total: total
-            }).catch(eventError => {
-                console.error('EventBridge publish failed:', eventError);
             });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
@@ -1167,12 +1120,10 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
         
         // Publish food payment updated event
         try {
-            publishEvent('food.order', 'food.payment.updated', {
+            await publishEvent('vizag.food', EVENTS.FOOD_ORDER_UPDATED, {
                 orderId: orderId,
                 paymentMethod: paymentMethod,
                 status: 'pending_verification'
-            }).catch(eventError => {
-                console.error('EventBridge publish failed:', eventError);
             });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
@@ -1253,11 +1204,9 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
         
         // Publish food order confirmed event
         try {
-            publishEvent('food.order', 'food.order.updated', {
+            await publishEvent('vizag.food', EVENTS.FOOD_ORDER_UPDATED, {
                 orderId: orderId,
                 status: 'confirmed'
-            }).catch(eventError => {
-                console.error('EventBridge publish failed:', eventError);
             });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
@@ -1475,8 +1424,13 @@ app.delete('/api/food-items/:id', async (req, res) => {
 });
 
 // Resort Owner Dashboard routes
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+let bcrypt, jwt;
+try {
+    bcrypt = require('bcrypt');
+    jwt = require('jsonwebtoken');
+} catch (error) {
+    console.log('⚠️ bcrypt or jsonwebtoken not installed, owner features disabled');
+}
 const JWT_SECRET = process.env.JWT_SECRET || 'vizag-resort-owner-secret';
 
 // Serve owner dashboard static files
