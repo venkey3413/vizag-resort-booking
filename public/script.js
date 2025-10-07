@@ -221,13 +221,16 @@ function displayResorts() {
     setTimeout(setupRatingStars, 100);
 }
 
-function openBookingModal(resortId) {
+async function openBookingModal(resortId) {
     const resort = resorts.find(r => r.id === resortId);
     if (!resort) return;
 
     document.getElementById('resortId').value = resortId;
     document.getElementById('resortPrice').value = resort.price;
     document.getElementById('modalResortName').textContent = `Book ${resort.name}`;
+    
+    // Load blocked dates for this resort
+    await loadBlockedDates(resortId);
     
     calculateTotal();
     document.getElementById('bookingModal').style.display = 'block';
@@ -412,6 +415,57 @@ function setMinDate() {
     document.getElementById('checkIn').value = today;
     document.getElementById('checkOut').min = tomorrowStr;
     document.getElementById('checkOut').value = tomorrowStr;
+}
+
+let blockedDates = [];
+
+async function loadBlockedDates(resortId) {
+    try {
+        const response = await fetch(`/api/blocked-dates/${resortId}`);
+        blockedDates = await response.json();
+        updateDateInputs();
+    } catch (error) {
+        console.error('Error loading blocked dates:', error);
+        blockedDates = [];
+    }
+}
+
+function updateDateInputs() {
+    const checkInInput = document.getElementById('checkIn');
+    const checkOutInput = document.getElementById('checkOut');
+    
+    // Remove existing event listeners
+    checkInInput.removeEventListener('input', validateCheckInDate);
+    checkOutInput.removeEventListener('input', validateCheckOutDate);
+    
+    // Add new event listeners
+    checkInInput.addEventListener('input', validateCheckInDate);
+    checkOutInput.addEventListener('input', validateCheckOutDate);
+}
+
+function validateCheckInDate(e) {
+    const selectedDate = e.target.value;
+    
+    if (blockedDates.includes(selectedDate)) {
+        showNotification('This date is blocked by the resort owner. Please choose another date.', 'error');
+        e.target.value = '';
+        return;
+    }
+    
+    // Update checkout minimum date
+    const nextDay = new Date(selectedDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    document.getElementById('checkOut').min = nextDay.toISOString().split('T')[0];
+}
+
+function validateCheckOutDate(e) {
+    const checkInDate = document.getElementById('checkIn').value;
+    const checkOutDate = e.target.value;
+    
+    if (checkInDate && checkOutDate <= checkInDate) {
+        showNotification('Check-out date must be after check-in date', 'error');
+        e.target.value = '';
+    }
 }
 
 function setupLogoRotation() {

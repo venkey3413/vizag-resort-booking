@@ -1515,3 +1515,34 @@ footer p {
 .coupon-error {
     color: red;
 }
+
+/* Blocked Date Styles */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+.date-blocked {
+    background-color: #ffebee !important;
+    border-color: #f44336 !important;
+    color: #c62828 !important;
+}
+
+.date-blocked:focus {
+    border-color: #d32f2f !important;
+    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2) !important;
+}
+
+.blocked-date-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: none;
+}
+
+.blocked-date-warning.show {
+    display: block;
+}

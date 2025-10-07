@@ -860,6 +860,40 @@ app.get('/api/coupons', async (req, res) => {
     }
 });
 
+// Endpoint to get blocked dates for calendar
+app.get('/api/blocked-dates/:resortId', async (req, res) => {
+    try {
+        const { resortId } = req.params;
+        const blockedDates = [];
+        
+        // Get admin blocked dates
+        try {
+            const adminBlocks = await db.all(
+                'SELECT block_date FROM resort_blocks WHERE resort_id = ?',
+                [resortId]
+            );
+            adminBlocks.forEach(block => blockedDates.push(block.block_date));
+        } catch (error) {
+            // Table might not exist
+        }
+        
+        // Get owner blocked dates
+        try {
+            const ownerBlocks = await db.all(
+                'SELECT blocked_date FROM resort_availability WHERE resort_id = ?',
+                [resortId]
+            );
+            ownerBlocks.forEach(block => blockedDates.push(block.blocked_date));
+        } catch (error) {
+            // Table might not exist
+        }
+        
+        res.json(blockedDates);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch blocked dates' });
+    }
+});
+
 // Endpoint to check card payment limits
 app.post('/api/check-card-limit', async (req, res) => {
     try {
