@@ -256,6 +256,7 @@ function deleteBooking(id) {
     confirmModal.className = 'modal';
     confirmModal.innerHTML = `
         <div class="modal-content">
+            <span class="close" onclick="closeCancelModal()">&times;</span>
             <h3>⚠️ Cancel Booking</h3>
             <p><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</p>
             <p><strong>Guest:</strong> ${booking.guest_name}</p>
