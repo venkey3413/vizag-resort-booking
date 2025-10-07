@@ -551,10 +551,17 @@ app.put('/api/resorts/:id', async (req, res) => {
         try {
             await publishEvent('vizag.admin', 'resort.updated', { resortId });
             
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent('resort.updated', 'vizag.admin', {
-                resortId: resortId
-            });
+            // Notify main server directly
+            const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
+            await fetch(mainServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'resort.updated',
+                    source: 'vizag.admin',
+                    data: { resortId }
+                })
+            }).catch(err => console.log('Main server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
