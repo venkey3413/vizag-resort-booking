@@ -6,6 +6,7 @@ const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-s
 const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
+// Use shared EventBridge listener instance
 const eventBridgeListener = require('./eventbridge-listener');
 const fetch = require('node-fetch');
 
