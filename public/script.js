@@ -481,39 +481,35 @@ function setupLogoRotation() {
 }
 
 function setupWebSocketSync() {
-    console.log('📡 EventBridge + fallback polling enabled');
+    console.log('📡 EventBridge real-time sync enabled');
     
-    // Primary: EventBridge via Server-Sent Events
     const eventSource = new EventSource('/api/events');
     
     eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
+        console.log('📡 EventBridge event:', data);
         
-        if (data.type === 'resort.updated' || data.type === 'resort.added' || data.type === 'resort.deleted') {
-            console.log('📡 EventBridge update received');
+        if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted') {
+            console.log('🏨 Resort update received - refreshing');
             loadResorts();
+        }
+        
+        if (data.type === 'booking.created' || data.type === 'booking.updated') {
+            console.log('📋 Booking update received');
+        }
+        
+        if (data.type === 'payment.updated') {
+            console.log('💰 Payment update received');
         }
     };
     
     eventSource.onerror = function(error) {
-        console.log('⚠️ EventBridge connection error, fallback active');
+        console.log('⚠️ EventBridge connection error, retrying...');
     };
     
-    // Fallback: Polling every 30 seconds as backup
-    setInterval(async () => {
-        try {
-            const response = await fetch('/api/resorts');
-            const newResorts = await response.json();
-            
-            if (JSON.stringify(newResorts) !== JSON.stringify(resorts)) {
-                console.log('🔄 Fallback sync detected changes');
-                resorts = newResorts;
-                displayResorts();
-            }
-        } catch (error) {
-            // Silent fallback
-        }
-    }, 30000);
+    eventSource.onopen = function() {
+        console.log('✅ EventBridge connected');
+    };
 }
 
 let currentGalleryIndex = 0;

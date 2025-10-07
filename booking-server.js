@@ -6,6 +6,7 @@ const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-s
 const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
+const eventBridgeSync = require('./eventbridge-sync');
 const fetch = require('node-fetch');
 
 const app = express();
@@ -14,6 +15,12 @@ const PORT = 3002;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('bookings-public'));
+
+// Real-time EventBridge sync endpoint
+app.get('/api/events', (req, res) => {
+    const clientId = `booking-${Date.now()}-${Math.random()}`;
+    eventBridgeSync.subscribe(clientId, res);
+});
 
 let db;
 
@@ -144,10 +151,16 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
             await publishEvent('vizag.resort', EVENTS.PAYMENT_UPDATED, {
                 bookingId: id,
                 paymentStatus: payment_status,
-                guestName: booking.guest_name
+                guestName: booking.guest_name,
+                resortName: booking.resort_name
             });
             
-
+            // Notify EventBridge sync
+            eventBridgeSync.notifyEvent(EVENTS.PAYMENT_UPDATED, 'vizag.resort', {
+                bookingId: id,
+                paymentStatus: payment_status,
+                guestName: booking.guest_name
+            });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -439,6 +452,9 @@ app.post('/api/resorts', async (req, res) => {
             }
         }
         
+        // Notify EventBridge sync
+        eventBridgeSync.notifyEvent('resort.added', 'vizag.admin', { resortId });
+        
         res.json({ message: 'Resort added successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to add resort' });
@@ -516,6 +532,9 @@ app.put('/api/resorts/:id', async (req, res) => {
                 console.error('Failed to create/update owner account:', ownerError);
             }
         }
+        
+        // Notify EventBridge sync
+        eventBridgeSync.notifyEvent('resort.updated', 'vizag.admin', { resortId });
         
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {

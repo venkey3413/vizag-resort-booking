@@ -3,6 +3,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
+const eventBridgeSync = require('./eventbridge-sync');
 // UPI service removed - generate payment details inline
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
@@ -514,6 +515,13 @@ app.post('/api/bookings', async (req, res) => {
                 guestName: guestName,
                 totalPrice: totalPrice
             });
+            
+            // Notify EventBridge sync
+            eventBridgeSync.notifyEvent(EVENTS.BOOKING_CREATED, 'vizag.resort', {
+                bookingId: result.lastID,
+                resortId: resortId,
+                guestName: guestName
+            });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -744,6 +752,12 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
                 paymentStatus: 'pending',
                 transactionId: transactionId
             });
+            
+            // Notify EventBridge sync
+            eventBridgeSync.notifyEvent(EVENTS.PAYMENT_UPDATED, 'vizag.resort', {
+                bookingId: bookingId,
+                paymentStatus: 'pending'
+            });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -756,6 +770,24 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
 });
 
 
+
+// Real-time EventBridge sync endpoint
+app.get('/api/events', (req, res) => {
+    const clientId = `main-${Date.now()}-${Math.random()}`;
+    eventBridgeSync.subscribe(clientId, res);
+});
+
+// Endpoint to receive EventBridge notifications (localhost only) - kept for backward compatibility
+app.post('/api/eventbridge-notify', (req, res) => {
+    const clientIP = req.ip || req.connection.remoteAddress;
+    if (clientIP !== '127.0.0.1' && clientIP !== '::1' && !clientIP.includes('127.0.0.1')) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+    
+    const { type, source, ...data } = req.body;
+    console.log(`📡 Received EventBridge notification: ${type}`);
+    res.json({ success: true });
+});
 
 app.get('/api/bookings', async (req, res) => {
     try {
