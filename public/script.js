@@ -495,6 +495,11 @@ function setupWebSocketSync() {
                     console.log('🏨 Resort update detected - refreshing resorts now!');
                     loadResorts();
                 }
+                
+                if (data.type === 'resort.availability.updated') {
+                    console.log('📅 Resort availability updated - refreshing resorts');
+                    loadResorts();
+                }
             } catch (error) {
                 console.log('📡 EventBridge ping or invalid data:', event.data);
             }

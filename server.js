@@ -1672,6 +1672,24 @@ app.post('/api/owner/block-date', verifyOwnerToken, async (req, res) => {
             console.error('Telegram notification failed:', telegramError);
         }
         
+        // Publish EventBridge event
+        try {
+            await publishEvent('vizag.resort', EVENTS.RESORT_AVAILABILITY_UPDATED, {
+                resortId: resortId,
+                date: date,
+                action: 'blocked',
+                reason: reason
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.RESORT_AVAILABILITY_UPDATED, 'vizag.resort', {
+                resortId: resortId,
+                action: 'blocked'
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
         res.json({ success: true, message: 'Date blocked successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to block date' });
@@ -1719,6 +1737,23 @@ app.delete('/api/owner/unblock-date/:id', verifyOwnerToken, async (req, res) => 
             await sendTelegramNotification(message);
         } catch (telegramError) {
             console.error('Telegram notification failed:', telegramError);
+        }
+        
+        // Publish EventBridge event
+        try {
+            await publishEvent('vizag.resort', EVENTS.RESORT_AVAILABILITY_UPDATED, {
+                resortId: block.resort_id,
+                date: block.blocked_date,
+                action: 'unblocked'
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.RESORT_AVAILABILITY_UPDATED, 'vizag.resort', {
+                resortId: block.resort_id,
+                action: 'unblocked'
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
         }
         
         res.json({ success: true, message: 'Date unblocked successfully' });
