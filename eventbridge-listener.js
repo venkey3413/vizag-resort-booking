@@ -34,9 +34,7 @@ class EventBridgeListener {
         // Cleanup on disconnect
         res.on('close', () => {
             this.subscribers.delete(clientId);
-            if (this.subscribers.size === 0) {
-                this.stopListening();
-            }
+            // Don't stop listening when clients disconnect
         });
 
         // Keep alive ping
