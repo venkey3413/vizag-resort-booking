@@ -645,6 +645,38 @@ app.post('/api/dynamic-pricing', async (req, res) => {
     }
 });
 
+app.delete('/api/resorts/:id', async (req, res) => {
+    try {
+        const resortId = req.params.id;
+        
+        await db.run('DELETE FROM resorts WHERE id = ?', [resortId]);
+        await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
+        
+        // Publish to EventBridge only
+        try {
+            await publishEvent('vizag.admin', 'resort.deleted', { resortId });
+            
+            // Notify main server directly
+            const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
+            await fetch(mainServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'resort.deleted',
+                    source: 'vizag.admin',
+                    data: { resortId }
+                })
+            }).catch(err => console.log('Main server notification failed:', err.message));
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
+        res.json({ message: 'Resort deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete resort' });
+    }
+});
+
 // Endpoint to get payment proof details for invoice generation
 app.get('/api/payment-proof/:bookingId', async (req, res) => {
     try {

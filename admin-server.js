@@ -84,6 +84,18 @@ app.post('/api/dynamic-pricing', async (req, res) => {
     }
 });
 
+app.delete('/api/resorts/:id', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3002/api/resorts/${req.params.id}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete resort' });
+    }
+});
+
 // Food item management endpoints
 app.get('/api/food-items', async (req, res) => {
     try {
