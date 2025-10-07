@@ -141,9 +141,35 @@ async function cancelFoodOrder(orderId) {
 }
 
 function setupEventBridgeSync() {
-    console.log('📡 EventBridge enabled (AWS Lambda triggers)');
-    // EventBridge events will trigger Lambda functions that update the UI
-    // No client-side SSE needed - all updates happen server-side
+    console.log('📡 EventBridge real-time sync enabled');
+    
+    try {
+        const eventSource = new EventSource('/api/events');
+        
+        eventSource.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('📡 EventBridge event received:', data);
+                
+                if (data.type === 'booking.created' || data.type === 'booking.updated' || data.type === 'payment.updated') {
+                    console.log('📋 Booking update detected - refreshing bookings!');
+                    loadBookings();
+                }
+            } catch (error) {
+                console.log('📡 EventBridge ping or invalid data');
+            }
+        };
+        
+        eventSource.onerror = function(error) {
+            console.log('⚠️ EventBridge connection error');
+        };
+        
+        eventSource.onopen = function() {
+            console.log('✅ EventBridge connected to booking management');
+        };
+    } catch (error) {
+        console.error('EventBridge setup failed:', error);
+    }
 }
 
 async function loadBookings() {
