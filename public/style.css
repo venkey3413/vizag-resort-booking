@@ -62,53 +62,12 @@ header {
     display: inline-block;
 }
 
-/* Events Booking Notice */
-.events-booking-notice {
-    background: linear-gradient(90deg, #28a745, #20c997, #28a745);
-    background-size: 200% 100%;
-    animation: eventsNoticeSlide 3s linear infinite;
-    color: white;
-    padding: 8px 0;
-    position: fixed;
-    width: 100%;
-    top: 120px;
-    z-index: 999;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.events-notice-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.events-notice-text {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    letter-spacing: 0.5px;
-    animation: eventsTextRun 8s linear infinite;
-    white-space: nowrap;
-    display: inline-block;
-}
-
 @keyframes foodNoticeSlide {
     0% { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
 }
 
-@keyframes eventsNoticeSlide {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
-}
-
 @keyframes foodTextRun {
-    0% { transform: translateX(100vw); }
-    100% { transform: translateX(-100%); }
-}
-
-@keyframes eventsTextRun {
     0% { transform: translateX(100vw); }
     100% { transform: translateX(-100%); }
 }
@@ -551,7 +510,7 @@ input, select {
     }
 
     .hero {
-        margin-top: 145px;
+        margin-top: 105px;
         min-height: 85vh;
         padding: 40px 20px;
     }
@@ -561,12 +520,7 @@ input, select {
         top: 75px;
     }
     
-    .events-booking-notice {
-        padding: 5px 0;
-        top: 110px;
-    }
-    
-    .food-notice-text, .events-notice-text {
+    .food-notice-text {
         font-size: 0.7rem;
     }
     
@@ -648,7 +602,7 @@ input, select {
     }
     
     .hero {
-        margin-top: 130px;
+        margin-top: 95px;
         padding: 20px 15px;
         min-height: 60vh;
     }
@@ -658,12 +612,7 @@ input, select {
         top: 65px;
     }
     
-    .events-booking-notice {
-        padding: 4px 0;
-        top: 100px;
-    }
-    
-    .food-notice-text, .events-notice-text {
+    .food-notice-text {
         font-size: 0.65rem;
         letter-spacing: 0.2px;
     }
