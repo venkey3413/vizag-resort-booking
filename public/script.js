@@ -501,11 +501,13 @@ function setupWebSocketSync() {
         };
         
         eventSource.onerror = function(error) {
-            console.log('⚠️ EventBridge connection error');
+            console.log('⚠️ EventBridge connection error:', error);
+            console.log('EventSource readyState:', eventSource.readyState);
         };
         
         eventSource.onopen = function() {
-            console.log('✅ EventBridge connected');
+            console.log('✅ EventBridge connected successfully');
+            console.log('EventSource readyState:', eventSource.readyState);
         };
     } catch (error) {
         console.error('EventBridge setup failed:', error);
