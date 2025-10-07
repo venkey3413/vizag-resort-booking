@@ -1429,7 +1429,21 @@ app.post('/api/food-items', async (req, res) => {
         
         const newItem = { id: result.lastID, name, description, price: parseInt(price), image };
         
-        publishEvent('food.menu', 'food.item.created', { itemId: newItem.id, name }).catch(console.error);
+        // Publish EventBridge event
+        try {
+            await publishEvent('vizag.food', EVENTS.FOOD_ITEM_CREATED, {
+                itemId: newItem.id,
+                name: name
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.FOOD_ITEM_CREATED, 'vizag.food', {
+                itemId: newItem.id,
+                name: name
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ success: true, item: newItem });
     } catch (error) {
@@ -1453,7 +1467,21 @@ app.put('/api/food-items/:id', async (req, res) => {
         
         const updatedItem = { id, name, description, price: parseInt(price), image };
         
-        publishEvent('food.menu', 'food.item.updated', { itemId: id, name }).catch(console.error);
+        // Publish EventBridge event
+        try {
+            await publishEvent('vizag.food', EVENTS.FOOD_ITEM_UPDATED, {
+                itemId: id,
+                name: name
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.FOOD_ITEM_UPDATED, 'vizag.food', {
+                itemId: id,
+                name: name
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ success: true, item: updatedItem });
     } catch (error) {
@@ -1472,7 +1500,21 @@ app.delete('/api/food-items/:id', async (req, res) => {
         
         await db.run('DELETE FROM food_items WHERE id = ?', [id]);
         
-        publishEvent('food.menu', 'food.item.deleted', { itemId: id, name: item.name }).catch(console.error);
+        // Publish EventBridge event
+        try {
+            await publishEvent('vizag.food', EVENTS.FOOD_ITEM_DELETED, {
+                itemId: id,
+                name: item.name
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.FOOD_ITEM_DELETED, 'vizag.food', {
+                itemId: id,
+                name: item.name
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ success: true, message: 'Food item deleted' });
     } catch (error) {

@@ -34,7 +34,10 @@ const EVENTS = {
     BOOKING_UPDATED: 'booking.updated', 
     PAYMENT_UPDATED: 'payment.updated',
     FOOD_ORDER_CREATED: 'food.order.created',
-    FOOD_ORDER_UPDATED: 'food.order.updated'
+    FOOD_ORDER_UPDATED: 'food.order.updated',
+    FOOD_ITEM_CREATED: 'food.item.created',
+    FOOD_ITEM_UPDATED: 'food.item.updated',
+    FOOD_ITEM_DELETED: 'food.item.deleted'
 };
 
 module.exports = {
