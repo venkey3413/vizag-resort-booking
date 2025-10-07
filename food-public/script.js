@@ -8,17 +8,41 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupMenuSync() {
-    const eventSource = new EventSource('/api/events');
+    console.log('📡 EventBridge real-time sync enabled for food service');
     
-    eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
+    try {
+        const eventSource = new EventSource('/api/events');
         
-        if (data.type === 'food.item.created' || data.type === 'food.item.updated' || data.type === 'food.item.deleted') {
-            console.log('Menu update received');
-            loadMenu();
-        }
-    };
+        eventSource.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('📡 Food EventBridge event received:', data);
+                
+                if (data.type === 'food.item.created' || data.type === 'food.item.updated' || data.type === 'food.item.deleted') {
+                    console.log('🍽️ Menu update received - refreshing menu');
+                    loadMenu();
+                }
+                
+                if (data.type === 'food.order.created' || data.type === 'food.order.updated') {
+                    console.log('📋 Food order update received');
+                }
+            } catch (error) {
+                console.log('📡 EventBridge ping or invalid data');
+            }
+        };
+        
+        eventSource.onerror = function(error) {
+            console.log('⚠️ Food EventBridge connection error');
+        };
+        
+        eventSource.onopen = function() {
+            console.log('✅ EventBridge connected to food service');
+        };
+    } catch (error) {
+        console.error('Food EventBridge setup failed:', error);
+    }
     
+    // Fallback polling
     setInterval(() => {
         loadMenu();
     }, 60000);
