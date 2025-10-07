@@ -57,7 +57,7 @@ header {
     font-weight: 600;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     letter-spacing: 0.5px;
-    animation: foodTextRun 8s linear infinite;
+    animation: foodTextRun 15s linear infinite;
     white-space: nowrap;
     display: inline-block;
 }
