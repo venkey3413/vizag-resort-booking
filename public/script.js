@@ -54,7 +54,21 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLogoRotation();
     setupWebSocketSync();
     preloadQRCode();
+    registerServiceWorker();
 });
+
+// Register service worker for mobile app
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('SW registered:', registration);
+            })
+            .catch(error => {
+                console.log('SW registration failed:', error);
+            });
+    }
+}
 
 async function loadCoupons(checkIn = null) {
     try {
