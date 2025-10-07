@@ -94,10 +94,12 @@ class EventBridgeListener {
         };
 
         console.log(`📡 EventBridge event: ${eventType} from ${source}`);
+        console.log(`📡 Broadcasting to ${this.subscribers.size} subscribers`);
 
         // Broadcast to appropriate services
         if (eventType.includes('resort')) {
             this.broadcast(event, 'main'); // Main website needs resort updates
+            console.log(`📡 Resort event broadcasted to main website`);
         }
         
         if (eventType.includes('booking') || eventType.includes('payment')) {
