@@ -944,6 +944,38 @@ app.post('/api/check-card-limit', async (req, res) => {
     }
 });
 
+// Email validation endpoint
+app.post('/api/validate-email', async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        // Basic format validation
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            return res.json({ valid: false, reason: 'Invalid format' });
+        }
+        
+        // Check for common disposable email domains
+        const disposableDomains = ['10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com'];
+        const domain = email.split('@')[1].toLowerCase();
+        
+        if (disposableDomains.includes(domain)) {
+            return res.json({ valid: false, reason: 'Disposable email not allowed' });
+        }
+        
+        // For now, return valid for proper format emails
+        // You can integrate with email validation services like:
+        // - EmailJS validation API
+        // - Hunter.io API
+        // - ZeroBounce API
+        
+        res.json({ valid: true, reason: 'Valid email format' });
+    } catch (error) {
+        console.error('Email validation error:', error);
+        res.status(500).json({ valid: false, reason: 'Validation service error' });
+    }
+});
+
 // Endpoint to get payment proof details for invoice generation
 app.get('/api/payment-proof/:bookingId', async (req, res) => {
     try {

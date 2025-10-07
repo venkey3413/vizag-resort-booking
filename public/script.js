@@ -111,6 +111,9 @@ function setupEventListeners() {
     document.getElementById('checkOut').addEventListener('change', calculateTotal);
     document.getElementById('guests').addEventListener('change', calculateTotal);
     
+    // Email validation on blur
+    document.getElementById('email').addEventListener('blur', validateEmailField);
+    
     // Coupon button event
     document.getElementById('applyCouponBtn').addEventListener('click', applyCouponImpl);
     
@@ -349,6 +352,25 @@ async function handleBooking(e) {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
         return;
+    }
+    
+    // Real-time email validation
+    try {
+        const emailValidation = await fetch('/api/validate-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: bookingData.email })
+        });
+        
+        const emailResult = await emailValidation.json();
+        if (!emailResult.valid) {
+            showNotification('Please enter a valid working email address that can receive emails', 'error');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+    } catch (error) {
+        console.log('Email validation service unavailable, proceeding...');
     }
 
     try {
@@ -1081,4 +1103,40 @@ function highlightStars(stars, rating) {
     stars.forEach((star, index) => {
         star.textContent = index < rating ? '★' : '☆';
     });
+}
+
+// Real-time email validation
+async function validateEmailField() {
+    const emailInput = document.getElementById('email');
+    const email = emailInput.value.trim();
+    
+    if (!email) return;
+    
+    // Basic format check first
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        emailInput.style.borderColor = '#dc3545';
+        showNotification('Please enter a valid email format', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/validate-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        
+        const result = await response.json();
+        
+        if (result.valid) {
+            emailInput.style.borderColor = '#28a745';
+        } else {
+            emailInput.style.borderColor = '#dc3545';
+            showNotification(result.reason || 'Invalid email address', 'error');
+        }
+    } catch (error) {
+        console.log('Email validation service unavailable');
+        emailInput.style.borderColor = '#ddd';
+    }
 }
