@@ -23,6 +23,14 @@ app.get('/api/events', (req, res) => {
     eventBridgeListener.subscribe(clientId, res, 'booking');
 });
 
+// EventBridge notification endpoint
+app.post('/api/eventbridge-notify', (req, res) => {
+    const { type, source, data } = req.body;
+    console.log(`📡 Booking server received EventBridge notification: ${type}`);
+    eventBridgeListener.handleEvent(type, source, data);
+    res.json({ success: true });
+});
+
 let db;
 
 async function initDB() {

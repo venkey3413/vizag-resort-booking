@@ -522,6 +522,18 @@ app.post('/api/bookings', async (req, res) => {
                 resortId: resortId,
                 guestName: guestName
             });
+            
+            // Notify booking server directly
+            const bookingServerUrl = 'http://localhost:3002/api/eventbridge-notify';
+            await fetch(bookingServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'booking.created',
+                    source: 'vizag.resort',
+                    data: { bookingId: result.lastID, guestName }
+                })
+            }).catch(err => console.log('Booking server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
