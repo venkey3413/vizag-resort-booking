@@ -777,14 +777,7 @@ app.get('/api/events', (req, res) => {
     eventBridgeListener.subscribe(clientId, res, 'main');
 });
 
-// Handle EventBridge events for resort updates
-eventBridgeListener.on('resort.added', () => {
-    console.log('🏨 Resort added - main server notified');
-});
 
-eventBridgeListener.on('resort.updated', () => {
-    console.log('🏨 Resort updated - main server notified');
-});
 
 
 
