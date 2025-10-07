@@ -18,7 +18,8 @@ class EventBridgeListener {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
-            'Access-Control-Allow-Origin': '*'
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Cache-Control'
         });
 
         this.subscribers.set(clientId, { res, serviceType });
@@ -31,24 +32,29 @@ class EventBridgeListener {
             this.startListening();
         }
 
+        // Keep alive ping every 15 seconds
+        const keepAlive = setInterval(() => {
+            if (this.subscribers.has(clientId)) {
+                try {
+                    res.write(': heartbeat\n\n');
+                } catch (error) {
+                    clearInterval(keepAlive);
+                    this.subscribers.delete(clientId);
+                }
+            } else {
+                clearInterval(keepAlive);
+            }
+        }, 15000);
+
         // Cleanup on disconnect
         res.on('close', () => {
+            clearInterval(keepAlive);
             this.subscribers.delete(clientId);
-            // Don't stop listening when clients disconnect
         });
 
-        // Keep alive ping
-        const keepAlive = setInterval(() => {
-            try {
-                res.write('data: {"type":"ping"}\n\n');
-            } catch (error) {
-                clearInterval(keepAlive);
-                this.subscribers.delete(clientId);
-            }
-        }, 30000);
-
-        res.on('close', () => {
+        res.on('error', () => {
             clearInterval(keepAlive);
+            this.subscribers.delete(clientId);
         });
     }
 
@@ -72,16 +78,24 @@ class EventBridgeListener {
     // Broadcast event to relevant subscribers
     broadcast(event, targetService = 'all') {
         const eventString = `data: ${JSON.stringify(event)}\n\n`;
+        const toRemove = [];
         
         for (const [clientId, subscriber] of this.subscribers) {
             if (targetService === 'all' || subscriber.serviceType === targetService) {
                 try {
-                    subscriber.res.write(eventString);
+                    if (!subscriber.res.destroyed) {
+                        subscriber.res.write(eventString);
+                    } else {
+                        toRemove.push(clientId);
+                    }
                 } catch (error) {
-                    this.subscribers.delete(clientId);
+                    toRemove.push(clientId);
                 }
             }
         }
+        
+        // Clean up dead connections
+        toRemove.forEach(clientId => this.subscribers.delete(clientId));
     }
 
     // Handle EventBridge event
@@ -96,26 +110,21 @@ class EventBridgeListener {
         console.log(`📡 EventBridge event: ${eventType} from ${source}`);
         console.log(`📡 Broadcasting to ${this.subscribers.size} subscribers`);
 
-        // Broadcast to appropriate services
-        if (eventType.includes('resort')) {
-            this.broadcast(event, 'main'); // Main website needs resort updates
-            console.log(`📡 Resort event broadcasted to main website`);
-        }
-        
-        if (eventType.includes('booking') || eventType.includes('payment')) {
-            this.broadcast(event, 'booking'); // Booking management needs these
-        }
-
-        if (eventType.includes('food')) {
-            this.broadcast(event, 'admin'); // Admin panel manages food
-        }
-
-        // Also broadcast to all for general updates
+        // Broadcast to all subscribers - let client filter
         this.broadcast(event, 'all');
     }
 
     stopListening() {
         this.isListening = false;
+        // Close all connections
+        for (const [clientId, subscriber] of this.subscribers) {
+            try {
+                subscriber.res.end();
+            } catch (error) {
+                // Ignore errors when closing
+            }
+        }
+        this.subscribers.clear();
         console.log('📡 EventBridge listener stopped');
     }
 }

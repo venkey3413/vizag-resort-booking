@@ -4,43 +4,61 @@ let menuItems = [];
 document.addEventListener('DOMContentLoaded', function() {
     loadMenu();
     updateCart();
-    setupMenuSync();
+    // Delay EventBridge setup to ensure page is fully loaded
+    setTimeout(setupMenuSync, 1000);
 });
 
 function setupMenuSync() {
     console.log('📡 EventBridge real-time sync enabled for food service');
     
-    try {
-        const eventSource = new EventSource('/api/events');
-        
-        eventSource.onmessage = function(event) {
-            try {
-                const data = JSON.parse(event.data);
-                console.log('📡 Food EventBridge event received:', data);
-                
-                if (data.type === 'food.item.created' || data.type === 'food.item.updated' || data.type === 'food.item.deleted') {
-                    console.log('🍽️ Menu update received - refreshing menu');
-                    loadMenu();
+    let eventSource;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    function connectEventSource() {
+        try {
+            eventSource = new EventSource('/api/events');
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📡 Food EventBridge event received:', data);
+                    
+                    if (data.type === 'food.item.created' || data.type === 'food.item.updated' || data.type === 'food.item.deleted') {
+                        console.log('🍽️ Menu update received - refreshing menu');
+                        loadMenu();
+                    }
+                    
+                    if (data.type === 'food.order.created' || data.type === 'food.order.updated') {
+                        console.log('📋 Food order update received');
+                    }
+                } catch (error) {
+                    // Ignore ping messages
                 }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.log('⚠️ Food EventBridge connection error, attempting reconnect...');
+                eventSource.close();
                 
-                if (data.type === 'food.order.created' || data.type === 'food.order.updated') {
-                    console.log('📋 Food order update received');
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                } else {
+                    console.log('❌ Max reconnection attempts reached');
                 }
-            } catch (error) {
-                console.log('📡 EventBridge ping or invalid data');
-            }
-        };
-        
-        eventSource.onerror = function(error) {
-            console.log('⚠️ Food EventBridge connection error');
-        };
-        
-        eventSource.onopen = function() {
-            console.log('✅ EventBridge connected to food service');
-        };
-    } catch (error) {
-        console.error('Food EventBridge setup failed:', error);
+            };
+            
+            eventSource.onopen = function() {
+                console.log('✅ EventBridge connected to food service');
+                reconnectAttempts = 0;
+            };
+        } catch (error) {
+            console.error('Food EventBridge setup failed:', error);
+        }
     }
+    
+    connectEventSource();
     
     // Fallback polling
     setInterval(() => {
