@@ -135,6 +135,58 @@ app.delete('/api/food-items/:id', async (req, res) => {
     }
 });
 
+// Forward booking requests to booking-server
+app.get('/api/bookings', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3002/api/bookings');
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch bookings' });
+    }
+});
+
+app.post('/api/bookings/:id/cancel', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3002/api/bookings/${req.params.id}/cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to cancel booking' });
+    }
+});
+
+app.put('/api/bookings/:id/payment', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3002/api/bookings/${req.params.id}/payment`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update payment status' });
+    }
+});
+
+app.post('/api/bookings/:id/send-email', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3002/api/bookings/${req.params.id}/send-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to send email' });
+    }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`👨‍💼 Admin Panel running on http://0.0.0.0:${PORT}`);
 });

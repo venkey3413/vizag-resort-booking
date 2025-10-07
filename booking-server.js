@@ -459,6 +459,11 @@ app.post('/api/resorts', async (req, res) => {
         // Publish to EventBridge only
         try {
             await publishEvent('vizag.admin', 'resort.added', { resortId });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent('resort.added', 'vizag.admin', {
+                resortId: resortId
+            });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -544,6 +549,11 @@ app.put('/api/resorts/:id', async (req, res) => {
         // Publish to EventBridge only
         try {
             await publishEvent('vizag.admin', 'resort.updated', { resortId });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent('resort.updated', 'vizag.admin', {
+                resortId: resortId
+            });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }

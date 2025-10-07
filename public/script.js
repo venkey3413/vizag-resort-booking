@@ -486,29 +486,25 @@ function setupWebSocketSync() {
     const eventSource = new EventSource('/api/events');
     
     eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        console.log('📡 EventBridge event:', data);
-        
-        if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted') {
-            console.log('🏨 Resort update received - refreshing');
-            loadResorts();
-        }
-        
-        if (data.type === 'booking.created' || data.type === 'booking.updated') {
-            console.log('📋 Booking update received');
-        }
-        
-        if (data.type === 'payment.updated') {
-            console.log('💰 Payment update received');
+        try {
+            const data = JSON.parse(event.data);
+            console.log('📡 EventBridge event received:', data);
+            
+            if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted') {
+                console.log('🏨 Resort update received - refreshing resorts');
+                setTimeout(() => loadResorts(), 500); // Small delay to ensure DB is updated
+            }
+        } catch (error) {
+            console.log('📡 EventBridge ping or invalid data');
         }
     };
     
     eventSource.onerror = function(error) {
-        console.log('⚠️ EventBridge connection error, retrying...');
+        console.log('⚠️ EventBridge connection error, will retry automatically');
     };
     
     eventSource.onopen = function() {
-        console.log('✅ EventBridge connected');
+        console.log('✅ EventBridge connected to main server');
     };
 }
 
