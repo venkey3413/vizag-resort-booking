@@ -489,14 +489,14 @@ function setupWebSocketSync() {
         eventSource.onmessage = function(event) {
             try {
                 const data = JSON.parse(event.data);
-                console.log('📡 EventBridge event:', data);
+                console.log('📡 EventBridge event received:', data);
                 
                 if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted') {
-                    console.log('🏨 Resort update - refreshing');
+                    console.log('🏨 Resort update detected - refreshing resorts now!');
                     loadResorts();
                 }
             } catch (error) {
-                // Ignore ping messages
+                console.log('📡 EventBridge ping or invalid data:', event.data);
             }
         };
         
