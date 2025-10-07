@@ -3,7 +3,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const { publishEvent, EVENTS } = require('./eventbridge-service');
-const eventBridgeSync = require('./eventbridge-sync');
+const eventBridgeListener = require('./eventbridge-listener');
 // UPI service removed - generate payment details inline
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
@@ -516,8 +516,8 @@ app.post('/api/bookings', async (req, res) => {
                 totalPrice: totalPrice
             });
             
-            // Notify EventBridge sync
-            eventBridgeSync.notifyEvent(EVENTS.BOOKING_CREATED, 'vizag.resort', {
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.BOOKING_CREATED, 'vizag.resort', {
                 bookingId: result.lastID,
                 resortId: resortId,
                 guestName: guestName
@@ -753,8 +753,8 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
                 transactionId: transactionId
             });
             
-            // Notify EventBridge sync
-            eventBridgeSync.notifyEvent(EVENTS.PAYMENT_UPDATED, 'vizag.resort', {
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.PAYMENT_UPDATED, 'vizag.resort', {
                 bookingId: bookingId,
                 paymentStatus: 'pending'
             });
@@ -771,23 +771,13 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
 
 
 
-// Real-time EventBridge sync endpoint
+// Real-time EventBridge listener endpoint
 app.get('/api/events', (req, res) => {
     const clientId = `main-${Date.now()}-${Math.random()}`;
-    eventBridgeSync.subscribe(clientId, res);
+    eventBridgeListener.subscribe(clientId, res, 'main');
 });
 
-// Endpoint to receive EventBridge notifications (localhost only) - kept for backward compatibility
-app.post('/api/eventbridge-notify', (req, res) => {
-    const clientIP = req.ip || req.connection.remoteAddress;
-    if (clientIP !== '127.0.0.1' && clientIP !== '::1' && !clientIP.includes('127.0.0.1')) {
-        return res.status(403).json({ error: 'Forbidden' });
-    }
-    
-    const { type, source, ...data } = req.body;
-    console.log(`📡 Received EventBridge notification: ${type}`);
-    res.json({ success: true });
-});
+
 
 app.get('/api/bookings', async (req, res) => {
     try {
@@ -1115,8 +1105,8 @@ app.post('/api/food-orders', async (req, res) => {
                 total: total
             });
             
-            // Notify EventBridge sync
-            eventBridgeSync.notifyEvent(EVENTS.FOOD_ORDER_CREATED, 'vizag.food', {
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.FOOD_ORDER_CREATED, 'vizag.food', {
                 orderId: orderId,
                 bookingId: bookingId
             });
@@ -1164,8 +1154,8 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
                 status: 'pending_verification'
             });
             
-            // Notify EventBridge sync
-            eventBridgeSync.notifyEvent(EVENTS.FOOD_ORDER_UPDATED, 'vizag.food', {
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.FOOD_ORDER_UPDATED, 'vizag.food', {
                 orderId: orderId,
                 status: 'pending_verification'
             });

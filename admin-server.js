@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
-const eventBridgeSync = require('./eventbridge-sync');
+const eventBridgeListener = require('./eventbridge-listener');
 
 const app = express();
 const PORT = 3001;
@@ -10,10 +10,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('admin-public'));
 
-// Real-time EventBridge sync endpoint
+// Real-time EventBridge listener endpoint
 app.get('/api/events', (req, res) => {
     const clientId = `admin-${Date.now()}-${Math.random()}`;
-    eventBridgeSync.subscribe(clientId, res);
+    eventBridgeListener.subscribe(clientId, res, 'admin');
 });
 
 // Serve admin panel

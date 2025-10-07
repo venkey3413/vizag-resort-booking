@@ -6,7 +6,7 @@ const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-s
 const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
-const eventBridgeSync = require('./eventbridge-sync');
+const eventBridgeListener = require('./eventbridge-listener');
 const fetch = require('node-fetch');
 
 const app = express();
@@ -16,10 +16,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('bookings-public'));
 
-// Real-time EventBridge sync endpoint
+// Real-time EventBridge listener endpoint
 app.get('/api/events', (req, res) => {
     const clientId = `booking-${Date.now()}-${Math.random()}`;
-    eventBridgeSync.subscribe(clientId, res);
+    eventBridgeListener.subscribe(clientId, res, 'booking');
 });
 
 let db;
@@ -155,8 +155,8 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
                 resortName: booking.resort_name
             });
             
-            // Notify EventBridge sync
-            eventBridgeSync.notifyEvent(EVENTS.PAYMENT_UPDATED, 'vizag.resort', {
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.PAYMENT_UPDATED, 'vizag.resort', {
                 bookingId: id,
                 paymentStatus: payment_status,
                 guestName: booking.guest_name
@@ -216,8 +216,8 @@ app.delete('/api/bookings/:id', async (req, res) => {
                 status: 'deleted'
             });
             
-            // Notify EventBridge sync
-            eventBridgeSync.notifyEvent(EVENTS.BOOKING_UPDATED, 'vizag.resort', {
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.BOOKING_UPDATED, 'vizag.resort', {
                 bookingId: id,
                 status: 'deleted'
             });
@@ -456,8 +456,12 @@ app.post('/api/resorts', async (req, res) => {
             }
         }
         
-        // Notify EventBridge sync
-        eventBridgeSync.notifyEvent('resort.added', 'vizag.admin', { resortId });
+        // Publish to EventBridge only
+        try {
+            await publishEvent('vizag.admin', 'resort.added', { resortId });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ message: 'Resort added successfully' });
     } catch (error) {
@@ -537,8 +541,12 @@ app.put('/api/resorts/:id', async (req, res) => {
             }
         }
         
-        // Notify EventBridge sync
-        eventBridgeSync.notifyEvent('resort.updated', 'vizag.admin', { resortId });
+        // Publish to EventBridge only
+        try {
+            await publishEvent('vizag.admin', 'resort.updated', { resortId });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
         
         res.json({ message: 'Resort updated successfully' });
     } catch (error) {
