@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     loadFoodItems();
     setupEventListeners();
-    setupEventBridgeSync();
+    // Delay EventBridge setup to ensure page is fully loaded
+    setTimeout(setupEventBridgeSync, 1000);
     
     // Toggle owner credentials visibility
     document.getElementById('createOwnerAccount').addEventListener('change', function() {
@@ -17,39 +18,65 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupEventBridgeSync() {
-    console.log('📡 EventBridge + fallback polling enabled');
+    console.log('📡 EventBridge real-time sync enabled for admin panel');
     
-    // Listen for EventBridge events via WebSocket or Server-Sent Events
-    const eventSource = new EventSource('/api/events');
+    let eventSource;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
     
-    eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        console.log('📡 EventBridge event received:', data);
-        
-        if (data.type === 'resort.updated' || data.type === 'resort.added' || data.type === 'resort.deleted') {
-            loadResorts(); // Refresh only when EventBridge triggers
-        }
-    };
-    
-    eventSource.onerror = function(error) {
-        console.log('⚠️ EventBridge connection error, fallback active');
-    };
-    
-    // Fallback: Polling every 30 seconds as backup
-    setInterval(async () => {
+    function connectEventSource() {
         try {
-            const response = await fetch('/api/resorts');
-            const newResorts = await response.json();
+            eventSource = new EventSource('/api/events');
             
-            if (JSON.stringify(newResorts) !== JSON.stringify(resorts)) {
-                console.log('🔄 Fallback sync detected changes');
-                resorts = newResorts;
-                displayResorts();
-            }
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📡 Admin EventBridge event received:', data);
+                    
+                    // Resort events
+                    if (data.type === 'resort.updated' || data.type === 'resort.added' || data.type === 'resort.deleted') {
+                        console.log('🏨 Resort update received - refreshing resorts');
+                        loadResorts();
+                    }
+                    
+                    // Food item events
+                    if (data.type === 'food.item.created' || data.type === 'food.item.updated' || data.type === 'food.item.deleted') {
+                        console.log('🍽️ Food item update received - refreshing menu');
+                        loadFoodItems();
+                    }
+                } catch (error) {
+                    // Ignore ping messages
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.log('⚠️ Admin EventBridge connection error, attempting reconnect...');
+                eventSource.close();
+                
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                } else {
+                    console.log('❌ Max reconnection attempts reached');
+                }
+            };
+            
+            eventSource.onopen = function() {
+                console.log('✅ EventBridge connected to admin panel');
+                reconnectAttempts = 0;
+            };
         } catch (error) {
-            // Silent fallback
+            console.error('Admin EventBridge setup failed:', error);
         }
-    }, 30000);
+    }
+    
+    connectEventSource();
+    
+    // Fallback polling
+    setInterval(() => {
+        loadResorts();
+        loadFoodItems();
+    }, 60000);
 }
 
 function setupEventListeners() {
