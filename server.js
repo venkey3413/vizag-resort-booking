@@ -165,6 +165,32 @@ async function initDB() {
             FOREIGN KEY (resort_id) REFERENCES resorts (id)
         )
     `);
+    
+    // Create resort owners table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS resort_owners (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            resort_ids TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    // Create resort availability table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS resort_availability (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resort_id INTEGER NOT NULL,
+            blocked_date DATE NOT NULL,
+            reason TEXT,
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts (id),
+            FOREIGN KEY (created_by) REFERENCES resort_owners (id)
+        )
+    `);
 
     // Insert sample resorts
     const resortCount = await db.get('SELECT COUNT(*) as count FROM resorts');
@@ -211,7 +237,7 @@ app.post('/api/check-availability', async (req, res) => {
     try {
         const { resortId, checkIn, checkOut } = req.body;
         
-        // Check for blocked dates
+        // Check for blocked dates (both old and new tables)
         try {
             const blockedCheckIn = await db.get(
                 'SELECT block_date FROM resort_blocks WHERE resort_id = ? AND block_date = ?',
@@ -225,6 +251,22 @@ app.post('/api/check-availability', async (req, res) => {
             }
         } catch (error) {
             console.log('Resort blocks table not found, skipping blocked date check');
+        }
+        
+        // Check for owner-blocked dates
+        try {
+            const ownerBlockedCheckIn = await db.get(
+                'SELECT blocked_date FROM resort_availability WHERE resort_id = ? AND blocked_date = ?',
+                [resortId, checkIn]
+            );
+            
+            if (ownerBlockedCheckIn) {
+                return res.status(400).json({ 
+                    error: `Resort is not available for check-in on ${new Date(checkIn).toLocaleDateString()} (blocked by owner)` 
+                });
+            }
+        } catch (error) {
+            console.log('Resort availability table not found, skipping owner blocked date check');
         }
         
         // Check if resort is already booked for the requested check-in date
@@ -324,6 +366,22 @@ app.post('/api/bookings', async (req, res) => {
             }
         } catch (error) {
             console.log('Resort blocks table not found, skipping blocked date check');
+        }
+        
+        // Check for owner-blocked dates
+        try {
+            const ownerBlockedCheckIn = await db.get(
+                'SELECT blocked_date FROM resort_availability WHERE resort_id = ? AND blocked_date = ?',
+                [resortId, checkIn]
+            );
+            
+            if (ownerBlockedCheckIn) {
+                return res.status(400).json({ 
+                    error: `Resort is not available for check-in on ${new Date(checkIn).toLocaleDateString()} (blocked by owner)` 
+                });
+            }
+        } catch (error) {
+            console.log('Resort availability table not found, skipping owner blocked date check');
         }
         
         // Check if resort is already booked for the requested check-in date
@@ -1382,11 +1440,234 @@ app.delete('/api/food-items/:id', async (req, res) => {
     }
 });
 
+// Resort Owner Dashboard routes
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'vizag-resort-owner-secret';
+
+// Serve owner dashboard static files
+app.use('/owner-dashboard', express.static('owner-public'));
+
+app.get('/owner-dashboard', (req, res) => {
+    res.sendFile(__dirname + '/owner-public/login.html');
+});
+
+// Owner login
+app.post('/api/owner/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        const owner = await db.get('SELECT * FROM resort_owners WHERE email = ?', [email]);
+        if (!owner) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        const validPassword = await bcrypt.compare(password, owner.password);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        const token = jwt.sign({ ownerId: owner.id, email: owner.email }, JWT_SECRET, { expiresIn: '24h' });
+        
+        res.json({ 
+            success: true, 
+            token, 
+            owner: { 
+                id: owner.id, 
+                name: owner.name, 
+                email: owner.email,
+                resortIds: owner.resort_ids.split(',').map(id => parseInt(id))
+            } 
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// Middleware to verify owner token
+function verifyOwnerToken(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.owner = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+}
+
+// Get owner's resorts
+app.get('/api/owner/resorts', verifyOwnerToken, async (req, res) => {
+    try {
+        const owner = await db.get('SELECT resort_ids FROM resort_owners WHERE id = ?', [req.owner.ownerId]);
+        const resortIds = owner.resort_ids.split(',').map(id => parseInt(id));
+        
+        const resorts = await db.all(
+            `SELECT * FROM resorts WHERE id IN (${resortIds.map(() => '?').join(',')})`,
+            resortIds
+        );
+        
+        res.json(resorts);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch resorts' });
+    }
+});
+
+// Get blocked dates for owner's resorts
+app.get('/api/owner/blocked-dates', verifyOwnerToken, async (req, res) => {
+    try {
+        const owner = await db.get('SELECT resort_ids FROM resort_owners WHERE id = ?', [req.owner.ownerId]);
+        const resortIds = owner.resort_ids.split(',').map(id => parseInt(id));
+        
+        const blockedDates = await db.all(
+            `SELECT ra.*, r.name as resort_name 
+             FROM resort_availability ra 
+             JOIN resorts r ON ra.resort_id = r.id 
+             WHERE ra.resort_id IN (${resortIds.map(() => '?').join(',')}) 
+             ORDER BY ra.blocked_date DESC`,
+            resortIds
+        );
+        
+        res.json(blockedDates);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch blocked dates' });
+    }
+});
+
+// Block date for resort
+app.post('/api/owner/block-date', verifyOwnerToken, async (req, res) => {
+    try {
+        const { resortId, date, reason } = req.body;
+        
+        // Verify owner has access to this resort
+        const owner = await db.get('SELECT resort_ids FROM resort_owners WHERE id = ?', [req.owner.ownerId]);
+        const resortIds = owner.resort_ids.split(',').map(id => parseInt(id));
+        
+        if (!resortIds.includes(parseInt(resortId))) {
+            return res.status(403).json({ error: 'Access denied to this resort' });
+        }
+        
+        // Check if date is already blocked
+        const existing = await db.get(
+            'SELECT id FROM resort_availability WHERE resort_id = ? AND blocked_date = ?',
+            [resortId, date]
+        );
+        
+        if (existing) {
+            return res.status(400).json({ error: 'Date is already blocked' });
+        }
+        
+        // Block the date
+        await db.run(
+            'INSERT INTO resort_availability (resort_id, blocked_date, reason, created_by) VALUES (?, ?, ?, ?)',
+            [resortId, date, reason, req.owner.ownerId]
+        );
+        
+        // Get resort name for notification
+        const resort = await db.get('SELECT name FROM resorts WHERE id = ?', [resortId]);
+        
+        // Send Telegram notification
+        try {
+            const message = `🚫 DATE BLOCKED BY OWNER!
+
+🏨 Resort: ${resort.name}
+📅 Date: ${new Date(date).toLocaleDateString('en-IN')}
+📝 Reason: ${reason || 'No reason provided'}
+👤 Blocked by: ${req.owner.email}
+⏰ Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        res.json({ success: true, message: 'Date blocked successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to block date' });
+    }
+});
+
+// Unblock date for resort
+app.delete('/api/owner/unblock-date/:id', verifyOwnerToken, async (req, res) => {
+    try {
+        const blockId = req.params.id;
+        
+        // Get block details and verify ownership
+        const block = await db.get(
+            `SELECT ra.*, r.name as resort_name 
+             FROM resort_availability ra 
+             JOIN resorts r ON ra.resort_id = r.id 
+             WHERE ra.id = ?`,
+            [blockId]
+        );
+        
+        if (!block) {
+            return res.status(404).json({ error: 'Block not found' });
+        }
+        
+        // Verify owner has access to this resort
+        const owner = await db.get('SELECT resort_ids FROM resort_owners WHERE id = ?', [req.owner.ownerId]);
+        const resortIds = owner.resort_ids.split(',').map(id => parseInt(id));
+        
+        if (!resortIds.includes(block.resort_id)) {
+            return res.status(403).json({ error: 'Access denied to this resort' });
+        }
+        
+        // Remove the block
+        await db.run('DELETE FROM resort_availability WHERE id = ?', [blockId]);
+        
+        // Send Telegram notification
+        try {
+            const message = `✅ DATE UNBLOCKED BY OWNER!
+
+🏨 Resort: ${block.resort_name}
+📅 Date: ${new Date(block.blocked_date).toLocaleDateString('en-IN')}
+👤 Unblocked by: ${req.owner.email}
+⏰ Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        res.json({ success: true, message: 'Date unblocked successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to unblock date' });
+    }
+});
+
+// Get bookings for owner's resorts
+app.get('/api/owner/bookings', verifyOwnerToken, async (req, res) => {
+    try {
+        const owner = await db.get('SELECT resort_ids FROM resort_owners WHERE id = ?', [req.owner.ownerId]);
+        const resortIds = owner.resort_ids.split(',').map(id => parseInt(id));
+        
+        const bookings = await db.all(
+            `SELECT b.*, r.name as resort_name,
+                    COALESCE(b.booking_reference, 'RB' || SUBSTR('000000' || b.id, -6)) as booking_ref
+             FROM bookings b 
+             JOIN resorts r ON b.resort_id = r.id 
+             WHERE b.resort_id IN (${resortIds.map(() => '?').join(',')}) 
+             ORDER BY b.booking_date DESC`,
+            resortIds
+        );
+        
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch bookings' });
+    }
+});
+
 // Initialize and start server
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Resort Booking Server running on http://0.0.0.0:${PORT}`);
         console.log(`🍽️ My Food Service available at http://0.0.0.0:${PORT}/food`);
+        console.log(`👤 Owner Dashboard available at http://0.0.0.0:${PORT}/owner-dashboard`);
     });
 }).catch(error => {
     console.error('Failed to start server:', error);
