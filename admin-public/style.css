@@ -308,6 +308,23 @@ button.delete:hover {
     font-size: 0.8em;
 }
 
+.owner-credentials {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.owner-credentials .form-row {
+    margin-bottom: 15px;
+}
+
+.owner-credentials small {
+    color: #6c757d;
+    font-style: italic;
+}
+
 @media (max-width: 768px) {
     .form-row {
         grid-template-columns: 1fr;

@@ -385,20 +385,52 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing } = req.body;
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword } = req.body;
         
         const result = await db.run(`
             INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link, amenities)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [name, location, price, description, image, gallery, videos, map_link, amenities]);
         
+        const resortId = result.lastID;
+        
         // Add dynamic pricing if provided
         if (dynamic_pricing && dynamic_pricing.length > 0) {
             for (const item of dynamic_pricing) {
                 await db.run(
                     'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
-                    [result.lastID, item.day_type, item.price]
+                    [resortId, item.day_type, item.price]
                 );
+            }
+        }
+        
+        // Create owner account if requested
+        if (createOwner && ownerName && ownerEmail && ownerPassword) {
+            try {
+                const bcrypt = require('bcrypt');
+                const hashedPassword = await bcrypt.hash(ownerPassword, 10);
+                await db.run(
+                    'INSERT INTO resort_owners (name, email, password, resort_ids) VALUES (?, ?, ?, ?)',
+                    [ownerName, ownerEmail, hashedPassword, resortId.toString()]
+                );
+                
+                // Send Telegram notification about new owner
+                try {
+                    const message = `🏨 NEW RESORT & OWNER CREATED!
+
+🏖️ Resort: ${name}
+👤 Owner: ${ownerName}
+📧 Email: ${ownerEmail}
+🆔 Resort ID: ${resortId}
+⏰ Created: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+🔗 Owner can login at: https://vizagresortbooking.in/owner-dashboard`;
+                    await sendTelegramNotification(message);
+                } catch (telegramError) {
+                    console.error('Telegram notification failed:', telegramError);
+                }
+            } catch (ownerError) {
+                console.error('Failed to create owner account:', ownerError);
             }
         }
         
@@ -410,7 +442,7 @@ app.post('/api/resorts', async (req, res) => {
 
 app.put('/api/resorts/:id', async (req, res) => {
     try {
-        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing } = req.body;
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword } = req.body;
         const resortId = req.params.id;
         
         await db.run(`
@@ -427,6 +459,56 @@ app.put('/api/resorts/:id', async (req, res) => {
                     'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
                     [resortId, item.day_type, item.price]
                 );
+            }
+        }
+        
+        // Create owner account if requested
+        if (createOwner && ownerName && ownerEmail && ownerPassword) {
+            try {
+                const bcrypt = require('bcrypt');
+                const hashedPassword = await bcrypt.hash(ownerPassword, 10);
+                
+                // Check if owner already exists for this resort
+                const existingOwner = await db.get(
+                    'SELECT id, resort_ids FROM resort_owners WHERE email = ?',
+                    [ownerEmail]
+                );
+                
+                if (existingOwner) {
+                    // Add resort to existing owner's list
+                    const resortIds = existingOwner.resort_ids.split(',');
+                    if (!resortIds.includes(resortId)) {
+                        resortIds.push(resortId);
+                        await db.run(
+                            'UPDATE resort_owners SET resort_ids = ? WHERE id = ?',
+                            [resortIds.join(','), existingOwner.id]
+                        );
+                    }
+                } else {
+                    // Create new owner
+                    await db.run(
+                        'INSERT INTO resort_owners (name, email, password, resort_ids) VALUES (?, ?, ?, ?)',
+                        [ownerName, ownerEmail, hashedPassword, resortId.toString()]
+                    );
+                }
+                
+                // Send Telegram notification
+                try {
+                    const message = `🏨 RESORT OWNER UPDATED!
+
+🏖️ Resort: ${name}
+👤 Owner: ${ownerName}
+📧 Email: ${ownerEmail}
+🆔 Resort ID: ${resortId}
+⏰ Updated: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+🔗 Owner can login at: https://vizagresortbooking.in/owner-dashboard`;
+                    await sendTelegramNotification(message);
+                } catch (telegramError) {
+                    console.error('Telegram notification failed:', telegramError);
+                }
+            } catch (ownerError) {
+                console.error('Failed to create/update owner account:', ownerError);
             }
         }
         

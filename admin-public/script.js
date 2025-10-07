@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
     loadFoodItems();
     setupEventListeners();
     setupEventBridgeSync();
+    
+    // Toggle owner credentials visibility
+    document.getElementById('createOwnerAccount').addEventListener('change', function() {
+        const ownerCredentials = document.getElementById('ownerCredentials');
+        ownerCredentials.style.display = this.checked ? 'block' : 'none';
+    });
 });
 
 function setupEventBridgeSync() {
@@ -132,6 +138,32 @@ async function handleSubmit(e) {
         map_link: document.getElementById('mapLink').value,
         dynamic_pricing: dynamicPricing
     };
+    
+    // Add owner credentials if checkbox is checked
+    if (document.getElementById('createOwnerAccount').checked) {
+        const ownerName = document.getElementById('ownerName').value;
+        const ownerEmail = document.getElementById('ownerEmail').value;
+        const ownerPassword = document.getElementById('ownerPassword').value;
+        
+        if (!ownerName || !ownerEmail || !ownerPassword) {
+            alert('Please fill all owner credential fields');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+        
+        if (ownerPassword.length < 6) {
+            alert('Owner password must be at least 6 characters');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+        
+        resortData.createOwner = true;
+        resortData.ownerName = ownerName;
+        resortData.ownerEmail = ownerEmail;
+        resortData.ownerPassword = ownerPassword;
+    }
 
     try {
         let response;
@@ -209,6 +241,8 @@ function cancelEdit() {
     document.getElementById('weekdayPrice').value = '';
     document.getElementById('weekendPrice').value = '';
     document.getElementById('holidayPrice').value = '';
+    document.getElementById('createOwnerAccount').checked = false;
+    document.getElementById('ownerCredentials').style.display = 'none';
     document.getElementById('submitBtn').textContent = 'Add Resort';
     const cancelBtn = document.getElementById('cancelBtn');
     if (cancelBtn) cancelBtn.style.display = 'none';

@@ -87,6 +87,28 @@
                     </div>
                     <small>Leave empty to use base price for that day type</small>
                 </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="createOwnerAccount"> Create Owner Account for this Resort
+                    </label>
+                    <div id="ownerCredentials" class="owner-credentials" style="display:none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ownerName">Owner Name:</label>
+                                <input type="text" id="ownerName" placeholder="Resort Owner Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="ownerEmail">Owner Email:</label>
+                                <input type="email" id="ownerEmail" placeholder="owner@example.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ownerPassword">Owner Password:</label>
+                            <input type="password" id="ownerPassword" placeholder="Minimum 6 characters">
+                        </div>
+                        <small>Owner will be able to login and manage availability for this resort</small>
+                    </div>
+                </div>
                 <button type="submit" id="submitBtn">Add Resort</button>
                 <button type="button" id="cancelBtn" onclick="cancelEdit()" style="display:none;">Cancel</button>
             </form>
