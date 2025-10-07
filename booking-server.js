@@ -216,7 +216,11 @@ app.delete('/api/bookings/:id', async (req, res) => {
                 status: 'deleted'
             });
             
-
+            // Notify EventBridge sync
+            eventBridgeSync.notifyEvent(EVENTS.BOOKING_UPDATED, 'vizag.resort', {
+                bookingId: id,
+                status: 'deleted'
+            });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }

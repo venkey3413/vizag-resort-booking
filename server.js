@@ -1114,6 +1114,12 @@ app.post('/api/food-orders', async (req, res) => {
                 bookingId: bookingId,
                 total: total
             });
+            
+            // Notify EventBridge sync
+            eventBridgeSync.notifyEvent(EVENTS.FOOD_ORDER_CREATED, 'vizag.food', {
+                orderId: orderId,
+                bookingId: bookingId
+            });
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -1155,6 +1161,12 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
             await publishEvent('vizag.food', EVENTS.FOOD_ORDER_UPDATED, {
                 orderId: orderId,
                 paymentMethod: paymentMethod,
+                status: 'pending_verification'
+            });
+            
+            // Notify EventBridge sync
+            eventBridgeSync.notifyEvent(EVENTS.FOOD_ORDER_UPDATED, 'vizag.food', {
+                orderId: orderId,
                 status: 'pending_verification'
             });
         } catch (eventError) {
