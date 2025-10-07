@@ -5,24 +5,15 @@ let eventbridge = null;
 let eventBridgeEnabled = false;
 
 try {
-    // Only initialize if AWS credentials are properly configured
-    if (process.env.AWS_ACCESS_KEY_ID && 
-        process.env.AWS_SECRET_ACCESS_KEY && 
-        process.env.AWS_ACCESS_KEY_ID !== 'your-access-key' &&
-        process.env.AWS_SECRET_ACCESS_KEY !== 'your-secret-key') {
-        
-        eventbridge = new AWS.EventBridge({
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            region: process.env.AWS_REGION || 'ap-south-1'
-        });
-        eventBridgeEnabled = true;
-        console.log('✅ EventBridge initialized with AWS credentials');
-    } else {
-        console.log('⚠️ EventBridge disabled - AWS credentials not configured');
-    }
+    // Initialize EventBridge - will use IAM role if attached to EC2
+    eventbridge = new AWS.EventBridge({
+        region: process.env.AWS_REGION || 'ap-south-1'
+    });
+    eventBridgeEnabled = true;
+    console.log('✅ EventBridge initialized (using IAM role or environment credentials)');
 } catch (error) {
     console.log('⚠️ EventBridge initialization failed:', error.message);
+    eventBridgeEnabled = false;
 }
 
 const EVENT_BUS_NAME = 'vizag-resort-events';
@@ -35,8 +26,8 @@ async function publishEvent(source, detailType, detail) {
                 Entries: [{
                     Source: source,
                     DetailType: detailType,
-                    Detail: JSON.stringify(detail),
-                    EventBusName: EVENT_BUS_NAME
+                    Detail: JSON.stringify(detail)
+                    // Using default event bus
                 }]
             };
             
