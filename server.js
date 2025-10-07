@@ -775,6 +775,7 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
 app.get('/api/events', (req, res) => {
     const clientId = `main-${Date.now()}-${Math.random()}`;
     eventBridgeListener.subscribe(clientId, res, 'main');
+    console.log('📡 Main website connected to EventBridge');
 });
 
 
