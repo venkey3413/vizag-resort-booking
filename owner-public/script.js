@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const owner = JSON.parse(ownerData);
     document.getElementById('ownerName').textContent = owner.name;
     
-    // Initialize dashboard
-    initializeDashboard();
+    // Initialize dashboard with delay for EventBridge
+    setTimeout(initializeDashboard, 1000);
 });
 
 // Logout functionality
@@ -109,6 +109,69 @@ document.getElementById('blockDateForm').addEventListener('submit', async functi
 async function initializeDashboard() {
     loadResorts();
     loadBlockedDates();
+    setupEventBridgeSync();
+}
+
+// Setup EventBridge real-time sync
+function setupEventBridgeSync() {
+    console.log('📡 EventBridge real-time sync enabled for owner dashboard');
+    
+    let eventSource;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    function connectEventSource() {
+        try {
+            eventSource = new EventSource('/api/events');
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📡 Owner EventBridge event received:', data);
+                    
+                    // Booking events - refresh bookings tab if active
+                    if (data.type === 'booking.created' || data.type === 'booking.updated' || data.type === 'payment.updated') {
+                        console.log('📋 Booking update received - refreshing bookings');
+                        const activeTab = document.querySelector('.tab-content.active');
+                        if (activeTab && activeTab.id === 'bookings') {
+                            loadBookings();
+                        }
+                    }
+                } catch (error) {
+                    // Ignore ping messages
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.log('⚠️ Owner EventBridge connection error, attempting reconnect...');
+                eventSource.close();
+                
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                } else {
+                    console.log('❌ Max reconnection attempts reached');
+                }
+            };
+            
+            eventSource.onopen = function() {
+                console.log('✅ EventBridge connected to owner dashboard');
+                reconnectAttempts = 0;
+            };
+        } catch (error) {
+            console.error('Owner EventBridge setup failed:', error);
+        }
+    }
+    
+    connectEventSource();
+    
+    // Fallback polling
+    setInterval(() => {
+        const activeTab = document.querySelector('.tab-content.active');
+        if (activeTab && activeTab.id === 'bookings') {
+            loadBookings();
+        }
+    }, 60000);
 }
 
 // Load owner's resorts
