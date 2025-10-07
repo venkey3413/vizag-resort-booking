@@ -471,12 +471,21 @@ function validateCheckOutDate(e) {
 function setupLogoRotation() {
     const logo = document.querySelector('.logo-image');
     if (logo) {
+        // Click rotation
         logo.addEventListener('click', function() {
             this.classList.add('rotating');
             setTimeout(() => {
                 this.classList.remove('rotating');
             }, 600);
         });
+        
+        // Auto rotation every 15 seconds
+        setInterval(() => {
+            logo.classList.add('auto-rotate');
+            setTimeout(() => {
+                logo.classList.remove('auto-rotate');
+            }, 1000);
+        }, 15000);
     }
 }
 
