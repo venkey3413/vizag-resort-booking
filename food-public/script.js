@@ -217,16 +217,30 @@ function generateDeliveryTimeSlots() {
     // Clear existing options except the first one
     deliveryTimeSelect.innerHTML = '<option value="">Select delivery time</option>';
     
-    // Get check-in date from booking validation (we'll need to store this)
-    // For now, limit to same day until 10 PM
+    // Use check-in date from booking validation if available
+    const checkInDate = window.checkInDate ? new Date(window.checkInDate) : new Date();
     const today = new Date();
-    const maxTime = new Date(today);
-    maxTime.setHours(22, 0, 0, 0); // 10 PM today
+    today.setHours(0, 0, 0, 0);
+    checkInDate.setHours(0, 0, 0, 0);
+    
+    // Only allow delivery on check-in date
+    if (checkInDate.getTime() !== today.getTime()) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Food delivery only available on your check-in date';
+        option.disabled = true;
+        deliveryTimeSelect.appendChild(option);
+        return;
+    }
+    
+    // Set max time to 10 PM on check-in date
+    const maxTime = new Date(checkInDate);
+    maxTime.setHours(22, 0, 0, 0); // 10 PM on check-in date
     
     // Generate time slots until 10 PM on check-in date (every hour)
-    let slotTime = new Date(minDeliveryTime);
+    let slotTime = new Date(Math.max(minDeliveryTime.getTime(), checkInDate.getTime() + 12 * 60 * 60 * 1000)); // Start from noon on check-in date or 3 hours from now
     
-    while (slotTime <= maxTime && slotTime.getDate() === today.getDate()) {
+    while (slotTime <= maxTime) {
         const timeString = slotTime.toLocaleTimeString('en-IN', { 
             hour: '2-digit', 
             minute: '2-digit',
@@ -249,7 +263,7 @@ function generateDeliveryTimeSlots() {
     if (deliveryTimeSelect.children.length === 1) {
         const option = document.createElement('option');
         option.value = '';
-        option.textContent = 'No delivery slots available (orders close at 10 PM)';
+        option.textContent = 'No delivery slots available (orders close at 10 PM on check-in date)';
         option.disabled = true;
         deliveryTimeSelect.appendChild(option);
     }
@@ -317,6 +331,9 @@ async function confirmOrder() {
         
         // Store check-in date for delivery slot validation
         window.checkInDate = validationResult.booking.checkIn;
+        
+        // Regenerate delivery slots based on check-in date
+        generateDeliveryTimeSlots();
     } catch (error) {
         showNotification('Error validating booking ID. Please try again.', 'error');
         return;
