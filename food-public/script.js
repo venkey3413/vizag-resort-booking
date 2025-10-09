@@ -225,6 +225,7 @@ function generateDeliveryTimeSlots() {
     
     let slotTime = new Date(Math.max(minDeliveryTime.getTime(), noonOnCheckIn.getTime()));
     
+    // Generate slots for the check-in date
     while (slotTime <= maxTime) {
         const timeString = slotTime.toLocaleTimeString('en-IN', { 
             hour: '2-digit', 
@@ -244,11 +245,11 @@ function generateDeliveryTimeSlots() {
         slotTime = new Date(slotTime.getTime() + 60 * 60 * 1000);
     }
     
-    // If no slots available, show message
+    // If no slots available, show message with check-in date
     if (deliveryTimeSelect.children.length === 1) {
         const option = document.createElement('option');
         option.value = '';
-        option.textContent = 'No delivery slots available (orders close at 10 PM on check-in date)';
+        option.textContent = `No delivery slots available for ${checkInDate.toLocaleDateString('en-IN')} (orders close at 10 PM)`;
         option.disabled = true;
         deliveryTimeSelect.appendChild(option);
     }
@@ -317,7 +318,7 @@ async function validateBookingId() {
         checkInDate.setHours(0, 0, 0, 0);
         
         if (checkInDate.getTime() >= today.getTime()) {
-            showNotification(`Booking validated! Check-in: ${checkInDate.toLocaleDateString('en-IN')}`, 'success');
+            showNotification(`Booking validated! Food delivery available on ${checkInDate.toLocaleDateString('en-IN')}`, 'success');
         } else {
             showNotification('Cannot order food for past check-in dates', 'error');
             const deliveryTimeSelect = document.getElementById('deliveryTime');
@@ -369,21 +370,20 @@ async function confirmOrder() {
         return;
     }
     
-    const now = new Date();
     const checkInDate = new Date(window.checkInDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     checkInDate.setHours(0, 0, 0, 0);
     
     // Check if check-in date is in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
     if (checkInDate.getTime() < today.getTime()) {
         showNotification('Cannot order food for past check-in dates', 'error');
         return;
     }
     
-    // If check-in date is today, check if it's past 10 PM
+    // If check-in date is today and it's past 10 PM, block orders
     if (checkInDate.getTime() === today.getTime()) {
+        const now = new Date();
         const today10PM = new Date();
         today10PM.setHours(22, 0, 0, 0);
         
