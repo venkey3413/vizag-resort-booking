@@ -214,22 +214,16 @@ function generateDeliveryTimeSlots() {
     today.setHours(0, 0, 0, 0);
     checkInDate.setHours(0, 0, 0, 0);
     
-    // Only allow delivery on check-in date
-    if (checkInDate.getTime() !== today.getTime()) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = `Food delivery only available on your check-in date: ${checkInDate.toLocaleDateString('en-IN')}`;
-        option.disabled = true;
-        deliveryTimeSelect.appendChild(option);
-        return;
-    }
-    
     // Set max time to 10 PM on check-in date
     const maxTime = new Date(checkInDate);
     maxTime.setHours(22, 0, 0, 0); // 10 PM on check-in date
     
-    // Generate time slots until 10 PM on check-in date (every hour)
-    let slotTime = new Date(Math.max(minDeliveryTime.getTime(), checkInDate.getTime() + 12 * 60 * 60 * 1000)); // Start from noon on check-in date or 3 hours from now
+    // Generate time slots for the check-in date (every hour)
+    // Start from noon on check-in date or 3 hours from now, whichever is later
+    const noonOnCheckIn = new Date(checkInDate);
+    noonOnCheckIn.setHours(12, 0, 0, 0);
+    
+    let slotTime = new Date(Math.max(minDeliveryTime.getTime(), noonOnCheckIn.getTime()));
     
     while (slotTime <= maxTime) {
         const timeString = slotTime.toLocaleTimeString('en-IN', { 
@@ -317,7 +311,19 @@ async function validateBookingId() {
         // Generate delivery slots based on check-in date
         generateDeliveryTimeSlots();
         
-        showNotification('Booking ID validated successfully!', 'success');
+        const checkInDate = new Date(validationResult.booking.checkIn);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        checkInDate.setHours(0, 0, 0, 0);
+        
+        if (checkInDate.getTime() >= today.getTime()) {
+            showNotification(`Booking validated! Check-in: ${checkInDate.toLocaleDateString('en-IN')}`, 'success');
+        } else {
+            showNotification('Cannot order food for past check-in dates', 'error');
+            const deliveryTimeSelect = document.getElementById('deliveryTime');
+            deliveryTimeSelect.innerHTML = '<option value="">Check-in date has passed</option>';
+            return;
+        }
     } catch (error) {
         showNotification('Error validating booking ID. Please try again.', 'error');
         const deliveryTimeSelect = document.getElementById('deliveryTime');
@@ -357,25 +363,34 @@ async function confirmOrder() {
         return;
     }
     
-    // Check if current time is past 10 PM and if today is check-in date
-    const now = new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const checkInDate = new Date(window.checkInDate);
-    checkInDate.setHours(0, 0, 0, 0);
-    
-    if (checkInDate.getTime() !== today.getTime()) {
-        showNotification(`Food orders are only available on your check-in date: ${checkInDate.toLocaleDateString('en-IN')}`, 'error');
+    // Check if booking was validated
+    if (!window.checkInDate) {
+        showNotification('Please validate your booking ID first', 'error');
         return;
     }
     
-    const today10PM = new Date();
-    today10PM.setHours(22, 0, 0, 0);
+    const now = new Date();
+    const checkInDate = new Date(window.checkInDate);
+    checkInDate.setHours(0, 0, 0, 0);
     
-    if (now > today10PM) {
-        showNotification('Food orders are only accepted until 10 PM on the check-in date', 'error');
+    // Check if check-in date is in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (checkInDate.getTime() < today.getTime()) {
+        showNotification('Cannot order food for past check-in dates', 'error');
         return;
+    }
+    
+    // If check-in date is today, check if it's past 10 PM
+    if (checkInDate.getTime() === today.getTime()) {
+        const today10PM = new Date();
+        today10PM.setHours(22, 0, 0, 0);
+        
+        if (now > today10PM) {
+            showNotification('Food orders are only accepted until 10 PM on the check-in date', 'error');
+            return;
+        }
     }
     
     // Phone validation
