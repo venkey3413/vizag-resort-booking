@@ -171,16 +171,6 @@ function updateCart() {
 function openBookingModal() {
     if (cart.length === 0) return;
     
-    // Check if current time is past 10 PM
-    const now = new Date();
-    const today10PM = new Date();
-    today10PM.setHours(22, 0, 0, 0);
-    
-    if (now > today10PM) {
-        showNotification('Food orders are only accepted until 10 PM on the check-in date', 'error');
-        return;
-    }
-    
     const modal = document.getElementById('bookingModal');
     const orderSummary = document.getElementById('orderSummary');
     const modalSubtotal = document.getElementById('modalSubtotal');
@@ -201,8 +191,9 @@ function openBookingModal() {
     document.querySelector('.total-summary .summary-row:nth-child(2) span:last-child').textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
     modalTotal.textContent = `₹${total}`;
     
-    // Generate delivery time slots (minimum 3 hours from now)
-    generateDeliveryTimeSlots();
+    // Initialize with empty delivery slots - will be populated after booking validation
+    const deliveryTimeSelect = document.getElementById('deliveryTime');
+    deliveryTimeSelect.innerHTML = '<option value="">Enter booking ID first to see delivery slots</option>';
     
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -277,6 +268,63 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
+// Add booking ID validation on input change
+document.addEventListener('DOMContentLoaded', function() {
+    loadMenu();
+    updateCart();
+    setTimeout(setupMenuSync, 1000);
+    
+    // Add event listener for booking ID validation
+    const bookingIdInput = document.getElementById('bookingId');
+    if (bookingIdInput) {
+        bookingIdInput.addEventListener('blur', validateBookingId);
+        bookingIdInput.addEventListener('input', function() {
+            if (this.value.trim() === '') {
+                const deliveryTimeSelect = document.getElementById('deliveryTime');
+                if (deliveryTimeSelect) {
+                    deliveryTimeSelect.innerHTML = '<option value="">Enter booking ID first to see delivery slots</option>';
+                }
+            }
+        });
+    }
+});
+
+async function validateBookingId() {
+    const bookingId = document.getElementById('bookingId').value.trim();
+    
+    if (!bookingId) return;
+    
+    try {
+        const validationResponse = await fetch(`/api/validate-booking/${bookingId}`);
+        const validationResult = await validationResponse.json();
+        
+        if (!validationResult.valid) {
+            showNotification(validationResult.error || 'Invalid booking ID', 'error');
+            const deliveryTimeSelect = document.getElementById('deliveryTime');
+            deliveryTimeSelect.innerHTML = '<option value="">Invalid booking ID</option>';
+            return;
+        }
+        
+        // Auto-fill guest details if available
+        if (validationResult.booking) {
+            document.getElementById('customerEmail').value = validationResult.booking.email;
+            document.getElementById('phoneNumber').value = validationResult.booking.phone;
+        }
+        
+        // Store check-in date for delivery slot validation
+        window.checkInDate = validationResult.booking.checkIn;
+        
+        // Generate delivery slots based on check-in date
+        generateDeliveryTimeSlots();
+        
+        showNotification('Booking ID validated successfully!', 'success');
+    } catch (error) {
+        showNotification('Error validating booking ID. Please try again.', 'error');
+        const deliveryTimeSelect = document.getElementById('deliveryTime');
+        deliveryTimeSelect.innerHTML = '<option value="">Error validating booking</option>';
+    }
+}
+
 async function confirmOrder() {
     const bookingId = document.getElementById('bookingId').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
@@ -303,20 +351,23 @@ async function confirmOrder() {
         return;
     }
     
+    // Check if booking was validated
+    if (!window.checkInDate) {
+        showNotification('Please validate your booking ID first', 'error');
+        return;
+    }
+    
     // Check if current time is past 10 PM and if today is check-in date
     const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Only allow orders on check-in date
-    if (window.checkInDate) {
-        const checkInDate = new Date(window.checkInDate);
-        checkInDate.setHours(0, 0, 0, 0);
-        
-        if (checkInDate.getTime() !== today.getTime()) {
-            showNotification(`Food orders are only available on your check-in date: ${checkInDate.toLocaleDateString('en-IN')}`, 'error');
-            return;
-        }
+    const checkInDate = new Date(window.checkInDate);
+    checkInDate.setHours(0, 0, 0, 0);
+    
+    if (checkInDate.getTime() !== today.getTime()) {
+        showNotification(`Food orders are only available on your check-in date: ${checkInDate.toLocaleDateString('en-IN')}`, 'error');
+        return;
     }
     
     const today10PM = new Date();
@@ -324,32 +375,6 @@ async function confirmOrder() {
     
     if (now > today10PM) {
         showNotification('Food orders are only accepted until 10 PM on the check-in date', 'error');
-        return;
-    }
-    
-    // Validate booking ID first
-    try {
-        const validationResponse = await fetch(`/api/validate-booking/${bookingId}`);
-        const validationResult = await validationResponse.json();
-        
-        if (!validationResult.valid) {
-            showNotification('Invalid booking ID or booking not confirmed. Only confirmed resort bookings can order food.', 'error');
-            return;
-        }
-        
-        // Auto-fill guest details if available
-        if (validationResult.booking) {
-            document.getElementById('customerEmail').value = validationResult.booking.email;
-            document.getElementById('phoneNumber').value = validationResult.booking.phone;
-        }
-        
-        // Store check-in date for delivery slot validation
-        window.checkInDate = validationResult.booking.checkIn;
-        
-        // Regenerate delivery slots based on check-in date
-        generateDeliveryTimeSlots();
-    } catch (error) {
-        showNotification('Error validating booking ID. Please try again.', 'error');
         return;
     }
     
