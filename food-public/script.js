@@ -219,11 +219,11 @@ function generateDeliveryTimeSlots() {
     maxTime.setHours(22, 0, 0, 0); // 10 PM on check-in date
     
     // Generate time slots for the check-in date (every hour)
-    // Start from noon on check-in date or 3 hours from now, whichever is later
+    // Always start from noon on check-in date regardless of current time
     const noonOnCheckIn = new Date(checkInDate);
     noonOnCheckIn.setHours(12, 0, 0, 0);
     
-    let slotTime = new Date(Math.max(minDeliveryTime.getTime(), noonOnCheckIn.getTime()));
+    let slotTime = new Date(noonOnCheckIn.getTime());
     
     // Generate slots for the check-in date
     while (slotTime <= maxTime) {
@@ -318,7 +318,18 @@ async function validateBookingId() {
         checkInDate.setHours(0, 0, 0, 0);
         
         if (checkInDate.getTime() >= today.getTime()) {
-            showNotification(`Booking validated! Food delivery available on ${checkInDate.toLocaleDateString('en-IN')}`, 'success');
+            const daysDiff = Math.ceil((checkInDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+            let message = `Booking validated! Food delivery on ${checkInDate.toLocaleDateString('en-IN')}`;
+            
+            if (daysDiff === 0) {
+                message += ' (today)';
+            } else if (daysDiff === 1) {
+                message += ' (tomorrow)';
+            } else {
+                message += ` (in ${daysDiff} days)`;
+            }
+            
+            showNotification(message, 'success');
         } else {
             showNotification('Cannot order food for past check-in dates', 'error');
             const deliveryTimeSelect = document.getElementById('deliveryTime');
@@ -381,7 +392,7 @@ async function confirmOrder() {
         return;
     }
     
-    // If check-in date is today and it's past 10 PM, block orders
+    // Allow orders for future dates anytime, but for today's check-in, check if it's past 10 PM
     if (checkInDate.getTime() === today.getTime()) {
         const now = new Date();
         const today10PM = new Date();
@@ -392,6 +403,8 @@ async function confirmOrder() {
             return;
         }
     }
+    
+    // For future check-in dates, allow ordering anytime with full day slots
     
     // Phone validation
     const phonePattern = /^(\+91|91)?[6-9]\d{9}$/;
