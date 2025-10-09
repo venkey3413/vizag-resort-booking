@@ -3,6 +3,8 @@ let appliedCoupon = null;
 let discountAmount = 0;
 let coupons = {};
 
+const SERVER_URL = '';
+
 // Define applyCoupon implementation
 function applyCouponImpl() {
     const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
@@ -54,25 +56,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLogoRotation();
     setupWebSocketSync();
     preloadQRCode();
-    registerServiceWorker();
+
 });
 
-// Register service worker for mobile app
-function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-                console.log('SW registered:', registration);
-            })
-            .catch(error => {
-                console.log('SW registration failed:', error);
-            });
-    }
-}
+
 
 async function loadCoupons(checkIn = null) {
     try {
-        const url = checkIn ? `/api/coupons?checkIn=${checkIn}` : '/api/coupons';
+        const url = checkIn ? `${SERVER_URL}/api/coupons?checkIn=${checkIn}` : `${SERVER_URL}/api/coupons`;
         const response = await fetch(url);
         const couponList = await response.json();
         coupons = {};
@@ -155,12 +146,30 @@ function scrollToSection(sectionId) {
 
 async function loadResorts() {
     try {
-        const response = await fetch('/api/resorts');
-        resorts = await response.json();
+        const url = `${SERVER_URL}/api/resorts`;
+        console.log('🏝️ Fetching resorts from:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        console.log('📶 Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        resorts = data;
+        console.log('✅ Resorts loaded:', resorts.length, 'resorts');
         displayResorts();
+        
     } catch (error) {
-        console.error('Error loading resorts:', error);
-        showNotification('Failed to load resorts', 'error');
+        console.error('❌ Error loading resorts:', error);
+        showNotification(`Failed to load resorts: ${error.message}`, 'error');
     }
 }
 
@@ -370,7 +379,7 @@ async function handleBooking(e) {
     
     // Real-time email validation
     try {
-        const emailValidation = await fetch('/api/validate-email', {
+        const emailValidation = await fetch(`${SERVER_URL}/api/validate-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: bookingData.email })
@@ -396,7 +405,7 @@ async function handleBooking(e) {
         }
         
         // Check availability with server
-        const availabilityResponse = await fetch('/api/check-availability', {
+        const availabilityResponse = await fetch(`${SERVER_URL}/api/check-availability`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -457,7 +466,7 @@ let blockedDates = [];
 
 async function loadBlockedDates(resortId) {
     try {
-        const response = await fetch(`/api/blocked-dates/${resortId}`);
+        const response = await fetch(`${SERVER_URL}/api/blocked-dates/${resortId}`);
         blockedDates = await response.json();
         updateDateInputs();
     } catch (error) {
@@ -529,7 +538,7 @@ function setupWebSocketSync() {
     console.log('📡 EventBridge real-time sync enabled');
     
     try {
-        const eventSource = new EventSource('/api/events');
+        const eventSource = new EventSource(`${SERVER_URL}/api/events`);
         
         eventSource.onmessage = function(event) {
             try {
@@ -845,7 +854,7 @@ function cancelPayment() {
 
 async function cancelBooking(bookingId) {
     try {
-        await fetch(`/api/bookings/${bookingId}/cancel`, {
+        await fetch(`${SERVER_URL}/api/bookings/${bookingId}/cancel`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -869,7 +878,7 @@ async function confirmPayment() {
     
     try {
         // Now create the booking with payment info
-        const bookingResponse = await fetch('/api/bookings', {
+        const bookingResponse = await fetch(`${SERVER_URL}/api/bookings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -904,8 +913,14 @@ function showPaymentMethod(method) {
 
 async function payWithRazorpay(bookingId, amount, name, email, phone) {
     try {
+        // Check if Razorpay is available
+        if (typeof Razorpay === 'undefined') {
+            showNotification('Card payment service not available. Please use UPI payment.', 'error');
+            return;
+        }
+        
         // Check card payment limit before proceeding
-        const limitResponse = await fetch('/api/check-card-limit', {
+        const limitResponse = await fetch(`${SERVER_URL}/api/check-card-limit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ bookingId })
@@ -918,8 +933,31 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
         }
         
         // Get Razorpay key from server
-        const keyResponse = await fetch('/api/razorpay-key');
-        const { key } = await keyResponse.json();
+        console.log('🔑 Fetching Razorpay key from server...');
+        const keyResponse = await fetch(`${SERVER_URL}/api/razorpay-key`);
+        
+        console.log('📊 Razorpay key response status:', keyResponse.status);
+        
+        if (!keyResponse.ok) {
+            const errorData = await keyResponse.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('❌ Razorpay key fetch failed:', errorData);
+            throw new Error(errorData.error || 'Failed to get payment configuration');
+        }
+        
+        const keyData = await keyResponse.json();
+        console.log('🔑 Razorpay key data received:', { hasKey: !!keyData.key, error: keyData.error });
+        
+        if (keyData.error) {
+            throw new Error(keyData.error);
+        }
+        
+        const key = keyData.key;
+        
+        if (!key) {
+            throw new Error('Payment system not configured - missing key');
+        }
+        
+        console.log('✅ Razorpay key loaded successfully, length:', key.length);
         
         const options = {
             key: key,
@@ -951,14 +989,15 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
         const rzp = new Razorpay(options);
         rzp.open();
     } catch (error) {
-        showNotification('Payment system error. Please try UPI payment.', 'error');
+        console.error('Card payment error:', error);
+        showNotification(`Card payment error: ${error.message}. Please use UPI payment.`, 'error');
     }
 }
 
 async function notifyCardPaymentSuccess(bookingId, paymentId) {
     try {
         // Notify admin immediately about card payment success
-        await fetch(`/api/bookings/${bookingId}/notify-card-payment`, {
+        await fetch(`${SERVER_URL}/api/bookings/${bookingId}/notify-card-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ paymentId })
@@ -1052,7 +1091,7 @@ async function confirmCardPayment(bookingId, paymentId) {
     submitBtn.disabled = true;
     
     try {
-        const response = await fetch(`/api/bookings/${bookingId}/card-payment-proof`, {
+        const response = await fetch(`${SERVER_URL}/api/bookings/${bookingId}/card-payment-proof`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ paymentId, cardLastFour })
@@ -1135,7 +1174,7 @@ async function validateEmailField() {
     }
     
     try {
-        const response = await fetch('/api/validate-email', {
+        const response = await fetch(`${SERVER_URL}/api/validate-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })

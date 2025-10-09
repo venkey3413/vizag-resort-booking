@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
@@ -46,7 +47,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://vizagresortbooking.in'],
+    origin: true,  // Allow all origins for mobile app compatibility
     credentials: true
 }));
 app.use(express.json());
@@ -829,9 +830,31 @@ app.get('/api/bookings', async (req, res) => {
 
 
 
+// Debug endpoint to check environment variables (remove in production)
+app.get('/api/debug-env', (req, res) => {
+    res.json({
+        hasRazorpayKey: !!process.env.RAZORPAY_KEY_ID,
+        razorpayKeyLength: process.env.RAZORPAY_KEY_ID ? process.env.RAZORPAY_KEY_ID.length : 0,
+        nodeEnv: process.env.NODE_ENV || 'development'
+    });
+});
+
 // Endpoint to get Razorpay key for frontend
 app.get('/api/razorpay-key', (req, res) => {
-    res.json({ key: process.env.RAZORPAY_KEY_ID });
+    const key = process.env.RAZORPAY_KEY_ID;
+    console.log('🔑 Razorpay key request - Key available:', !!key);
+    console.log('🔑 Key length:', key ? key.length : 0);
+    
+    if (!key) {
+        console.error('❌ RAZORPAY_KEY_ID not found in environment variables');
+        console.error('❌ Available env vars:', Object.keys(process.env).filter(k => k.includes('RAZOR')));
+        return res.status(500).json({ 
+            error: 'Payment system not configured. Please contact support.',
+            key: null 
+        });
+    }
+    
+    res.json({ key: key });
 });
 
 // Endpoint to get active coupons

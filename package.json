@@ -12,33 +12,20 @@
     "start-all": "node start-all.js",
     "test-sse": "node test-sse.js",
     "test-eventbridge": "node test-eventbridge-only.js",
-    "setup": "node setup.js",
-    "cap:install": "npm install @capacitor/android @capacitor/ios",
-    "cap:add": "npx cap add android && npx cap add ios",
-    "cap:sync": "npx cap sync",
-    "cap:open:android": "npx cap open android",
-    "cap:open:ios": "npx cap open ios",
-    "build:mobile": "npx cap copy && npx cap sync"
+    "setup": "node setup.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "sqlite3": "^5.1.6",
-    "sqlite": "^5.0.1",
-    "socket.io": "^4.7.2",
-    "concurrently": "^8.2.0",
     "aws-sdk": "^2.1490.0",
+    "bcrypt": "^5.1.1",
+    "concurrently": "^8.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
     "node-fetch": "^2.7.0",
     "nodemailer": "^6.9.7",
-    "dotenv": "^16.3.1",
-    "bcrypt": "^5.1.1",
-    "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
-    "@capacitor/cli": "^5.0.0",
-    "@capacitor/core": "^5.0.0",
-    "@capacitor/android": "^5.0.0",
-    "@capacitor/ios": "^5.0.0"
+    "socket.io": "^4.7.2",
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6"
   }
 }
-
