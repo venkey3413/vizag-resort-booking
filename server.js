@@ -1352,9 +1352,8 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
             return res.status(404).json({ error: 'Order not found' });
         }
         
-        if (order.status === 'confirmed') {
-            return res.status(400).json({ error: 'Cannot cancel confirmed order' });
-        }
+        // Allow cancellation of confirmed orders but send cancellation email
+        const wasConfirmed = order.status === 'confirmed';
         
         // Update order status
         await db.run('UPDATE food_orders SET status = ?, cancelled_at = datetime("now") WHERE order_id = ?', ['cancelled', orderId]);
@@ -1384,13 +1383,15 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
         
         // Send Telegram notification
         try {
-            const message = `❌ FOOD ORDER CANCELLED!
+            const statusText = wasConfirmed ? 'CONFIRMED FOOD ORDER CANCELLED' : 'FOOD ORDER CANCELLED';
+            const message = `❌ ${statusText}!
 
 📋 Order ID: ${orderId}
 🏨 Resort: ${order.resort_name}
 👤 Guest: ${order.guest_name}
 💰 Amount: ₹${order.total}
-⏰ Cancelled at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+${wasConfirmed ? '⚠️ Order was already confirmed and invoice sent
+' : ''}⏰ Cancelled at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
             
             await sendTelegramNotification(message);
         } catch (telegramError) {
