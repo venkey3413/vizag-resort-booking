@@ -817,7 +817,7 @@ function showPaymentInterface(booking) {
                             </p>
                         </div>
                         <p>Pay securely with Debit/Credit Card</p>
-                        <button onclick="payWithRazorpay(${booking.id}, ${(booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)}, '${booking.guestName}', '${booking.email}', '${booking.phone}')" class="razorpay-btn">
+                        <button onclick="payWithRazorpay('${booking.bookingReference}', ${(booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)}, '${booking.guestName}', '${booking.email}', '${booking.phone}')" class="razorpay-btn">
                             💳 Pay ₹${((booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)).toLocaleString()} with Card
                         </button>
                     </div>
@@ -911,7 +911,7 @@ function showPaymentMethod(method) {
     event.target.classList.add('active');
 }
 
-async function payWithRazorpay(bookingId, amount, name, email, phone) {
+async function payWithRazorpay(bookingReference, amount, name, email, phone) {
     try {
         // Check if Razorpay is available
         if (typeof Razorpay === 'undefined') {
@@ -919,18 +919,21 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
             return;
         }
         
-        // Check card payment limit before proceeding
-        const limitResponse = await fetch(`${SERVER_URL}/api/check-card-limit`, {
+        // First create the booking to get a booking ID
+        const bookingResponse = await fetch(`${SERVER_URL}/api/bookings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bookingId })
+            body: JSON.stringify(pendingBookingData)
         });
         
-        if (!limitResponse.ok) {
-            const error = await limitResponse.json();
-            showNotification(error.error, 'error');
+        if (!bookingResponse.ok) {
+            const error = await bookingResponse.json();
+            showNotification(error.error || 'Failed to create booking', 'error');
             return;
         }
+        
+        const booking = await bookingResponse.json();
+        const bookingId = booking.id;
         
         // Get Razorpay key from server
         console.log('🔑 Fetching Razorpay key from server...');
@@ -969,6 +972,7 @@ async function payWithRazorpay(bookingId, amount, name, email, phone) {
                 // Payment successful, notify admin immediately
                 notifyCardPaymentSuccess(bookingId, response.razorpay_payment_id);
                 showCardConfirmation(bookingId, response.razorpay_payment_id);
+                pendingBookingData = null; // Clear pending data
             },
             prefill: {
                 name: name,
