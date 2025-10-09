@@ -92,11 +92,6 @@ function displayFoodOrders(orders) {
                         ❌ Cancel Order
                     </button>
                 ` : ''}
-                ${order.status === 'confirmed' ? `
-                    <button class="cancel-food-btn" onclick="cancelConfirmedFoodOrder('${order.orderId}')">
-                        ❌ Cancel Confirmed Order
-                    </button>
-                ` : ''}
             </div>
         </div>
     `).join('');
@@ -142,28 +137,6 @@ async function cancelFoodOrder(orderId) {
     } catch (error) {
         console.error('Error cancelling food order:', error);
         alert('Error cancelling food order');
-    }
-}
-
-async function cancelConfirmedFoodOrder(orderId) {
-    if (!confirm('⚠️ This order is already confirmed and invoice was sent. Are you sure you want to cancel it?')) return;
-    
-    try {
-        const response = await fetch(`/api/food-orders/${orderId}/cancel`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (response.ok) {
-            alert('Confirmed food order cancelled successfully! Cancellation email sent to customer.');
-            loadFoodOrders();
-        } else {
-            const error = await response.json();
-            alert(error.error || 'Failed to cancel confirmed food order');
-        }
-    } catch (error) {
-        console.error('Error cancelling confirmed food order:', error);
-        alert('Error cancelling confirmed food order');
     }
 }
 
