@@ -1046,29 +1046,32 @@ app.get('/api/validate-booking/:bookingId', async (req, res) => {
             });
         }
         
-        // Check if current time is past 10 PM on check-in date
+        // Allow food orders for any future check-in date
         const now = new Date();
         const checkInDate = new Date(booking.check_in);
-        const checkIn10PM = new Date(checkInDate);
-        checkIn10PM.setHours(22, 0, 0, 0);
-        
-        // Only allow orders on check-in date and before 10 PM
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         checkInDate.setHours(0, 0, 0, 0);
         
-        if (checkInDate.getTime() !== today.getTime()) {
+        // Only block orders for past check-in dates
+        if (checkInDate.getTime() < today.getTime()) {
             return res.status(400).json({ 
                 valid: false, 
-                error: 'Food orders are only available on your check-in date' 
+                error: 'Cannot order food for past check-in dates' 
             });
         }
         
-        if (now > checkIn10PM) {
-            return res.status(400).json({ 
-                valid: false, 
-                error: 'Food orders are only accepted until 10 PM on the check-in date' 
-            });
+        // If check-in is today, check if it's past 10 PM
+        if (checkInDate.getTime() === today.getTime()) {
+            const checkIn10PM = new Date(checkInDate);
+            checkIn10PM.setHours(22, 0, 0, 0);
+            
+            if (now > checkIn10PM) {
+                return res.status(400).json({ 
+                    valid: false, 
+                    error: 'Food orders are only accepted until 10 PM on the check-in date' 
+                });
+            }
         }
         
         res.json({ 
@@ -1134,31 +1137,37 @@ app.post('/api/food-orders', async (req, res) => {
             });
         }
         
-        // Check if current time is past 10 PM on check-in date
+        // Allow food orders for any future check-in date
         const now = new Date();
         const checkInDate = new Date(booking.check_in);
-        const checkIn10PM = new Date(checkInDate);
-        checkIn10PM.setHours(22, 0, 0, 0);
-        
-        // Only allow orders on check-in date and before 10 PM
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         checkInDate.setHours(0, 0, 0, 0);
         
-        if (checkInDate.getTime() !== today.getTime()) {
+        // Only block orders for past check-in dates
+        if (checkInDate.getTime() < today.getTime()) {
             return res.status(400).json({ 
-                error: 'Food orders are only available on your check-in date' 
+                error: 'Cannot order food for past check-in dates' 
             });
         }
         
-        if (now > checkIn10PM) {
-            return res.status(400).json({ 
-                error: 'Food orders are only accepted until 10 PM on the check-in date' 
-            });
+        // If check-in is today, check if it's past 10 PM
+        if (checkInDate.getTime() === today.getTime()) {
+            const checkIn10PM = new Date(checkInDate);
+            checkIn10PM.setHours(22, 0, 0, 0);
+            
+            if (now > checkIn10PM) {
+                return res.status(400).json({ 
+                    error: 'Food orders are only accepted until 10 PM on the check-in date' 
+                });
+            }
         }
         
         // Validate delivery time is within allowed slots (until 10 PM on check-in date)
         const deliveryDateTime = new Date(deliveryTime);
+        const checkIn10PM = new Date(checkInDate);
+        checkIn10PM.setHours(22, 0, 0, 0);
+        
         if (deliveryDateTime > checkIn10PM) {
             return res.status(400).json({ 
                 error: 'Delivery time must be before 10 PM on the check-in date' 
