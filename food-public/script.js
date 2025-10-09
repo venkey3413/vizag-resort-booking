@@ -227,7 +227,7 @@ function generateDeliveryTimeSlots() {
     if (checkInDate.getTime() !== today.getTime()) {
         const option = document.createElement('option');
         option.value = '';
-        option.textContent = 'Food delivery only available on your check-in date';
+        option.textContent = `Food delivery only available on your check-in date: ${checkInDate.toLocaleDateString('en-IN')}`;
         option.disabled = true;
         deliveryTimeSelect.appendChild(option);
         return;
@@ -303,8 +303,22 @@ async function confirmOrder() {
         return;
     }
     
-    // Check if current time is past 10 PM on check-in date
+    // Check if current time is past 10 PM and if today is check-in date
     const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Only allow orders on check-in date
+    if (window.checkInDate) {
+        const checkInDate = new Date(window.checkInDate);
+        checkInDate.setHours(0, 0, 0, 0);
+        
+        if (checkInDate.getTime() !== today.getTime()) {
+            showNotification(`Food orders are only available on your check-in date: ${checkInDate.toLocaleDateString('en-IN')}`, 'error');
+            return;
+        }
+    }
+    
     const today10PM = new Date();
     today10PM.setHours(22, 0, 0, 0);
     
