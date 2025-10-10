@@ -56,6 +56,7 @@ let selectedPackages = [];
 document.addEventListener('DOMContentLoaded', function() {
     loadPackages();
     updateBookingSummary();
+    setupEventBridgeSync();
 });
 
 function loadPackages() {
@@ -401,4 +402,66 @@ window.onclick = function(event) {
     if (event.target === paymentModal) {
         closePaymentModal();
     }
+}
+
+// EventBridge real-time sync
+function setupEventBridgeSync() {
+    console.log('📡 Travel EventBridge sync enabled');
+    
+    try {
+        const eventSource = new EventSource('/api/events');
+        
+        eventSource.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('📡 Travel EventBridge event:', data);
+                
+                if (data.type === 'travel.booking.created' || data.type === 'travel.booking.updated') {
+                    console.log('🚗 Travel booking update detected');
+                    showNotification('New travel booking activity detected!', 'info');
+                }
+                
+                if (data.type === 'booking.created' || data.type === 'booking.updated') {
+                    console.log('🏨 Resort booking update detected');
+                }
+                
+            } catch (error) {
+                console.log('📡 EventBridge ping:', event.data);
+            }
+        };
+        
+        eventSource.onerror = function(error) {
+            console.log('⚠️ Travel EventBridge error:', error);
+        };
+        
+        eventSource.onopen = function() {
+            console.log('✅ Travel EventBridge connected');
+        };
+    } catch (error) {
+        console.error('Travel EventBridge setup failed:', error);
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        z-index: 3000;
+        font-size: 14px;
+        max-width: 300px;
+        background: ${type === 'info' ? '#17a2b8' : type === 'success' ? '#28a745' : '#dc3545'};
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
 }
