@@ -27,10 +27,72 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        header { display: block !important; visibility: visible !important; opacity: 1 !important; }
-        .nav-container { display: flex !important; visibility: visible !important; opacity: 1 !important; }
-        nav ul { display: flex !important; visibility: visible !important; opacity: 1 !important; }
-        nav a { display: inline-block !important; visibility: visible !important; color: white !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 0.5rem 0;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex !important;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+        }
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .logo-container h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+        nav ul {
+            display: flex !important;
+            list-style: none;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+        }
+        nav a {
+            color: white !important;
+            text-decoration: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.3s;
+            display: inline-block !important;
+            visibility: visible !important;
+        }
+        nav a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        @media (max-width: 768px) {
+            .nav-container { padding: 0 10px; }
+            .logo-container h1 { font-size: 1rem; }
+            .logo-image { width: 40px; height: 40px; }
+            nav ul { gap: 0.3rem; }
+            nav a { font-size: 0.75rem; padding: 0.4rem 0.5rem; }
+        }
     </style>
     <link rel="stylesheet" href="style.css">
     
@@ -59,7 +121,6 @@
         <nav>
             <div class="nav-container">
                 <div class="logo-container">
-                    <span class="logo-text">ɪ</span>
                     <img src="cropped_circle_image.png" alt="Logo" class="logo-image">
                     <h1>Vizag Resorts</h1>
                 </div>
