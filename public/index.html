@@ -201,6 +201,24 @@
         /* PREVENT ANY EXTERNAL OVERRIDES */
         * { --header-override: none !important; }
         header { contain: layout style !important; }
+        
+        /* FORCE FOOTER AND POLICY BUTTON VISIBILITY */
+        footer { display: block !important; visibility: visible !important; opacity: 1 !important; background: #333 !important; color: white !important; text-align: center !important; padding: 20px 0 !important; }
+        footer p { display: block !important; visibility: visible !important; margin: 5px 0 !important; font-size: 0.9rem !important; color: white !important; }
+        footer a { display: inline !important; visibility: visible !important; color: #ccc !important; text-decoration: underline !important; }
+        
+        .fixed-policy-btn { display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; left: 20px !important; bottom: 100px !important; z-index: 1000 !important; background: #007bff !important; border-radius: 25px !important; box-shadow: 0 4px 12px rgba(0,123,255,0.3) !important; }
+        .fixed-policy-btn a { display: block !important; visibility: visible !important; padding: 12px 16px !important; color: white !important; text-decoration: none !important; font-size: 0.9rem !important; font-weight: 600 !important; white-space: nowrap !important; }
+        
+        /* MOBILE FORCE FIXES */
+        @media (max-width: 768px) {
+            header nav ul { gap: 0.2rem !important; padding-right: 0 !important; }
+            header nav a { font-size: 0.6rem !important; padding: 0.2rem 0.25rem !important; }
+            .fixed-policy-btn { left: 10px !important; bottom: 80px !important; }
+            .fixed-policy-btn a { padding: 8px 10px !important; font-size: 0.75rem !important; }
+            footer { padding: 15px 0 !important; }
+            footer p { font-size: 0.8rem !important; margin: 3px 0 !important; }
+        }
     </style>
     <link rel="stylesheet" href="style.css">
     <script>
@@ -212,22 +230,20 @@
                 header.setAttribute('data-locked', 'true');
             }
             
-            // LOCK FOOTER VISIBILITY
+            // FORCE ALL ELEMENTS VISIBILITY
             const footer = document.querySelector('footer');
+            const policyBtn = document.querySelector('.fixed-policy-btn');
+            
             if (footer) {
                 footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: #333 !important; color: white !important; text-align: center !important; padding: 20px 0 !important;';
-                const footerPs = footer.querySelectorAll('p');
-                footerPs.forEach((p, index) => {
-                    if (index === 0) {
-                        p.style.cssText = 'margin: 5px 0 10px 0 !important; font-size: 0.9rem !important; color: white !important; display: block !important; visibility: visible !important;';
-                    } else {
-                        p.style.cssText = 'margin: 5px 0 !important; font-size: 0.9rem !important; display: block !important; visibility: visible !important;';
-                    }
-                });
-                const footerLinks = footer.querySelectorAll('a');
-                footerLinks.forEach(link => {
-                    link.style.cssText = 'color: #ccc !important; text-decoration: underline !important; display: inline !important; visibility: visible !important;';
-                });
+                footer.querySelectorAll('p').forEach(p => p.style.cssText = 'display: block !important; visibility: visible !important; margin: 5px 0 !important; font-size: 0.9rem !important; color: white !important;');
+                footer.querySelectorAll('a').forEach(a => a.style.cssText = 'display: inline !important; visibility: visible !important; color: #ccc !important; text-decoration: underline !important;');
+            }
+            
+            if (policyBtn) {
+                policyBtn.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; left: 20px !important; bottom: 100px !important; z-index: 1000 !important; background: #007bff !important; border-radius: 25px !important;';
+                const policyLink = policyBtn.querySelector('a');
+                if (policyLink) policyLink.style.cssText = 'display: block !important; visibility: visible !important; padding: 12px 16px !important; color: white !important; text-decoration: none !important; font-size: 0.9rem !important;';
             }
         });
         
