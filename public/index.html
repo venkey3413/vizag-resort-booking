@@ -204,12 +204,30 @@
     </style>
     <link rel="stylesheet" href="style.css">
     <script>
-        // LOCK HEADER ON DOM READY AND PREVENT CHANGES
+        // LOCK HEADER AND FOOTER ON DOM READY AND PREVENT CHANGES
         document.addEventListener('DOMContentLoaded', function() {
             const header = document.querySelector('header');
             if (header) {
                 header.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100vw !important; z-index: 999999 !important; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; padding: 0.5rem 0 !important;';
                 header.setAttribute('data-locked', 'true');
+            }
+            
+            // LOCK FOOTER VISIBILITY
+            const footer = document.querySelector('footer');
+            if (footer) {
+                footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: #333 !important; color: white !important; text-align: center !important; padding: 20px 0 !important;';
+                const footerPs = footer.querySelectorAll('p');
+                footerPs.forEach((p, index) => {
+                    if (index === 0) {
+                        p.style.cssText = 'margin: 5px 0 10px 0 !important; font-size: 0.9rem !important; color: white !important; display: block !important; visibility: visible !important;';
+                    } else {
+                        p.style.cssText = 'margin: 5px 0 !important; font-size: 0.9rem !important; display: block !important; visibility: visible !important;';
+                    }
+                });
+                const footerLinks = footer.querySelectorAll('a');
+                footerLinks.forEach(link => {
+                    link.style.cssText = 'color: #ccc !important; text-decoration: underline !important; display: inline !important; visibility: visible !important;';
+                });
             }
         });
         
