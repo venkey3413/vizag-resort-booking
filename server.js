@@ -1026,6 +1026,13 @@ app.get('/food', (req, res) => {
     res.sendFile(__dirname + '/food-public/index.html');
 });
 
+// Travel service routes
+app.use('/travel', express.static('travel-public'));
+
+app.get('/travel', (req, res) => {
+    res.sendFile(__dirname + '/travel-public/index.html');
+});
+
 // Validate booking ID for food orders
 app.get('/api/validate-booking/:bookingId', async (req, res) => {
     try {
