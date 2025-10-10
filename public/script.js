@@ -242,7 +242,7 @@ function displayResorts() {
                             <span class="review-text">Rate this resort</span>
                         </div>
                         <div class="cancellation-policy">
-                            <a href="Booking cancellation_policy.pdf" target="_blank" class="policy-text">Cancellation Policy</a>
+                            <a href="Cancellation &amp; terms and conditions (1).pdf" target="_blank" class="policy-text">Cancellation Policy</a>
                         </div>
                     </div>
                 </div>
