@@ -56,7 +56,28 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLogoRotation();
     setupWebSocketSync();
     preloadQRCode();
+    initBannerRotation();
 });
+
+// Rotating Banner Animation
+function initBannerRotation() {
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.banner-slide');
+    const totalSlides = slides.length;
+
+    function nextSlide() {
+        if (slides.length > 0) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % totalSlides;
+            slides[currentSlide].classList.add('active');
+        }
+    }
+
+    // Start banner rotation every 8 seconds
+    if (slides.length > 1) {
+        setInterval(nextSlide, 8000);
+    }
+}
 
 
 
