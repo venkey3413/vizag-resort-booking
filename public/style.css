@@ -655,7 +655,7 @@ input, select {
 
     .hero {
         margin-top: 0;
-        height: 100vh;
+        height: 70vh;
         padding: 40px 20px;
     }
     
@@ -766,7 +766,7 @@ input, select {
     .hero {
         margin-top: 0;
         padding: 20px 15px;
-        height: 100vh;
+        height: 60vh;
     }
     
     .food-order-notice {
