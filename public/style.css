@@ -303,12 +303,18 @@ nav a:hover {
 
 .banner-slide:nth-child(1) {
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
-                url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1200') center/cover !important;
+                url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
 }
 
 .banner-slide:nth-child(2) {
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
-                url('https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=1200') center/cover !important;
+                url('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1920&h=1080&fit=crop') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
 }
 
 .banner-slide h2 {
