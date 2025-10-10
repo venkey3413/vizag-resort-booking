@@ -3,6 +3,7 @@ let bookings = [];
 document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
     loadFoodOrders();
+    loadTravelBookings();
     setupEventBridgeSync();
 });
 
@@ -154,6 +155,16 @@ function setupEventBridgeSync() {
                 if (data.type === 'booking.created' || data.type === 'booking.updated' || data.type === 'payment.updated') {
                     console.log('📋 Booking update detected - refreshing bookings!');
                     loadBookings();
+                }
+                
+                if (data.type === 'food.order.created' || data.type === 'food.order.updated') {
+                    console.log('🍽️ Food order update detected - refreshing food orders!');
+                    loadFoodOrders();
+                }
+                
+                if (data.type === 'travel.booking.created' || data.type === 'travel.booking.updated') {
+                    console.log('🚗 Travel booking update detected - refreshing travel bookings!');
+                    loadTravelBookings();
                 }
             } catch (error) {
                 console.log('📡 EventBridge ping or invalid data');
@@ -569,5 +580,91 @@ async function removeBlock(id) {
         }
     } catch (error) {
         alert('Failed to remove block');
+    }
+}
+
+// Travel booking management functions
+async function loadTravelBookings() {
+    try {
+        const response = await fetch('/api/travel-bookings');
+        const bookings = await response.json();
+        window.currentTravelBookings = bookings;
+        displayTravelBookings(bookings);
+    } catch (error) {
+        console.error('Error loading travel bookings:', error);
+        document.getElementById('travelBookingsGrid').innerHTML = '<p>Error loading travel bookings</p>';
+    }
+}
+
+function displayTravelBookings(bookings) {
+    const grid = document.getElementById('travelBookingsGrid');
+    
+    if (bookings.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No travel bookings found</div>';
+        return;
+    }
+    
+    grid.innerHTML = bookings.map(booking => `
+        <div class="travel-booking-card">
+            <div class="travel-booking-header">
+                <div class="travel-booking-id">🚗 ${booking.booking_reference}</div>
+                <div class="travel-booking-status ${booking.status}">${booking.status.replace('_', ' ').toUpperCase()}</div>
+            </div>
+            
+            <div class="travel-booking-details">
+                <div>
+                    <p><strong>Customer:</strong> ${booking.customer_name}</p>
+                    <p><strong>Phone:</strong> ${booking.phone}</p>
+                    <p><strong>Email:</strong> ${booking.email}</p>
+                    <p><strong>Travel Date:</strong> ${new Date(booking.travel_date).toLocaleDateString()}</p>
+                    <p><strong>Pickup Location:</strong> ${booking.pickup_location}</p>
+                    <p><strong>Booked:</strong> ${new Date(booking.created_at).toLocaleString()}</p>
+                </div>
+                <div>
+                    <p><strong>Total Amount:</strong> ₹${booking.total_amount.toLocaleString()}</p>
+                    ${booking.payment_method ? `<p><strong>Payment Method:</strong> ${booking.payment_method.toUpperCase()}</p>` : ''}
+                    ${booking.transaction_id ? `<p><strong>Transaction ID:</strong> ${booking.transaction_id}</p>` : ''}
+                </div>
+            </div>
+            
+            <div class="travel-packages">
+                <h4>Packages:</h4>
+                ${booking.packages.map(pkg => `
+                    <div class="travel-package-item">
+                        <span>${pkg.name} x ${pkg.quantity}</span>
+                        <span>₹${(pkg.price * pkg.quantity).toLocaleString()}</span>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="travel-booking-actions">
+                ${booking.status === 'pending_payment' ? `
+                    <button class="confirm-travel-btn" onclick="confirmTravelBooking(${booking.id})">
+                        ✅ Confirm Payment & Send Confirmation
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function confirmTravelBooking(id) {
+    if (!confirm('Confirm this travel booking payment and send confirmation email?')) return;
+    
+    try {
+        const response = await fetch(`/api/travel-bookings/${id}/confirm`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            alert('Travel booking confirmed and confirmation email sent!');
+            loadTravelBookings();
+        } else {
+            alert('Failed to confirm travel booking');
+        }
+    } catch (error) {
+        console.error('Error confirming travel booking:', error);
+        alert('Error confirming travel booking');
     }
 }

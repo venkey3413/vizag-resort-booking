@@ -60,6 +60,7 @@
                 <ul>
                     <li><a href="#home">Home</a></li>
                     <li><a href="/food">My Food</a></li>
+                    <li><a href="#travel">Book Travel</a></li>
                     <li><a href="https://vizagresortbooking.in/owner-dashboard" target="_blank">Owner Dashboard</a></li>
                 </ul>
             </div>
@@ -88,6 +89,24 @@
                 <h2>Premium Resorts in Visakhapatnam</h2>
                 <div id="resortsGrid" class="resorts-grid">
                     <!-- Resorts will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="travel" class="travel-section">
+            <div class="container">
+                <h2>Book Travel Packages</h2>
+                <p class="section-subtitle">Explore Vizag with our curated travel packages</p>
+                <div id="travelGrid" class="travel-grid">
+                    <!-- Travel packages will be loaded here -->
+                </div>
+                <div class="travel-booking" id="travelBooking" style="display: none;">
+                    <h3>Your Travel Booking</h3>
+                    <div id="selectedPackages" class="selected-packages"></div>
+                    <div class="travel-total">
+                        <span>Total: ₹<span id="travelTotal">0</span></span>
+                        <button id="bookTravelBtn" class="book-travel-btn" onclick="openTravelModal()">Book Now</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -214,6 +233,47 @@
                 </div>
                 
                 <button type="submit" class="book-btn">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Travel Booking Modal -->
+    <div id="travelModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTravelModal()">&times;</span>
+            <h2>Complete Your Travel Booking</h2>
+            <form id="travelForm">
+                <div class="form-group">
+                    <label for="travelName">Full Name:</label>
+                    <input type="text" id="travelName" required>
+                </div>
+                <div class="form-group">
+                    <label for="travelPhone">Phone Number:</label>
+                    <input type="tel" id="travelPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="travelEmail">Email:</label>
+                    <input type="email" id="travelEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="travelDate">Travel Date:</label>
+                    <input type="date" id="travelDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="pickupLocation">Pickup Location:</label>
+                    <input type="text" id="pickupLocation" placeholder="Enter pickup address" required>
+                </div>
+                <div class="travel-summary">
+                    <h3>Booking Summary</h3>
+                    <div id="travelSummary"></div>
+                    <div class="price-summary">
+                        <div class="price-row">
+                            <span>Total Amount:</span>
+                            <span id="travelModalTotal">₹0</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="book-btn">Confirm Travel Booking</button>
             </form>
         </div>
     </div>

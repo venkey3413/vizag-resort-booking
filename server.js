@@ -1848,6 +1848,167 @@ app.get('/api/owner/bookings', verifyOwnerToken, async (req, res) => {
     }
 });
 
+// Travel booking endpoints
+app.post('/api/travel-bookings', async (req, res) => {
+    try {
+        const { customer_name, phone, email, travel_date, pickup_location, packages, total_amount } = req.body;
+        
+        if (!customer_name || !phone || !email || !travel_date || !pickup_location || !packages || !total_amount) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+        
+        const booking_reference = `TR${Date.now()}`;
+        
+        // Create travel bookings table if it doesn't exist
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS travel_bookings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                booking_reference TEXT UNIQUE NOT NULL,
+                customer_name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                email TEXT NOT NULL,
+                travel_date TEXT NOT NULL,
+                pickup_location TEXT NOT NULL,
+                packages TEXT NOT NULL,
+                total_amount INTEGER NOT NULL,
+                status TEXT DEFAULT 'pending_payment',
+                payment_method TEXT,
+                transaction_id TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Insert travel booking
+        const result = await db.run(`
+            INSERT INTO travel_bookings (booking_reference, customer_name, phone, email, travel_date, pickup_location, packages, total_amount)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [booking_reference, customer_name, phone, email, travel_date, pickup_location, JSON.stringify(packages), total_amount]);
+        
+        // Send Telegram notification
+        try {
+            const packageNames = packages.map(p => `${p.name} x${p.quantity}`).join(', ');
+            const message = `🚗 NEW TRAVEL BOOKING!
+
+📋 Booking ID: ${booking_reference}
+👤 Customer: ${customer_name}
+📧 Email: ${email}
+📱 Phone: ${phone}
+📅 Travel Date: ${new Date(travel_date).toLocaleDateString('en-IN')}
+📍 Pickup: ${pickup_location}
+🎯 Packages: ${packageNames}
+💰 Amount: ₹${total_amount.toLocaleString()}
+⚠️ Status: Pending Payment
+
+⏰ Booked at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        // Publish travel booking created event
+        try {
+            await publishEvent('vizag.travel', EVENTS.TRAVEL_BOOKING_CREATED, {
+                bookingId: result.lastID,
+                bookingReference: booking_reference,
+                customerName: customer_name,
+                totalAmount: total_amount
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.TRAVEL_BOOKING_CREATED, 'vizag.travel', {
+                bookingId: result.lastID,
+                bookingReference: booking_reference
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
+        res.json({ 
+            success: true, 
+            booking_reference,
+            message: 'Travel booking created successfully'
+        });
+    } catch (error) {
+        console.error('Travel booking error:', error);
+        res.status(500).json({ error: 'Failed to create travel booking' });
+    }
+});
+
+// Get travel bookings (admin endpoint)
+app.get('/api/travel-bookings', async (req, res) => {
+    try {
+        const bookings = await db.all(`
+            SELECT * FROM travel_bookings 
+            ORDER BY created_at DESC
+        `);
+        
+        // Parse packages JSON for each booking
+        bookings.forEach(booking => {
+            if (booking.packages) {
+                booking.packages = JSON.parse(booking.packages);
+            }
+        });
+        
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch travel bookings' });
+    }
+});
+
+// Confirm travel booking payment
+app.post('/api/travel-bookings/:id/confirm', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const booking = await db.get('SELECT * FROM travel_bookings WHERE id = ?', [id]);
+        
+        if (!booking) {
+            return res.status(404).json({ error: 'Travel booking not found' });
+        }
+        
+        // Update booking status
+        await db.run('UPDATE travel_bookings SET status = ? WHERE id = ?', ['confirmed', id]);
+        
+        // Send confirmation email
+        try {
+            const confirmationData = {
+                bookingReference: booking.booking_reference,
+                customerName: booking.customer_name,
+                email: booking.email,
+                phone: booking.phone,
+                travelDate: booking.travel_date,
+                pickupLocation: booking.pickup_location,
+                packages: JSON.parse(booking.packages),
+                totalAmount: booking.total_amount,
+                confirmedAt: new Date()
+            };
+            
+            await sendInvoiceEmail(confirmationData, 'travel');
+            console.log(`Travel booking confirmation sent for ${booking.booking_reference}`);
+        } catch (emailError) {
+            console.error('Failed to send travel confirmation:', emailError);
+        }
+        
+        // Publish travel booking confirmed event
+        try {
+            await publishEvent('vizag.travel', EVENTS.TRAVEL_BOOKING_UPDATED, {
+                bookingId: id,
+                bookingReference: booking.booking_reference,
+                status: 'confirmed'
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Travel booking confirmed'
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to confirm travel booking' });
+    }
+});
+
 // Initialize and start server
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {

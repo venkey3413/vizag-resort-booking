@@ -1,0 +1,404 @@
+// Travel packages data
+const travelPackages = [
+    {
+        id: 1,
+        name: "Araku Valley Tour",
+        description: "Full day trip to scenic Araku Valley with coffee plantations and tribal museum",
+        duration: "8-10 hours",
+        price: 2500,
+        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"
+    },
+    {
+        id: 2,
+        name: "Borra Caves Adventure",
+        description: "Explore the famous limestone caves with stalactites and stalagmites",
+        duration: "6-8 hours",
+        price: 1800,
+        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400"
+    },
+    {
+        id: 3,
+        name: "Beach Hopping Tour",
+        description: "Visit RK Beach, Rushikonda, and Yarada Beach in one day",
+        duration: "4-6 hours",
+        price: 1200,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400"
+    },
+    {
+        id: 4,
+        name: "Kailasagiri Hill Station",
+        description: "Cable car ride and panoramic views of Vizag city and coastline",
+        duration: "3-4 hours",
+        price: 800,
+        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"
+    },
+    {
+        id: 5,
+        name: "Submarine Museum & INS Kurusura",
+        description: "Explore the submarine museum and maritime heritage",
+        duration: "2-3 hours",
+        price: 600,
+        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400"
+    },
+    {
+        id: 6,
+        name: "Simhachalam Temple Tour",
+        description: "Visit the ancient Narasimha temple with architectural marvels",
+        duration: "3-4 hours",
+        price: 700,
+        image: "https://images.unsplash.com/photo-1582632502788-e3d2e7e8e5e5?w=400"
+    }
+];
+
+let selectedPackages = [];
+
+// Load packages on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadPackages();
+    updateBookingSummary();
+});
+
+function loadPackages() {
+    const packagesGrid = document.getElementById('packagesGrid');
+    packagesGrid.innerHTML = '';
+
+    travelPackages.forEach(package => {
+        const packageCard = document.createElement('div');
+        packageCard.className = 'package-item';
+        packageCard.innerHTML = `
+            <img src="${package.image}" alt="${package.name}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'">
+            <div class="package-item-content">
+                <h3>${package.name}</h3>
+                <p>${package.description}</p>
+                <div class="package-duration">Duration: ${package.duration}</div>
+                <div class="package-item-footer">
+                    <span class="price">₹${package.price}</span>
+                    <button class="add-btn" onclick="addPackage(${package.id})">Add Package</button>
+                </div>
+            </div>
+        `;
+        packagesGrid.appendChild(packageCard);
+    });
+}
+
+function addPackage(packageId) {
+    const package = travelPackages.find(p => p.id === packageId);
+    const existingPackage = selectedPackages.find(p => p.id === packageId);
+
+    if (existingPackage) {
+        existingPackage.quantity += 1;
+    } else {
+        selectedPackages.push({
+            ...package,
+            quantity: 1
+        });
+    }
+
+    updateBookingSummary();
+}
+
+function removePackage(packageId) {
+    const packageIndex = selectedPackages.findIndex(p => p.id === packageId);
+    if (packageIndex > -1) {
+        if (selectedPackages[packageIndex].quantity > 1) {
+            selectedPackages[packageIndex].quantity -= 1;
+        } else {
+            selectedPackages.splice(packageIndex, 1);
+        }
+    }
+    updateBookingSummary();
+}
+
+function updatePackageQuantity(packageId, change) {
+    const package = selectedPackages.find(p => p.id === packageId);
+    if (package) {
+        package.quantity += change;
+        if (package.quantity <= 0) {
+            removePackage(packageId);
+        }
+    }
+    updateBookingSummary();
+}
+
+function updateBookingSummary() {
+    const bookingItems = document.getElementById('bookingItems');
+    const subtotalElement = document.getElementById('subtotal');
+    const totalAmountElement = document.getElementById('totalAmount');
+    const bookNowBtn = document.getElementById('bookNowBtn');
+
+    if (selectedPackages.length === 0) {
+        bookingItems.innerHTML = '<p class="empty-booking">No packages selected</p>';
+        subtotalElement.textContent = '₹0';
+        totalAmountElement.textContent = '₹0';
+        bookNowBtn.disabled = true;
+        return;
+    }
+
+    let subtotal = 0;
+    let itemsHTML = '';
+
+    selectedPackages.forEach(package => {
+        const itemTotal = package.price * package.quantity;
+        subtotal += itemTotal;
+
+        itemsHTML += `
+            <div class="booking-item">
+                <div class="booking-item-info">
+                    <h4>${package.name}</h4>
+                    <p>₹${package.price} × ${package.quantity} = ₹${itemTotal}</p>
+                </div>
+                <div class="quantity-controls">
+                    <button class="qty-btn" onclick="updatePackageQuantity(${package.id}, -1)">-</button>
+                    <span>${package.quantity}</span>
+                    <button class="qty-btn" onclick="updatePackageQuantity(${package.id}, 1)">+</button>
+                </div>
+            </div>
+        `;
+    });
+
+    bookingItems.innerHTML = itemsHTML;
+    subtotalElement.textContent = `₹${subtotal}`;
+    totalAmountElement.textContent = `₹${subtotal}`;
+    bookNowBtn.disabled = false;
+}
+
+function openBookingModal() {
+    const modal = document.getElementById('bookingModal');
+    const modalTotal = document.getElementById('modalTotal');
+    const bookingSummary = document.getElementById('bookingSummary');
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('travelDate').min = today;
+
+    // Update modal summary
+    let summaryHTML = '';
+    let total = 0;
+
+    selectedPackages.forEach(package => {
+        const itemTotal = package.price * package.quantity;
+        total += itemTotal;
+        summaryHTML += `
+            <div class="summary-item">
+                <span>${package.name} × ${package.quantity}</span>
+                <span>₹${itemTotal}</span>
+            </div>
+        `;
+    });
+
+    bookingSummary.innerHTML = summaryHTML;
+    modalTotal.textContent = `₹${total}`;
+    modal.style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('bookingModal').style.display = 'none';
+}
+
+function confirmBooking() {
+    const customerName = document.getElementById('customerName').value;
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    const customerEmail = document.getElementById('customerEmail').value;
+    const travelDate = document.getElementById('travelDate').value;
+    const pickupLocation = document.getElementById('pickupLocation').value;
+
+    if (!customerName || !phoneNumber || !customerEmail || !travelDate || !pickupLocation) {
+        alert('Please fill in all required fields');
+        return;
+    }
+
+    // Calculate total
+    const total = selectedPackages.reduce((sum, package) => sum + (package.price * package.quantity), 0);
+
+    // Create booking data
+    const bookingData = {
+        customer_name: customerName,
+        phone: phoneNumber,
+        email: customerEmail,
+        travel_date: travelDate,
+        pickup_location: pickupLocation,
+        packages: selectedPackages,
+        total_amount: total
+    };
+
+    // Show payment options
+    showPaymentModal(bookingData);
+}
+
+function showPaymentModal(bookingData) {
+    closeModal();
+    
+    // Create payment modal
+    const paymentModal = document.createElement('div');
+    paymentModal.className = 'modal payment-modal';
+    paymentModal.innerHTML = `
+        <div class="modal-content payment-content">
+            <span class="close" onclick="closePaymentModal()">&times;</span>
+            <h2>Complete Payment</h2>
+            
+            <div class="booking-summary">
+                <h3>Booking Details</h3>
+                <p><strong>Name:</strong> ${bookingData.customer_name}</p>
+                <p><strong>Phone:</strong> ${bookingData.phone}</p>
+                <p><strong>Travel Date:</strong> ${bookingData.travel_date}</p>
+                <p><strong>Pickup:</strong> ${bookingData.pickup_location}</p>
+                <p><strong>Total Amount:</strong> ₹${bookingData.total_amount}</p>
+            </div>
+
+            <div class="payment-tabs">
+                <div class="payment-tab active" onclick="switchPaymentTab('upi')">
+                    <h4>UPI Payment</h4>
+                </div>
+                <div class="payment-tab" onclick="switchPaymentTab('card')">
+                    <h4>Card Payment</h4>
+                </div>
+            </div>
+
+            <div id="upiPayment" class="payment-method active">
+                <div class="qr-section">
+                    <img src="/qr-code.png.jpeg" alt="UPI QR Code" class="qr-code">
+                    <p><strong>Scan & Pay ₹${bookingData.total_amount}</strong></p>
+                </div>
+                <div class="payment-instructions">
+                    <h4>Payment Instructions:</h4>
+                    <ol>
+                        <li>Scan the QR code with any UPI app</li>
+                        <li>Enter amount: ₹${bookingData.total_amount}</li>
+                        <li>Complete the payment</li>
+                        <li>Enter the 12-digit UTR number below</li>
+                    </ol>
+                </div>
+                <div class="payment-proof">
+                    <input type="text" id="utrNumber" placeholder="Enter 12-digit UTR number" maxlength="12">
+                    <button class="confirm-payment-btn" onclick="confirmUPIPayment('${JSON.stringify(bookingData).replace(/'/g, "\\'")}')">
+                        Confirm Payment
+                    </button>
+                </div>
+            </div>
+
+            <div id="cardPayment" class="payment-method">
+                <div class="card-pricing">
+                    <p><strong>Card Payment Amount: ₹${Math.round(bookingData.total_amount * 1.02)}</strong></p>
+                    <small>*2% processing fee included</small>
+                </div>
+                <button class="razorpay-btn" onclick="initiateRazorpayPayment('${JSON.stringify(bookingData).replace(/'/g, "\\'")}')">
+                    Pay with Card/UPI
+                </button>
+            </div>
+
+            <div class="payment-actions">
+                <button class="close-payment-btn" onclick="closePaymentModal()">Cancel</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(paymentModal);
+}
+
+function switchPaymentTab(method) {
+    // Update tabs
+    document.querySelectorAll('.payment-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.payment-method').forEach(method => method.classList.remove('active'));
+    
+    event.target.closest('.payment-tab').classList.add('active');
+    document.getElementById(method + 'Payment').classList.add('active');
+}
+
+function closePaymentModal() {
+    const paymentModal = document.querySelector('.payment-modal');
+    if (paymentModal) {
+        paymentModal.remove();
+    }
+}
+
+function confirmUPIPayment(bookingDataStr) {
+    const bookingData = JSON.parse(bookingDataStr);
+    const utrNumber = document.getElementById('utrNumber').value;
+
+    if (!utrNumber || utrNumber.length !== 12) {
+        alert('Please enter a valid 12-digit UTR number');
+        return;
+    }
+
+    // Submit booking with UPI payment
+    submitTravelBooking({
+        ...bookingData,
+        payment_method: 'upi',
+        transaction_id: utrNumber
+    });
+}
+
+function initiateRazorpayPayment(bookingDataStr) {
+    const bookingData = JSON.parse(bookingDataStr);
+    const amount = Math.round(bookingData.total_amount * 1.02 * 100); // Convert to paise and add 2% fee
+
+    const options = {
+        key: 'rzp_live_your_key_here', // Replace with your Razorpay key
+        amount: amount,
+        currency: 'INR',
+        name: 'Vizag Resort Booking',
+        description: 'Travel Package Booking',
+        handler: function(response) {
+            submitTravelBooking({
+                ...bookingData,
+                payment_method: 'card',
+                transaction_id: response.razorpay_payment_id
+            });
+        },
+        prefill: {
+            name: bookingData.customer_name,
+            email: bookingData.email,
+            contact: bookingData.phone
+        },
+        theme: {
+            color: '#667eea'
+        }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+}
+
+function submitTravelBooking(bookingData) {
+    // Show loading
+    const loadingDiv = document.createElement('div');
+    loadingDiv.innerHTML = '<div style="text-align: center; padding: 2rem;"><h3>Processing your booking...</h3></div>';
+    
+    fetch('/api/travel-bookings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closePaymentModal();
+            alert(`Booking confirmed! Your booking reference is: ${data.booking_reference}`);
+            
+            // Reset form
+            selectedPackages = [];
+            updateBookingSummary();
+        } else {
+            alert('Booking failed: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while processing your booking');
+    });
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('bookingModal');
+    const paymentModal = document.querySelector('.payment-modal');
+    
+    if (event.target === modal) {
+        closeModal();
+    }
+    if (event.target === paymentModal) {
+        closePaymentModal();
+    }
+}

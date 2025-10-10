@@ -742,6 +742,30 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
     }
 });
 
+// Travel booking management endpoints
+app.get('/api/travel-bookings', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/travel-bookings');
+        const bookings = await response.json();
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch travel bookings' });
+    }
+});
+
+app.post('/api/travel-bookings/:id/confirm', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/travel-bookings/${req.params.id}/confirm`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to confirm travel booking' });
+    }
+});
+
 
 
 

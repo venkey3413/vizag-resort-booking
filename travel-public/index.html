@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Travel - Vizag Resort Booking</title>
+    <link rel="icon" type="image/png" href="/cropped_circle_image.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="/cropped_circle_image.png" alt="Logo" class="logo-image">
+                <h1>Book Travel</h1>
+            </div>
+            <nav>
+                <a href="/">Main Page</a>
+                <a href="/food-ordering">My Food</a>
+                <a href="#packages">Packages</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Travel Notice -->
+    <div class="travel-notice">
+        <div class="notice-content">
+            <span class="notice-text">
+                🚗 BOOK YOUR TRAVEL WITH US - CAR RENTALS, SIGHTSEEING TOURS & MORE 📱 8341674465 (WhatsApp Only)
+            </span>
+        </div>
+    </div>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Explore Vizag with Comfort</h2>
+                <p>Professional drivers, comfortable vehicles, and memorable experiences</p>
+            </div>
+        </section>
+
+        <section id="packages" class="packages-section">
+            <div class="container">
+                <h2>Travel Packages</h2>
+                <div class="packages-grid" id="packagesGrid">
+                    <!-- Travel packages will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="booking" class="booking-section">
+            <div class="container">
+                <h2>Your Booking</h2>
+                <div class="booking-container">
+                    <div id="bookingItems" class="booking-items">
+                        <p class="empty-booking">No packages selected</p>
+                    </div>
+                    <div class="booking-total">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">₹0</span>
+                        </div>
+                        <div class="total-row final-total">
+                            <span>Total:</span>
+                            <span id="totalAmount">₹0</span>
+                        </div>
+                        <button id="bookNowBtn" class="book-btn" onclick="openBookingModal()" disabled>
+                            Book Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Complete Your Booking</h2>
+            <div class="booking-form">
+                <div class="form-group">
+                    <label for="customerName">Full Name:</label>
+                    <input type="text" id="customerName" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number:</label>
+                    <input type="tel" id="phoneNumber" placeholder="+91 9876543210" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">Email:</label>
+                    <input type="email" id="customerEmail" placeholder="customer@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="travelDate">Travel Date:</label>
+                    <input type="date" id="travelDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="pickupLocation">Pickup Location:</label>
+                    <input type="text" id="pickupLocation" placeholder="Enter pickup address" required>
+                </div>
+                <div class="booking-summary">
+                    <h3>Booking Summary</h3>
+                    <div id="bookingSummary"></div>
+                    <div class="total-summary">
+                        <div class="summary-row final">
+                            <span>Total Amount:</span>
+                            <span id="modalTotal">₹0</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="confirmBooking()" class="confirm-btn">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="contact">
+        <div class="container">
+            <p>&copy; 2024 Book Travel - Vizag Resort Booking. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>
