@@ -27,11 +27,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        header { display: block !important; visibility: visible !important; opacity: 1 !important; }
-        .nav-container { display: flex !important; visibility: visible !important; opacity: 1 !important; }
-        nav ul { display: flex !important; visibility: visible !important; opacity: 1 !important; }
-        nav a { display: inline-block !important; visibility: visible !important; color: white !important; font-size: 1rem !important; padding: 0.5rem 1rem !important; }
-        nav a[href*="owner-dashboard"] { font-size: 0.9rem !important; padding: 0.4rem 0.8rem !important; font-weight: 400 !important; font-family: Inter, sans-serif !important; text-decoration: none !important; border-radius: 4px !important; transition: none !important; }
+        header { display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; top: 0 !important; width: 100% !important; z-index: 1000 !important; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; padding: 0.5rem 0 !important; }
+        .nav-container { display: flex !important; visibility: visible !important; opacity: 1 !important; max-width: 1200px !important; margin: 0 auto !important; padding: 0 20px !important; justify-content: space-between !important; align-items: center !important; }
+        nav ul { display: flex !important; visibility: visible !important; opacity: 1 !important; list-style: none !important; gap: 2rem !important; margin: 0 !important; padding: 0 !important; }
+        nav a { display: inline-block !important; visibility: visible !important; color: white !important; font-size: 1rem !important; padding: 0.5rem 1rem !important; text-decoration: none !important; }
+        nav a[href*="owner-dashboard"] { font-size: 0.9rem !important; padding: 0.4rem 0.8rem !important; font-weight: 400 !important; font-family: Inter, sans-serif !important; text-decoration: none !important; border-radius: 4px !important; transition: none !important; background: rgba(255,255,255,0.1) !important; }
+        .logo-container { display: flex !important; align-items: center !important; gap: 0.3rem !important; }
+        .logo-text { font-size: 1.8rem !important; font-weight: 800 !important; color: white !important; }
+        .logo-image { height: 60px !important; width: 60px !important; border-radius: 50% !important; }
+        .logo-container h1 { margin: 0 !important; font-size: 1.3rem !important; font-weight: 600 !important; color: white !important; }
     </style>
     <link rel="stylesheet" href="style.css">
     
