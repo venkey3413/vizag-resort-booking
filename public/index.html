@@ -226,7 +226,7 @@
             });
         });
         
-        if (typeof MutationObserver !== 'undefined') {
+        if (typeof MutationObserver !== 'undefined' && document.body) {
             observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true });
         }
     </script>
@@ -447,10 +447,10 @@
         </div>
     </div>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Vizag Resort Booking. Book resorts in Vizag, S.R Puram, S Kota, Narava, Pinagadi, Pendurthi and all areas of Visakhapatnam.</p>
-            <p><a href="Cancellation &amp; terms and conditions (1).pdf" target="_blank" style="color: #ccc; text-decoration: underline;">Cancellation &amp; Terms and Conditions</a></p>
+    <footer style="background: #333 !important; color: white !important; text-align: center !important; padding: 20px 0 !important;">
+        <div class="container" style="max-width: 1200px !important; margin: 0 auto !important; padding: 0 20px !important;">
+            <p style="margin: 5px 0 10px 0 !important; font-size: 0.9rem !important; color: white !important;">&copy; 2025 Vizag Resort Booking. Book resorts in Vizag, S.R Puram, S Kota, Narava, Pinagadi, Pendurthi and all areas of Visakhapatnam.</p>
+            <p style="margin: 5px 0 !important; font-size: 0.9rem !important;"><a href="Cancellation &amp; terms and conditions (1).pdf" target="_blank" style="color: #ccc !important; text-decoration: underline !important; transition: color 0.3s !important;">Cancellation &amp; Terms and Conditions</a></p>
         </div>
     </footer>
 
