@@ -85,13 +85,19 @@ function preloadQRCode() {
 }
 
 function setupEventListeners() {
-    // Navigation - only handle internal anchor links
+    // Navigation - only handle internal anchor links, allow external links to work normally
     document.querySelectorAll('nav a[href^="#"]').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const target = this.getAttribute('href').substring(1);
             scrollToSection(target);
         });
+    });
+    
+    // Ensure external navigation links work properly
+    document.querySelectorAll('nav a:not([href^="#"])').forEach(link => {
+        link.style.pointerEvents = 'auto';
+        link.style.cursor = 'pointer';
     });
     
 
