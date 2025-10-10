@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLogoRotation();
     setupWebSocketSync();
     preloadQRCode();
-    loadTravelPackages();
 });
 
 
@@ -95,8 +94,7 @@ function setupEventListeners() {
         });
     });
     
-    // Setup travel event listeners
-    setupTravelEventListeners();
+
 
     // Modal close
     document.querySelector('.close').addEventListener('click', closeModal);
@@ -558,15 +556,7 @@ function setupWebSocketSync() {
                     loadResorts();
                 }
                 
-                if (data.type === 'travel.booking.created' || data.type === 'travel.booking.updated') {
-                    console.log('🚗 Travel booking update detected');
-                    // Could refresh travel bookings if needed
-                }
-                
-                if (data.type === 'food.order.created' || data.type === 'food.order.updated') {
-                    console.log('🍽️ Food order update detected');
-                    // Could refresh food orders if needed
-                }
+
             } catch (error) {
                 console.log('📡 EventBridge ping or invalid data:', event.data);
             }
@@ -1175,243 +1165,7 @@ function highlightStars(stars, rating) {
     });
 }
 
-// Add travel event listeners to main setup
-setupTravelEventListeners();
 
-// Travel packages data and functions
-const travelPackages = [
-    {
-        id: 1,
-        name: "Araku Valley Tour",
-        description: "Full day trip to scenic Araku Valley with coffee plantations and tribal museum",
-        duration: "8-10 hours",
-        price: 2500,
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"
-    },
-    {
-        id: 2,
-        name: "Borra Caves Adventure",
-        description: "Explore the famous limestone caves with stalactites and stalagmites",
-        duration: "6-8 hours",
-        price: 1800,
-        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400"
-    },
-    {
-        id: 3,
-        name: "Beach Hopping Tour",
-        description: "Visit RK Beach, Rushikonda, and Yarada Beach in one day",
-        duration: "4-6 hours",
-        price: 1200,
-        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400"
-    },
-    {
-        id: 4,
-        name: "Kailasagiri Hill Station",
-        description: "Cable car ride and panoramic views of Vizag city and coastline",
-        duration: "3-4 hours",
-        price: 800,
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"
-    }
-];
-
-let selectedTravelPackages = [];
-
-function loadTravelPackages() {
-    const travelGrid = document.getElementById('travelGrid');
-    if (!travelGrid) return;
-    
-    travelGrid.innerHTML = travelPackages.map(pkg => `
-        <div class="travel-package">
-            <img src="${pkg.image}" alt="${pkg.name}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'">
-            <div class="travel-package-content">
-                <h3>${pkg.name}</h3>
-                <p>${pkg.description}</p>
-                <div class="travel-duration">Duration: ${pkg.duration}</div>
-                <div class="travel-package-footer">
-                    <span class="travel-price">₹${pkg.price.toLocaleString()}</span>
-                    <button class="add-travel-btn" onclick="addTravelPackage(${pkg.id})" id="travel-btn-${pkg.id}">
-                        Add Package
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function addTravelPackage(packageId) {
-    const pkg = travelPackages.find(p => p.id === packageId);
-    const existingPkg = selectedTravelPackages.find(p => p.id === packageId);
-    
-    if (existingPkg) {
-        existingPkg.quantity += 1;
-    } else {
-        selectedTravelPackages.push({ ...pkg, quantity: 1 });
-    }
-    
-    updateTravelBooking();
-}
-
-function removeTravelPackage(packageId) {
-    const pkgIndex = selectedTravelPackages.findIndex(p => p.id === packageId);
-    if (pkgIndex > -1) {
-        if (selectedTravelPackages[pkgIndex].quantity > 1) {
-            selectedTravelPackages[pkgIndex].quantity -= 1;
-        } else {
-            selectedTravelPackages.splice(pkgIndex, 1);
-        }
-    }
-    updateTravelBooking();
-}
-
-function updateTravelQuantity(packageId, change) {
-    const pkg = selectedTravelPackages.find(p => p.id === packageId);
-    if (pkg) {
-        pkg.quantity += change;
-        if (pkg.quantity <= 0) {
-            removeTravelPackage(packageId);
-        }
-    }
-    updateTravelBooking();
-}
-
-function updateTravelBooking() {
-    const bookingSection = document.getElementById('travelBooking');
-    const selectedPackagesDiv = document.getElementById('selectedPackages');
-    const totalSpan = document.getElementById('travelTotal');
-    
-    if (!bookingSection || !selectedPackagesDiv || !totalSpan) return;
-    
-    if (selectedTravelPackages.length === 0) {
-        bookingSection.style.display = 'none';
-        return;
-    }
-    
-    bookingSection.style.display = 'block';
-    
-    let total = 0;
-    let packagesHTML = '';
-    
-    selectedTravelPackages.forEach(pkg => {
-        const itemTotal = pkg.price * pkg.quantity;
-        total += itemTotal;
-        
-        packagesHTML += `
-            <div class="selected-package">
-                <div class="package-info">
-                    <h4>${pkg.name}</h4>
-                    <p>₹${pkg.price.toLocaleString()} × ${pkg.quantity} = ₹${itemTotal.toLocaleString()}</p>
-                </div>
-                <div class="package-controls">
-                    <button class="qty-btn" onclick="updateTravelQuantity(${pkg.id}, -1)">-</button>
-                    <span>${pkg.quantity}</span>
-                    <button class="qty-btn" onclick="updateTravelQuantity(${pkg.id}, 1)">+</button>
-                </div>
-            </div>
-        `;
-    });
-    
-    selectedPackagesDiv.innerHTML = packagesHTML;
-    totalSpan.textContent = total.toLocaleString();
-}
-
-function openTravelModal() {
-    const modal = document.getElementById('travelModal');
-    const summaryDiv = document.getElementById('travelSummary');
-    const totalSpan = document.getElementById('travelModalTotal');
-    
-    if (!modal || !summaryDiv || !totalSpan) return;
-    
-    // Set minimum date to today
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('travelDate').min = today;
-    
-    // Update summary
-    let summaryHTML = '';
-    let total = 0;
-    
-    selectedTravelPackages.forEach(pkg => {
-        const itemTotal = pkg.price * pkg.quantity;
-        total += itemTotal;
-        summaryHTML += `
-            <div class="summary-item">
-                <span>${pkg.name} × ${pkg.quantity}</span>
-                <span>₹${itemTotal.toLocaleString()}</span>
-            </div>
-        `;
-    });
-    
-    summaryDiv.innerHTML = summaryHTML;
-    totalSpan.textContent = `₹${total.toLocaleString()}`;
-    modal.style.display = 'block';
-}
-
-function closeTravelModal() {
-    const modal = document.getElementById('travelModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.getElementById('travelForm').reset();
-    }
-}
-
-// Add travel form submission handler
-function setupTravelEventListeners() {
-    const travelForm = document.getElementById('travelForm');
-    if (travelForm) {
-        travelForm.addEventListener('submit', handleTravelBooking);
-    }
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        const travelModal = document.getElementById('travelModal');
-        if (event.target === travelModal) {
-            closeTravelModal();
-        }
-    });
-}
-
-async function handleTravelBooking(e) {
-    e.preventDefault();
-    
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Processing...';
-    submitBtn.disabled = true;
-    
-    const travelData = {
-        customer_name: document.getElementById('travelName').value,
-        phone: document.getElementById('travelPhone').value,
-        email: document.getElementById('travelEmail').value,
-        travel_date: document.getElementById('travelDate').value,
-        pickup_location: document.getElementById('pickupLocation').value,
-        packages: selectedTravelPackages,
-        total_amount: selectedTravelPackages.reduce((sum, pkg) => sum + (pkg.price * pkg.quantity), 0)
-    };
-    
-    try {
-        const response = await fetch(`${SERVER_URL}/api/travel-bookings`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(travelData)
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            showNotification(`Travel booking confirmed! Reference: ${result.booking_reference}`, 'success');
-            closeTravelModal();
-            selectedTravelPackages = [];
-            updateTravelBooking();
-        } else {
-            const error = await response.json();
-            showNotification(error.error || 'Travel booking failed', 'error');
-        }
-    } catch (error) {
-        console.error('Travel booking error:', error);
-        showNotification('Network error. Please try again.', 'error');
-    } finally {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    }
-}
 
 // Real-time email validation
 async function validateEmailField() {
