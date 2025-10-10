@@ -310,7 +310,10 @@ nav a:hover {
 
 .banner-slide:nth-child(2) {
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
-                url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200') center/cover;
+                url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&h=800&fit=crop&crop=center') center/cover;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 
 .banner-slide h2 {
