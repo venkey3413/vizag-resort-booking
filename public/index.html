@@ -87,11 +87,11 @@
             background: rgba(255,255,255,0.2);
         }
         @media (max-width: 768px) {
-            .nav-container { padding: 0 10px; }
-            .logo-container h1 { font-size: 1rem; }
-            .logo-image { width: 40px; height: 40px; }
-            nav ul { gap: 0.3rem; }
-            nav a { font-size: 0.75rem; padding: 0.4rem 0.5rem; }
+            header div { padding: 0 10px !important; flex-wrap: nowrap !important; }
+            header h1 { font-size: 0.9rem !important; }
+            header img { width: 35px !important; height: 35px !important; }
+            header nav { gap: 4px !important; }
+            header nav a { font-size: 0.7rem !important; padding: 6px 8px !important; }
         }
     </style>
     <link rel="stylesheet" href="style.css">
@@ -117,21 +117,19 @@
     </script>
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="nav-container">
-                <div class="logo-container">
-                    <img src="cropped_circle_image.png" alt="Logo" class="logo-image">
-                    <h1>Vizag Resorts</h1>
-                </div>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="/food">Food</a></li>
-                    <li><a href="/travel">Travel</a></li>
-                    <li><a href="https://vizagresortbooking.in/owner-dashboard" target="_blank">Owner</a></li>
-                </ul>
+    <header style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: fixed; top: 0; width: 100%; z-index: 1000; padding: 10px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="cropped_circle_image.png" alt="Logo" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
+                <h1 style="color: white; font-size: 1.1rem; margin: 0; font-weight: 600;">Vizag Resorts</h1>
             </div>
-        </nav>
+            <nav style="display: flex; gap: 8px;">
+                <a href="#home" style="color: white; text-decoration: none; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Home</a>
+                <a href="/food" style="color: white; text-decoration: none; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Food</a>
+                <a href="/travel" style="color: white; text-decoration: none; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Travel</a>
+                <a href="https://vizagresortbooking.in/owner-dashboard" target="_blank" style="color: white; text-decoration: none; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Owner</a>
+            </nav>
+        </div>
     </header>
 
     <!-- Food Order Notice -->
