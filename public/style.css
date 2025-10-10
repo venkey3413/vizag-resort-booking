@@ -19,8 +19,8 @@ body {
     padding: 0 20px;
 }
 
-/* Header */
-header {
+/* Desktop Header */
+.desktop-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 0.5rem 0;
@@ -29,9 +29,11 @@ header {
     top: 0;
     z-index: 1000;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    display: block;
+}
+
+.mobile-header {
+    display: none;
 }
 
 /* Food Order Notice */
@@ -474,8 +476,62 @@ input, select {
 }
 
 @media (max-width: 768px) {
-    header {
-        padding: 0.5rem 0;
+    .desktop-header {
+        display: none;
+    }
+    
+    .mobile-header {
+        display: block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.3rem 0;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .mobile-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px;
+        max-width: 100%;
+    }
+    
+    .mobile-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .mobile-logo img {
+        height: 30px;
+        width: 30px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+    
+    .mobile-logo span {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .mobile-menu {
+        display: flex;
+        gap: 0.3rem;
+    }
+    
+    .mobile-menu a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.3rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        white-space: nowrap;
     }
     
     .resort-card {
@@ -485,75 +541,6 @@ input, select {
     .resort-gallery {
         width: 100%;
         overflow: hidden;
-    }
-    
-    .nav-container {
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        padding: 0 5px !important;
-        max-width: 100% !important;
-        overflow: hidden !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    .logo-container {
-        gap: 0.15rem !important;
-        flex-shrink: 0 !important;
-        min-width: 0 !important;
-        max-width: 55% !important;
-    }
-    
-    .logo-text {
-        font-size: 1.2rem !important;
-        font-weight: 800 !important;
-    }
-    
-    .logo-image {
-        height: 35px !important;
-        width: 35px !important;
-        border: 2px solid rgba(255,255,255,0.3) !important;
-    }
-    
-    .logo-container h1 {
-        font-size: 0.9rem !important;
-        font-weight: 700 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-    
-    nav {
-        flex-shrink: 0 !important;
-    }
-    
-    nav ul {
-        gap: 0.15rem !important;
-        margin: 0 !important;
-        flex-wrap: nowrap !important;
-        padding: 0 !important;
-        flex-shrink: 0 !important;
-    }
-    
-    nav ul li a {
-        font-size: 0.55rem !important;
-        padding: 0.15rem 0.2rem !important;
-        white-space: nowrap !important;
-        border-radius: 2px !important;
-        background: rgba(255,255,255,0.1) !important;
-        transition: background 0.3s !important;
-        display: inline-block !important;
-        visibility: visible !important;
-    }
-    
-    nav ul li a[href*="owner-dashboard"] {
-        font-size: 0.55rem !important;
-        padding: 0.2rem 0.3rem !important;
-    }
-    
-    nav ul li a:hover {
-        background: rgba(255,255,255,0.2) !important;
     }
 
     .hero {
