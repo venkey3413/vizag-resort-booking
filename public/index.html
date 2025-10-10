@@ -27,17 +27,209 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        header { display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; top: 0 !important; width: 100% !important; z-index: 1000 !important; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; padding: 0.5rem 0 !important; }
-        .nav-container { display: flex !important; visibility: visible !important; opacity: 1 !important; max-width: 1200px !important; margin: 0 auto !important; padding: 0 20px !important; justify-content: space-between !important; align-items: center !important; }
-        nav ul { display: flex !important; visibility: visible !important; opacity: 1 !important; list-style: none !important; gap: 2rem !important; margin: 0 !important; padding: 0 !important; }
-        nav a { display: inline-block !important; visibility: visible !important; color: white !important; font-size: 1rem !important; padding: 0.5rem 1rem !important; text-decoration: none !important; }
-        nav a[href*="owner-dashboard"] { font-size: 0.9rem !important; padding: 0.4rem 0.8rem !important; font-weight: 400 !important; font-family: Inter, sans-serif !important; text-decoration: none !important; border-radius: 4px !important; transition: none !important; background: rgba(255,255,255,0.1) !important; }
-        .logo-container { display: flex !important; align-items: center !important; gap: 0.3rem !important; }
-        .logo-text { font-size: 1.8rem !important; font-weight: 800 !important; color: white !important; }
-        .logo-image { height: 60px !important; width: 60px !important; border-radius: 50% !important; }
-        .logo-container h1 { margin: 0 !important; font-size: 1.3rem !important; font-weight: 600 !important; color: white !important; }
+        /* PERMANENT LOCKED HEADER - CANNOT BE MODIFIED EVEN ON HARD REFRESH */
+        html header, html header *, html header *::before, html header *::after,
+        body header, body header *, body header *::before, body header *::after,
+        [data-header] header, [data-header] header *, [data-header] header *::before, [data-header] header *::after {
+            all: unset !important;
+            box-sizing: border-box !important;
+        }
+        
+        html body header,
+        html body div header,
+        html body main header,
+        html body section header,
+        body > header,
+        #root header,
+        .app header {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100vw !important;
+            height: auto !important;
+            z-index: 999999 !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            padding: 0.5rem 0 !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif !important;
+            margin: 0 !important;
+            border: none !important;
+            outline: none !important;
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+        }
+        
+        header .nav-container,
+        header > nav > .nav-container,
+        header nav .nav-container {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+            padding: 0 20px !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            height: auto !important;
+        }
+        
+        header nav,
+        header > nav {
+            display: block !important;
+            width: 100% !important;
+        }
+        
+        header nav ul,
+        header nav > ul,
+        header .nav-container ul {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            list-style: none !important;
+            gap: 2rem !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+        }
+        
+        header nav ul li,
+        header nav li {
+            display: list-item !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        header nav a,
+        header nav ul a,
+        header nav li a {
+            display: inline-block !important;
+            visibility: visible !important;
+            color: white !important;
+            font-size: 1rem !important;
+            padding: 0.5rem 1rem !important;
+            text-decoration: none !important;
+            font-family: Inter, sans-serif !important;
+            font-weight: 400 !important;
+            border: none !important;
+            background: transparent !important;
+            margin: 0 !important;
+            outline: none !important;
+        }
+        
+        header nav a:hover {
+            opacity: 0.8 !important;
+        }
+        
+        header nav a[href*="owner-dashboard"],
+        header a[href*="owner-dashboard"] {
+            font-size: 0.85rem !important;
+            padding: 0.4rem 0.6rem !important;
+            font-weight: 400 !important;
+            font-family: Inter, sans-serif !important;
+            text-decoration: none !important;
+            border-radius: 4px !important;
+            background: rgba(255,255,255,0.1) !important;
+            transition: none !important;
+        }
+        
+        header .logo-container,
+        header nav .logo-container {
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.3rem !important;
+            flex-shrink: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        header .logo-text,
+        header .logo-container .logo-text {
+            font-size: 1.8rem !important;
+            font-weight: 800 !important;
+            color: white !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3) !important;
+            order: -1 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        header .logo-image,
+        header .logo-container .logo-image {
+            height: 60px !important;
+            width: 60px !important;
+            border-radius: 50% !important;
+            object-fit: cover !important;
+            border: 3px solid rgba(255,255,255,0.3) !important;
+            cursor: pointer !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        header .logo-container h1,
+        header h1 {
+            margin: 0 !important;
+            font-size: 1.3rem !important;
+            font-weight: 600 !important;
+            color: white !important;
+            letter-spacing: 0.5px !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        /* MOBILE RESPONSIVE - LOCKED */
+        @media (max-width: 768px) {
+            header .nav-container { padding: 0 10px !important; }
+            header .logo-text { font-size: 1.5rem !important; }
+            header .logo-image { height: 45px !important; width: 45px !important; }
+            header .logo-container h1 { font-size: 1.1rem !important; }
+            header nav ul { gap: 0.5rem !important; }
+            header nav a { font-size: 0.65rem !important; padding: 0.3rem 0.4rem !important; background: rgba(255,255,255,0.1) !important; border-radius: 4px !important; }
+            header nav a[href*="owner-dashboard"] { font-size: 0.6rem !important; padding: 0.25rem 0.35rem !important; }
+        }
+        
+        /* PREVENT ANY EXTERNAL OVERRIDES */
+        * { --header-override: none !important; }
+        header { contain: layout style !important; }
     </style>
     <link rel="stylesheet" href="style.css">
+    <script>
+        // LOCK HEADER ON DOM READY AND PREVENT CHANGES
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('header');
+            if (header) {
+                header.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100vw !important; z-index: 999999 !important; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; padding: 0.5rem 0 !important;';
+                header.setAttribute('data-locked', 'true');
+            }
+        });
+        
+        // PREVENT STYLE MODIFICATIONS
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.target.tagName === 'HEADER' || mutation.target.closest('header')) {
+                    const header = document.querySelector('header');
+                    if (header && !header.getAttribute('data-locked')) {
+                        header.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100vw !important; z-index: 999999 !important; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; padding: 0.5rem 0 !important;';
+                        header.setAttribute('data-locked', 'true');
+                    }
+                }
+            });
+        });
+        
+        if (typeof MutationObserver !== 'undefined') {
+            observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true });
+        }
+    </script>
     
     <!-- Structured Data for Google -->
     <script type="application/ld+json">
