@@ -79,9 +79,11 @@ header {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-    display: flex;
+    display: flex !important;
     justify-content: space-between;
     align-items: center;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .logo-container {
@@ -519,6 +521,8 @@ input, select {
         border-radius: 4px;
         background: rgba(255,255,255,0.1);
         transition: background 0.3s;
+        display: inline-block !important;
+        visibility: visible !important;
     }
     
     nav ul li a:hover {
