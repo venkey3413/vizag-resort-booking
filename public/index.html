@@ -83,10 +83,18 @@
     <main>
         <section id="home" class="hero">
             <div class="hero-content">
-                <h2>Best Resorts in Visakhapatnam</h2>
-                <p>Discover luxury beach resorts, best gateway in Vizag. Perfect for family vacations, and corporate stays.</p>
-                <button onclick="scrollToSection('resorts')" class="cta-btn">Explore Resorts</button>
-
+                <div class="rotating-banner">
+                    <div class="banner-slide active">
+                        <h2>Best Resorts in Visakhapatnam</h2>
+                        <p>Discover luxury beach resorts, best gateway in Vizag. Perfect for family vacations, and corporate stays.</p>
+                        <button onclick="scrollToSection('resorts')" class="cta-btn">Explore Resorts</button>
+                    </div>
+                    <div class="banner-slide">
+                        <h2>Delicious Food Delivered</h2>
+                        <p>Fresh, tasty meals prepared with love and delivered hot to your resort doorstep</p>
+                        <button onclick="window.open('https://vizagresortbooking.in/food/', '_blank')" class="cta-btn">Order Food</button>
+                    </div>
+                </div>
             </div>
         </section>
 

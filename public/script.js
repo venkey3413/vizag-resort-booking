@@ -1208,3 +1208,18 @@ async function validateEmailField() {
         emailInput.style.borderColor = '#ddd';
     }
 }
+// Rotating Banner Animation
+let currentSlide = 0;
+const slides = document.querySelectorAll('.banner-slide');
+const totalSlides = slides.length;
+
+function nextSlide() {
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + 1) % totalSlides;
+    slides[currentSlide].classList.add('active');
+}
+
+// Start banner rotation every 8 seconds
+if (slides.length > 1) {
+    setInterval(nextSlide, 8000);
+}
