@@ -657,6 +657,18 @@ input, select {
         margin-top: 0;
         height: 70vh;
         padding: 40px 20px;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+    
+    .rotating-banner {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+    
+    .banner-slide {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
     }
     
     .food-order-notice {
@@ -767,6 +779,18 @@ input, select {
         margin-top: 0;
         padding: 20px 15px;
         height: 60vh;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+    
+    .rotating-banner {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+    
+    .banner-slide {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
     }
     
     .food-order-notice {
