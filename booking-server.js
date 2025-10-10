@@ -15,6 +15,15 @@ const PORT = 3002;
 
 app.use(cors());
 app.use(express.json());
+
+// Cache-busting headers
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    next();
+});
+
 app.use(express.static('bookings-public'));
 
 // Real-time EventBridge listener endpoint

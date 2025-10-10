@@ -475,7 +475,7 @@ input, select {
 
 @media (max-width: 768px) {
     header {
-        padding: 0.8rem 0;
+        padding: 0.5rem 0;
     }
     
     .resort-card {
@@ -491,42 +491,51 @@ input, select {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        padding: 0 10px;
+        padding: 0 8px;
+        max-width: 100%;
+        overflow: hidden;
     }
     
     .logo-container {
-        gap: 0.3rem;
+        gap: 0.2rem;
         flex-shrink: 0;
+        min-width: 0;
     }
     
     .logo-text {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         font-weight: 800;
     }
     
     .logo-image {
-        height: 45px;
-        width: 45px;
+        height: 35px;
+        width: 35px;
     }
     
     .logo-container h1 {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         font-weight: 700;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    nav {
+        flex-shrink: 0;
     }
     
     nav ul {
-        gap: 0.3rem;
+        gap: 0.2rem;
         margin: 0;
         flex-wrap: nowrap;
         padding-right: 0;
     }
     
     nav ul li a {
-        font-size: 0.65rem;
-        padding: 0.25rem 0.3rem;
+        font-size: 0.6rem;
+        padding: 0.2rem 0.25rem;
         white-space: nowrap;
-        border-radius: 4px;
+        border-radius: 3px;
         background: rgba(255,255,255,0.1);
         transition: background 0.3s;
         display: inline-block !important;
@@ -534,8 +543,8 @@ input, select {
     }
     
     nav ul li a[href*="owner-dashboard"] {
-        font-size: 0.6rem;
-        padding: 0.25rem 0.35rem;
+        font-size: 0.55rem;
+        padding: 0.2rem 0.3rem;
     }
     
     nav ul li a:hover {
@@ -598,51 +607,54 @@ input, select {
 
 @media (max-width: 480px) {
     .container {
-        padding: 0 10px;
+        padding: 0 8px;
     }
     
     .nav-container {
-        padding: 0 8px;
-        gap: 0.5rem;
-    }
-    
-    .logo-text {
-        font-size: 1.3rem;
-    }
-    
-    .logo-image {
-        height: 40px;
-        width: 40px;
-    }
-    
-    .logo-container {
-        gap: 0.2rem;
-    }
-    
-    .logo-container h1 {
-        font-size: 0.95rem;
-        font-weight: 600;
-    }
-    
-    nav ul {
+        padding: 0 5px;
         gap: 0.3rem;
     }
     
+    .logo-text {
+        font-size: 1rem;
+    }
+    
+    .logo-image {
+        height: 30px;
+        width: 30px;
+    }
+    
+    .logo-container {
+        gap: 0.15rem;
+        max-width: 60%;
+    }
+    
+    .logo-container h1 {
+        font-size: 0.8rem;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    nav ul {
+        gap: 0.15rem;
+    }
+    
     nav ul li a {
-        font-size: 0.7rem;
-        padding: 0.3rem 0.4rem;
-        border-radius: 3px;
+        font-size: 0.55rem;
+        padding: 0.2rem 0.25rem;
+        border-radius: 2px;
     }
     
     .hero {
-        margin-top: 95px;
+        margin-top: 85px;
         padding: 20px 15px;
         min-height: 60vh;
     }
     
     .food-order-notice {
         padding: 4px 0;
-        top: 65px;
+        top: 55px;
     }
     
     .food-notice-text {
