@@ -583,7 +583,7 @@ input, select {
     }
     
     .logo-container h1 {
-        font-size: 1.2rem;
+        font-size: 1.6rem;
     }
     
     nav ul {
@@ -613,10 +613,18 @@ input, select {
     
     .food-order-notice {
         top: 65px;
-        padding: 5px 0;
+        padding: 8px 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        height: 40px;
+    }
+    
+    .food-notice-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
     }
     
     .food-notice-text {
@@ -691,7 +699,7 @@ input, select {
     }
     
     .logo-container h1 {
-        font-size: 0.8rem !important;
+        font-size: 1.2rem !important;
         font-weight: 600 !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
@@ -715,7 +723,18 @@ input, select {
     
     .food-order-notice {
         top: 55px;
-        padding: 4px 0;
+        padding: 6px 0;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .food-notice-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
     }
     
     .food-notice-text {
