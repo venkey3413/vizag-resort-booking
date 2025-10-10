@@ -515,14 +515,19 @@ input, select {
     }
     
     nav ul li a {
-        font-size: 0.75rem;
-        padding: 0.4rem 0.5rem;
+        font-size: 0.65rem;
+        padding: 0.3rem 0.4rem;
         white-space: nowrap;
         border-radius: 4px;
         background: rgba(255,255,255,0.1);
         transition: background 0.3s;
         display: inline-block !important;
         visibility: visible !important;
+    }
+    
+    nav ul li a[href*="owner-dashboard"] {
+        font-size: 0.6rem;
+        padding: 0.25rem 0.35rem;
     }
     
     nav ul li a:hover {
