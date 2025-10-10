@@ -152,6 +152,13 @@ nav a {
     visibility: visible !important;
 }
 
+nav a[href*="owner-dashboard"] {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
 nav a:hover {
     opacity: 0.8;
 }
