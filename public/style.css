@@ -1633,9 +1633,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Fixed Cancellation Policy Button */
 .fixed-policy-btn {
-    position: absolute;
+    position: fixed;
     left: 20px;
-    bottom: 100px;
+    bottom: 20px;
     z-index: 1000;
     background: #007bff;
     border-radius: 25px;
@@ -1661,7 +1661,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (max-width: 768px) {
     .fixed-policy-btn {
         left: 10px;
-        bottom: 80px;
+        bottom: 15px;
     }
     
     .fixed-policy-btn a {
