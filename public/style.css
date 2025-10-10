@@ -583,7 +583,7 @@ input, select {
     }
     
     .logo-container h1 {
-        font-size: 0.9rem;
+        font-size: 1.2rem;
     }
     
     nav ul {
@@ -614,6 +614,9 @@ input, select {
     .food-order-notice {
         top: 65px;
         padding: 5px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .food-notice-text {
