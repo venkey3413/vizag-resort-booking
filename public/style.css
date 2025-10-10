@@ -23,7 +23,7 @@ body {
 header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 0.5rem 0;
+    padding: 0.3rem 0;
     position: fixed;
     width: 100%;
     top: 0;
@@ -38,7 +38,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 80px;
+    height: 60px;
 }
 
 .logo-container {
@@ -246,9 +246,7 @@ nav a {
 
 nav a[href*="owner-dashboard"] {
     font-size: 0.85rem;
-    padding: 0.4rem 0.6rem;
-    background: rgba(255,255,255,0.1);
-    border-radius: 4px;
+    padding: 0.4rem 0;
 }
 
 nav a:hover {

@@ -15,51 +15,59 @@ body {
 header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 1rem 0;
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: 60px;
+    display: flex;
+    align-items: center;
 }
 
-.header-container {
+.nav-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    height: 100%;
 }
 
-.logo {
+.logo-container {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .logo-image {
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     object-fit: cover;
 }
 
-.logo h1 {
-    font-size: 1.8rem;
-    font-weight: bold;
+.logo-container h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
 }
 
 nav {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
+    align-items: center;
 }
 
 nav a {
     color: white;
     text-decoration: none;
     font-weight: 500;
+    font-size: 1rem;
     transition: opacity 0.3s;
+    padding: 8px 0;
 }
 
 nav a:hover {
@@ -109,7 +117,7 @@ nav a:hover {
 
 /* Main Content */
 main {
-    margin-top: 110px;
+    margin-top: 90px;
 }
 
 .container {
@@ -590,32 +598,29 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .header-container {
-        flex-direction: row;
-        justify-content: space-between;
+    .nav-container {
         padding: 0 15px;
     }
     
-    .logo {
-        gap: 0.5rem;
+    .logo-container {
+        gap: 8px;
     }
     
     .logo-image {
-        width: 45px;
-        height: 45px;
+        width: 35px;
+        height: 35px;
     }
     
-    .logo h1 {
+    .logo-container h1 {
         font-size: 1.1rem;
     }
 
     nav {
-        gap: 0.8rem;
+        gap: 1rem;
     }
     
     nav a {
-        font-size: 0.9rem;
-        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
     }
 
     .hero-content h2 {
@@ -671,6 +676,6 @@ footer {
     }
     
     main {
-        margin-top: 110px;
+        margin-top: 80px;
     }
 }
