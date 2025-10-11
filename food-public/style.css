@@ -153,6 +153,11 @@ main {
     color: white;
     text-align: center;
     padding: 100px 0;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .hero-content h2 {
