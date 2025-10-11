@@ -116,6 +116,128 @@ nav a:hover {
     100% { background-position: 200% 50%; }
 }
 
+/* Header */
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.3rem 0;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+    order: -1;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.logo-image {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: transform 0.6s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.logo-image:hover {
+    border-color: rgba(255,255,255,0.6);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.logo-container h1 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.3s;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+nav a:hover {
+    opacity: 0.8;
+}
+
+/* Food Order Notice */
+.food-order-notice {
+    background: linear-gradient(90deg, #ff6b6b, #ffa500, #ff6b6b);
+    background-size: 200% 100%;
+    animation: foodNoticeSlide 3s linear infinite;
+    color: white;
+    padding: 8px 0;
+    position: fixed;
+    width: 100%;
+    top: 80px;
+    z-index: 999;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.food-notice-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.food-notice-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    letter-spacing: 0.5px;
+    animation: foodTextRun 15s linear infinite;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+@keyframes foodNoticeSlide {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+@keyframes foodTextRun {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+}
+
 /* Main Content */
 main {
     margin-top: 120px;
