@@ -639,7 +639,7 @@ input, select {
     }
     
     nav a {
-        font-size: 0.7rem;
+        font-size: 0.9rem;
         padding: 0.3rem 0.5rem;
         background: none;
     }
@@ -770,7 +770,7 @@ input, select {
     }
     
     nav ul li a {
-        font-size: 0.55rem !important;
+        font-size: 0.75rem !important;
         padding: 0.2rem 0.25rem !important;
         border-radius: 2px !important;
     }
