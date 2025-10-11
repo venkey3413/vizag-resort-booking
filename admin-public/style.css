@@ -5,56 +5,28 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     background: #f5f5f5;
     color: #333;
 }
 
-header {
-    background: #2c3e50;
-    color: white;
-    padding: 1rem 0;
-}
-
-.header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-nav a {
-    color: white;
-    text-decoration: none;
-    margin-left: 1rem;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: background 0.3s;
-}
-
-nav a:hover {
-    background: rgba(255,255,255,0.1);
-}
-
 .container {
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 20px;
+    margin: 0 auto;
+    padding: 2rem;
 }
 
 .add-resort {
     background: white;
     padding: 2rem;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     margin-bottom: 2rem;
 }
 
 .add-resort h2 {
     margin-bottom: 1.5rem;
-    color: #2c3e50;
+    color: #333;
 }
 
 .form-row {
@@ -68,146 +40,42 @@ nav a:hover {
     margin-bottom: 1rem;
 }
 
-label {
+.form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
 }
 
-input, textarea {
+.form-group input,
+.form-group textarea,
+.form-group select {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 5px;
     font-size: 1rem;
-}
-
-button {
-    background: #3498db;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    margin-right: 0.5rem;
-}
-
-button:hover {
-    background: #2980b9;
-}
-
-button.edit {
-    background: #f39c12;
-}
-
-button.edit:hover {
-    background: #e67e22;
-}
-
-button.delete {
-    background: #e74c3c;
-}
-
-button.delete:hover {
-    background: #c0392b;
-}
-
-#cancelBtn {
-    background: #95a5a6;
-}
-
-#cancelBtn:hover {
-    background: #7f8c8d;
-}
-
-.resorts-list {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.resorts-list h2 {
-    margin-bottom: 1.5rem;
-    color: #2c3e50;
-}
-
-.resorts-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.resort-item {
-    display: grid;
-    grid-template-columns: 100px 1fr auto;
-    gap: 1rem;
-    padding: 1rem;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    align-items: center;
-}
-
-.resort-image {
-    width: 100px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-.resort-info h3 {
-    margin-bottom: 0.5rem;
-}
-
-.resort-info p {
-    color: #666;
-    margin-bottom: 0.25rem;
-}
-
-.resort-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 1rem 1.5rem;
-    border-radius: 4px;
-    color: white;
-    z-index: 1000;
-}
-
-.notification.success {
-    background: #27ae60;
-}
-
-.notification.error {
-    background: #e74c3c;
 }
 
 .upload-btn {
-    background: #17a2b8;
+    background: #007bff;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
     cursor: pointer;
+    margin-top: 0.5rem;
     font-size: 0.9rem;
-    margin-top: 5px;
-    margin-left: 10px;
 }
 
 .upload-btn:hover {
-    background: #138496;
+    background: #0056b3;
 }
 
 .pricing-container {
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 5px;
     padding: 1rem;
-    background: #f9f9f9;
+    background: #f8f9fa;
 }
 
 .pricing-row {
@@ -217,112 +85,233 @@ button.delete:hover {
     margin-bottom: 0.5rem;
 }
 
-.pricing-row:last-child {
-    margin-bottom: 0;
-}
-
 .pricing-row label {
+    flex: 1;
     margin-bottom: 0;
-    font-weight: normal;
-    width: 150px;
 }
 
 .pricing-row input {
-    width: 200px;
+    flex: 1;
     margin-left: 1rem;
+}
+
+.owner-credentials {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 1rem;
+    background: #f8f9fa;
+    margin-top: 1rem;
+}
+
+button[type="submit"] {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-right: 1rem;
+}
+
+button[type="submit"]:hover {
+    background: #218838;
+}
+
+#cancelBtn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#cancelBtn:hover {
+    background: #545b62;
+}
+
+.resorts-list {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.resorts-list h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.resorts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.resort-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.resort-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.resort-card-content {
+    padding: 1rem;
+}
+
+.resort-card h3 {
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.resort-card p {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.resort-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.edit-btn {
+    background: #ffc107;
+    color: #212529;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.edit-btn:hover {
+    background: #e0a800;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.delete-btn:hover {
+    background: #c82333;
 }
 
 .food-management {
     background: white;
     padding: 2rem;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    margin-top: 2rem;
 }
 
 .food-management h2 {
     margin-bottom: 1.5rem;
-    color: #2c3e50;
+    color: #333;
+}
+
+.food-actions {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.clear-orders-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.clear-orders-btn:hover {
+    background: #c82333;
 }
 
 .food-form {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 8px;
     margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f8f9fa;
 }
 
 .food-form h3 {
     margin-bottom: 1rem;
-    color: #2c3e50;
+    color: #333;
+}
+
+.food-orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+
+.food-order-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.food-list {
+    margin-top: 2rem;
+}
+
+.food-list h3 {
+    margin-bottom: 1rem;
+    color: #333;
 }
 
 .food-items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
+    margin-top: 1rem;
 }
 
 .food-item-card {
-    background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.food-item-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.food-item-content {
     padding: 1rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.food-item-card h4 {
-    margin-bottom: 0.5rem;
-    color: #2c3e50;
-}
-
-.food-item-card .price {
-    font-weight: bold;
-    color: #27ae60;
-    font-size: 1.1em;
-    margin-bottom: 0.5rem;
-}
-
-.food-item-card .category {
-    background: #e9ecef;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    display: inline-block;
-    margin-bottom: 0.5rem;
-}
-
-.food-item-card .description {
-    color: #666;
-    font-size: 0.9em;
-    margin-bottom: 1rem;
 }
 
 .food-item-actions {
     display: flex;
     gap: 0.5rem;
-}
-
-.food-item-actions button {
-    padding: 0.5rem 1rem;
-    font-size: 0.8em;
-}
-
-.owner-credentials {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 10px;
-    border: 1px solid #e9ecef;
-}
-
-.owner-credentials .form-row {
-    margin-bottom: 15px;
-}
-
-.owner-credentials small {
-    color: #6c757d;
-    font-style: italic;
+    margin-top: 1rem;
 }
 
 @media (max-width: 768px) {
@@ -330,23 +319,15 @@ button.delete:hover {
         grid-template-columns: 1fr;
     }
     
-    .resort-item {
+    .resorts-grid {
         grid-template-columns: 1fr;
-        text-align: center;
-    }
-    
-    .pricing-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .pricing-row input {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 0.25rem;
     }
     
     .food-items-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .food-orders-grid {
         grid-template-columns: 1fr;
     }
 }

@@ -115,6 +115,9 @@
 
         <section class="food-management">
             <h2>Food Item Management</h2>
+            <div class="food-actions">
+                <button onclick="clearAllFoodOrders()" class="clear-orders-btn">🗑️ Clear All Food Orders</button>
+            </div>
             <div class="food-form">
                 <h3>Add/Edit Food Item</h3>
                 <form id="foodForm">
@@ -154,6 +157,12 @@
                     <button type="submit" id="foodSubmitBtn">Add Food Item</button>
                     <button type="button" id="foodCancelBtn" onclick="cancelFoodEdit()" style="display:none;">Cancel</button>
                 </form>
+            </div>
+            <div class="food-orders">
+                <h3>Recent Food Orders</h3>
+                <div id="foodOrdersGrid" class="food-orders-grid">
+                    <!-- Food orders will be loaded here -->
+                </div>
             </div>
             <div class="food-list">
                 <h3>Current Menu Items</h3>

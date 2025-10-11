@@ -156,6 +156,59 @@ app.delete('/api/food-items/:id', async (req, res) => {
     }
 });
 
+// Clear all food orders endpoint
+app.delete('/api/food-orders/clear-all', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/food-orders/clear-all', {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to clear food orders' });
+    }
+});
+
+// Get food orders endpoint
+app.get('/api/food-orders', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/food-orders');
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch food orders' });
+    }
+});
+
+// Food order management endpoints
+app.post('/api/food-orders/:id/confirm', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/food-orders/${req.params.id}/confirm`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to confirm food order' });
+    }
+});
+
+app.post('/api/food-orders/:id/cancel', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/food-orders/${req.params.id}/cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to cancel food order' });
+    }
+});
+
 // Forward booking requests to booking-server
 app.get('/api/bookings', async (req, res) => {
     try {

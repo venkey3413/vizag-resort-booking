@@ -1456,6 +1456,35 @@ app.get('/api/food-orders', async (req, res) => {
     }
 });
 
+// Clear all food orders (admin endpoint)
+app.delete('/api/food-orders/clear-all', async (req, res) => {
+    try {
+        const result = await db.run('DELETE FROM food_orders');
+        
+        // Send Telegram notification
+        try {
+            const message = `🗑️ ALL FOOD ORDERS CLEARED!
+
+📊 Orders deleted: ${result.changes}
+⏰ Cleared at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+👤 Action: Admin Panel`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        res.json({ 
+            success: true, 
+            message: `Cleared ${result.changes} food orders`,
+            deletedCount: result.changes
+        });
+    } catch (error) {
+        console.error('Clear food orders error:', error);
+        res.status(500).json({ error: 'Failed to clear food orders' });
+    }
+});
+
 // Initialize food items table
 async function initFoodItemsTable() {
     await db.exec(`

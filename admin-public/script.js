@@ -1,11 +1,13 @@
 let resorts = [];
 let foodItems = [];
+let foodOrders = [];
 let editingId = null;
 let editingFoodId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     loadFoodItems();
+    loadFoodOrders();
     setupEventListeners();
     // Delay EventBridge setup to ensure page is fully loaded
     setTimeout(setupEventBridgeSync, 1000);
@@ -44,6 +46,12 @@ function setupEventBridgeSync() {
                         console.log('🍽️ Food item update received - refreshing menu');
                         loadFoodItems();
                     }
+                    
+                    // Food order events
+                    if (data.type === 'food.order.created' || data.type === 'food.order.updated') {
+                        console.log('🍽️ Food order update received - refreshing orders');
+                        loadFoodOrders();
+                    }
                 } catch (error) {
                     // Ignore ping messages
                 }
@@ -76,6 +84,7 @@ function setupEventBridgeSync() {
     setInterval(() => {
         loadResorts();
         loadFoodItems();
+        loadFoodOrders();
     }, 60000);
 }
 
@@ -88,6 +97,11 @@ function setupEventListeners() {
     const foodForm = document.getElementById('foodForm');
     if (foodForm) {
         foodForm.addEventListener('submit', handleFoodSubmit);
+    }
+    
+    const clearOrdersBtn = document.getElementById('clearOrdersBtn');
+    if (clearOrdersBtn) {
+        clearOrdersBtn.addEventListener('click', clearAllFoodOrders);
     }
 }
 
@@ -414,5 +428,128 @@ async function deleteFoodItem(id) {
     } catch (error) {
         console.error('Error:', error);
         alert('Network error. Please try again.');
+    }
+}
+
+// Food Orders Management Functions
+async function loadFoodOrders() {
+    try {
+        const response = await fetch('/api/food-orders');
+        foodOrders = await response.json();
+        displayFoodOrders();
+    } catch (error) {
+        console.error('Error loading food orders:', error);
+    }
+}
+
+function displayFoodOrders() {
+    const grid = document.getElementById('foodOrdersGrid');
+    if (!grid) return;
+    
+    if (foodOrders.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; color: #666;">No food orders found</p>';
+        return;
+    }
+    
+    grid.innerHTML = foodOrders.map(order => {
+        const items = order.items.map(item => `${item.name} x${item.quantity}`).join(', ');
+        const statusClass = order.status === 'confirmed' ? 'confirmed' : 
+                           order.status === 'cancelled' ? 'cancelled' : 'pending';
+        
+        return `
+            <div class="food-order-card ${statusClass}">
+                <div class="order-header">
+                    <h4>Order #${order.orderId}</h4>
+                    <span class="status ${statusClass}">${order.status.replace('_', ' ').toUpperCase()}</span>
+                </div>
+                <div class="order-details">
+                    <p><strong>Guest:</strong> ${order.guestName}</p>
+                    <p><strong>Resort:</strong> ${order.resortName}</p>
+                    <p><strong>Phone:</strong> ${order.phoneNumber}</p>
+                    <p><strong>Items:</strong> ${items}</p>
+                    <p><strong>Total:</strong> ₹${order.total}</p>
+                    <p><strong>Delivery:</strong> ${new Date(order.deliveryTime).toLocaleString()}</p>
+                    <p><strong>Ordered:</strong> ${new Date(order.orderTime).toLocaleString()}</p>
+                    ${order.paymentMethod ? `<p><strong>Payment:</strong> ${order.paymentMethod.toUpperCase()}</p>` : ''}
+                    ${order.transactionId ? `<p><strong>UTR:</strong> ${order.transactionId}</p>` : ''}
+                    ${order.paymentId ? `<p><strong>Payment ID:</strong> ${order.paymentId}</p>` : ''}
+                </div>
+                <div class="order-actions">
+                    ${order.status === 'pending_verification' ? 
+                        `<button class="confirm" onclick="confirmFoodOrder('${order.orderId}')">Confirm</button>` : ''}
+                    ${order.status !== 'confirmed' && order.status !== 'cancelled' ? 
+                        `<button class="cancel" onclick="cancelFoodOrder('${order.orderId}')">Cancel</button>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function confirmFoodOrder(orderId) {
+    if (!confirm('Confirm this food order?')) return;
+    
+    try {
+        const response = await fetch(`/api/food-orders/${orderId}/confirm`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('Food order confirmed successfully');
+            loadFoodOrders();
+        } else {
+            alert('Failed to confirm order');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+async function cancelFoodOrder(orderId) {
+    if (!confirm('Cancel this food order?')) return;
+    
+    try {
+        const response = await fetch(`/api/food-orders/${orderId}/cancel`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('Food order cancelled successfully');
+            loadFoodOrders();
+        } else {
+            alert('Failed to cancel order');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+async function clearAllFoodOrders() {
+    if (!confirm('Are you sure you want to clear ALL food orders? This action cannot be undone.')) return;
+    
+    const button = document.getElementById('clearOrdersBtn');
+    const originalText = button.textContent;
+    button.textContent = 'Clearing...';
+    button.disabled = true;
+    
+    try {
+        const response = await fetch('/api/food-orders/clear-all', {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(`Successfully cleared ${result.deletedCount} food orders`);
+            loadFoodOrders();
+        } else {
+            alert('Failed to clear food orders');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    } finally {
+        button.textContent = originalText;
+        button.disabled = false;
     }
 }
