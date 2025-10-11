@@ -151,32 +151,31 @@ button[type="submit"]:hover {
     gap: 1.5rem;
 }
 
-.resort-card {
+.resort-item {
     border: 1px solid #ddd;
     border-radius: 10px;
-    overflow: hidden;
+    padding: 1rem;
     background: white;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.resort-card img {
+.resort-image {
     width: 100%;
     height: 200px;
     object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 1rem;
 }
 
-.resort-card-content {
-    padding: 1rem;
-}
-
-.resort-card h3 {
+.resort-info h3 {
     margin-bottom: 0.5rem;
     color: #333;
 }
 
-.resort-card p {
+.resort-info p {
     color: #666;
     margin-bottom: 0.5rem;
+    font-size: 0.9rem;
 }
 
 .resort-actions {
@@ -185,7 +184,7 @@ button[type="submit"]:hover {
     margin-top: 1rem;
 }
 
-.edit-btn {
+.resort-actions .edit {
     background: #ffc107;
     color: #212529;
     border: none;
@@ -195,11 +194,11 @@ button[type="submit"]:hover {
     font-size: 0.9rem;
 }
 
-.edit-btn:hover {
+.resort-actions .edit:hover {
     background: #e0a800;
 }
 
-.delete-btn {
+.resort-actions .delete {
     background: #dc3545;
     color: white;
     border: none;
@@ -209,7 +208,7 @@ button[type="submit"]:hover {
     font-size: 0.9rem;
 }
 
-.delete-btn:hover {
+.resort-actions .delete:hover {
     background: #c82333;
 }
 
