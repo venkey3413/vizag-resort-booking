@@ -751,6 +751,19 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
     }
 });
 
+// Clear all food orders endpoint
+app.delete('/api/food-orders/clear-all', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/food-orders/clear-all', {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to clear all food orders' });
+    }
+});
+
 // Travel booking management endpoints
 app.get('/api/travel-bookings', async (req, res) => {
     try {

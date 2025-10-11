@@ -26,7 +26,12 @@
         </section>
         
         <section id="food-orders-tab" class="tab-content">
-            <h2>Food Orders</h2>
+            <div class="section-header">
+                <h2>Food Orders</h2>
+                <button id="clearAllFoodOrdersBtn" class="clear-all-btn" onclick="clearAllFoodOrders()">
+                    🗑️ Clear All Food Orders
+                </button>
+            </div>
             <div id="foodOrdersGrid" class="food-orders-grid">
                 <!-- Food orders will be loaded here -->
             </div>

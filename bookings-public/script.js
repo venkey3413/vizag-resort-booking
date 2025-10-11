@@ -141,6 +141,36 @@ async function cancelFoodOrder(orderId) {
     }
 }
 
+async function clearAllFoodOrders() {
+    if (!confirm('Are you sure you want to clear ALL food orders? This action cannot be undone.')) return;
+    
+    const button = document.getElementById('clearAllFoodOrdersBtn');
+    const originalText = button.textContent;
+    button.textContent = '🔄 Clearing...';
+    button.disabled = true;
+    
+    try {
+        const response = await fetch('/api/food-orders/clear-all', {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(`Successfully cleared ${result.deletedCount} food orders`);
+            loadFoodOrders();
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Failed to clear food orders');
+        }
+    } catch (error) {
+        console.error('Error clearing food orders:', error);
+        alert('Error clearing food orders');
+    } finally {
+        button.textContent = originalText;
+        button.disabled = false;
+    }
+}
+
 function setupEventBridgeSync() {
     console.log('📡 EventBridge real-time sync enabled');
     
