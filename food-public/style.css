@@ -489,11 +489,21 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
+    .hero {
+        margin-top: -50px;
+    }
+    
     .cart-container {
         grid-template-columns: 1fr;
     }
 
     .menu-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        margin-top: -45px;
     }
 }
