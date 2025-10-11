@@ -272,8 +272,19 @@
     </footer>
 
 
-    <link rel="stylesheet" href="style.css?v=20250103011">
-    <script src="script.js?v=20250103001"></script>
+    <link rel="stylesheet" href="style.css?v=20250103020">
+    <script>
+        // Automatic cache buster for mobile browsers
+        const currentVersion = '20250103020';
+        const lastVersion = localStorage.getItem('site_version');
+        if (lastVersion !== currentVersion) {
+            localStorage.setItem('site_version', currentVersion);
+            if (lastVersion) {
+                window.location.reload(true);
+            }
+        }
+    </script>
+    <script src="script.js?v=20250103020"></script>
     
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
