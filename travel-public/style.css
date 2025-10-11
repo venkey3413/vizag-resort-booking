@@ -15,102 +15,6 @@ body {
 header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 1rem 0;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.logo-image {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.logo h1 {
-    font-size: 1.8rem;
-    font-weight: bold;
-}
-
-nav {
-    display: flex;
-    gap: 2rem;
-}
-
-nav a {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: opacity 0.3s;
-}
-
-nav a:hover {
-    opacity: 0.8;
-}
-
-/* Travel Notice */
-.travel-notice {
-    background: linear-gradient(90deg, #28a745, #20c997, #28a745);
-    background-size: 200% 100%;
-    animation: gradientShift 3s linear infinite;
-    color: white;
-    padding: 8px 0;
-    text-align: center;
-    position: fixed;
-    width: 100%;
-    top: 80px;
-    z-index: 999;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.notice-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.notice-text {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    letter-spacing: 0.4px;
-    animation: textRun 12s linear infinite;
-    white-space: nowrap;
-    display: inline-block;
-}
-
-@keyframes textRun {
-    0% { transform: translateX(100vw); }
-    100% { transform: translateX(-100%); }
-}
-
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
-}
-
-/* Header */
-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
     padding: 0.3rem 0;
     position: fixed;
     width: 100%;
@@ -120,9 +24,9 @@ header {
 }
 
 .nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -133,6 +37,8 @@ header {
     display: flex;
     align-items: center;
     gap: 0.3rem;
+    margin-left: 5px;
+    padding-left: 0;
 }
 
 .logo-text {
@@ -240,9 +146,46 @@ main {
     padding: 0 20px;
 }
 
+/* Travel Notice */
+.travel-notice {
+    background: linear-gradient(90deg, #28a745, #20c997, #28a745);
+    background-size: 200% 100%;
+    animation: travelNoticeSlide 3s linear infinite;
+    color: white;
+    padding: 8px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.notice-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.notice-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    letter-spacing: 0.5px;
+    animation: travelTextRun 15s linear infinite;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+@keyframes travelNoticeSlide {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+@keyframes travelTextRun {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+}
+
 /* Hero Section */
 .hero {
-    background: linear-gradient(rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8)), url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200') center/cover;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     color: white;
     text-align: center;
     padding: 100px 0;
@@ -312,13 +255,6 @@ main {
     font-size: 0.9rem;
 }
 
-.package-duration {
-    color: #28a745;
-    font-weight: bold;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
-
 .package-item-footer {
     display: flex;
     justify-content: space-between;
@@ -328,10 +264,10 @@ main {
 .price {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #667eea;
+    color: #28a745;
 }
 
-.add-btn {
+.book-btn {
     background: #28a745;
     color: white;
     border: none;
@@ -341,7 +277,7 @@ main {
     transition: background 0.3s;
 }
 
-.add-btn:hover {
+.book-btn:hover {
     background: #218838;
 }
 
@@ -378,46 +314,6 @@ main {
     font-style: italic;
 }
 
-.booking-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid #eee;
-}
-
-.booking-item:last-child {
-    border-bottom: none;
-}
-
-.booking-item-info h4 {
-    margin-bottom: 0.5rem;
-}
-
-.booking-item-info p {
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.qty-btn {
-    background: #28a745;
-    color: white;
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .booking-total {
     background: white;
     padding: 2rem;
@@ -438,28 +334,6 @@ main {
     padding-top: 1rem;
     font-weight: bold;
     font-size: 1.2rem;
-}
-
-.book-btn {
-    width: 100%;
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 1rem;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    margin-top: 1rem;
-    transition: background 0.3s;
-}
-
-.book-btn:hover:not(:disabled) {
-    background: #218838;
-}
-
-.book-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
 }
 
 /* Modal */
@@ -536,14 +410,6 @@ main {
     color: #333;
 }
 
-.summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #eee;
-}
-
 .summary-row {
     display: flex;
     justify-content: space-between;
@@ -583,57 +449,11 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .header-container {
-        flex-direction: row;
-        justify-content: space-between;
-        padding: 0 15px;
-    }
-    
-    .logo {
-        gap: 0.5rem;
-    }
-    
-    .logo-image {
-        width: 45px;
-        height: 45px;
-    }
-    
-    .logo h1 {
-        font-size: 1.1rem;
-    }
-
-    nav {
-        gap: 0.8rem;
-    }
-    
-    nav a {
-        font-size: 0.9rem;
-        padding: 0.3rem 0.6rem;
-    }
-
-    .hero-content h2 {
-        font-size: 2rem;
-    }
-
     .booking-container {
         grid-template-columns: 1fr;
     }
 
     .packages-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .travel-notice {
-        padding: 5px 0;
-        top: 75px;
-    }
-    
-    .notice-text {
-        font-size: 0.65rem;
-        letter-spacing: 0.3px;
-    }
-    
-    main {
-        margin-top: 110px;
     }
 }
