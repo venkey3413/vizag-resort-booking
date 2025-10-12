@@ -60,14 +60,14 @@
             <div class="hero-content">
                 <div class="rotating-banner">
                     <div class="banner-slide active">
+                        <h2>Delicious Food Delivered</h2>
+                        <p>Fresh, tasty meals prepared with love and delivered hot to your resort doorstep</p>
+                        <button onclick="scrollToSection('menu')" class="cta-btn">Order Food</button>
+                    </div>
+                    <div class="banner-slide">
                         <h2>Best Resorts in Visakhapatnam</h2>
                         <p>Discover luxury beach resorts, best gateway in Vizag. Perfect for family vacations, corporate events.</p>
                         <button onclick="window.open('https://vizagresortbooking.in/', '_blank')" class="cta-btn">Explore Resorts</button>
-                    </div>
-                    <div class="banner-slide">
-                        <h2>Delicious Food Delivered</h2>
-                        <p>Fresh, tasty meals prepared with love and delivered hot to your resort doorstep</p>
-                        <button onclick="window.location.reload()" class="cta-btn">Order Food</button>
                     </div>
                     <div class="banner-slide">
                         <h2>Explore Vizag with Comfort</h2>
@@ -171,19 +171,6 @@
 
     <script src="script.js?v=20250103020"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script>
-        // Rotating banner functionality
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.banner-slide');
-        
-        function nextSlide() {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
-        }
-        
-        // Auto-rotate every 5 seconds
-        setInterval(nextSlide, 5000);
-    </script>
+
 </body>
 </html>

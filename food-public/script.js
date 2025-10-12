@@ -4,9 +4,30 @@ let menuItems = [];
 document.addEventListener('DOMContentLoaded', function() {
     loadMenu();
     updateCart();
+    initBannerRotation();
     // Delay EventBridge setup to ensure page is fully loaded
     setTimeout(setupMenuSync, 1000);
 });
+
+// Banner rotation functionality
+function initBannerRotation() {
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.banner-slide');
+    const totalSlides = slides.length;
+
+    function nextSlide() {
+        if (slides.length > 0) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % totalSlides;
+            slides[currentSlide].classList.add('active');
+        }
+    }
+
+    // Start banner rotation every 8 seconds
+    if (slides.length > 1) {
+        setInterval(nextSlide, 8000);
+    }
+}
 
 function setupMenuSync() {
     console.log('📡 EventBridge real-time sync enabled for food service');
@@ -690,6 +711,14 @@ function showNotification(message, type = 'success') {
     setTimeout(() => {
         notification.remove();
     }, 4000);
+}
+
+// Smooth scrolling function for hero section buttons
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
 // Smooth scrolling for navigation links

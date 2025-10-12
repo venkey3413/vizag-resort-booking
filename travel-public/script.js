@@ -56,8 +56,37 @@ let selectedPackages = [];
 document.addEventListener('DOMContentLoaded', function() {
     loadPackages();
     updateBookingSummary();
+    initBannerRotation();
     setupEventBridgeSync();
 });
+
+// Banner rotation functionality
+function initBannerRotation() {
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.banner-slide');
+    const totalSlides = slides.length;
+
+    function nextSlide() {
+        if (slides.length > 0) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % totalSlides;
+            slides[currentSlide].classList.add('active');
+        }
+    }
+
+    // Start banner rotation every 8 seconds
+    if (slides.length > 1) {
+        setInterval(nextSlide, 8000);
+    }
+}
+
+// Smooth scrolling function for hero section buttons
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+    }
+}
 
 function loadPackages() {
     const packagesGrid = document.getElementById('packagesGrid');
