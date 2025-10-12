@@ -541,9 +541,9 @@ footer {
     }
     
     .hero {
-        margin-top: 115px !important;
-        height: 50vh;
-        padding: 40px 20px;
+        margin-top: 0 !important;
+        height: calc(50vh + 115px);
+        padding: 155px 20px 40px 20px;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
         position: relative !important;
@@ -578,9 +578,9 @@ footer {
 
 @media (max-width: 480px) {
     .hero {
-        margin-top: 110px !important;
-        padding: 20px 15px;
-        height: 40vh;
+        margin-top: 0 !important;
+        padding: 130px 15px 20px 15px;
+        height: calc(40vh + 110px);
         width: 100vw;
         margin-left: calc(-50vw + 50%);
         position: relative;
