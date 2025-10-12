@@ -272,21 +272,15 @@
     </footer>
 
 
+    <link rel="stylesheet" href="style.css?t=20250103030">
     <script>
-        // Aggressive cache-busting with timestamp
-        const timestamp = Date.now();
-        document.write('<link rel="stylesheet" href="style.css?t=' + timestamp + '">');
-        
-        // Force reload if cached version detected
-        if (!sessionStorage.getItem('force_reload_done')) {
-            sessionStorage.setItem('force_reload_done', 'true');
-            setTimeout(() => window.location.reload(true), 100);
+        // Simple cache check
+        if (!sessionStorage.getItem('cache_cleared_v3')) {
+            sessionStorage.setItem('cache_cleared_v3', 'true');
+            window.location.reload(true);
         }
     </script>
-    <script>
-        const timestamp = Date.now();
-        document.write('<script src="script.js?t=' + timestamp + '"><\/script>');
-    </script>
+    <script src="script.js?t=20250103030"></script>
     
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
