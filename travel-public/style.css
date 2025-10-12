@@ -186,13 +186,13 @@ main {
 /* Hero Section */
 .hero {
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-                url('Gemini_Generated_Image_i2co5zi2co5zi2co.png') center/contain;
+                url('Gemini_Generated_Image_i2co5zi2co5zi2co.png') center/100% auto;
     color: white;
     text-align: center;
     padding: 100px 0;
     width: 100vw;
     margin-left: calc(-50vw + 50%);
-    background-size: contain;
+    background-size: 100% auto;
     background-position: center;
     background-repeat: no-repeat;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
