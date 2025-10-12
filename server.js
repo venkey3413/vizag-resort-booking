@@ -1985,7 +1985,7 @@ app.post('/api/travel-bookings', async (req, res) => {
         // Send Telegram notification
         try {
             const packageNames = packages.map(p => `${p.name} x${p.quantity}`).join(', ');
-            const message = `🚗 NEW TRAVEL BOOKING!
+            const message = `🚗 NEW TRAVEL BOOKING CREATED!
 
 📋 Booking ID: ${booking_reference}
 👤 Customer: ${customer_name}
@@ -1997,7 +1997,9 @@ app.post('/api/travel-bookings', async (req, res) => {
 💰 Amount: ₹${total_amount.toLocaleString()}
 ⚠️ Status: Pending Payment
 
-⏰ Booked at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+⏰ Booked at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+👉 Check booking management panel for updates`;
             
             await sendTelegramNotification(message);
         } catch (telegramError) {
