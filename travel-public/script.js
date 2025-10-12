@@ -258,6 +258,9 @@ function confirmBooking() {
 function showPaymentModal(bookingData) {
     closeModal();
     
+    // Store booking data globally
+    window.currentTravelBooking = bookingData;
+    
     // Create payment modal
     const paymentModal = document.createElement('div');
     paymentModal.className = 'modal payment-modal';
@@ -300,7 +303,7 @@ function showPaymentModal(bookingData) {
                 </div>
                 <div class="payment-proof">
                     <input type="text" id="utrNumber" placeholder="Enter 12-digit UTR number" maxlength="12">
-                    <button class="confirm-payment-btn" onclick="confirmUPIPayment('${JSON.stringify(bookingData).replace(/'/g, "\\'")}')">
+                    <button class="confirm-payment-btn" onclick="confirmUPIPayment()">
                         Confirm Payment
                     </button>
                 </div>
@@ -311,7 +314,7 @@ function showPaymentModal(bookingData) {
                     <p><strong>Card Payment Amount: ₹${Math.round(bookingData.total_amount * 1.02)}</strong></p>
                     <small>*2% processing fee included</small>
                 </div>
-                <button class="razorpay-btn" onclick="initiateRazorpayPayment('${JSON.stringify(bookingData).replace(/'/g, "\\'")}')">
+                <button class="razorpay-btn" onclick="initiateRazorpayPayment()">
                     Pay with Card/UPI
                 </button>
             </div>
@@ -341,8 +344,8 @@ function closePaymentModal() {
     }
 }
 
-function confirmUPIPayment(bookingDataStr) {
-    const bookingData = JSON.parse(bookingDataStr);
+function confirmUPIPayment() {
+    const bookingData = window.currentTravelBooking;
     const utrNumber = document.getElementById('utrNumber').value;
 
     if (!utrNumber || utrNumber.length !== 12) {
@@ -390,9 +393,9 @@ function confirmUPIPayment(bookingDataStr) {
     });
 }
 
-async function initiateRazorpayPayment(bookingDataStr) {
+async function initiateRazorpayPayment() {
     try {
-        const bookingData = JSON.parse(bookingDataStr);
+        const bookingData = window.currentTravelBooking;
         
         const keyResponse = await fetch('/api/razorpay-key');
         const { key } = await keyResponse.json();
