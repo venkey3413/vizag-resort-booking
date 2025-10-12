@@ -2,13 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Book Travel - Vizag Resort Booking</title>
     <link rel="icon" type="image/png" href="/cropped_circle_image.png">
     <link rel="stylesheet" href="style.css?v=20250103020">
+    <script>
+        // Dynamic viewport scaling based on screen resolution
+        function setDynamicViewport() {
+            const viewport = document.getElementById('viewport');
+            const screenWidth = screen.width;
+            const screenHeight = screen.height;
+            
+            if (screenWidth <= 480) {
+                viewport.content = 'width=device-width, initial-scale=0.9, maximum-scale=1.0, user-scalable=no';
+            } else if (screenWidth <= 768) {
+                viewport.content = 'width=device-width, initial-scale=0.95, maximum-scale=1.0, user-scalable=no';
+            } else if (screenWidth >= 1920) {
+                viewport.content = 'width=device-width, initial-scale=1.1, maximum-scale=1.2, user-scalable=yes';
+            } else {
+                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes';
+            }
+        }
+        setDynamicViewport();
+    </script>
 </head>
 <body>
 

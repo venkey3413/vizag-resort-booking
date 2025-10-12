@@ -185,7 +185,7 @@ main {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+    background: linear-gradient(rgba(40, 167, 69, 0.8), rgba(32, 201, 151, 0.8)), 
                 url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&h=800&fit=crop&crop=center') center/cover;
     color: white;
     text-align: center;
@@ -195,23 +195,18 @@ main {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    min-height: 500px;
+    margin-top: -40px;
 }
 
 .hero-content h2 {
-    font-size: 3rem;
+    font-size: 2.2rem;
     margin-bottom: 1rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .hero-content p {
-    font-size: 1.2rem;
+    font-size: 1rem;
     max-width: 600px;
     margin: 0 auto;
-    font-weight: 500;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 /* Packages Section */
@@ -461,6 +456,10 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
+    .hero {
+        margin-top: -50px;
+    }
+    
     .booking-container {
         grid-template-columns: 1fr;
     }
@@ -469,11 +468,13 @@ footer {
         grid-template-columns: 1fr;
     }
     
-    .hero-content h2 {
-        font-size: 2.2rem;
+    main {
+        margin-top: 140px;
     }
-    
-    .hero-content p {
-        font-size: 1rem;
+}
+
+@media (max-width: 480px) {
+    .hero {
+        margin-top: -45px;
     }
 }
