@@ -137,7 +137,7 @@ nav a:hover {
 
 /* Main Content */
 main {
-    margin-top: 120px;
+    margin-top: 0;
 }
 
 .container {
@@ -508,7 +508,20 @@ footer {
 /* Responsive */
 @media (max-width: 768px) {
     .hero {
-        margin-top: -50px;
+        margin-top: 0;
+        height: 70vh;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+    
+    .rotating-banner {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+    
+    .banner-slide {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
     }
     
     .booking-container {
@@ -526,6 +539,19 @@ footer {
 
 @media (max-width: 480px) {
     .hero {
-        margin-top: -45px;
+        margin-top: 0;
+        height: 60vh;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+    
+    .rotating-banner {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+    
+    .banner-slide {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
     }
 }
