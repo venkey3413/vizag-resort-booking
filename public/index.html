@@ -2,7 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <script>
+        // Dynamic viewport scaling based on screen resolution
+        function setDynamicViewport() {
+            const screenWidth = screen.width;
+            const screenHeight = screen.height;
+            let scale = 1.0;
+            
+            if (screenWidth <= 480) scale = 0.9;        // Small phones
+            else if (screenWidth <= 768) scale = 1.0;   // Tablets/large phones
+            else if (screenWidth <= 1024) scale = 1.1;  // Small laptops
+            else if (screenWidth <= 1440) scale = 1.2;  // Standard laptops
+            else scale = 1.3;                           // Large screens
+            
+            const viewport = document.querySelector('meta[name="viewport"]');
+            viewport.content = `width=device-width, initial-scale=${scale}, maximum-scale=2.0, user-scalable=yes`;
+        }
+        setDynamicViewport();
+    </script>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
