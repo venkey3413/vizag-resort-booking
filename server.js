@@ -1979,6 +1979,9 @@ app.post('/api/travel-bookings', async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `, [booking_reference, customer_name, phone, email, travel_date, pickup_location, JSON.stringify(packages), total_amount]);
         
+        // Store the booking ID for payment submission
+        const bookingId = result.lastID;
+        
         // Send Telegram notification
         try {
             const packageNames = packages.map(p => `${p.name} x${p.quantity}`).join(', ');
@@ -2034,6 +2037,7 @@ app.post('/api/travel-bookings', async (req, res) => {
         res.json({ 
             success: true, 
             booking_reference,
+            booking_id: bookingId,
             message: 'Travel booking created successfully'
         });
     } catch (error) {
@@ -2060,6 +2064,58 @@ app.get('/api/travel-bookings', async (req, res) => {
         res.json(bookings);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch travel bookings' });
+    }
+});
+
+// Submit travel booking payment for verification
+app.post('/api/travel-bookings/:id/payment', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { payment_method, transaction_id } = req.body;
+        
+        // Update booking with payment info
+        await db.run(`
+            UPDATE travel_bookings SET payment_method = ?, transaction_id = ?, status = ?
+            WHERE id = ?
+        `, [payment_method, transaction_id, 'pending_verification', id]);
+        
+        // Get booking details for notification
+        const booking = await db.get('SELECT * FROM travel_bookings WHERE id = ?', [id]);
+        
+        if (booking) {
+            // Send Telegram notification
+            try {
+                const packageNames = JSON.parse(booking.packages).map(p => `${p.name} x${p.quantity}`).join(', ');
+                const message = `🚗 TRAVEL PAYMENT SUBMITTED!
+
+📋 Booking ID: ${booking.booking_reference}
+👤 Customer: ${booking.customer_name}
+📱 Phone: ${booking.phone}
+📅 Travel Date: ${new Date(booking.travel_date).toLocaleDateString('en-IN')}
+📍 Pickup: ${booking.pickup_location}
+🎯 Packages: ${packageNames}
+💰 Amount: ₹${booking.total_amount.toLocaleString()}
+💳 Payment Method: ${payment_method.toUpperCase()}
+${transaction_id ? `🔢 UTR ID: ${transaction_id}` : ''}
+⚠️ Status: Pending Verification
+
+⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+👉 Please verify and confirm in booking management panel`;
+                
+                await sendTelegramNotification(message);
+            } catch (telegramError) {
+                console.error('Telegram notification failed:', telegramError);
+            }
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Travel booking payment submitted for verification'
+        });
+    } catch (error) {
+        console.error('Travel payment submission error:', error);
+        res.status(500).json({ error: 'Failed to submit payment' });
     }
 });
 

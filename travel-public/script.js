@@ -346,53 +346,128 @@ function confirmUPIPayment(bookingDataStr) {
     const utrNumber = document.getElementById('utrNumber').value;
 
     if (!utrNumber || utrNumber.length !== 12) {
-        alert('Please enter a valid 12-digit UTR number');
+        showNotification('Please enter a valid 12-digit UTR number', 'error');
         return;
     }
 
-    // Submit booking with UPI payment
-    submitTravelBooking({
-        ...bookingData,
-        payment_method: 'upi',
-        transaction_id: utrNumber
+    console.log('🚗 Creating travel booking first...');
+    
+    fetch('/api/travel-bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Travel booking created, now submitting payment...');
+            return fetch(`/api/travel-bookings/${data.booking_id}/payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    payment_method: 'upi',
+                    transaction_id: utrNumber
+                })
+            });
+        } else {
+            throw new Error(data.error || 'Failed to create booking');
+        }
+    })
+    .then(response => response.json())
+    .then(paymentData => {
+        if (paymentData.success) {
+            closePaymentModal();
+            showNotification('Travel booking payment submitted for verification. You will be notified once confirmed.', 'success');
+            selectedPackages = [];
+            updateBookingSummary();
+        } else {
+            throw new Error(paymentData.error || 'Payment submission failed');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Travel booking/payment error:', error);
+        showNotification(error.message || 'An error occurred. Please try again.', 'error');
     });
 }
 
-function initiateRazorpayPayment(bookingDataStr) {
-    const bookingData = JSON.parse(bookingDataStr);
-    const amount = Math.round(bookingData.total_amount * 1.02 * 100); // Convert to paise and add 2% fee
+async function initiateRazorpayPayment(bookingDataStr) {
+    try {
+        const bookingData = JSON.parse(bookingDataStr);
+        
+        const keyResponse = await fetch('/api/razorpay-key');
+        const { key } = await keyResponse.json();
+        
+        const amount = Math.round(bookingData.total_amount * 1.02 * 100);
 
-    const options = {
-        key: 'rzp_live_your_key_here', // Replace with your Razorpay key
-        amount: amount,
-        currency: 'INR',
-        name: 'Vizag Resort Booking',
-        description: 'Travel Package Booking',
-        handler: function(response) {
-            submitTravelBooking({
-                ...bookingData,
-                payment_method: 'card',
-                transaction_id: response.razorpay_payment_id
+        const options = {
+            key: key,
+            amount: amount,
+            currency: 'INR',
+            name: 'Vizag Resort Booking',
+            description: 'Travel Package Booking',
+            handler: function(response) {
+                handleTravelCardPayment(bookingData, response.razorpay_payment_id);
+            },
+            prefill: {
+                name: bookingData.customer_name,
+                email: bookingData.email,
+                contact: bookingData.phone
+            },
+            theme: {
+                color: '#667eea'
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+    } catch (error) {
+        showNotification('Payment system error. Please try UPI payment.', 'error');
+    }
+}
+
+function handleTravelCardPayment(bookingData, paymentId) {
+    console.log('💳 Processing travel card payment...');
+    
+    fetch('/api/travel-bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Travel booking created, now submitting card payment...');
+            return fetch(`/api/travel-bookings/${data.booking_id}/payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    payment_method: 'card',
+                    transaction_id: paymentId
+                })
             });
-        },
-        prefill: {
-            name: bookingData.customer_name,
-            email: bookingData.email,
-            contact: bookingData.phone
-        },
-        theme: {
-            color: '#667eea'
+        } else {
+            throw new Error(data.error || 'Failed to create booking');
         }
-    };
-
-    const rzp = new Razorpay(options);
-    rzp.open();
+    })
+    .then(response => response.json())
+    .then(paymentData => {
+        if (paymentData.success) {
+            closePaymentModal();
+            showNotification('Travel booking payment submitted for verification. You will be notified once confirmed.', 'success');
+            selectedPackages = [];
+            updateBookingSummary();
+        } else {
+            throw new Error(paymentData.error || 'Payment submission failed');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Travel card payment error:', error);
+        showNotification(error.message || 'Payment processing failed. Please try again.', 'error');
+    });
 }
 
 function submitTravelBooking(bookingData) {
-    // Show loading
-    const loadingDiv = document.createElement('div');
-    loadingDiv.innerHTML = '<div style="text-align: center; padding: 2rem;"><h3>Processing your booking...</h3></div>';
+    console.log('🚗 Submitting travel booking:', bookingData);
     
     fetch('/api/travel-bookings', {
         method: 'POST',
@@ -401,22 +476,26 @@ function submitTravelBooking(bookingData) {
         },
         body: JSON.stringify(bookingData)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('📥 Travel booking response status:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('📋 Travel booking response:', data);
         if (data.success) {
             closePaymentModal();
-            alert(`Booking confirmed! Your booking reference is: ${data.booking_reference}`);
+            showNotification(`Travel booking confirmed! Your booking reference is: ${data.booking_reference}`, 'success');
             
             // Reset form
             selectedPackages = [];
             updateBookingSummary();
         } else {
-            alert('Booking failed: ' + data.message);
+            showNotification('Booking failed: ' + (data.error || data.message), 'error');
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while processing your booking');
+        console.error('❌ Travel booking error:', error);
+        showNotification('Network error. Please try again.', 'error');
     });
 }
 
