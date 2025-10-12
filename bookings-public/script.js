@@ -618,8 +618,12 @@ async function loadTravelBookings() {
     try {
         const response = await fetch('/api/travel-bookings');
         const bookings = await response.json();
-        window.currentTravelBookings = bookings;
-        displayTravelBookings(bookings);
+        
+        // Ensure bookings is an array
+        const bookingsArray = Array.isArray(bookings) ? bookings : [];
+        
+        window.currentTravelBookings = bookingsArray;
+        displayTravelBookings(bookingsArray);
     } catch (error) {
         console.error('Error loading travel bookings:', error);
         document.getElementById('travelBookingsGrid').innerHTML = '<p>Error loading travel bookings</p>';
