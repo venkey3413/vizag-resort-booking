@@ -128,17 +128,18 @@ nav a:hover {
 @media (max-width: 768px) {
     .food-notice-text {
         font-size: 0.7rem;
-        animation: none;
-        white-space: normal;
+        animation: foodTextRun 20s linear infinite;
+        white-space: nowrap;
         text-align: center;
         line-height: 1.2;
         padding: 0 10px;
     }
     
     .food-order-notice {
-        padding: 10px 0;
-        animation: none;
-        background: #ff6b35;
+        padding: 8px 0;
+        animation: foodNoticeSlide 3s linear infinite;
+        background: linear-gradient(90deg, #ff6b6b, #ffa500, #ff6b6b);
+        background-size: 200% 100%;
     }
 }
 
