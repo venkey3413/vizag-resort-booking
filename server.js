@@ -1200,6 +1200,26 @@ app.post('/api/food-orders', async (req, res) => {
         
         console.log('Food order created:', { orderId, bookingId, total, checkInDate: booking.check_in });
         
+        // Send Telegram notification for new food order
+        try {
+            const message = `🍽️ NEW FOOD ORDER CREATED!
+
+📋 Order ID: ${orderId}
+🏨 Resort: ${booking.resort_name}
+👤 Guest: ${booking.guest_name}
+📧 Email: ${customerEmail}
+📱 Phone: ${phoneNumber}
+📅 Delivery: ${new Date(deliveryTime).toLocaleString('en-IN')}
+💰 Total: ₹${total.toLocaleString()}
+⚠️ Status: Pending Payment
+
+⏰ Ordered at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
         // Publish food order created event
         try {
             await publishEvent('vizag.food', EVENTS.FOOD_ORDER_CREATED, {
@@ -1213,6 +1233,18 @@ app.post('/api/food-orders', async (req, res) => {
                 orderId: orderId,
                 bookingId: bookingId
             });
+            
+            // Notify booking server directly
+            const bookingServerUrl = 'http://localhost:3002/api/eventbridge-notify';
+            await fetch(bookingServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'food.order.created',
+                    source: 'vizag.food',
+                    data: { orderId, bookingId, total }
+                })
+            }).catch(err => console.log('Booking server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -1249,6 +1281,31 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
             submittedAt: new Date()
         });
         
+        // Get order details for notification
+        const order = await db.get('SELECT * FROM food_orders WHERE order_id = ?', [orderId]);
+        
+        // Send Telegram notification for manual verification
+        try {
+            const message = `🍽️ FOOD ORDER PAYMENT SUBMITTED!
+
+📋 Order ID: ${orderId}
+🏨 Resort: ${order ? order.resort_name : 'N/A'}
+👤 Guest: ${order ? order.guest_name : 'N/A'}
+💰 Amount: ₹${order ? order.total.toLocaleString() : 'N/A'}
+💳 Payment Method: ${paymentMethod.toUpperCase()}
+${transactionId ? `🔢 UTR ID: ${transactionId}` : ''}
+${paymentId ? `🔢 Payment ID: ${paymentId}` : ''}
+⚠️ Status: Pending Verification
+
+⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+👉 Please verify and confirm in booking management panel`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
         // Publish food payment updated event
         try {
             await publishEvent('vizag.food', EVENTS.FOOD_ORDER_UPDATED, {
@@ -1262,27 +1319,20 @@ app.post('/api/food-orders/:orderId/payment', async (req, res) => {
                 orderId: orderId,
                 status: 'pending_verification'
             });
+            
+            // Notify booking server directly
+            const bookingServerUrl = 'http://localhost:3002/api/eventbridge-notify';
+            await fetch(bookingServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'food.order.updated',
+                    source: 'vizag.food',
+                    data: { orderId, status: 'pending_verification' }
+                })
+            }).catch(err => console.log('Booking server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
-        }
-        
-        // Send Telegram notification for manual verification
-        try {
-            const message = `🍽️ FOOD ORDER PAYMENT SUBMITTED!
-
-📋 Order ID: ${orderId}
-💳 Payment Method: ${paymentMethod.toUpperCase()}
-${transactionId ? `🔢 UTR ID: ${transactionId}` : ''}
-${paymentId ? `🔢 Payment ID: ${paymentId}` : ''}
-⚠️ Status: Pending Verification
-
-⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
-
-👉 Please verify and confirm in admin panel`;
-            
-            await sendTelegramNotification(message);
-        } catch (telegramError) {
-            console.error('Telegram notification failed:', telegramError);
         }
         
         res.json({ 
@@ -1405,7 +1455,7 @@ app.post('/api/food-orders/:orderId/cancel', async (req, res) => {
 📋 Order ID: ${orderId}
 🏨 Resort: ${order.resort_name}
 👤 Guest: ${order.guest_name}
-💰 Amount: ₹${order.total}
+💰 Amount: ₹${order.total.toLocaleString()}
 ⏰ Cancelled at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
             
             await sendTelegramNotification(message);
@@ -1467,7 +1517,7 @@ app.delete('/api/food-orders/clear-all', async (req, res) => {
 
 📊 Orders deleted: ${result.changes}
 ⏰ Cleared at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
-👤 Action: Admin Panel`;
+👤 Action: Booking Management Panel`;
             
             await sendTelegramNotification(message);
         } catch (telegramError) {

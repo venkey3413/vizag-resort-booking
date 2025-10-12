@@ -408,6 +408,28 @@ main {
     background-color: rgba(0,0,0,0.5);
 }
 
+/* Bulk order notice */
+.bulk-order-notice {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.bulk-order-notice h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.bulk-order-notice p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
 .modal-content {
     background-color: white;
     margin: 5% auto;
@@ -450,12 +472,18 @@ main {
     color: #333;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 1rem;
+}
+
+.form-group select {
+    background: white;
+    cursor: pointer;
 }
 
 .order-summary {
@@ -507,6 +535,183 @@ main {
     background: #218838;
 }
 
+/* Payment Modal Styles */
+.payment-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 4000;
+    padding: 1rem;
+}
+
+.payment-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.payment-content h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.booking-summary {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.booking-summary h3 {
+    margin-bottom: 0.5rem;
+    color: #667eea;
+}
+
+.booking-summary p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.payment-tabs {
+    display: flex;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.payment-tab {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.payment-tab.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+.payment-method {
+    display: none;
+    padding: 1rem 0;
+}
+
+.payment-method.active {
+    display: block;
+}
+
+.qr-section {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.qr-code {
+    max-width: 200px;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.payment-instructions {
+    background: #e3f2fd;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.payment-instructions p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.payment-proof input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.confirm-payment-btn,
+.razorpay-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.confirm-payment-btn:hover,
+.razorpay-btn:hover {
+    background: #218838;
+}
+
+.razorpay-btn {
+    background: #667eea;
+}
+
+.razorpay-btn:hover {
+    background: #5a6fd8;
+}
+
+.card-section {
+    text-align: center;
+}
+
+.card-pricing {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.card-pricing p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.payment-actions {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.close-payment-btn {
+    padding: 0.5rem 1.5rem;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.close-payment-btn:hover {
+    background: #5a6268;
+}
+
 /* Footer */
 footer {
     background: #333;
@@ -531,6 +736,19 @@ footer {
     
     main {
         margin-top: 140px;
+    }
+    
+    .payment-modal {
+        padding: 0.5rem;
+    }
+    
+    .payment-content {
+        padding: 1.5rem;
+        max-height: 95vh;
+    }
+    
+    .qr-code {
+        max-width: 150px;
     }
 }
 

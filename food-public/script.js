@@ -344,10 +344,14 @@ async function validateBookingId() {
 }
 
 async function confirmOrder() {
+    console.log('🍽️ confirmOrder() called');
+    
     const bookingId = document.getElementById('bookingId').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
     const customerEmail = document.getElementById('customerEmail').value.trim();
     const deliveryTime = document.getElementById('deliveryTime').value;
+    
+    console.log('📋 Order form data:', { bookingId, phoneNumber, customerEmail, deliveryTime });
     
     if (!bookingId) {
         showNotification('Please enter your booking ID', 'error');
@@ -366,12 +370,6 @@ async function confirmOrder() {
     
     if (!deliveryTime) {
         showNotification('Please select a delivery time', 'error');
-        return;
-    }
-    
-    // Check if booking was validated
-    if (!window.checkInDate) {
-        showNotification('Please validate your booking ID first', 'error');
         return;
     }
     
@@ -436,6 +434,8 @@ async function confirmOrder() {
     };
     
     try {
+        console.log('📤 Sending order to server:', orderData);
+        
         // Create food order first
         const response = await fetch('/api/food-orders', {
             method: 'POST',
@@ -443,22 +443,31 @@ async function confirmOrder() {
             body: JSON.stringify(orderData)
         });
         
+        console.log('📥 Server response status:', response.status);
+        
         if (response.ok) {
             const result = await response.json();
+            console.log('✅ Order created successfully:', result);
             orderData.orderId = result.orderId;
             
             // Show payment interface
+            console.log('💳 Showing payment interface...');
             showPaymentInterface(orderData);
             closeModal();
         } else {
-            showNotification('Failed to create order. Please try again.', 'error');
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('❌ Order creation failed:', errorData);
+            showNotification(errorData.error || 'Failed to create order. Please try again.', 'error');
         }
     } catch (error) {
+        console.error('❌ Network error:', error);
         showNotification('Network error. Please try again.', 'error');
     }
 }
 
 function showPaymentInterface(order) {
+    console.log('💳 showPaymentInterface() called with order:', order);
+    
     const paymentModal = document.createElement('div');
     paymentModal.className = 'payment-modal';
     paymentModal.innerHTML = `
@@ -527,6 +536,9 @@ function showPaymentInterface(order) {
     
     document.body.appendChild(paymentModal);
     window.currentFoodOrder = order;
+    
+    console.log('✅ Payment modal added to DOM');
+    console.log('🔍 Payment modal element:', paymentModal);
 }
 
 function showPaymentMethod(method) {
@@ -544,7 +556,10 @@ function closeFoodPaymentModal() {
 }
 
 async function confirmFoodPayment() {
+    console.log('💳 confirmFoodPayment() called');
+    
     const transactionId = document.getElementById('transactionId').value;
+    console.log('🔢 UTR entered:', transactionId);
     
     if (!transactionId) {
         showNotification('Please enter your 12-digit UTR number', 'error');
@@ -557,6 +572,8 @@ async function confirmFoodPayment() {
     }
     
     try {
+        console.log('📤 Submitting payment for order:', window.currentFoodOrder.orderId);
+        
         const response = await fetch(`/api/food-orders/${window.currentFoodOrder.orderId}/payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -566,15 +583,22 @@ async function confirmFoodPayment() {
             })
         });
         
+        console.log('📥 Payment response status:', response.status);
+        
         if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Payment submitted successfully:', result);
             showNotification('Food order payment submitted for verification. You will be notified once confirmed.', 'success');
             cart = [];
             updateCart();
             closeFoodPaymentModal();
         } else {
-            showNotification('Payment submission failed. Please try again.', 'error');
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('❌ Payment submission failed:', errorData);
+            showNotification(errorData.error || 'Payment submission failed. Please try again.', 'error');
         }
     } catch (error) {
+        console.error('❌ Payment network error:', error);
         showNotification('Network error. Please try again.', 'error');
     }
 }
@@ -609,7 +633,11 @@ async function payFoodWithCard(amount) {
 }
 
 async function handleFoodCardPayment(paymentId) {
+    console.log('💳 handleFoodCardPayment() called with paymentId:', paymentId);
+    
     try {
+        console.log('📤 Submitting card payment for order:', window.currentFoodOrder.orderId);
+        
         const response = await fetch(`/api/food-orders/${window.currentFoodOrder.orderId}/payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -619,20 +647,29 @@ async function handleFoodCardPayment(paymentId) {
             })
         });
         
+        console.log('📥 Card payment response status:', response.status);
+        
         if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Card payment submitted successfully:', result);
             showNotification('Food order payment submitted for verification. You will be notified once confirmed.', 'success');
             cart = [];
             updateCart();
             closeFoodPaymentModal();
         } else {
-            showNotification('Payment submission failed. Please try again.', 'error');
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('❌ Card payment submission failed:', errorData);
+            showNotification(errorData.error || 'Payment submission failed. Please try again.', 'error');
         }
     } catch (error) {
+        console.error('❌ Card payment network error:', error);
         showNotification('Network error. Please try again.', 'error');
     }
 }
 
 function showNotification(message, type = 'success') {
+    console.log(`📢 Notification (${type}):`, message);
+    
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
