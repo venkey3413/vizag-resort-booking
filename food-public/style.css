@@ -226,12 +226,12 @@ main {
 
 .banner-slide:nth-child(1) {
     background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop') center/cover;
+                url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=1080&fit=crop') center/cover;
 }
 
 .banner-slide:nth-child(2) {
     background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                url('../Food page bg.png') center/cover;
+                url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop') center/cover;
 }
 
 .banner-slide:nth-child(3) {
@@ -796,6 +796,7 @@ footer {
     .hero {
         margin-top: 0;
         height: 70vh;
+        padding: 40px 20px;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
     }
@@ -839,6 +840,7 @@ footer {
 @media (max-width: 480px) {
     .hero {
         margin-top: 0;
+        padding: 20px 15px;
         height: 60vh;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
