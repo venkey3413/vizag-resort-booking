@@ -225,11 +225,13 @@ main {
 }
 
 .banner-slide:nth-child(1) {
-    background: url('../Food page bg.png') center/cover;
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                url('../Food page bg.png') center/cover;
 }
 
 .banner-slide:nth-child(2) {
-    background: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=1080&fit=crop') center/cover;
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=1080&fit=crop') center/cover;
 }
 
 .banner-slide h2 {
