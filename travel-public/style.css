@@ -192,6 +192,8 @@ main {
     position: relative;
     overflow: hidden;
     width: 100%;
+    transform: none !important;
+    transition: none !important;
 }
 
 .hero-content {
@@ -527,12 +529,28 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
+    /* Mobile viewport fix */
+    body {
+        overflow-x: hidden;
+    }
+    
+    .food-order-notice {
+        height: 35px;
+        position: fixed;
+        top: 80px;
+    }
+    
     .hero {
-        margin-top: 115px;
+        margin-top: 115px !important;
         height: 50vh;
         padding: 40px 20px;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
     }
     
     .rotating-banner {
@@ -560,11 +578,13 @@ footer {
 
 @media (max-width: 480px) {
     .hero {
-        margin-top: 100px;
+        margin-top: 110px !important;
         padding: 20px 15px;
         height: 40vh;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
+        position: relative;
+        top: 0;
     }
     
     .rotating-banner {

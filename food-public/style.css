@@ -140,6 +140,9 @@ nav a:hover {
         animation: foodNoticeSlide 3s linear infinite;
         background: linear-gradient(90deg, #ff6b6b, #ffa500, #ff6b6b);
         background-size: 200% 100%;
+        height: 35px;
+        position: fixed;
+        top: 80px;
     }
     
     nav ul {
@@ -149,6 +152,20 @@ nav a:hover {
     
     nav a {
         font-size: 0.9rem;
+    }
+    
+    /* Mobile viewport fix */
+    body {
+        overflow-x: hidden;
+    }
+    
+    .hero {
+        margin-top: 115px !important;
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
     }
 }
 
@@ -182,6 +199,8 @@ main {
     position: relative;
     overflow: hidden;
     width: 100%;
+    transform: none !important;
+    transition: none !important;
 }
 
 .hero-content {
@@ -794,11 +813,13 @@ footer {
 /* Responsive */
 @media (max-width: 768px) {
     .hero {
-        margin-top: 105px;
+        margin-top: 115px !important;
         height: 50vh;
         padding: 40px 20px;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
+        position: relative;
+        top: 0;
     }
     
     .rotating-banner {
@@ -839,11 +860,13 @@ footer {
 
 @media (max-width: 480px) {
     .hero {
-        margin-top: 95px;
+        margin-top: 110px !important;
         padding: 20px 15px;
         height: 40vh;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
+        position: relative;
+        top: 0;
     }
     
     .rotating-banner {
