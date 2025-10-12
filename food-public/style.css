@@ -77,7 +77,7 @@ nav ul {
     list-style: none;
     gap: 2rem;
     margin: 0;
-    padding: 0;
+    padding: 0 15px 0 0;
     align-items: center;
 }
 
@@ -140,6 +140,15 @@ nav a:hover {
         animation: foodNoticeSlide 3s linear infinite;
         background: linear-gradient(90deg, #ff6b6b, #ffa500, #ff6b6b);
         background-size: 200% 100%;
+    }
+    
+    nav ul {
+        gap: 1rem;
+        padding: 0 10px 0 0;
+    }
+    
+    nav a {
+        font-size: 0.9rem;
     }
 }
 
