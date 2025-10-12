@@ -272,19 +272,21 @@
     </footer>
 
 
-    <link rel="stylesheet" href="style.css?v=20250103020">
     <script>
-        // Automatic cache buster for mobile browsers
-        const currentVersion = '20250103020';
-        const lastVersion = localStorage.getItem('site_version');
-        if (lastVersion !== currentVersion) {
-            localStorage.setItem('site_version', currentVersion);
-            if (lastVersion) {
-                window.location.reload(true);
-            }
+        // Aggressive cache-busting with timestamp
+        const timestamp = Date.now();
+        document.write('<link rel="stylesheet" href="style.css?t=' + timestamp + '">');
+        
+        // Force reload if cached version detected
+        if (!sessionStorage.getItem('force_reload_done')) {
+            sessionStorage.setItem('force_reload_done', 'true');
+            setTimeout(() => window.location.reload(true), 100);
         }
     </script>
-    <script src="script.js?v=20250103020"></script>
+    <script>
+        const timestamp = Date.now();
+        document.write('<script src="script.js?t=' + timestamp + '"><\/script>');
+    </script>
     
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
