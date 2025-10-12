@@ -185,8 +185,7 @@ main {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(rgba(40, 167, 69, 0.8), rgba(32, 201, 151, 0.8)), 
-                url('travel booking bg.png') center/cover;
+    background: url('travel booking bg.png') center/cover;
     color: white;
     text-align: center;
     padding: 100px 0;
