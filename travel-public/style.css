@@ -185,7 +185,7 @@ main {
 
 /* Hero Section */
 .hero {
-    height: 100vh;
+    height: 60vh;
     text-align: center;
     color: white;
     margin-top: 0;
@@ -529,7 +529,7 @@ footer {
 @media (max-width: 768px) {
     .hero {
         margin-top: 0;
-        height: 70vh;
+        height: 50vh;
         padding: 40px 20px;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
@@ -562,7 +562,7 @@ footer {
     .hero {
         margin-top: 0;
         padding: 20px 15px;
-        height: 60vh;
+        height: 40vh;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
     }
