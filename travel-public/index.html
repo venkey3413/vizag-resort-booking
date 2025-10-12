@@ -66,8 +66,16 @@
     <main>
         <section class="hero">
             <div class="hero-content">
-                <h2>Explore Vizag with Comfort</h2>
-                <p>Professional drivers, comfortable vehicles, and memorable experiences</p>
+                <div class="rotating-banner">
+                    <div class="banner-slide active">
+                        <h2>Explore Vizag with Comfort</h2>
+                        <p>Professional drivers, comfortable vehicles, and memorable experiences</p>
+                    </div>
+                    <div class="banner-slide">
+                        <h2>Discover Hidden Gems</h2>
+                        <p>Uncover the beauty of Visakhapatnam with our guided travel packages</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -154,5 +162,19 @@
 
     <script src="script.js?v=20250103020"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        // Rotating banner functionality
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.banner-slide');
+        
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+        
+        // Auto-rotate every 5 seconds
+        setInterval(nextSlide, 5000);
+    </script>
 </body>
 </html>
