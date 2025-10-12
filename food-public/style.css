@@ -125,6 +125,23 @@ nav a:hover {
     display: inline-block;
 }
 
+@media (max-width: 768px) {
+    .food-notice-text {
+        font-size: 0.7rem;
+        animation: none;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.2;
+        padding: 0 10px;
+    }
+    
+    .food-order-notice {
+        padding: 10px 0;
+        animation: none;
+        background: #ff6b35;
+    }
+}
+
 @keyframes foodNoticeSlide {
     0% { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
@@ -499,6 +516,10 @@ footer {
 
     .menu-grid {
         grid-template-columns: 1fr;
+    }
+    
+    main {
+        margin-top: 140px;
     }
 }
 
