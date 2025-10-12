@@ -103,7 +103,7 @@ function loadPackages() {
                 <div class="package-duration">Duration: ${package.duration}</div>
                 <div class="package-item-footer">
                     <span class="price">₹${package.price}</span>
-                    <button class="add-btn" onclick="addPackage(${package.id})">Add Package</button>
+                    <button class="book-btn" onclick="addPackage(${package.id})">Add Package</button>
                 </div>
             </div>
         `;

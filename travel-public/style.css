@@ -348,17 +348,42 @@ main {
 }
 
 .book-btn {
-    background: #28a745;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     color: white;
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.5rem 0.75rem 2.5rem;
     border-radius: 25px;
     cursor: pointer;
-    transition: background 0.3s;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .book-btn:hover {
-    background: #218838;
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.book-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+}
+
+.book-btn::before {
+    content: '+';
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    font-weight: bold;
+    opacity: 0.8;
 }
 
 /* Booking Section */
