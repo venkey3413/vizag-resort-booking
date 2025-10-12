@@ -188,7 +188,7 @@ main {
     height: 60vh;
     text-align: center;
     color: white;
-    margin-top: 140px;
+    margin-top: 120px;
     position: relative;
     overflow: hidden;
     width: 100%;
@@ -528,7 +528,7 @@ footer {
 /* Responsive */
 @media (max-width: 768px) {
     .hero {
-        margin-top: 155px;
+        margin-top: 115px;
         height: 50vh;
         padding: 40px 20px;
         width: 100vw;
@@ -560,7 +560,7 @@ footer {
 
 @media (max-width: 480px) {
     .hero {
-        margin-top: 135px;
+        margin-top: 100px;
         padding: 20px 15px;
         height: 40vh;
         width: 100vw;
