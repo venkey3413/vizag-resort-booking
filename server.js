@@ -2015,6 +2015,18 @@ app.post('/api/travel-bookings', async (req, res) => {
                 bookingId: result.lastID,
                 bookingReference: booking_reference
             });
+            
+            // Notify booking server directly
+            const bookingServerUrl = 'http://localhost:3002/api/eventbridge-notify';
+            await fetch(bookingServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'travel.booking.created',
+                    source: 'vizag.travel',
+                    data: { bookingId: result.lastID, bookingReference: booking_reference, customerName: customer_name }
+                })
+            }).catch(err => console.log('Booking server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -2091,6 +2103,18 @@ app.post('/api/travel-bookings/:id/confirm', async (req, res) => {
                 bookingReference: booking.booking_reference,
                 status: 'confirmed'
             });
+            
+            // Notify booking server directly
+            const bookingServerUrl = 'http://localhost:3002/api/eventbridge-notify';
+            await fetch(bookingServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'travel.booking.updated',
+                    source: 'vizag.travel',
+                    data: { bookingId: id, bookingReference: booking.booking_reference, status: 'confirmed' }
+                })
+            }).catch(err => console.log('Booking server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }

@@ -162,6 +162,60 @@
     <script src="script.js?v=20250103020"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
+        // EventBridge real-time sync
+        function setupTravelSync() {
+            console.log('📡 EventBridge real-time sync enabled for travel service');
+            
+            let eventSource;
+            let reconnectAttempts = 0;
+            const maxReconnectAttempts = 5;
+            
+            function connectEventSource() {
+                try {
+                    eventSource = new EventSource('/api/events');
+                    
+                    eventSource.onmessage = function(event) {
+                        try {
+                            const data = JSON.parse(event.data);
+                            console.log('📡 Travel EventBridge event received:', data);
+                            
+                            if (data.type === 'travel.booking.created' || data.type === 'travel.booking.updated') {
+                                console.log('🚗 Travel booking update received');
+                            }
+                        } catch (error) {
+                            // Ignore ping messages
+                        }
+                    };
+                    
+                    eventSource.onerror = function(error) {
+                        console.log('⚠️ Travel EventBridge connection error, attempting reconnect...');
+                        eventSource.close();
+                        
+                        if (reconnectAttempts < maxReconnectAttempts) {
+                            reconnectAttempts++;
+                            setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                        } else {
+                            console.log('❌ Max reconnection attempts reached');
+                        }
+                    };
+                    
+                    eventSource.onopen = function() {
+                        console.log('✅ EventBridge connected to travel service');
+                        reconnectAttempts = 0;
+                    };
+                } catch (error) {
+                    console.error('Travel EventBridge setup failed:', error);
+                }
+            }
+            
+            connectEventSource();
+        }
+        
+        // Initialize EventBridge after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(setupTravelSync, 1000);
+        });
+        
         // Rotating banner functionality
         let currentSlide = 0;
         const slides = document.querySelectorAll('.banner-slide');
