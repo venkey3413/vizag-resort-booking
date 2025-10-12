@@ -185,7 +185,8 @@ main {
 
 /* Hero Section */
 .hero {
-    background: url('travel booking bg.png') center/cover;
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('Gemini_Generated_Image_i2co5zi2co5zi2co.png') center/cover;
     color: white;
     text-align: center;
     padding: 100px 0;
@@ -194,17 +195,22 @@ main {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .hero-content h2 {
     font-size: 3rem;
     margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .hero-content p {
     font-size: 1.2rem;
     max-width: 600px;
     margin: 0 auto;
+    font-weight: 500;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 /* Packages Section */
@@ -460,5 +466,13 @@ footer {
 
     .packages-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .hero-content h2 {
+        font-size: 2.2rem;
+    }
+    
+    .hero-content p {
+        font-size: 1rem;
     }
 }
