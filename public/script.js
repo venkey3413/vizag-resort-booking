@@ -49,12 +49,12 @@ function updateTotalPrice() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Skip resort loading if already loaded by critical.js
-    if (!window.resorts || window.resorts.length === 0) {
-        loadResorts();
-    } else {
+    // Use resorts loaded by critical.js or load them
+    if (window.resorts && window.resorts.length > 0) {
         resorts = window.resorts;
         displayResorts();
+    } else {
+        loadResorts();
     }
     loadCoupons();
     setupEventListeners();
@@ -62,32 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLogoRotation();
     setupWebSocketSync();
     preloadQRCode();
-    // Skip banner rotation if already initialized
-    if (!window.bannerRotationInitialized) {
-        initBannerRotation();
-    }
 });
 
-// Rotating Banner Animation - avoid conflicts
-function initBannerRotation() {
-    window.bannerRotationInitialized = true;
-    let currentSlide = 0;
-    const slides = document.querySelectorAll('.banner-slide');
-    const totalSlides = slides.length;
 
-    function nextSlide() {
-        if (slides.length > 0) {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % totalSlides;
-            slides[currentSlide].classList.add('active');
-        }
-    }
-
-    // Start banner rotation every 8 seconds
-    if (slides.length > 1) {
-        setInterval(nextSlide, 8000);
-    }
-}
 
 
 
