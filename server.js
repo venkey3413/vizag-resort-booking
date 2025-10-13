@@ -45,20 +45,47 @@ async function backupInvoiceToS3(invoiceData, type) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Input sanitization function
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return String(input || '');
+    return input.replace(/[<>"'&]/g, function(match) {
+        const map = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;'};
+        return map[match];
+    });
+}
+
 // Middleware
 app.use(cors({
-    origin: true,  // Allow all origins for mobile app compatibility
-    credentials: true
+    origin: process.env.NODE_ENV === 'production' ? ['https://vizagresortbooking.in'] : true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
-// Cache-busting headers
+// Security headers
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('X-Frame-Options', 'DENY');
+    res.set('X-XSS-Protection', '1; mode=block');
+    res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     next();
 });
+
+// HTTPS redirect in production
+if (process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+        if (req.header('x-forwarded-proto') !== 'https') {
+            res.redirect(`https://${req.header('host')}${req.url}`);
+        } else {
+            next();
+        }
+    });
+}
 
 app.use(express.static('public'));
 
@@ -321,8 +348,31 @@ app.post('/api/bookings', async (req, res) => {
     try {
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount, transactionId } = req.body;
 
+        // Enhanced input sanitization
+        const sanitizedData = {
+            resortId: parseInt(resortId) || 0,
+            guestName: sanitizeInput(guestName).substring(0, 100),
+            email: sanitizeInput(email).substring(0, 100),
+            phone: sanitizeInput(phone).substring(0, 20),
+            checkIn: sanitizeInput(checkIn).substring(0, 10),
+            checkOut: sanitizeInput(checkOut).substring(0, 10),
+            guests: Math.max(1, Math.min(20, parseInt(guests) || 1)),
+            transactionId: sanitizeInput(transactionId || '').substring(0, 50)
+        };
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(sanitizedData.email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+        
+        // Phone validation
+        if (!sanitizedData.phone.match(/^\+91[0-9]{10}$/)) {
+            return res.status(400).json({ error: 'Invalid phone number format' });
+        }
+
         // Basic validation
-        if (!resortId || !guestName || !email || !phone || !checkIn || !checkOut || !guests) {
+        if (!sanitizedData.resortId || !sanitizedData.guestName || !sanitizedData.email || !sanitizedData.phone || !sanitizedData.checkIn || !sanitizedData.checkOut || !sanitizedData.guests) {
             return res.status(400).json({ error: 'All fields are required' });
         }
         
@@ -461,11 +511,11 @@ app.post('/api/bookings', async (req, res) => {
         const initialStatus = transactionId ? 'pending_verification' : 'pending_payment';
         const paymentStatus = transactionId ? 'pending' : 'pending';
         
-        // Create booking
+        // Create booking with sanitized data
         const result = await db.run(`
             INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount, status, payment_status, transaction_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [resortId, guestName, email, phone, checkIn, checkOut, guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount, initialStatus, paymentStatus, transactionId]);
+        `, [sanitizedData.resortId, sanitizedData.guestName, sanitizedData.email, sanitizedData.phone, sanitizedData.checkIn, sanitizedData.checkOut, sanitizedData.guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount, initialStatus, paymentStatus, sanitizedData.transactionId]);
         
         // Store payment proof if transactionId provided
         if (transactionId) {

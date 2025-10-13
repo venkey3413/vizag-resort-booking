@@ -162,6 +162,15 @@ function scrollToSection(sectionId) {
     }
 }
 
+// Input sanitization function
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return String(input || '');
+    return input.replace(/[<>"'&\/]/g, function(match) {
+        const map = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;', '/': '&#x2F;'};
+        return map[match];
+    });
+}
+
 async function loadResorts() {
     try {
         const url = `${SERVER_URL}/api/resorts`;
@@ -170,7 +179,8 @@ async function loadResorts() {
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         });
         
@@ -210,35 +220,36 @@ function displayResorts() {
             }
         }
         
+        const safeId = parseInt(resort.id) || 0;
         return `
             <div class="resort-card">
                 <div class="resort-gallery">
-                    <img src="${resort.image}" alt="${resort.name}" class="resort-image main-image">
+                    <img src="${sanitizeInput(resort.image)}" alt="${sanitizeInput(resort.name)}" class="resort-image main-image">
                     ${(resort.gallery || resort.videos) ? `
-                        <button class="view-more-btn" onclick="openGallery(${resort.id})">
+                        <button class="view-more-btn" onclick="openGallery(${safeId})">
                             📸 View More
                         </button>
                     ` : ''}
                 </div>
                 <div class="resort-info">
-                    <h3>${resort.name}</h3>
+                    <h3>${sanitizeInput(resort.name)}</h3>
                     <p class="resort-location">
-                        📍 ${resort.location}
-                        ${resort.map_link ? `<br><a href="${resort.map_link}" target="_blank" class="view-map-btn">🗺️ View Map</a>` : ''}
+                        📍 ${sanitizeInput(resort.location)}
+                        ${resort.map_link ? `<br><a href="${sanitizeInput(resort.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>` : ''}
                     </p>
                     <p class="resort-price">${pricingDisplay}</p>
-                    <p class="resort-description">${resort.description}</p>
+                    <p class="resort-description">${sanitizeInput(resort.description)}</p>
                     ${resort.amenities ? `
                         <div class="resort-amenities">
                             <h4>🏨 Amenities:</h4>
                             <div class="amenities-list">
                                 ${resort.amenities.split('\n').filter(a => a.trim()).map(amenity => 
-                                    `<span class="amenity-tag">${amenity.trim()}</span>`
+                                    `<span class="amenity-tag">${sanitizeInput(amenity.trim())}</span>`
                                 ).join('')}
                             </div>
                         </div>
                     ` : ''}
-                    <button class="book-btn" onclick="openBookingModal(${resort.id})">
+                    <button class="book-btn" onclick="openBookingModal(${safeId})">
                         Book Now
                     </button>
                     <div class="resort-footer">
@@ -906,14 +917,28 @@ async function confirmPayment() {
     }
     
     try {
-        // Now create the booking with payment info
+        // Now create the booking with payment info and enhanced security
+        const sanitizedBookingData = {
+            resortId: parseInt(pendingBookingData.resortId) || 0,
+            guestName: sanitizeInput(pendingBookingData.guestName).substring(0, 100),
+            email: sanitizeInput(pendingBookingData.email).substring(0, 100),
+            phone: sanitizeInput(pendingBookingData.phone).substring(0, 20),
+            checkIn: sanitizeInput(pendingBookingData.checkIn).substring(0, 10),
+            checkOut: sanitizeInput(pendingBookingData.checkOut).substring(0, 10),
+            guests: Math.max(1, Math.min(20, parseInt(pendingBookingData.guests) || 1)),
+            transactionId: sanitizeInput(transactionId).substring(0, 50),
+            couponCode: pendingBookingData.couponCode,
+            discountAmount: pendingBookingData.discountAmount
+        };
+        
         const bookingResponse = await fetch(`${SERVER_URL}/api/bookings`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...pendingBookingData,
-                transactionId
-            })
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': sessionStorage.getItem('csrf-token') || ''
+            },
+            body: JSON.stringify(sanitizedBookingData)
         });
         
         if (bookingResponse.ok) {
@@ -948,11 +973,27 @@ async function payWithRazorpay(bookingReference, amount, name, email, phone) {
             return;
         }
         
-        // First create the booking to get a booking ID
+        // First create the booking to get a booking ID with enhanced security
+        const sanitizedBookingData = {
+            resortId: parseInt(pendingBookingData.resortId) || 0,
+            guestName: sanitizeInput(pendingBookingData.guestName).substring(0, 100),
+            email: sanitizeInput(pendingBookingData.email).substring(0, 100),
+            phone: sanitizeInput(pendingBookingData.phone).substring(0, 20),
+            checkIn: sanitizeInput(pendingBookingData.checkIn).substring(0, 10),
+            checkOut: sanitizeInput(pendingBookingData.checkOut).substring(0, 10),
+            guests: Math.max(1, Math.min(20, parseInt(pendingBookingData.guests) || 1)),
+            couponCode: pendingBookingData.couponCode,
+            discountAmount: pendingBookingData.discountAmount
+        };
+        
         const bookingResponse = await fetch(`${SERVER_URL}/api/bookings`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(pendingBookingData)
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': sessionStorage.getItem('csrf-token') || ''
+            },
+            body: JSON.stringify(sanitizedBookingData)
         });
         
         if (!bookingResponse.ok) {
