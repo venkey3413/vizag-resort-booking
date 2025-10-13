@@ -252,7 +252,7 @@ main {
 }
 
 .cta-btn {
-    background: #ff6b6b;
+    background: #dc3545;
     color: white;
     padding: 15px 30px;
     border: none;
@@ -260,10 +260,11 @@ main {
     font-size: 1.1rem;
     cursor: pointer;
     transition: background 0.3s;
+    font-weight: 600;
 }
 
 .cta-btn:hover {
-    background: #ff5252;
+    background: #c82333;
 }
 
 .banner-slide h2 {

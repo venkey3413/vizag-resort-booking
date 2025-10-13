@@ -2,13 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="public, max-age=31536000">
+    <meta http-equiv="Pragma" content="cache">
+    <meta http-equiv="Expires" content="31536000">
     <title>Book Travel - Vizag Resort Booking</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//checkout.razorpay.com">
+    <link rel="preload" href="/cropped_circle_image.webp" as="image" type="image/webp">
     <link rel="icon" type="image/png" href="/cropped_circle_image.png">
-    <link rel="stylesheet" href="style.css?v=20250103020">
+    <style>
+    @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:fallback;src:url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2) format('woff2')}
+    @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:fallback;src:url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff2) format('woff2')}
+    *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.6;color:#333;font-size:16px}header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:.3rem 0;position:fixed;width:100%;top:0;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,.1)}.nav-container{width:100%;margin:0;padding:0 20px;display:flex;justify-content:space-between;align-items:center;height:60px;max-width:1200px;margin:0 auto}.logo-container{margin-left:5px;display:flex;align-items:center;gap:.3rem}.logo-text{font-size:1.8rem;font-weight:800;color:white;order:-1;text-shadow:1px 1px 2px rgba(0,0,0,.3)}.logo-image{height:60px;width:60px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3)}.logo-title{font-size:1.3rem;font-weight:600;letter-spacing:.5px;margin:0;color:white}nav ul{display:flex;list-style:none;gap:3rem;margin:0;padding:0;align-items:center}nav a{color:white;text-decoration:none;transition:opacity .3s;padding:.5rem 0;font-size:1rem;font-weight:500}.food-order-notice{background:linear-gradient(90deg,#ff6b6b,#ffa500,#ff6b6b);background-size:200% 100%;animation:foodNoticeSlide 3s linear infinite;color:white;padding:8px 0;position:fixed;width:100%;top:80px;z-index:999;text-align:center}.food-notice-text{font-size:.75rem;font-weight:600;text-shadow:1px 1px 2px rgba(0,0,0,.3);animation:foodTextRun 15s linear infinite;white-space:nowrap;display:inline-block}@keyframes foodNoticeSlide{0%{background-position:0% 50%}100%{background-position:200% 50%}}@keyframes foodTextRun{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}.hero{height:60vh;text-align:center;color:white;position:relative;overflow:hidden;width:100%}.cta-btn{background:#dc3545;color:white;padding:15px 30px;border:none;border-radius:5px;font-size:1.1rem;cursor:pointer;transition:background .3s;font-weight:600}
+    </style>
+    <link rel="preload" href="style.css?v=1.0.5" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="style.css?v=1.0.5"></noscript>
     <script>
         // Dynamic viewport scaling based on screen resolution
         function setDynamicViewport() {
@@ -35,8 +44,11 @@
             <div class="nav-container">
                 <div class="logo-container">
                     <span class="logo-text">ɪ</span>
-                    <img src="/cropped_circle_image.png" alt="Logo" class="logo-image">
-                    <h1>Vizag Travel</h1>
+                    <picture>
+                        <source srcset="/cropped_circle_image.webp" type="image/webp">
+                        <img src="/cropped_circle_image.png" alt="Logo" class="logo-image" loading="eager" fetchpriority="high">
+                    </picture>
+                    <span class="logo-title">Vizag Travel</span>
                 </div>
                 <ul>
                     <li><a href="/">Home</a></li>
@@ -166,8 +178,25 @@
         </div>
     </footer>
 
-    <script src="script.js?v=20250103020"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="script.js?v=1.0.5" defer></script>
+    <script type="module">
+    window.loadRazorpay = () => {
+        if (!window.Razorpay) {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.referrerPolicy = 'strict-origin-when-cross-origin';
+            document.head.appendChild(script);
+        }
+    };
+    </script>
+    <script>
+    window.addEventListener('load', function() {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'style.css?v=1.0.5';
+        document.head.appendChild(link);
+    });
+    </script>
 
 </body>
 </html>
