@@ -19,6 +19,11 @@ app.use((req, res, next) => {
 
 app.use(express.static('admin-public'));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', port: PORT, timestamp: new Date().toISOString() });
+});
+
 // Real-time EventBridge listener endpoint
 app.get('/api/events', (req, res) => {
     const clientId = `admin-${Date.now()}-${Math.random()}`;
