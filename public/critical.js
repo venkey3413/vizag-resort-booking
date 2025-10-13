@@ -15,6 +15,15 @@ function initBannerRotation(){
 // Initialize when DOM is ready
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){initBannerRotation();setupModalEvents()})}else{initBannerRotation();setupModalEvents()}
 
+// Modal close function
+window.closeModal=function(){
+    const modal=document.getElementById('bookingModal');
+    if(modal){
+        modal.style.display='none';
+        document.getElementById('bookingForm').reset();
+    }
+}
+
 // Setup modal events
 function setupModalEvents(){
     // Close button
@@ -115,15 +124,6 @@ window.bookNow=function(resortId,resortName){
         }
     }else{
         alert('Please wait for page to load completely.');
-    }
-}
-
-// Modal close function
-window.closeModal=function(){
-    const modal=document.getElementById('bookingModal');
-    if(modal){
-        modal.style.display='none';
-        document.getElementById('bookingForm').reset();
     }
 }
 
