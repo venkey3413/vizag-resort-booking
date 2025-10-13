@@ -196,47 +196,17 @@ window.handleBookingSubmit=function(e){
     const platformFee=Math.round(basePrice*0.015);
     const total=basePrice+platformFee;
     
-    // Check availability before proceeding to payment
-    const btn = e.target.querySelector('button[type="submit"]');
-    const originalText = btn.textContent;
-    btn.textContent = 'Checking availability...';
-    btn.disabled = true;
+    const bookingData = {
+        ...formData,
+        resortName: resort.name,
+        basePrice: basePrice,
+        platformFee: platformFee,
+        totalPrice: total,
+        bookingReference: `RB${String(Date.now()).slice(-6)}`
+    };
     
-    fetch('/api/check-availability', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({
-            resortId: formData.resortId,
-            checkIn: formData.checkIn,
-            checkOut: formData.checkOut
-        })
-    }).then(r => r.json()).then(availability => {
-        if (!availability.available) {
-            showCriticalNotification(availability.error || 'Resort not available for selected dates. Please choose different dates.', 'error');
-            btn.textContent = originalText;
-            btn.disabled = false;
-            return;
-        }
-        
-        const bookingData = {
-            ...formData,
-            resortName: resort.name,
-            basePrice: basePrice,
-            platformFee: platformFee,
-            totalPrice: total,
-            bookingReference: `RB${String(Date.now()).slice(-6)}`
-        };
-        
-        showPaymentInterface(bookingData);
-        window.closeModal();
-    }).catch(e => {
-        showCriticalNotification('Unable to check availability. Please try again.', 'error');
-        btn.textContent = originalText;
-        btn.disabled = false;
-    });
+    showPaymentInterface(bookingData);
+    window.closeModal();
 }
 
 // Enhanced payment interface with card payment
@@ -443,7 +413,6 @@ window.loadRazorpay();
 // Enhanced notification system
 function showCriticalNotification(message, type = 'success') {
     const isBookingConfirmation = message.includes('submitted for verification') || message.includes('successful');
-    const isAvailabilityError = message.includes('not available') || message.includes('choose different dates');
     
     const notification = document.createElement('div');
     
@@ -474,12 +443,12 @@ function showCriticalNotification(message, type = 'success') {
             animation: bookingPulse 0.6s ease-out;
             border: 3px solid #fff;
         `;
-    } else if (isAvailabilityError && type === 'error') {
+    } else if (type === 'error') {
         notification.innerHTML = `
             <div class="notification-content">
                 <div class="error-icon">❌</div>
                 <div class="notification-text">
-                    <strong>Dates Not Available!</strong><br>
+                    <strong>Error!</strong><br>
                     ${message}
                 </div>
             </div>
@@ -519,7 +488,7 @@ function showCriticalNotification(message, type = 'success') {
     
     document.body.appendChild(notification);
     
-    if ((isBookingConfirmation || isAvailabilityError) && !document.getElementById('critical-animation-styles')) {
+    if ((isBookingConfirmation || type === 'error') && !document.getElementById('critical-animation-styles')) {
         const style = document.createElement('style');
         style.id = 'critical-animation-styles';
         style.textContent = `
@@ -557,7 +526,7 @@ function showCriticalNotification(message, type = 'success') {
         document.head.appendChild(style);
     }
     
-    const duration = (isBookingConfirmation || isAvailabilityError) ? 8000 : 4000;
+    const duration = (isBookingConfirmation || type === 'error') ? 6000 : 4000;
     
     setTimeout(() => {
         notification.remove();
