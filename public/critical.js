@@ -12,7 +12,9 @@ function initBannerRotation(){
 }
 // Initialize when DOM is ready
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initBannerRotation)}else{initBannerRotation()}
+// Load resorts immediately
+fetch('/api/resorts').then(r=>r.json()).then(resorts=>{const grid=document.getElementById('resortsGrid');if(grid&&resorts){grid.innerHTML=resorts.map(r=>`<div class="resort-card"><img src="${r.image}" alt="${r.name}" class="resort-image"><div class="resort-info"><h3>${r.name}</h3><p class="resort-location">${r.location}</p><p class="resort-price">₹${r.price}/night</p><p class="resort-description">${r.description}</p><button class="book-btn" onclick="openBookingModal(${r.id})">Book Now</button></div></div>`).join('')}}).catch(e=>console.log('Resorts loading deferred'))
 // Cache clearing
-if(!sessionStorage.getItem('cache_cleared_v5')){sessionStorage.setItem('cache_cleared_v5','true');window.location.reload(true)}
-// Lazy load non-critical JS
-window.addEventListener('load',()=>{setTimeout(()=>{const script=document.createElement('script');script.src='script.js?v=1.0.5';script.defer=true;document.head.appendChild(script)},2000)})
+if(!sessionStorage.getItem('cache_cleared_v6')){sessionStorage.setItem('cache_cleared_v6','true');window.location.reload(true)}
+// Load full script
+window.addEventListener('load',()=>{setTimeout(()=>{const script=document.createElement('script');script.src='script.js?v=1.0.5';document.head.appendChild(script)},1000)})
