@@ -477,7 +477,7 @@ async function handleBooking(e) {
             bookingReference: `RB${String(Date.now()).slice(-6)}`
         };
         
-        showPaymentInterface(pendingBookingData);
+        showScriptPaymentInterface(pendingBookingData);
         closeModal();
     } catch (error) {
         console.error('Booking validation error:', error);
@@ -803,7 +803,7 @@ function prevImage(resortId) {
     }
 }
 
-function showPaymentInterface(booking) {
+function showScriptPaymentInterface(booking) {
     // Store booking data for critical.js
     window.pendingCriticalBooking = booking;
     
