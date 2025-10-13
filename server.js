@@ -71,7 +71,8 @@ app.use((req, res, next) => {
     res.set('X-Content-Type-Options', 'nosniff');
     res.set('X-Frame-Options', 'DENY');
     res.set('X-XSS-Protection', '1; mode=block');
-    res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    // HSTS disabled to allow HTTP on ports 3001/3002
+    // res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     next();
 });
