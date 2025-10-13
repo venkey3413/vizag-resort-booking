@@ -142,7 +142,7 @@ window.bookNow=function(resortId,resortName){
             modal.style.display='block';
         }
     }else{
-        alert('Please wait for page to load completely.');
+        showCriticalNotification('Please wait for page to load completely.', 'error');
     }
 }
 
@@ -161,25 +161,25 @@ window.handleBookingSubmit=function(e){
     
     // Basic validation
     if(!formData.guestName||!formData.email||!formData.phone||!formData.checkIn||!formData.checkOut){
-        alert('Please fill all required fields');
+        showCriticalNotification('Please fill all required fields', 'error');
         return;
     }
     
     // Phone validation
     if(!formData.phone.startsWith('+91')||formData.phone.length!==13){
-        alert('Please enter a valid phone number with +91');
+        showCriticalNotification('Please enter a valid phone number with +91', 'error');
         return;
     }
     
     // Email validation
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)){
-        alert('Please enter a valid email address');
+        showCriticalNotification('Please enter a valid email address', 'error');
         return;
     }
     
     // Create booking data for payment
     const resort=window.resorts.find(r=>r.id==formData.resortId);
-    if(!resort){alert('Resort not found');return}
+    if(!resort){showCriticalNotification('Resort not found', 'error');return}
     
     const checkInDate=new Date(formData.checkIn);
     const checkOutDate=new Date(formData.checkOut);
@@ -261,8 +261,8 @@ function showPaymentInterface(bookingData){
     
     window.confirmCriticalPayment=function(){
         const utr=document.getElementById('utrInput').value;
-        if(!utr){alert('Please enter your 12-digit UTR number');return}
-        if(!/^[0-9]{12}$/.test(utr)){alert('UTR number must be exactly 12 digits');return}
+        if(!utr){showCriticalNotification('Please enter your 12-digit UTR number', 'error');return}
+        if(!/^[0-9]{12}$/.test(utr)){showCriticalNotification('UTR number must be exactly 12 digits', 'error');return}
         
         const btn=document.querySelector('[onclick="confirmCriticalPayment()"]');
         const originalText=btn.textContent;
@@ -288,13 +288,13 @@ function showPaymentInterface(bookingData){
             })
         }).then(r=>r.json()).then(result=>{
             if(result.error){
-                alert('Booking failed: '+result.error);
+                showCriticalNotification('Booking failed: '+result.error, 'error');
             }else{
-                alert('Payment submitted for verification. You will be notified via email and WhatsApp.');
+                showCriticalNotification('Payment submitted for verification. You will be notified via email and WhatsApp.', 'success');
                 paymentModal.remove();
                 window.pendingCriticalBooking=null;
             }
-        }).catch(e=>alert('Network error. Please try again.')).finally(()=>{
+        }).catch(e=>showCriticalNotification('Network error. Please try again.', 'error')).finally(()=>{
             btn.textContent=originalText;
             btn.disabled=false;
         });
@@ -305,7 +305,7 @@ function showPaymentInterface(bookingData){
             const script=document.createElement('script');
             script.src='https://checkout.razorpay.com/v1/checkout.js';
             script.onload=function(){setTimeout(window.payCriticalWithCard,500)};
-            script.onerror=function(){alert('Card payment service unavailable. Please use UPI.')};
+            script.onerror=function(){showCriticalNotification('Card payment service unavailable. Please use UPI.', 'error')};
             document.head.appendChild(script);
             return;
         }
@@ -331,12 +331,12 @@ function showPaymentInterface(bookingData){
             })
         }).then(r=>r.json()).then(booking=>{
             if(booking.error){
-                alert('Booking failed: '+booking.error);
+                showCriticalNotification('Booking failed: '+booking.error, 'error');
                 return;
             }
             fetch('/api/razorpay-key').then(r=>r.json()).then(keyData=>{
                 if(!keyData.key){
-                    alert('Payment system not configured. Please use UPI.');
+                    showCriticalNotification('Payment system not configured. Please use UPI.', 'error');
                     return;
                 }
                 const options={
@@ -354,7 +354,7 @@ function showPaymentInterface(bookingData){
                             },
                             body:JSON.stringify({paymentId:response.razorpay_payment_id})
                         }).catch(e=>console.log('Notification failed'));
-                        alert('Card payment successful! You will be notified via email and WhatsApp.');
+                        showCriticalNotification('Card payment successful! You will be notified via email and WhatsApp.', 'success');
                         paymentModal.remove();
                         window.pendingCriticalBooking=null;
                     },
@@ -372,8 +372,8 @@ function showPaymentInterface(bookingData){
                 };
                 const rzp=new Razorpay(options);
                 rzp.open();
-            }).catch(e=>alert('Payment configuration error. Please use UPI.'));
-        }).catch(e=>alert('Booking creation failed. Please try again.'));
+            }).catch(e=>showCriticalNotification('Payment configuration error. Please use UPI.', 'error'));
+        }).catch(e=>showCriticalNotification('Booking creation failed. Please try again.', 'error'));
     }
 }
 
@@ -401,3 +401,83 @@ window.loadRazorpay=function(){
 
 // Load Razorpay immediately
 window.loadRazorpay();
+
+// Enhanced notification system
+function showCriticalNotification(message, type = 'success') {
+    const isBookingConfirmation = message.includes('submitted for verification') || message.includes('successful');
+    
+    const notification = document.createElement('div');
+    
+    if (isBookingConfirmation && type === 'success') {
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="success-icon">🎉</div>
+                <div class="notification-text">
+                    <strong>Booking Confirmed!</strong><br>
+                    ${message}
+                </div>
+            </div>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+            font-size: 16px;
+            max-width: 400px;
+            text-align: center;
+            animation: bookingPulse 0.6s ease-out;
+            border: 3px solid #fff;
+        `;
+    } else {
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${type === 'success' ? '#28a745' : '#dc3545'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 3000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+        `;
+    }
+    
+    document.body.appendChild(notification);
+    
+    if (isBookingConfirmation && !document.getElementById('critical-animation-styles')) {
+        const style = document.createElement('style');
+        style.id = 'critical-animation-styles';
+        style.textContent = `
+            @keyframes bookingPulse {
+                0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.05); }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            }
+            .success-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                animation: bounce 1s infinite alternate;
+            }
+            @keyframes bounce {
+                0% { transform: translateY(0); }
+                100% { transform: translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    const duration = isBookingConfirmation ? 10000 : 4000;
+    
+    setTimeout(() => {
+        notification.remove();
+    }, duration);
+}
