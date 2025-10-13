@@ -3,6 +3,7 @@ function scrollToSection(id){document.getElementById(id).scrollIntoView({behavio
 // Banner rotation
 window.currentSlide=0;
 function initBannerRotation(){
+    window.bannerRotationInitialized=true;
     const slides=document.querySelectorAll('.banner-slide');
     if(slides.length>0){
         function showSlide(n){slides.forEach(s=>s.classList.remove('active'));slides[n].classList.add('active')}
@@ -39,25 +40,34 @@ fetch('/api/resorts').then(r=>r.json()).then(resorts=>{
 if(!sessionStorage.getItem('cache_cleared_v7')){sessionStorage.setItem('cache_cleared_v7','true');window.location.reload(true)}
 // Essential booking modal function
 window.openBookingModal=function(resortId){
-    console.log('Opening booking modal for resort:', resortId);
-    const script=document.querySelector('script[src*="script.js"]');
-    if(script&&script.dataset.loaded==='true'&&typeof window.openBookingModalFull==='function'){
-        console.log('Using full script modal');
+    if(typeof window.openBookingModalFull==='function'){
         window.openBookingModalFull(resortId);
     }else{
-        console.log('Using fallback modal');
-        const resort=window.resorts?.find(r=>r.id==resortId);
-        const modal=document.getElementById('bookingModal');
-        console.log('Resort found:', !!resort, 'Modal found:', !!modal);
-        if(resort&&modal){
-            document.getElementById('resortId').value=resortId;
-            document.getElementById('resortPrice').value=resort.price;
-            document.getElementById('modalResortName').textContent=`Book ${resort.name}`;
-            modal.style.display='block';
-        }else{
-            alert('Please wait for page to fully load, then try again.');
-        }
+        showNotification('Please wait for page to fully load, then try again.', 'error');
     }
 }
-// Load full script
-window.addEventListener('load',()=>{setTimeout(()=>{const script=document.createElement('script');script.src='script.js?v=1.0.5';script.onload=()=>{script.dataset.loaded='true';if(typeof openBookingModal==='function'){window.openBookingModalFull=openBookingModal}};document.head.appendChild(script)},1000)})
+// Load full script immediately
+if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',loadMainScript);
+}else{
+    loadMainScript();
+}
+function loadMainScript(){
+    const script=document.createElement('script');
+    script.src='script.js?v=1.0.5';
+    script.onload=()=>{
+        if(typeof openBookingModal==='function'){
+            window.openBookingModalFull=openBookingModal;
+        }
+    };
+    document.head.appendChild(script);
+}
+// Simple notification function
+function showNotification(message,type){
+    const notification=document.createElement('div');
+    notification.className=`notification ${type}`;
+    notification.textContent=message;
+    notification.style.cssText='position:fixed;top:20px;right:20px;padding:15px;border-radius:5px;color:white;z-index:10000;'+(type==='error'?'background:#dc3545;':'background:#28a745;');
+    document.body.appendChild(notification);
+    setTimeout(()=>notification.remove(),3000);
+}

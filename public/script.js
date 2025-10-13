@@ -49,18 +49,28 @@ function updateTotalPrice() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadResorts();
+    // Skip resort loading if already loaded by critical.js
+    if (!window.resorts || window.resorts.length === 0) {
+        loadResorts();
+    } else {
+        resorts = window.resorts;
+        displayResorts();
+    }
     loadCoupons();
     setupEventListeners();
     setMinDate();
     setupLogoRotation();
     setupWebSocketSync();
     preloadQRCode();
-    initBannerRotation();
+    // Skip banner rotation if already initialized
+    if (!window.bannerRotationInitialized) {
+        initBannerRotation();
+    }
 });
 
-// Rotating Banner Animation
+// Rotating Banner Animation - avoid conflicts
 function initBannerRotation() {
+    window.bannerRotationInitialized = true;
     let currentSlide = 0;
     const slides = document.querySelectorAll('.banner-slide');
     const totalSlides = slides.length;
