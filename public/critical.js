@@ -31,7 +31,7 @@ fetch('/api/resorts').then(r=>r.json()).then(resorts=>{
                     pricingDisplay+='</small>';
                 }
             }
-            return `<div class="resort-card"><img src="${r.image}" alt="${r.name}" class="resort-image"><div class="resort-info"><h3>${r.name}</h3><p class="resort-location">📍 ${r.location}${r.map_link?`<br><a href="${r.map_link}" target="_blank" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><p class="resort-description">${r.description}</p><button class="book-btn" onclick="openBookingModal(${r.id})">Book Now</button></div></div>`;
+            return `<div class="resort-card"><img src="${r.image}" alt="${r.name}" class="resort-image"><div class="resort-info"><h3>${r.name}</h3><p class="resort-location">📍 ${r.location}${r.map_link?`<br><a href="${r.map_link}" target="_blank" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><p class="resort-description">${r.description}</p>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${amenity.trim()}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="window.openBookingModal(${r.id})">Book Now</button></div></div>`;
         }).join('');
     }
 }).catch(e=>console.log('Resorts loading deferred'))
@@ -39,12 +39,16 @@ fetch('/api/resorts').then(r=>r.json()).then(resorts=>{
 if(!sessionStorage.getItem('cache_cleared_v7')){sessionStorage.setItem('cache_cleared_v7','true');window.location.reload(true)}
 // Essential booking modal function
 window.openBookingModal=function(resortId){
+    console.log('Opening booking modal for resort:', resortId);
     const script=document.querySelector('script[src*="script.js"]');
     if(script&&script.dataset.loaded==='true'&&typeof window.openBookingModalFull==='function'){
+        console.log('Using full script modal');
         window.openBookingModalFull(resortId);
     }else{
+        console.log('Using fallback modal');
         const resort=window.resorts?.find(r=>r.id==resortId);
         const modal=document.getElementById('bookingModal');
+        console.log('Resort found:', !!resort, 'Modal found:', !!modal);
         if(resort&&modal){
             document.getElementById('resortId').value=resortId;
             document.getElementById('resortPrice').value=resort.price;
