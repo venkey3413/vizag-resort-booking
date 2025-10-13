@@ -262,14 +262,14 @@ function showPaymentInterface(bookingData){
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({
-                resortId:bookingData.resortId,
-                guestName:bookingData.guestName,
-                email:bookingData.email,
-                phone:bookingData.phone,
+                resortId:parseInt(bookingData.resortId),
+                guestName:bookingData.guestName.trim(),
+                email:bookingData.email.trim(),
+                phone:bookingData.phone.trim(),
                 checkIn:bookingData.checkIn,
                 checkOut:bookingData.checkOut,
-                guests:bookingData.guests,
-                transactionId:utr
+                guests:parseInt(bookingData.guests)||2,
+                transactionId:utr.trim()
             })
         }).then(r=>r.json()).then(result=>{
             if(result.error){
@@ -283,51 +283,65 @@ function showPaymentInterface(bookingData){
     }
     
     window.payCriticalWithCard=function(){
-        if(!window.loadRazorpay){alert('Card payment not available. Please use UPI.');return}
-        window.loadRazorpay();
-        setTimeout(function(){
-            if(typeof Razorpay==='undefined'){alert('Card payment service loading. Please try again.');return}
+        // Load Razorpay script if not available
+        if(typeof Razorpay==='undefined'){
+            const script=document.createElement('script');
+            script.src='https://checkout.razorpay.com/v1/checkout.js';
+            script.onload=function(){setTimeout(window.payCriticalWithCard,500)};
+            script.onerror=function(){alert('Card payment service unavailable. Please use UPI.')};
+            document.head.appendChild(script);
+            return;
+        }
+        
+        const cardAmount=bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015);
+        
+        // Create booking first
+        fetch('/api/bookings',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                resortId:parseInt(bookingData.resortId),
+                guestName:bookingData.guestName.trim(),
+                email:bookingData.email.trim(),
+                phone:bookingData.phone.trim(),
+                checkIn:bookingData.checkIn,
+                checkOut:bookingData.checkOut,
+                guests:parseInt(bookingData.guests)||2
+            })
+        }).then(r=>r.json()).then(booking=>{
+            if(booking.error){alert('Booking failed: '+booking.error);return}
             
-            const cardAmount=bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015);
-            
-            fetch('/api/bookings',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({
-                    resortId:bookingData.resortId,
-                    guestName:bookingData.guestName,
-                    email:bookingData.email,
-                    phone:bookingData.phone,
-                    checkIn:bookingData.checkIn,
-                    checkOut:bookingData.checkOut,
-                    guests:bookingData.guests
-                })
-            }).then(r=>r.json()).then(booking=>{
-                if(booking.error){alert('Booking failed: '+booking.error);return}
+            // Get Razorpay key
+            fetch('/api/razorpay-key').then(r=>r.json()).then(keyData=>{
+                if(!keyData.key){alert('Payment system not configured. Please use UPI.');return}
                 
-                fetch('/api/razorpay-key').then(r=>r.json()).then(keyData=>{
-                    if(!keyData.key){alert('Payment system not configured');return}
-                    
-                    const options={
-                        key:keyData.key,
-                        amount:cardAmount*100,
-                        currency:'INR',
-                        name:'Vizag Resorts',
-                        description:'Resort Booking Payment',
-                        handler:function(response){
-                            alert('Card payment successful! You will be notified via email and WhatsApp.');
-                            paymentModal.remove();
-                            window.pendingCriticalBooking=null;
-                        },
-                        prefill:{name:bookingData.guestName,email:bookingData.email,contact:bookingData.phone},
-                        theme:{color:'#667eea'}
-                    };
-                    
-                    const rzp=new Razorpay(options);
-                    rzp.open();
-                }).catch(e=>alert('Payment configuration error'));
-            }).catch(e=>alert('Booking creation failed'));
-        },1000);
+                const options={
+                    key:keyData.key,
+                    amount:cardAmount*100,
+                    currency:'INR',
+                    name:'Vizag Resorts',
+                    description:'Resort Booking Payment',
+                    handler:function(response){
+                        // Notify successful payment
+                        fetch(`/api/bookings/${booking.id}/notify-card-payment`,{
+                            method:'POST',
+                            headers:{'Content-Type':'application/json'},
+                            body:JSON.stringify({paymentId:response.razorpay_payment_id})
+                        }).catch(e=>console.log('Notification failed'));
+                        
+                        alert('Card payment successful! You will be notified via email and WhatsApp.');
+                        paymentModal.remove();
+                        window.pendingCriticalBooking=null;
+                    },
+                    prefill:{name:bookingData.guestName,email:bookingData.email,contact:bookingData.phone},
+                    theme:{color:'#667eea'},
+                    modal:{ondismiss:function(){console.log('Payment cancelled')}}
+                };
+                
+                const rzp=new Razorpay(options);
+                rzp.open();
+            }).catch(e=>alert('Payment configuration error. Please use UPI.'));
+        }).catch(e=>alert('Booking creation failed. Please try again.'));
     }
 }
 
@@ -341,3 +355,13 @@ window.openBookingModal=function(resortId){
 const script=document.createElement('script');
 script.src='script.js?v=1.0.5';
 document.head.appendChild(script);
+
+// Preload Razorpay for card payments
+window.loadRazorpay=function(){
+    if(typeof Razorpay==='undefined'){
+        const razorScript=document.createElement('script');
+        razorScript.src='https://checkout.razorpay.com/v1/checkout.js';
+        razorScript.async=true;
+        document.head.appendChild(razorScript);
+    }
+};
