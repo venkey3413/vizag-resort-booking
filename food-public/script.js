@@ -625,17 +625,46 @@ async function confirmFoodPayment() {
 }
 
 async function payFoodWithCard(amount) {
+    console.log('💳 payFoodWithCard() called with amount:', amount);
+    
+    // Load Razorpay if not already loaded
+    if (typeof Razorpay === 'undefined') {
+        console.log('📦 Loading Razorpay script...');
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => {
+            console.log('✅ Razorpay script loaded, retrying payment...');
+            setTimeout(() => payFoodWithCard(amount), 500);
+        };
+        script.onerror = () => {
+            console.error('❌ Failed to load Razorpay script');
+            showNotification('Payment system unavailable. Please use UPI payment.', 'error');
+        };
+        document.head.appendChild(script);
+        return;
+    }
+    
     try {
+        console.log('🔑 Fetching Razorpay key...');
         const keyResponse = await fetch('/api/razorpay-key');
-        const { key } = await keyResponse.json();
+        const keyData = await keyResponse.json();
+        
+        if (!keyData.key) {
+            console.error('❌ No Razorpay key received');
+            showNotification('Payment system not configured. Please use UPI payment.', 'error');
+            return;
+        }
+        
+        console.log('🔑 Razorpay key received, initializing payment...');
         
         const options = {
-            key: key,
+            key: keyData.key,
             amount: amount * 100,
             currency: 'INR',
             name: 'My Food - Vizag Resorts',
             description: 'Food Order Payment',
             handler: function(response) {
+                console.log('✅ Razorpay payment successful:', response.razorpay_payment_id);
                 handleFoodCardPayment(response.razorpay_payment_id);
             },
             prefill: {
@@ -643,12 +672,19 @@ async function payFoodWithCard(amount) {
             },
             theme: {
                 color: '#667eea'
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log('❌ Payment cancelled by user');
+                }
             }
         };
         
+        console.log('🚀 Opening Razorpay checkout...');
         const rzp = new Razorpay(options);
         rzp.open();
     } catch (error) {
+        console.error('❌ Payment system error:', error);
         showNotification('Payment system error. Please try UPI payment.', 'error');
     }
 }
