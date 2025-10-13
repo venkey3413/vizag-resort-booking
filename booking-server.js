@@ -26,6 +26,16 @@ app.use((req, res, next) => {
 
 app.use(express.static('bookings-public'));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', port: PORT, timestamp: new Date().toISOString() });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/bookings-public/index.html');
+});
+
 // Real-time EventBridge listener endpoint
 app.get('/api/events', (req, res) => {
     const clientId = `booking-${Date.now()}-${Math.random()}`;
