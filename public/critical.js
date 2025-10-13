@@ -28,16 +28,16 @@ window.closeModal=function(){
 function setupModalEvents(){
     // Close button
     const closeBtn=document.querySelector('.close');
-    if(closeBtn)closeBtn.onclick=closeModal;
+    if(closeBtn)closeBtn.onclick=window.closeModal;
     
     // Form submission
     const form=document.getElementById('bookingForm');
-    if(form)form.onsubmit=handleBookingSubmit;
+    if(form)form.onsubmit=window.handleBookingSubmit;
     
     // Click outside modal to close
     window.onclick=function(event){
         const modal=document.getElementById('bookingModal');
-        if(event.target===modal)closeModal();
+        if(event.target===modal)window.closeModal();
     }
 }
 
