@@ -394,21 +394,49 @@ function confirmUPIPayment() {
 }
 
 async function initiateRazorpayPayment() {
+    console.log('💳 initiateRazorpayPayment() called');
+    
+    // Load Razorpay if not already loaded
+    if (typeof Razorpay === 'undefined') {
+        console.log('📦 Loading Razorpay script...');
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => {
+            console.log('✅ Razorpay script loaded, retrying payment...');
+            setTimeout(() => initiateRazorpayPayment(), 500);
+        };
+        script.onerror = () => {
+            console.error('❌ Failed to load Razorpay script');
+            showNotification('Payment system unavailable. Please use UPI payment.', 'error');
+        };
+        document.head.appendChild(script);
+        return;
+    }
+    
     try {
         const bookingData = window.currentTravelBooking;
         
+        console.log('🔑 Fetching Razorpay key...');
         const keyResponse = await fetch('/api/razorpay-key');
-        const { key } = await keyResponse.json();
+        const keyData = await keyResponse.json();
+        
+        if (!keyData.key) {
+            console.error('❌ No Razorpay key received');
+            showNotification('Payment system not configured. Please use UPI payment.', 'error');
+            return;
+        }
         
         const amount = Math.round(bookingData.total_amount * 1.02 * 100);
+        console.log('💰 Payment amount:', amount / 100);
 
         const options = {
-            key: key,
+            key: keyData.key,
             amount: amount,
             currency: 'INR',
             name: 'Vizag Resort Booking',
             description: 'Travel Package Booking',
             handler: function(response) {
+                console.log('✅ Razorpay payment successful:', response.razorpay_payment_id);
                 handleTravelCardPayment(bookingData, response.razorpay_payment_id);
             },
             prefill: {
@@ -418,12 +446,19 @@ async function initiateRazorpayPayment() {
             },
             theme: {
                 color: '#667eea'
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log('❌ Payment cancelled by user');
+                }
             }
         };
 
+        console.log('🚀 Opening Razorpay checkout...');
         const rzp = new Razorpay(options);
         rzp.open();
     } catch (error) {
+        console.error('❌ Payment system error:', error);
         showNotification('Payment system error. Please try UPI payment.', 'error');
     }
 }
