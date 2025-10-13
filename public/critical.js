@@ -16,5 +16,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 fetch('/api/resorts').then(r=>r.json()).then(resorts=>{const grid=document.getElementById('resortsGrid');if(grid&&resorts){grid.innerHTML=resorts.map(r=>`<div class="resort-card"><img src="${r.image}" alt="${r.name}" class="resort-image"><div class="resort-info"><h3>${r.name}</h3><p class="resort-location">${r.location}</p><p class="resort-price">₹${r.price}/night</p><p class="resort-description">${r.description}</p><button class="book-btn" onclick="openBookingModal(${r.id})">Book Now</button></div></div>`).join('')}}).catch(e=>console.log('Resorts loading deferred'))
 // Cache clearing
 if(!sessionStorage.getItem('cache_cleared_v7')){sessionStorage.setItem('cache_cleared_v7','true');window.location.reload(true)}
+// Essential booking modal function
+function openBookingModal(resortId){if(typeof window.openBookingModalFull==='function'){window.openBookingModalFull(resortId)}else{alert('Please wait for page to fully load, then try again.');}}
 // Load full script
 window.addEventListener('load',()=>{setTimeout(()=>{const script=document.createElement('script');script.src='script.js?v=1.0.5';document.head.appendChild(script)},1000)})

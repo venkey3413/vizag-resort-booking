@@ -33,6 +33,15 @@
         }
         setDynamicViewport();
         window.addEventListener('resize', setDynamicViewport);
+        
+        // Desktop hero positioning
+        if (window.innerWidth > 768) {
+            const style = document.createElement('style');
+            style.textContent = `
+                .hero { margin-top: 88px !important; height: calc(100vh - 88px) !important; }
+            `;
+            document.head.appendChild(style);
+        }
     </script>
     <title>My Food - Vizag Resort Booking</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
