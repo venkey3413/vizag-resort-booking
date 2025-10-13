@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <script>
         // Dynamic viewport scaling based on screen resolution
         function setDynamicViewport() {
@@ -21,9 +21,9 @@
         }
         setDynamicViewport();
     </script>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Cache-Control" content="public, max-age=31536000">
+    <meta http-equiv="Pragma" content="cache">
+    <meta http-equiv="Expires" content="31536000">
     <title>Vizag Resort Booking - Best Beach Resorts in Visakhapatnam</title>
     <meta name="description" content="Book luxury beach resorts in Vizag (Visakhapatnam). Best prices, stunning ocean views, premium amenities. Book now at VizagResortBooking.in">
     <meta name="keywords" content="Vizag resorts, Visakhapatnam hotels, beach resorts, resort booking, Vizag tourism, Andhra Pradesh resorts, S.R Puram resorts, S Kota resort, resorts in vizag, book resorts in vizag, available resorts in vizag, Narava resort, Pinagadi resort, Pendurthi resort, vizag resort, all resorts in vizag, Araku Valley resorts, Borra Caves hotels, Kailasagiri resorts, RK Beach hotels, Rushikonda beach resorts, Yarada beach hotels, Vizag honeymoon packages, family resorts Vizag, luxury hotels Visakhapatnam, budget hotels Vizag, sea view resorts, hill station resorts Araku, weekend getaway Vizag, corporate bookings Visakhapatnam">
@@ -43,27 +43,34 @@
     <link rel="canonical" href="https://vizagresortbooking.in">
     <link rel="icon" type="image/png" href="cropped_circle_image.png">
     <link rel="shortcut icon" href="cropped_circle_image.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="//checkout.razorpay.com">
     <link rel="dns-prefetch" href="//cdn.socket.io">
     <link rel="dns-prefetch" href="//embed.tawk.to">
+    <link rel="preload" href="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop&fm=webp&q=75" as="image" fetchpriority="high">
+    <link rel="preload" href="cropped_circle_image.webp" as="image" type="image/webp">
     
     <!-- Critical CSS for above-the-fold content -->
     <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;line-height:1.6;color:#333;background:#f8f9fa}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.6;color:#333;background:#f8f9fa}
     header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:.3rem 0;position:fixed;width:100%;top:0;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,.1)}
     .nav-container{width:100%;margin:0;padding:0;display:flex;justify-content:space-between;align-items:center;height:60px}
     .logo-container{display:flex;align-items:center;gap:.3rem;margin-left:5px}
     .logo-text{font-size:1.8rem;font-weight:800;color:white;order:-1;text-shadow:1px 1px 2px rgba(0,0,0,.3)}
+    .logo-title{font-size:1.5rem;font-weight:700;color:white;text-shadow:1px 1px 2px rgba(0,0,0,.3)}
     .logo-image{height:60px;width:60px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3)}
-    .hero{height:100vh;background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop') center/cover;display:flex;align-items:center;justify-content:center;text-align:center;color:white;margin-top:80px}
+    .hero{height:100vh;background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop&fm=webp&q=75') center/cover;display:flex;align-items:center;justify-content:center;text-align:center;color:white;margin-top:80px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
     .cta-btn{background:#ff6b6b;color:white;padding:15px 30px;border:none;border-radius:5px;font-size:1.1rem;cursor:pointer;transition:background .3s}
     </style>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    <style>
+    @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:fallback;src:url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+    @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:fallback;src:url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+    @font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:fallback;src:url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiJ-Ek-_EeA.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+    @font-face{font-family:'Playfair Display';font-style:normal;font-weight:600;font-display:fallback;src:url(https://fonts.gstatic.com/s/playfairdisplay/v36/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDTbtXK-F2qC0s.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+    @font-face{font-family:'Playfair Display';font-style:normal;font-weight:800;font-display:fallback;src:url(https://fonts.gstatic.com/s/playfairdisplay/v36/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDYbtXK-F2qC0s.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+    </style>
 
 
 
@@ -96,8 +103,11 @@
             <div class="nav-container">
                 <div class="logo-container">
                     <span class="logo-text">ɪ</span>
-                    <img src="cropped_circle_image.png" alt="Vizag Resort Booking Logo" class="logo-image" width="60" height="60">
-                    <h1>Vizag Resorts</h1>
+                    <picture>
+                        <source srcset="cropped_circle_image.webp" type="image/webp">
+                        <img src="cropped_circle_image.png" alt="Vizag Resort Booking Logo" class="logo-image" width="60" height="60" loading="eager" fetchpriority="high">
+                    </picture>
+                    <span class="logo-title">Vizag Resorts</span>
                 </div>
                 <ul>
                     <li><a href="#home">Home</a></li>
@@ -175,27 +185,27 @@
                 <h2>Resort Locations in Vizag</h2>
                 <div class="locations-grid">
                     <div class="location">
-                        <h4>S.R Puram Resorts</h4>
+                        <h3>S.R Puram Resorts</h3>
                         <p>Premium resorts in S.R Puram area with modern amenities</p>
                     </div>
                     <div class="location">
-                        <h4>S Kota Resort</h4>
+                        <h3>S Kota Resort</h3>
                         <p>Beachside resorts in S Kota with stunning sea views</p>
                     </div>
                     <div class="location">
-                        <h4>Narava Resort</h4>
+                        <h3>Narava Resort</h3>
                         <p>Peaceful retreat in Narava with natural surroundings</p>
                     </div>
                     <div class="location">
-                        <h4>Pinagadi Resort</h4>
+                        <h3>Pinagadi Resort</h3>
                         <p>Hill station resort in Pinagadi area near Araku Valley</p>
                     </div>
                     <div class="location">
-                        <h4>Pendurthi Resort</h4>
+                        <h3>Pendurthi Resort</h3>
                         <p>Family-friendly resorts in Pendurthi with easy city access</p>
                     </div>
                     <div class="location">
-                        <h4>All Resorts in Vizag</h4>
+                        <h3>All Resorts in Vizag</h3>
                         <p>Book any available resort in Visakhapatnam with best prices</p>
                     </div>
                 </div>
@@ -312,8 +322,16 @@
     </footer>
 
 
-    <link rel="preload" href="style.css?t=20250103030" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="style.css?t=20250103030"></noscript>
+    <link rel="preload" href="critical.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="critical.css"></noscript>
+    <script>
+    window.addEventListener('load', function() {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'style.min.css?v=1.0.4';
+        document.head.appendChild(link);
+    });
+    </script>
     <script>
         // Simple cache check
         if (!sessionStorage.getItem('cache_cleared_v3')) {
@@ -321,11 +339,10 @@
             window.location.reload(true);
         }
     </script>
-    <script src="script.js?t=20250103030"></script>
+    <script src="critical.js" defer></script>
     
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
-    // Defer Tawk.to loading for better performance
     window.addEventListener('load', function() {
         setTimeout(function() {
             var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
@@ -334,7 +351,7 @@
             s1.async=true;
             s1.src='https://embed.tawk.to/68cae2fe18acfc192545232a/1j5c8dcrf';
             s1.charset='UTF-8';
-            s1.setAttribute('crossorigin','*');
+            s1.onerror=function(){console.log('Tawk.to failed to load');};
             s0.parentNode.insertBefore(s1,s0);
             })();
         }, 3000);
@@ -342,7 +359,25 @@
     </script>
     <!--End of Tawk.to Script-->
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" defer></script>
+    <script type="module">
+    // Load third-party scripts only when needed
+    window.loadRazorpay = () => {
+        if (!window.Razorpay) {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.referrerPolicy = 'strict-origin-when-cross-origin';
+            document.head.appendChild(script);
+        }
+    };
+    window.loadSocketIO = () => {
+        if (!window.io) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
+            script.integrity = 'sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjXfrPFxVNRWhyf3c/FqFONVa+/9ILPvOumdJO';
+            script.crossOrigin = 'anonymous';
+            document.head.appendChild(script);
+        }
+    };
+    </script>
 </body>
 </html>

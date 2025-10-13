@@ -5,7 +5,7 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
     line-height: 1.6;
     color: #333;
     font-size: 16px;
@@ -311,21 +311,21 @@ nav a:hover {
 
 .banner-slide:nth-child(1) {
     background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop') center/cover;
+                url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop&fm=webp&q=75') center/cover;
 }
 
 .banner-slide:nth-child(2) {
     background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=1080&fit=crop') center/cover;
+                url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=1080&fit=crop&fm=webp&q=75') center/cover;
 }
 
 .banner-slide:nth-child(3) {
     background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&h=800&fit=crop&crop=center') center/cover;
+                url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&h=800&fit=crop&crop=center&fm=webp&q=75') center/cover;
 }
 
 .banner-slide h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
     font-size: clamp(2.5rem, 6vw, 4rem);
     margin-bottom: 1rem;
     font-weight: 800;
@@ -431,20 +431,20 @@ section {
 }
 
 .resort-location {
-    color: #666;
+    color: #495057;
     margin-bottom: 1rem;
 }
 
 .view-map-btn {
-    color: #007bff;
+    color: #0056b3;
     text-decoration: none;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600;
     transition: color 0.3s;
 }
 
 .view-map-btn:hover {
-    color: #0056b3;
+    color: #003d82;
     text-decoration: underline;
 }
 
@@ -457,7 +457,7 @@ section {
 
 .resort-description {
     margin-bottom: 1.5rem;
-    color: #666;
+    color: #495057;
 }
 
 .book-btn {
@@ -498,14 +498,14 @@ section {
 }
 
 .booking-details {
-    color: #666;
+    color: #495057;
     font-size: 0.9rem;
 }
 
 .booking-status {
     padding: 5px 15px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: bold;
 }
 
@@ -1222,8 +1222,8 @@ input, select {
 }
 
 .review-text {
-    font-size: 0.7rem;
-    color: #888;
+    font-size: 0.75rem;
+    color: #495057;
     margin-left: 5px;
 }
 
@@ -1232,15 +1232,15 @@ input, select {
 }
 
 .policy-text {
-    font-size: 0.7rem;
-    color: #007bff;
+    font-size: 0.75rem;
+    color: #0056b3;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .policy-text:hover {
     text-decoration: underline;
-    color: #0056b3;
+    color: #003d82;
 }
 
 .features-section {
@@ -1269,13 +1269,13 @@ input, select {
 }
 
 .feature h3 {
-    color: #27ae60;
+    color: #1e7e34;
     margin-bottom: 15px;
     font-size: 1.2rem;
 }
 
 .feature p {
-    color: #666;
+    color: #495057;
     line-height: 1.6;
 }
 
@@ -1298,13 +1298,14 @@ input, select {
     text-align: center;
 }
 
-.location h4 {
-    color: #27ae60;
+.location h3 {
+    color: #1e7e34;
     margin-bottom: 10px;
+    font-size: 1.1rem;
 }
 
 .location p {
-    color: #666;
+    color: #495057;
     font-size: 0.9rem;
 }
 
@@ -1611,7 +1612,7 @@ footer a:hover {
     color: white;
     padding: 2px 6px;
     border-radius: 10px;
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     font-weight: 400;
     white-space: nowrap;
     box-shadow: 0 1px 2px rgba(0,0,0,0.15);
@@ -1671,11 +1672,11 @@ footer a:hover {
     
     .amenity-tag {
         padding: 1px 4px;
-        font-size: 0.55rem;
+        font-size: 0.75rem;
     }
     
     .resort-amenities h4 {
-        font-size: 0.65rem;
+        font-size: 0.75rem;
     }
 }
 
