@@ -197,7 +197,7 @@ main {
     height: 60vh;
     text-align: center;
     color: white;
-    margin-top: 110px;
+    margin-top: 0 !important;
     position: relative;
     overflow: hidden;
     width: 100%;
