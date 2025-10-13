@@ -110,8 +110,9 @@ function setupEventListeners() {
     
 
 
-    // Modal close
-    document.querySelector('.close').addEventListener('click', closeModal);
+    // Modal close - check if exists
+    const closeBtn=document.querySelector('.close');
+    if(closeBtn&&!closeBtn.onclick)closeBtn.addEventListener('click',closeModal);
     window.addEventListener('click', function(event) {
         const modal = document.getElementById('bookingModal');
         const galleryModal = document.getElementById('galleryModal');
@@ -137,19 +138,21 @@ function setupEventListeners() {
     // Coupon button event
     document.getElementById('applyCouponBtn').addEventListener('click', applyCouponImpl);
     
-    // Phone number validation
-    document.getElementById('phone').addEventListener('input', function(e) {
-        let value = e.target.value;
-        // Auto-add +91 if not present
-        if (value && !value.startsWith('+91')) {
-            value = '+91' + value.replace(/\D/g, '').substring(0, 10);
-        }
-        // Ensure only +91 followed by 10 digits
-        if (value.startsWith('+91')) {
-            value = '+91' + value.substring(3).replace(/\D/g, '').substring(0, 10);
-        }
-        e.target.value = value;
-    });
+    // Phone number validation - only if not already handled
+    const phoneInput=document.getElementById('phone');
+    if(phoneInput&&!phoneInput.dataset.handled){
+        phoneInput.dataset.handled='true';
+        phoneInput.addEventListener('input',function(e){
+            let value=e.target.value;
+            if(value&&!value.startsWith('+91')){
+                value='+91'+value.replace(/\D/g,'').substring(0,10);
+            }
+            if(value.startsWith('+91')){
+                value='+91'+value.substring(3).replace(/\D/g,'').substring(0,10);
+            }
+            e.target.value=value;
+        });
+    }
 }
 
 function scrollToSection(sectionId) {
@@ -262,19 +265,28 @@ function displayResorts() {
     setTimeout(setupRatingStars, 100);
 }
 
-async function openBookingModal(resortId) {
-    const resort = resorts.find(r => r.id === resortId);
-    if (!resort) return;
-
-    document.getElementById('resortId').value = resortId;
-    document.getElementById('resortPrice').value = resort.price;
-    document.getElementById('modalResortName').textContent = `Book ${resort.name}`;
+async function openBookingModal(resortId){
+    // Use critical.js function if available
+    if(window.bookNow&&window.resorts){
+        const resort=window.resorts.find(r=>r.id===resortId);
+        if(resort)return window.bookNow(resortId,resort.name);
+    }
     
-    // Load blocked dates for this resort
+    // Fallback implementation
+    const resort=resorts.find(r=>r.id===resortId);
+    if(!resort)return;
+    
+    document.getElementById('resortId').value=resortId;
+    document.getElementById('resortPrice').value=resort.price;
+    document.getElementById('modalResortName').textContent=`Book ${resort.name}`;
+    
+    // Set phone default
+    const phoneInput=document.getElementById('phone');
+    if(phoneInput)phoneInput.value='+91';
+    
     await loadBlockedDates(resortId);
-    
     calculateTotal();
-    document.getElementById('bookingModal').style.display = 'block';
+    document.getElementById('bookingModal').style.display='block';
 }
 
 function closeModal() {

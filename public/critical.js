@@ -26,13 +26,29 @@ window.closeModal=function(){
 
 // Setup modal events
 function setupModalEvents(){
-    // Close button
-    const closeBtn=document.querySelector('.close');
-    if(closeBtn)closeBtn.onclick=window.closeModal;
-    
-    // Form submission
-    const form=document.getElementById('bookingForm');
-    if(form)form.onsubmit=window.handleBookingSubmit;
+    // Close button - wait for DOM
+    setTimeout(function(){
+        const closeBtn=document.querySelector('.close');
+        if(closeBtn)closeBtn.onclick=window.closeModal;
+        
+        // Form submission
+        const form=document.getElementById('bookingForm');
+        if(form)form.onsubmit=window.handleBookingSubmit;
+        
+        // Phone input auto +91
+        const phoneInput=document.getElementById('phone');
+        if(phoneInput){
+            phoneInput.addEventListener('focus',function(){
+                if(!this.value||this.value==='+91')this.value='+91';
+            });
+            phoneInput.addEventListener('input',function(){
+                let val=this.value;
+                if(!val.startsWith('+91'))val='+91'+val.replace(/\D/g,'').substring(0,10);
+                if(val.startsWith('+91'))val='+91'+val.substring(3).replace(/\D/g,'').substring(0,10);
+                this.value=val;
+            });
+        }
+    },100);
     
     // Click outside modal to close
     window.onclick=function(event){
@@ -104,9 +120,9 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('resortPrice').value=resort.price;
             document.getElementById('modalResortName').textContent=`Book ${resortName}`;
             
-            // Set default +91 for phone
+            // Set default +91 for phone - force it
             const phoneInput=document.getElementById('phone');
-            if(phoneInput&&!phoneInput.value)phoneInput.value='+91';
+            if(phoneInput){phoneInput.value='+91';phoneInput.focus();phoneInput.blur()}
             
             const today=new Date().toISOString().split('T')[0];
             const tomorrow=new Date();
@@ -152,45 +168,83 @@ window.handleBookingSubmit=function(e){
         return;
     }
     
-    // Show payment interface
-    showPaymentInterface(formData);
-    closeModal();
-}
-
-// Simple payment interface
-function showPaymentInterface(bookingData){
-    const resort=window.resorts.find(r=>r.id==bookingData.resortId);
+    // Create booking data for payment
+    const resort=window.resorts.find(r=>r.id==formData.resortId);
     const basePrice=resort.price;
     const platformFee=Math.round(basePrice*0.015);
     const total=basePrice+platformFee;
     
+    const bookingData={
+        ...formData,
+        resortName:resort.name,
+        basePrice:basePrice,
+        platformFee:platformFee,
+        totalPrice:total,
+        bookingReference:`RB${String(Date.now()).slice(-6)}`
+    };
+    
+    // Show payment interface
+    showPaymentInterface(bookingData);
+    window.closeModal();
+}
+
+// Enhanced payment interface
+function showPaymentInterface(bookingData){
     const paymentModal=document.createElement('div');
+    paymentModal.className='payment-modal';
     paymentModal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
     paymentModal.innerHTML=`
-        <div style="background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;">
-            <h2>Complete Payment</h2>
-            <p><strong>Resort:</strong> ${resort.name}</p>
-            <p><strong>Guest:</strong> ${bookingData.guestName}</p>
-            <p><strong>Total:</strong> ₹${total.toLocaleString()}</p>
-            <div style="margin:20px 0;">
-                <h3>UPI Payment</h3>
-                <p>UPI ID: vizagresorts@ybl</p>
-                <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" style="width:100%;padding:10px;margin:10px 0;">
-                <button onclick="confirmPayment()" style="background:#28a745;color:white;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;">Confirm Payment</button>
+        <div style="background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;position:relative;">
+            <span onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;">&times;</span>
+            <h2>💳 Complete Payment</h2>
+            <div style="margin:15px 0;">
+                <p><strong>Resort:</strong> ${bookingData.resortName}</p>
+                <p><strong>Guest:</strong> ${bookingData.guestName}</p>
+                <p><strong>Total:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
+                <p><strong>Reference:</strong> ${bookingData.bookingReference}</p>
             </div>
-            <button onclick="this.parentElement.parentElement.remove()" style="background:#dc3545;color:white;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;margin-left:10px;">Cancel</button>
+            <div style="margin:20px 0;">
+                <h3>🔗 UPI Payment</h3>
+                <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
+                <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
+                <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
+                <button onclick="confirmCriticalPayment()" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">✅ Confirm Payment</button>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="background:#dc3545;color:white;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;width:100%;">Cancel</button>
         </div>
     `;
     document.body.appendChild(paymentModal);
     
-    window.confirmPayment=function(){
+    // Store booking data globally for payment confirmation
+    window.pendingCriticalBooking=bookingData;
+    
+    window.confirmCriticalPayment=function(){
         const utr=document.getElementById('utrInput').value;
-        if(utr&&utr.length===12){
-            alert('Payment submitted for verification. You will be notified via email and WhatsApp.');
-            paymentModal.remove();
-        }else{
-            alert('Please enter a valid 12-digit UTR number');
+        if(!utr){
+            alert('Please enter your 12-digit UTR number');
+            return;
         }
+        if(!/^[0-9]{12}$/.test(utr)){
+            alert('UTR number must be exactly 12 digits');
+            return;
+        }
+        
+        // Create booking with payment info
+        fetch('/api/bookings',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({...window.pendingCriticalBooking,transactionId:utr})
+        }).then(r=>r.json()).then(result=>{
+            if(result.error){
+                alert('Booking failed: '+result.error);
+            }else{
+                alert('Payment submitted for verification. You will be notified via email and WhatsApp.');
+                paymentModal.remove();
+                window.pendingCriticalBooking=null;
+            }
+        }).catch(e=>{
+            alert('Network error. Please try again.');
+        });
     }
 }
 
