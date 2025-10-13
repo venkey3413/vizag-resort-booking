@@ -1051,7 +1051,7 @@ function showNotification(message, type) {
                 50% { transform: translate(-50%, -50%) scale(1.05); }
                 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             }
-            .booking-confirmation .success-icon {
+            .success-icon {
                 font-size: 3rem;
                 margin-bottom: 1rem;
                 animation: bounce 1s infinite alternate;
