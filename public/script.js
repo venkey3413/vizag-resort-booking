@@ -804,74 +804,16 @@ function prevImage(resortId) {
 }
 
 function showPaymentInterface(booking) {
-    currentBookingId = booking.id;
-    const paymentModal = document.createElement('div');
-    paymentModal.className = 'payment-modal';
-    paymentModal.innerHTML = `
-        <div class="payment-content">
-            <h2>💳 Complete Payment</h2>
-            <div class="booking-summary">
-                <h3>Booking Details</h3>
-                <p><strong>Resort:</strong> ${booking.resortName}</p>
-                <p><strong>Guest:</strong> ${booking.guestName}</p>
-                <p><strong>Base Price:</strong> ₹${(booking.basePrice || booking.totalPrice || 0).toLocaleString()}</p>
-                <p><strong>Platform Fee (1.5%):</strong> ₹${(booking.platformFee || Math.round((booking.totalPrice || 0) * 0.015)).toLocaleString()}</p>
-                <p><strong>Total Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
-                <p><strong>Reference:</strong> ${booking.bookingReference}</p>
-            </div>
-            
-            <div class="payment-methods">
-                <div class="payment-tabs">
-                    <button class="payment-tab active" onclick="showPaymentMethod('upi')">🔗 UPI Payment</button>
-                    <button class="payment-tab" onclick="showPaymentMethod('card')">💳 Card Payment</button>
-                </div>
-                
-                <div id="upi-payment" class="payment-method active">
-                    <div class="qr-section">
-                        <img src="qr-code.png.jpeg" alt="UPI QR Code" class="qr-code">
-                        <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
-                        <p><strong>Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
-                    </div>
-                    
-                    <div class="payment-instructions">
-                        <p>• Scan QR code or use UPI ID</p>
-                        <p>• Pay exact amount</p>
-                        <p>• Enter 12-digit UTR number below</p>
-                    </div>
-                    
-                    <div class="payment-proof">
-                        <input type="text" id="transactionId" placeholder="Enter 12-digit UTR number" maxlength="12" pattern="[0-9]{12}" required>
-                        <button onclick="confirmPayment()" class="confirm-payment-btn">
-                            ✅ Confirm UPI Payment
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="card-payment" class="payment-method">
-                    <div class="card-section">
-                        <div class="card-pricing">
-                            <p><strong>Base Amount:</strong> ₹${(booking.totalPrice || 0).toLocaleString()}</p>
-                            <p><strong>Transaction Fee (1.5%):</strong> ₹${Math.round((booking.totalPrice || 0) * 0.015).toLocaleString()}</p>
-                            <p style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 5px;">
-                                <strong>Total Card Payment:</strong> ₹${((booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)).toLocaleString()}
-                            </p>
-                        </div>
-                        <p>Pay securely with Debit/Credit Card</p>
-                        <button onclick="payWithRazorpay('${booking.bookingReference}', ${(booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)}, '${booking.guestName}', '${booking.email}', '${booking.phone}')" class="razorpay-btn">
-                            💳 Pay ₹${((booking.totalPrice || 0) + Math.round((booking.totalPrice || 0) * 0.015)).toLocaleString()} with Card
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="payment-actions">
-                <button onclick="cancelPayment()" class="cancel-payment-btn">Cancel Payment</button>
-                <button onclick="closePaymentModal()" class="close-payment-btn">Close</button>
-            </div>
-        </div>
-    `;
+    // Store booking data for critical.js
+    window.pendingCriticalBooking = booking;
     
-    document.body.appendChild(paymentModal);
+    // Use critical.js payment interface
+    if (window.showPaymentInterface && typeof window.showPaymentInterface === 'function') {
+        return window.showPaymentInterface(booking);
+    }
+    
+    // Fallback - create simple modal
+    alert('Payment system loading... Please try booking again in a moment.');
 }
 
 let currentBookingId = null;
@@ -904,62 +846,11 @@ async function cancelBooking(bookingId) {
 }
 
 async function confirmPayment() {
-    const transactionId = document.getElementById('transactionId').value;
-    
-    if (!transactionId) {
-        showNotification('Please enter your 12-digit UTR number', 'error');
-        return;
+    // Use critical.js payment function
+    if (window.confirmCriticalPayment && typeof window.confirmCriticalPayment === 'function') {
+        return window.confirmCriticalPayment();
     }
-    
-    if (!/^[0-9]{12}$/.test(transactionId)) {
-        showNotification('UTR number must be exactly 12 digits', 'error');
-        return;
-    }
-    
-    // Use critical.js booking data
-    const bookingData = window.pendingCriticalBooking || pendingBookingData;
-    if (!bookingData) {
-        showNotification('Booking data not found', 'error');
-        return;
-    }
-    
-    try {
-        // Now create the booking with payment info and enhanced security
-        const sanitizedBookingData = {
-            resortId: parseInt(bookingData.resortId) || 0,
-            guestName: sanitizeInput(bookingData.guestName).substring(0, 100),
-            email: sanitizeInput(bookingData.email).substring(0, 100),
-            phone: sanitizeInput(bookingData.phone).substring(0, 20),
-            checkIn: sanitizeInput(bookingData.checkIn).substring(0, 10),
-            checkOut: sanitizeInput(bookingData.checkOut).substring(0, 10),
-            guests: Math.max(1, Math.min(20, parseInt(bookingData.guests) || 1)),
-            transactionId: sanitizeInput(transactionId).substring(0, 50),
-            couponCode: bookingData.couponCode,
-            discountAmount: bookingData.discountAmount
-        };
-        
-        const bookingResponse = await fetch(`${SERVER_URL}/api/bookings`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-Token': sessionStorage.getItem('csrf-token') || ''
-            },
-            body: JSON.stringify(sanitizedBookingData)
-        });
-        
-        if (bookingResponse.ok) {
-            showNotification('Your booking payment is being verified. You will be notified through email and WhatsApp.', 'success');
-            closePaymentModal();
-            pendingBookingData = null;
-        } else {
-            const error = await bookingResponse.json();
-            showNotification(error.error || 'Booking failed', 'error');
-        }
-    } catch (error) {
-        console.error('Booking creation error:', error);
-        showNotification('Network error. Please try again.', 'error');
-    }
+    alert('Payment system loading... Please try again.');
 }
 
 function showPaymentMethod(method) {
@@ -973,113 +864,11 @@ function showPaymentMethod(method) {
 }
 
 async function payWithRazorpay(bookingReference, amount, name, email, phone) {
-    // Use critical.js booking data
-    const bookingData = window.pendingCriticalBooking || pendingBookingData;
-    if (!bookingData) {
-        showNotification('Booking data not found', 'error');
-        return;
+    // Use critical.js payment function
+    if (window.payCriticalWithCard && typeof window.payCriticalWithCard === 'function') {
+        return window.payCriticalWithCard();
     }
-    
-    try {
-        // Check if Razorpay is available
-        if (typeof Razorpay === 'undefined') {
-            showNotification('Card payment service not available. Please use UPI payment.', 'error');
-            return;
-        }
-        
-        // First create the booking to get a booking ID with enhanced security
-        const sanitizedBookingData = {
-            resortId: parseInt(bookingData.resortId) || 0,
-            guestName: sanitizeInput(bookingData.guestName).substring(0, 100),
-            email: sanitizeInput(bookingData.email).substring(0, 100),
-            phone: sanitizeInput(bookingData.phone).substring(0, 20),
-            checkIn: sanitizeInput(bookingData.checkIn).substring(0, 10),
-            checkOut: sanitizeInput(bookingData.checkOut).substring(0, 10),
-            guests: Math.max(1, Math.min(20, parseInt(bookingData.guests) || 1)),
-            couponCode: bookingData.couponCode,
-            discountAmount: bookingData.discountAmount
-        };
-        
-        const bookingResponse = await fetch(`${SERVER_URL}/api/bookings`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-Token': sessionStorage.getItem('csrf-token') || ''
-            },
-            body: JSON.stringify(sanitizedBookingData)
-        });
-        
-        if (!bookingResponse.ok) {
-            const error = await bookingResponse.json();
-            showNotification(error.error || 'Failed to create booking', 'error');
-            return;
-        }
-        
-        const booking = await bookingResponse.json();
-        const bookingId = booking.id;
-        
-        // Get Razorpay key from server
-        console.log('🔑 Fetching Razorpay key from server...');
-        const keyResponse = await fetch(`${SERVER_URL}/api/razorpay-key`);
-        
-        console.log('📊 Razorpay key response status:', keyResponse.status);
-        
-        if (!keyResponse.ok) {
-            const errorData = await keyResponse.json().catch(() => ({ error: 'Unknown error' }));
-            console.error('❌ Razorpay key fetch failed:', errorData);
-            throw new Error(errorData.error || 'Failed to get payment configuration');
-        }
-        
-        const keyData = await keyResponse.json();
-        console.log('🔑 Razorpay key data received:', { hasKey: !!keyData.key, error: keyData.error });
-        
-        if (keyData.error) {
-            throw new Error(keyData.error);
-        }
-        
-        const key = keyData.key;
-        
-        if (!key) {
-            throw new Error('Payment system not configured - missing key');
-        }
-        
-        console.log('✅ Razorpay key loaded successfully, length:', key.length);
-        
-        const options = {
-            key: key,
-            amount: amount * 100, // Amount in paise
-            currency: 'INR',
-            name: 'Vizag Resorts',
-            description: 'Resort Booking Payment',
-            handler: function(response) {
-                // Payment successful, notify admin immediately
-                notifyCardPaymentSuccess(bookingId, response.razorpay_payment_id);
-                showCardConfirmation(bookingId, response.razorpay_payment_id);
-                pendingBookingData = null; // Clear pending data
-            },
-            prefill: {
-                name: name,
-                email: email,
-                contact: phone
-            },
-            theme: {
-                color: '#667eea'
-            },
-            method: {
-                upi: false,
-                wallet: false,
-                netbanking: false,
-                card: true
-            }
-        };
-        
-        const rzp = new Razorpay(options);
-        rzp.open();
-    } catch (error) {
-        console.error('Card payment error:', error);
-        showNotification(`Card payment error: ${error.message}. Please use UPI payment.`, 'error');
-    }
+    alert('Payment system loading... Please try again.');
 }
 
 async function notifyCardPaymentSuccess(bookingId, paymentId) {
