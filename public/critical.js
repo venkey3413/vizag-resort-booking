@@ -133,6 +133,14 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('checkIn').value=today;
             document.getElementById('checkOut').value=tomorrow.toISOString().split('T')[0];
             
+            // Auto-update checkout when checkin changes
+            document.getElementById('checkIn').addEventListener('change', function() {
+                const checkInDate = new Date(this.value);
+                const nextDay = new Date(checkInDate);
+                nextDay.setDate(nextDay.getDate() + 1);
+                document.getElementById('checkOut').value = nextDay.toISOString().split('T')[0];
+            });
+            
             const basePrice=resort.price;
             const platformFee=Math.round(basePrice*0.015);
             const total=basePrice+platformFee;
@@ -188,17 +196,47 @@ window.handleBookingSubmit=function(e){
     const platformFee=Math.round(basePrice*0.015);
     const total=basePrice+platformFee;
     
-    const bookingData={
-        ...formData,
-        resortName:resort.name,
-        basePrice:basePrice,
-        platformFee:platformFee,
-        totalPrice:total,
-        bookingReference:`RB${String(Date.now()).slice(-6)}`
-    };
+    // Check availability before proceeding to payment
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.textContent = 'Checking availability...';
+    btn.disabled = true;
     
-    showPaymentInterface(bookingData);
-    window.closeModal();
+    fetch('/api/check-availability', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            resortId: formData.resortId,
+            checkIn: formData.checkIn,
+            checkOut: formData.checkOut
+        })
+    }).then(r => r.json()).then(availability => {
+        if (!availability.available) {
+            showCriticalNotification(availability.error || 'Resort not available for selected dates. Please choose different dates.', 'error');
+            btn.textContent = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        const bookingData = {
+            ...formData,
+            resortName: resort.name,
+            basePrice: basePrice,
+            platformFee: platformFee,
+            totalPrice: total,
+            bookingReference: `RB${String(Date.now()).slice(-6)}`
+        };
+        
+        showPaymentInterface(bookingData);
+        window.closeModal();
+    }).catch(e => {
+        showCriticalNotification('Unable to check availability. Please try again.', 'error');
+        btn.textContent = originalText;
+        btn.disabled = false;
+    });
 }
 
 // Enhanced payment interface with card payment
@@ -405,6 +443,7 @@ window.loadRazorpay();
 // Enhanced notification system
 function showCriticalNotification(message, type = 'success') {
     const isBookingConfirmation = message.includes('submitted for verification') || message.includes('successful');
+    const isAvailabilityError = message.includes('not available') || message.includes('choose different dates');
     
     const notification = document.createElement('div');
     
@@ -435,6 +474,33 @@ function showCriticalNotification(message, type = 'success') {
             animation: bookingPulse 0.6s ease-out;
             border: 3px solid #fff;
         `;
+    } else if (isAvailabilityError && type === 'error') {
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="error-icon">❌</div>
+                <div class="notification-text">
+                    <strong>Dates Not Available!</strong><br>
+                    ${message}
+                </div>
+            </div>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+            font-size: 16px;
+            max-width: 400px;
+            text-align: center;
+            animation: errorShake 0.6s ease-out;
+            border: 3px solid #fff;
+        `;
     } else {
         notification.textContent = message;
         notification.style.cssText = `
@@ -453,7 +519,7 @@ function showCriticalNotification(message, type = 'success') {
     
     document.body.appendChild(notification);
     
-    if (isBookingConfirmation && !document.getElementById('critical-animation-styles')) {
+    if ((isBookingConfirmation || isAvailabilityError) && !document.getElementById('critical-animation-styles')) {
         const style = document.createElement('style');
         style.id = 'critical-animation-styles';
         style.textContent = `
@@ -462,20 +528,36 @@ function showCriticalNotification(message, type = 'success') {
                 50% { transform: translate(-50%, -50%) scale(1.05); }
                 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             }
+            @keyframes errorShake {
+                0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                25% { transform: translate(-50%, -50%) scale(1.05) translateX(-5px); }
+                50% { transform: translate(-50%, -50%) scale(1) translateX(5px); }
+                75% { transform: translate(-50%, -50%) scale(1) translateX(-3px); }
+                100% { transform: translate(-50%, -50%) scale(1) translateX(0); opacity: 1; }
+            }
             .success-icon {
                 font-size: 3rem;
                 margin-bottom: 1rem;
                 animation: bounce 1s infinite alternate;
             }
+            .error-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                animation: pulse 1s infinite alternate;
+            }
             @keyframes bounce {
                 0% { transform: translateY(0); }
                 100% { transform: translateY(-10px); }
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                100% { transform: scale(1.1); }
             }
         `;
         document.head.appendChild(style);
     }
     
-    const duration = isBookingConfirmation ? 10000 : 4000;
+    const duration = (isBookingConfirmation || isAvailabilityError) ? 8000 : 4000;
     
     setTimeout(() => {
         notification.remove();
