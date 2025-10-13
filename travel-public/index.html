@@ -33,8 +33,11 @@
             const viewport = document.querySelector('meta[name="viewport"]');
             viewport.content = `width=device-width, initial-scale=${scale}, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover`;
             
-            // Fix mobile hero section width
+            // Fix mobile hero section width and reset viewport scaling
             if (screenWidth <= 768) {
+                // Reset viewport to prevent scaling issues
+                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+                
                 const style = document.createElement('style');
                 style.textContent = `
                     .rotating-banner { width: ${screenWidth <= 480 ? '130vw' : '120vw'} !important; margin-left: calc(${screenWidth <= 480 ? '-65vw' : '-60vw'} + 50%) !important; }
