@@ -222,9 +222,12 @@ function showPaymentInterface(bookingData){
                 
                 <div id="upiPayment" style="display:block;">
                     <h3>🔗 UPI Payment</h3>
+                    <div style="text-align:center;margin:15px 0;">
+                        <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
+                    </div>
                     <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
                     <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
-                    <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
+                    <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" pattern="[0-9]{12}" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
                     <button onclick="confirmCriticalPayment()" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">✅ Confirm UPI Payment</button>
                 </div>
                 
@@ -275,7 +278,7 @@ function showPaymentInterface(bookingData){
         const cardAmount=bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015);
         
         // Create booking first with enhanced security
-        const sanitizeInput=s=>s?String(s).replace(/[<>"'&\/]/g,''):'';fetch('/api/bookings',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-Token':sessionStorage.getItem('csrf-token')||''},body:JSON.stringify({resortId:parseInt(bookingData.resortId)||0,guestName:sanitizeInput(bookingData.guestName).substring(0,100),email:sanitizeInput(bookingData.email).substring(0,100),phone:sanitizeInput(bookingData.phone).substring(0,20),checkIn:sanitizeInput(bookingData.checkIn).substring(0,10),checkOut:sanitizeInput(bookingData.checkOut).substring(0,10),guests:Math.max(1,Math.min(20,parseInt(bookingData.guests)||2))})}.then(r=>r.json()).then(booking=>{if(booking.error){alert('Booking failed: '+booking.error);return}fetch('/api/razorpay-key').then(r=>r.json()).then(keyData=>{if(!keyData.key){alert('Payment system not configured. Please use UPI.');return}const options={key:keyData.key,amount:cardAmount*100,currency:'INR',name:'Vizag Resorts',description:'Resort Booking Payment',handler:function(response){fetch(`/api/bookings/${booking.id}/notify-card-payment`,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},body:JSON.stringify({paymentId:response.razorpay_payment_id})}).catch(e=>console.log('Notification failed'));alert('Card payment successful! You will be notified via email and WhatsApp.');paymentModal.remove();window.pendingCriticalBooking=null},prefill:{name:bookingData.guestName,email:bookingData.email,contact:bookingData.phone},theme:{color:'#667eea'},modal:{ondismiss:function(){console.log('Payment cancelled')}}};const rzp=new Razorpay(options);rzp.open()}).catch(e=>alert('Payment configuration error. Please use UPI.'))}).catch(e=>alert('Booking creation failed. Please try again.'));
+        const sanitizeInput=s=>s?String(s).replace(/[<>"'&\/]/g,''):'';fetch('/api/bookings',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-Token':sessionStorage.getItem('csrf-token')||''},body:JSON.stringify({resortId:parseInt(bookingData.resortId)||0,guestName:sanitizeInput(bookingData.guestName).substring(0,100),email:sanitizeInput(bookingData.email).substring(0,100),phone:sanitizeInput(bookingData.phone).substring(0,20),checkIn:sanitizeInput(bookingData.checkIn).substring(0,10),checkOut:sanitizeInput(bookingData.checkOut).substring(0,10),guests:Math.max(1,Math.min(20,parseInt(bookingData.guests)||2))})}).then(r=>r.json()).then(booking=>{if(booking.error){alert('Booking failed: '+booking.error);return}fetch('/api/razorpay-key').then(r=>r.json()).then(keyData=>{if(!keyData.key){alert('Payment system not configured. Please use UPI.');return}const options={key:keyData.key,amount:cardAmount*100,currency:'INR',name:'Vizag Resorts',description:'Resort Booking Payment',handler:function(response){fetch(`/api/bookings/${booking.id}/notify-card-payment`,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},body:JSON.stringify({paymentId:response.razorpay_payment_id})}).catch(e=>console.log('Notification failed'));alert('Card payment successful! You will be notified via email and WhatsApp.');paymentModal.remove();window.pendingCriticalBooking=null},prefill:{name:bookingData.guestName,email:bookingData.email,contact:bookingData.phone},theme:{color:'#667eea'},modal:{ondismiss:function(){console.log('Payment cancelled')}}};const rzp=new Razorpay(options);rzp.open()}).catch(e=>alert('Payment configuration error. Please use UPI.'))}).catch(e=>alert('Booking creation failed. Please try again.'));
     }
 }
 
@@ -296,6 +299,10 @@ window.loadRazorpay=function(){
         const razorScript=document.createElement('script');
         razorScript.src='https://checkout.razorpay.com/v1/checkout.js';
         razorScript.async=true;
+        razorScript.onerror=()=>console.log('Razorpay failed to load');
         document.head.appendChild(razorScript);
     }
 };
+
+// Load Razorpay immediately
+window.loadRazorpay();
