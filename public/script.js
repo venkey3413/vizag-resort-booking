@@ -916,19 +916,26 @@ async function confirmPayment() {
         return;
     }
     
+    // Use critical.js booking data
+    const bookingData = window.pendingCriticalBooking || pendingBookingData;
+    if (!bookingData) {
+        showNotification('Booking data not found', 'error');
+        return;
+    }
+    
     try {
         // Now create the booking with payment info and enhanced security
         const sanitizedBookingData = {
-            resortId: parseInt(pendingBookingData.resortId) || 0,
-            guestName: sanitizeInput(pendingBookingData.guestName).substring(0, 100),
-            email: sanitizeInput(pendingBookingData.email).substring(0, 100),
-            phone: sanitizeInput(pendingBookingData.phone).substring(0, 20),
-            checkIn: sanitizeInput(pendingBookingData.checkIn).substring(0, 10),
-            checkOut: sanitizeInput(pendingBookingData.checkOut).substring(0, 10),
-            guests: Math.max(1, Math.min(20, parseInt(pendingBookingData.guests) || 1)),
+            resortId: parseInt(bookingData.resortId) || 0,
+            guestName: sanitizeInput(bookingData.guestName).substring(0, 100),
+            email: sanitizeInput(bookingData.email).substring(0, 100),
+            phone: sanitizeInput(bookingData.phone).substring(0, 20),
+            checkIn: sanitizeInput(bookingData.checkIn).substring(0, 10),
+            checkOut: sanitizeInput(bookingData.checkOut).substring(0, 10),
+            guests: Math.max(1, Math.min(20, parseInt(bookingData.guests) || 1)),
             transactionId: sanitizeInput(transactionId).substring(0, 50),
-            couponCode: pendingBookingData.couponCode,
-            discountAmount: pendingBookingData.discountAmount
+            couponCode: bookingData.couponCode,
+            discountAmount: bookingData.discountAmount
         };
         
         const bookingResponse = await fetch(`${SERVER_URL}/api/bookings`, {
@@ -966,6 +973,13 @@ function showPaymentMethod(method) {
 }
 
 async function payWithRazorpay(bookingReference, amount, name, email, phone) {
+    // Use critical.js booking data
+    const bookingData = window.pendingCriticalBooking || pendingBookingData;
+    if (!bookingData) {
+        showNotification('Booking data not found', 'error');
+        return;
+    }
+    
     try {
         // Check if Razorpay is available
         if (typeof Razorpay === 'undefined') {
@@ -975,15 +989,15 @@ async function payWithRazorpay(bookingReference, amount, name, email, phone) {
         
         // First create the booking to get a booking ID with enhanced security
         const sanitizedBookingData = {
-            resortId: parseInt(pendingBookingData.resortId) || 0,
-            guestName: sanitizeInput(pendingBookingData.guestName).substring(0, 100),
-            email: sanitizeInput(pendingBookingData.email).substring(0, 100),
-            phone: sanitizeInput(pendingBookingData.phone).substring(0, 20),
-            checkIn: sanitizeInput(pendingBookingData.checkIn).substring(0, 10),
-            checkOut: sanitizeInput(pendingBookingData.checkOut).substring(0, 10),
-            guests: Math.max(1, Math.min(20, parseInt(pendingBookingData.guests) || 1)),
-            couponCode: pendingBookingData.couponCode,
-            discountAmount: pendingBookingData.discountAmount
+            resortId: parseInt(bookingData.resortId) || 0,
+            guestName: sanitizeInput(bookingData.guestName).substring(0, 100),
+            email: sanitizeInput(bookingData.email).substring(0, 100),
+            phone: sanitizeInput(bookingData.phone).substring(0, 20),
+            checkIn: sanitizeInput(bookingData.checkIn).substring(0, 10),
+            checkOut: sanitizeInput(bookingData.checkOut).substring(0, 10),
+            guests: Math.max(1, Math.min(20, parseInt(bookingData.guests) || 1)),
+            couponCode: bookingData.couponCode,
+            discountAmount: bookingData.discountAmount
         };
         
         const bookingResponse = await fetch(`${SERVER_URL}/api/bookings`, {
