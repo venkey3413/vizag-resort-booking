@@ -589,25 +589,81 @@ function setupEventBridgeSync() {
 }
 
 function showNotification(message, type = 'info') {
+    const isBookingConfirmation = message.includes('submitted for verification') || message.includes('confirmed');
+    
     const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 5px;
-        color: white;
-        z-index: 3000;
-        font-size: 14px;
-        max-width: 300px;
-        background: ${type === 'info' ? '#17a2b8' : type === 'success' ? '#28a745' : '#dc3545'};
-        animation: slideIn 0.3s ease;
-    `;
-    notification.textContent = message;
+    
+    if (isBookingConfirmation && type === 'success') {
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="success-icon">🚗</div>
+                <div class="notification-text">
+                    <strong>Travel Booked!</strong><br>
+                    ${message}
+                </div>
+            </div>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+            font-size: 16px;
+            max-width: 400px;
+            text-align: center;
+            animation: bookingPulse 0.6s ease-out;
+            border: 3px solid #fff;
+        `;
+    } else {
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 3000;
+            font-size: 14px;
+            max-width: 300px;
+            background: ${type === 'info' ? '#17a2b8' : type === 'success' ? '#28a745' : '#dc3545'};
+            animation: slideIn 0.3s ease;
+        `;
+    }
     
     document.body.appendChild(notification);
     
+    if (isBookingConfirmation && !document.getElementById('booking-animation-styles')) {
+        const style = document.createElement('style');
+        style.id = 'booking-animation-styles';
+        style.textContent = `
+            @keyframes bookingPulse {
+                0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.05); }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            }
+            .success-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                animation: bounce 1s infinite alternate;
+            }
+            @keyframes bounce {
+                0% { transform: translateY(0); }
+                100% { transform: translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    const duration = isBookingConfirmation ? 10000 : 5000;
+    
     setTimeout(() => {
         notification.remove();
-    }, 5000);
+    }, duration);
 }
