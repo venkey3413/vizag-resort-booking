@@ -990,14 +990,81 @@ async function confirmCardPayment(bookingId, paymentId) {
 }
 
 function showNotification(message, type) {
+    const isBookingConfirmation = message.includes('submitted for verification') || message.includes('Payment submitted');
+    
     const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
+    notification.className = `notification ${type} ${isBookingConfirmation ? 'booking-confirmation' : ''}`;
+    
+    if (isBookingConfirmation && type === 'success') {
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="success-icon">🎉</div>
+                <div class="notification-text">
+                    <strong>Booking Confirmed!</strong><br>
+                    ${message}
+                </div>
+            </div>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+            font-size: 16px;
+            max-width: 400px;
+            text-align: center;
+            animation: bookingPulse 0.6s ease-out;
+            border: 3px solid #fff;
+        `;
+    } else {
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 3000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+            max-width: 300px;
+        `;
+    }
     
     document.body.appendChild(notification);
     
-    // Longer duration for success messages, especially payment confirmations
-    const duration = type === 'success' ? 8000 : 5000;
+    // Add CSS animation for booking confirmations
+    if (isBookingConfirmation && !document.getElementById('booking-animation-styles')) {
+        const style = document.createElement('style');
+        style.id = 'booking-animation-styles';
+        style.textContent = `
+            @keyframes bookingPulse {
+                0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.05); }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            }
+            .booking-confirmation .success-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                animation: bounce 1s infinite alternate;
+            }
+            @keyframes bounce {
+                0% { transform: translateY(0); }
+                100% { transform: translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    const duration = isBookingConfirmation ? 10000 : (type === 'success' ? 8000 : 5000);
     
     setTimeout(() => {
         notification.remove();
