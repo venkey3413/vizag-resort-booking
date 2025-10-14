@@ -644,29 +644,53 @@ function setupEventBridgeSync() {
     }
 }
 
+let currentTravelGalleryIndex = 0;
+let currentTravelGalleryImages = [];
+let currentTravelPackageId = null;
+
 function viewPackageGallery(packageId) {
     const package = travelPackages.find(p => p.id === packageId);
-    if (!package || !package.gallery) return;
+    if (!package) return;
     
-    const images = package.gallery.split('\n').filter(img => img.trim());
-    if (images.length === 0) return;
+    currentTravelPackageId = packageId;
+    currentTravelGalleryImages = [];
     
+    // Add main image
+    if (package.image) {
+        currentTravelGalleryImages.push({type: 'image', url: package.image});
+    }
+    
+    // Add gallery images
+    if (package.gallery) {
+        const additionalImages = package.gallery.split('\n').filter(img => img.trim());
+        additionalImages.forEach(img => {
+            currentTravelGalleryImages.push({type: 'image', url: img.trim()});
+        });
+    }
+    
+    if (currentTravelGalleryImages.length === 0) return;
+    
+    currentTravelGalleryIndex = 0;
+    
+    // Create gallery modal
     const galleryModal = document.createElement('div');
-    galleryModal.className = 'gallery-modal';
+    galleryModal.id = 'travelGalleryModal';
+    galleryModal.className = 'travel-gallery-modal';
     galleryModal.innerHTML = `
-        <div class="gallery-content">
-            <span class="gallery-close" onclick="closeGalleryModal()">&times;</span>
-            <h2>${package.name}</h2>
-            <div class="gallery-images">
-                ${images.map((img, index) => `
-                    <img src="${img.trim()}" alt="${package.name} - Image ${index + 1}" 
-                         onclick="openImageViewer('${img.trim()}', '${package.name}')">
-                `).join('')}
+        <div class="travel-gallery-content">
+            <span class="travel-gallery-close" onclick="closeTravelGallery()">&times;</span>
+            <h2 id="travelGalleryTitle">${package.name}</h2>
+            
+            <div class="travel-gallery-main">
+                <div class="travel-gallery-images"></div>
             </div>
-            <div class="package-details-modal">
+            
+            <div class="travel-gallery-thumbnails" id="travelGalleryThumbnails"></div>
+            
+            <div id="travelGalleryDescription" class="travel-package-details-modal">
                 <h3>Package Details</h3>
                 <p><strong>Duration:</strong> ${package.duration}</p>
-                <p><strong>Price:</strong> ₹${package.price}</p>
+                <p><strong>Price:</strong> ₹${package.price.toLocaleString()}</p>
                 <p><strong>Description:</strong> ${package.description}</p>
             </div>
         </div>
@@ -674,36 +698,60 @@ function viewPackageGallery(packageId) {
     
     document.body.appendChild(galleryModal);
     document.body.style.overflow = 'hidden';
+    
+    updateTravelGalleryImage();
+    setupTravelGalleryThumbnails();
 }
 
-function closeGalleryModal() {
-    const galleryModal = document.querySelector('.gallery-modal');
+function closeTravelGallery() {
+    const galleryModal = document.getElementById('travelGalleryModal');
     if (galleryModal) {
         galleryModal.remove();
         document.body.style.overflow = 'auto';
     }
 }
 
-function openImageViewer(imageSrc, packageName) {
-    const imageViewer = document.createElement('div');
-    imageViewer.className = 'image-viewer';
-    imageViewer.innerHTML = `
-        <div class="image-viewer-content">
-            <span class="image-viewer-close" onclick="closeImageViewer()">&times;</span>
-            <img src="${imageSrc}" alt="${packageName}">
-            <div class="image-info">
-                <h3>${packageName}</h3>
+function updateTravelGalleryImage() {
+    if (currentTravelGalleryImages.length > 0) {
+        const currentItem = currentTravelGalleryImages[currentTravelGalleryIndex];
+        const container = document.querySelector('.travel-gallery-images');
+        
+        container.innerHTML = `
+            <img id="travelGalleryMainImage" src="${currentItem.url}" alt="">
+            <div class="travel-gallery-controls">
+                <button id="travelGalleryPrev" onclick="prevTravelImage()">&lt;</button>
+                <button id="travelGalleryNext" onclick="nextTravelImage()">&gt;</button>
             </div>
-        </div>
-    `;
-    
-    document.body.appendChild(imageViewer);
+        `;
+    }
 }
 
-function closeImageViewer() {
-    const imageViewer = document.querySelector('.image-viewer');
-    if (imageViewer) {
-        imageViewer.remove();
+function setupTravelGalleryThumbnails() {
+    const thumbnailsContainer = document.getElementById('travelGalleryThumbnails');
+    thumbnailsContainer.innerHTML = currentTravelGalleryImages.map((item, index) => {
+        return `<img src="${item.url}" class="travel-gallery-thumbnail ${index === currentTravelGalleryIndex ? 'active' : ''}" onclick="setTravelGalleryImage(${index})">`;
+    }).join('');
+}
+
+function setTravelGalleryImage(index) {
+    currentTravelGalleryIndex = index;
+    updateTravelGalleryImage();
+    setupTravelGalleryThumbnails();
+}
+
+function nextTravelImage() {
+    if (currentTravelGalleryImages.length > 1) {
+        currentTravelGalleryIndex = (currentTravelGalleryIndex + 1) % currentTravelGalleryImages.length;
+        updateTravelGalleryImage();
+        setupTravelGalleryThumbnails();
+    }
+}
+
+function prevTravelImage() {
+    if (currentTravelGalleryImages.length > 1) {
+        currentTravelGalleryIndex = currentTravelGalleryIndex === 0 ? currentTravelGalleryImages.length - 1 : currentTravelGalleryIndex - 1;
+        updateTravelGalleryImage();
+        setupTravelGalleryThumbnails();
     }
 }
 
