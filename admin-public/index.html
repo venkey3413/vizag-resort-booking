@@ -167,6 +167,51 @@
                 </div>
             </div>
         </section>
+
+        <section class="travel-management">
+            <h2>Travel Package Management</h2>
+
+            <div class="travel-form">
+                <h3>Add/Edit Travel Package</h3>
+                <form id="travelForm">
+                    <input type="hidden" id="travelId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="travelName">Package Name:</label>
+                            <input type="text" id="travelName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="travelPrice">Price (₹):</label>
+                            <input type="number" id="travelPrice" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="travelDuration">Duration:</label>
+                            <input type="text" id="travelDuration" placeholder="e.g., 8-10 hours" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="travelImage">Image URL:</label>
+                            <input type="url" id="travelImage" placeholder="https://..." readonly>
+                            <button type="button" onclick="uploadTravelImage()" class="upload-btn">📷 Upload Image</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="travelDescription">Description:</label>
+                        <textarea id="travelDescription" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" id="travelSubmitBtn">Add Travel Package</button>
+                    <button type="button" id="travelCancelBtn" onclick="cancelTravelEdit()" style="display:none;">Cancel</button>
+                </form>
+            </div>
+
+            <div class="travel-list">
+                <h3>Current Travel Packages</h3>
+                <div id="travelPackagesGrid" class="travel-packages-grid">
+                    <!-- Travel packages will be loaded here -->
+                </div>
+            </div>
+        </section>
     </main>
 
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
@@ -241,6 +286,23 @@
             }, (error, result) => {
                 if (!error && result && result.event === "success") {
                     document.getElementById('foodImage').value = result.info.secure_url;
+                }
+            });
+        }
+        
+        function uploadTravelImage() {
+            cloudinary.openUploadWidget({
+                cloudName: CLOUDINARY_CLOUD_NAME,
+                uploadPreset: 'resort_images',
+                sources: ['local', 'url'],
+                multiple: false,
+                resourceType: 'image',
+                maxFileSize: 10000000,
+                cropping: true,
+                croppingAspectRatio: 16/9
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    document.getElementById('travelImage').value = result.info.secure_url;
                 }
             });
         }

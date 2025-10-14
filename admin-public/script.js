@@ -1,11 +1,14 @@
 let resorts = [];
 let foodItems = [];
+let travelPackages = [];
 let editingId = null;
 let editingFoodId = null;
+let editingTravelId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     loadFoodItems();
+    loadTravelPackages();
     setupEventListeners();
     // Delay EventBridge setup to ensure page is fully loaded
     setTimeout(setupEventBridgeSync, 1000);
@@ -45,6 +48,12 @@ function setupEventBridgeSync() {
                         loadFoodItems();
                     }
                     
+                    // Travel package events
+                    if (data.type === 'travel.package.created' || data.type === 'travel.package.updated' || data.type === 'travel.package.deleted') {
+                        console.log('🚗 Travel package update received - refreshing packages');
+                        loadTravelPackages();
+                    }
+                    
 
                 } catch (error) {
                     // Ignore ping messages
@@ -78,6 +87,7 @@ function setupEventBridgeSync() {
     setInterval(() => {
         loadResorts();
         loadFoodItems();
+        loadTravelPackages();
     }, 60000);
 }
 
@@ -90,6 +100,11 @@ function setupEventListeners() {
     const foodForm = document.getElementById('foodForm');
     if (foodForm) {
         foodForm.addEventListener('submit', handleFoodSubmit);
+    }
+    
+    const travelForm = document.getElementById('travelForm');
+    if (travelForm) {
+        travelForm.addEventListener('submit', handleTravelSubmit);
     }
     
 
@@ -414,6 +429,128 @@ async function deleteFoodItem(id) {
             loadFoodItems();
         } else {
             alert('Failed to delete food item');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+// Travel Package Management Functions
+async function loadTravelPackages() {
+    try {
+        const response = await fetch('/api/travel-packages');
+        travelPackages = await response.json();
+        displayTravelPackages();
+    } catch (error) {
+        console.error('Error loading travel packages:', error);
+    }
+}
+
+function displayTravelPackages() {
+    const grid = document.getElementById('travelPackagesGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = travelPackages.map(pkg => `
+        <div class="travel-package-card">
+            <h4>${pkg.name}</h4>
+            <div class="price">₹${pkg.price}</div>
+            <div class="duration">${pkg.duration}</div>
+            ${pkg.description ? `<div class="description">${pkg.description}</div>` : ''}
+            <div class="travel-package-actions">
+                <button class="edit" onclick="editTravelPackage(${pkg.id})">Edit</button>
+                <button class="delete" onclick="deleteTravelPackage(${pkg.id})">Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function handleTravelSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('travelSubmitBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Processing...';
+    submitBtn.disabled = true;
+
+    const travelData = {
+        name: document.getElementById('travelName').value,
+        price: parseInt(document.getElementById('travelPrice').value),
+        duration: document.getElementById('travelDuration').value,
+        description: document.getElementById('travelDescription').value,
+        image: document.getElementById('travelImage').value
+    };
+
+    try {
+        let response;
+        if (editingTravelId) {
+            response = await fetch(`/api/travel-packages/${editingTravelId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(travelData)
+            });
+        } else {
+            response = await fetch('/api/travel-packages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(travelData)
+            });
+        }
+
+        if (response.ok) {
+            alert(editingTravelId ? 'Travel package updated successfully' : 'Travel package added successfully');
+            document.getElementById('travelForm').reset();
+            cancelTravelEdit();
+            loadTravelPackages();
+        } else {
+            alert('Operation failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+function editTravelPackage(id) {
+    const pkg = travelPackages.find(p => p.id === id);
+    if (!pkg) return;
+
+    editingTravelId = id;
+    document.getElementById('travelName').value = pkg.name;
+    document.getElementById('travelPrice').value = pkg.price;
+    document.getElementById('travelDuration').value = pkg.duration;
+    document.getElementById('travelDescription').value = pkg.description || '';
+    document.getElementById('travelImage').value = pkg.image || '';
+    
+    document.getElementById('travelSubmitBtn').textContent = 'Update Travel Package';
+    const cancelBtn = document.getElementById('travelCancelBtn');
+    if (cancelBtn) cancelBtn.style.display = 'inline-block';
+}
+
+function cancelTravelEdit() {
+    editingTravelId = null;
+    document.getElementById('travelForm').reset();
+    document.getElementById('travelSubmitBtn').textContent = 'Add Travel Package';
+    const cancelBtn = document.getElementById('travelCancelBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
+async function deleteTravelPackage(id) {
+    if (!confirm('Are you sure you want to delete this travel package?')) return;
+
+    try {
+        const response = await fetch(`/api/travel-packages/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Travel package deleted successfully');
+            loadTravelPackages();
+        } else {
+            alert('Failed to delete travel package');
         }
     } catch (error) {
         console.error('Error:', error);
