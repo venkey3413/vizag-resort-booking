@@ -161,6 +161,57 @@ app.delete('/api/food-items/:id', async (req, res) => {
     }
 });
 
+// Travel packages management endpoints
+app.get('/api/travel-packages', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/travel-packages');
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch travel packages' });
+    }
+});
+
+app.post('/api/travel-packages', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/travel-packages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add travel package' });
+    }
+});
+
+app.put('/api/travel-packages/:id', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/travel-packages/${req.params.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update travel package' });
+    }
+});
+
+app.delete('/api/travel-packages/:id', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/travel-packages/${req.params.id}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete travel package' });
+    }
+});
+
 // Forward booking requests to booking-server
 app.get('/api/bookings', async (req, res) => {
     try {
