@@ -135,6 +135,41 @@ nav a:hover {
     100% { transform: translateX(-100%); }
 }
 
+/* Travel Notice */
+.travel-notice {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 0;
+    position: fixed;
+    width: 100%;
+    top: 108px;
+    z-index: 998;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+.travel-notice-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.travel-notice-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    letter-spacing: 0.5px;
+    animation: travelTextSlide 20s linear infinite;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+@keyframes travelTextSlide {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+}
+
 /* Main Content */
 main {
     margin-top: 0;
@@ -147,41 +182,15 @@ main {
 }
 
 /* Travel Notice */
-.travel-notice {
-    background: linear-gradient(90deg, #28a745, #20c997, #28a745);
-    background-size: 200% 100%;
-    animation: travelNoticeSlide 3s linear infinite;
-    color: white;
-    padding: 8px 0;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
 
-.notice-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
 
-.notice-text {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    letter-spacing: 0.5px;
-    animation: travelTextRun 15s linear infinite;
-    white-space: nowrap;
-    display: inline-block;
-}
 
-@keyframes travelTextRun {
-    0% { transform: translateX(100vw); }
-    100% { transform: translateX(-100%); }
-}
 
-@keyframes travelNoticeSlide {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
-}
+
+
+
+
+
 
 
 
@@ -190,7 +199,7 @@ main {
     height: 60vh;
     text-align: center;
     color: white;
-    margin-top: 120px;
+    margin-top: 160px;
     position: relative;
     overflow: hidden;
     width: 100%;
