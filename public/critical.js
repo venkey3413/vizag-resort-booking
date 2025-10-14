@@ -130,15 +130,23 @@ window.bookNow=function(resortId,resortName){
             const today=new Date().toISOString().split('T')[0];
             const tomorrow=new Date();
             tomorrow.setDate(tomorrow.getDate()+1);
+            
+            // Set minimum dates to prevent past bookings
+            document.getElementById('checkIn').min = today;
+            document.getElementById('checkOut').min = tomorrow.toISOString().split('T')[0];
+            
             document.getElementById('checkIn').value=today;
             document.getElementById('checkOut').value=tomorrow.toISOString().split('T')[0];
             
             // Auto-update checkout when checkin changes
-            document.getElementById('checkIn').addEventListener('change', function() {
+            const checkInInput = document.getElementById('checkIn');
+            checkInInput.removeEventListener('change', arguments.callee);
+            checkInInput.addEventListener('change', function() {
                 const checkInDate = new Date(this.value);
                 const nextDay = new Date(checkInDate);
                 nextDay.setDate(nextDay.getDate() + 1);
                 document.getElementById('checkOut').value = nextDay.toISOString().split('T')[0];
+                document.getElementById('checkOut').min = nextDay.toISOString().split('T')[0];
             });
             
             const basePrice=resort.price;
@@ -182,6 +190,22 @@ window.handleBookingSubmit=function(e){
     // Email validation
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)){
         showCriticalNotification('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    // Date validation - prevent past dates
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInDate = new Date(formData.checkIn);
+    const checkOutDate = new Date(formData.checkOut);
+    
+    if (checkInDate < today) {
+        showCriticalNotification('Check-in date cannot be in the past. Please select today or a future date.', 'error');
+        return;
+    }
+    
+    if (checkOutDate <= checkInDate) {
+        showCriticalNotification('Check-out date must be at least one day after check-in date.', 'error');
         return;
     }
     
