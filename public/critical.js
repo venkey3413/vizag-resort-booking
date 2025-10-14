@@ -58,31 +58,49 @@ function setupModalEvents(){
 }
 
 // Load resorts immediately with CSRF protection
-fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}}).then(r=>r.json()).then(resorts=>{
+fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}}).then(r=>{
+    console.log('🏨 Resort API response status:', r.status);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+}).then(resorts=>{
+    console.log('🏨 Resorts loaded:', resorts.length, 'resorts');
     window.resorts=resorts;
     const grid=document.getElementById('resortsGrid');
-    if(grid&&resorts){
-        grid.innerHTML=resorts.map(r=>{
-            let pricingDisplay=`₹${r.price.toLocaleString()}/night`;
-            if(r.dynamic_pricing&&r.dynamic_pricing.length>0){
-                pricingDisplay=`From ₹${r.price.toLocaleString()}/night`;
-                const weekdayPrice=r.dynamic_pricing.find(p=>p.day_type==='weekday');
-                const weekendPrice=r.dynamic_pricing.find(p=>p.day_type==='weekend');
-                if(weekdayPrice||weekendPrice){
-                    pricingDisplay+='<br><small>';
-                    if(weekdayPrice)pricingDisplay+=`Weekday: ₹${weekdayPrice.price.toLocaleString()}`;
-                    if(weekdayPrice&&weekendPrice)pricingDisplay+=' | ';
-                    if(weekendPrice)pricingDisplay+=`Weekend: ₹${weekendPrice.price.toLocaleString()}`;
-                    pricingDisplay+='</small>';
-                }
-            }
-            const sanitize=s=>{if(!s)return '';const str=String(s);return str.replace(/[<>"'&\/]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;','/':'&#x2F;'}[m]||m));};
-            const safeId=parseInt(r.id)||0;
-            const safeName=sanitize(r.name).replace(/[^a-zA-Z0-9\s]/g,'');
-            return `<div class="resort-card"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image"><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><p class="resort-description">${sanitize(r.description)}</p>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
-        }).join('');
+    if(!grid){
+        console.error('❌ Resort grid element not found');
+        return;
     }
-}).catch(e=>console.log('Resorts loading deferred'))
+    if(!resorts||resorts.length===0){
+        grid.innerHTML='<p style="text-align:center;padding:2rem;color:#666;">No resorts available at the moment.</p>';
+        return;
+    }
+    grid.innerHTML=resorts.map(r=>{
+        let pricingDisplay=`₹${r.price.toLocaleString()}/night`;
+        if(r.dynamic_pricing&&r.dynamic_pricing.length>0){
+            pricingDisplay=`From ₹${r.price.toLocaleString()}/night`;
+            const weekdayPrice=r.dynamic_pricing.find(p=>p.day_type==='weekday');
+            const weekendPrice=r.dynamic_pricing.find(p=>p.day_type==='weekend');
+            if(weekdayPrice||weekendPrice){
+                pricingDisplay+='<br><small>';
+                if(weekdayPrice)pricingDisplay+=`Weekday: ₹${weekdayPrice.price.toLocaleString()}`;
+                if(weekdayPrice&&weekendPrice)pricingDisplay+=' | ';
+                if(weekendPrice)pricingDisplay+=`Weekend: ₹${weekendPrice.price.toLocaleString()}`;
+                pricingDisplay+='</small>';
+            }
+        }
+        const sanitize=s=>{if(!s)return '';const str=String(s);return str.replace(/[<>"'&\/]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;','/':'&#x2F;'}[m]||m));};
+        const safeId=parseInt(r.id)||0;
+        const safeName=sanitize(r.name).replace(/[^a-zA-Z0-9\s]/g,'');
+        return `<div class="resort-card"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image"><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><p class="resort-description">${sanitize(r.description)}</p>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
+    }).join('');
+    console.log('✅ Resorts displayed successfully');
+}).catch(e=>{
+    console.error('❌ Resort loading failed:', e);
+    const grid=document.getElementById('resortsGrid');
+    if(grid){
+        grid.innerHTML='<p style="text-align:center;padding:2rem;color:#dc3545;">Failed to load resorts. Please refresh the page.</p>';
+    }
+})
 
 // Cache clearing
 if(!sessionStorage.getItem('cache_cleared_v7')){sessionStorage.setItem('cache_cleared_v7','true');window.location.reload(true)}
@@ -196,15 +214,15 @@ window.handleBookingSubmit=function(e){
     // Date validation - prevent past dates
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const checkInDate = new Date(formData.checkIn);
-    const checkOutDate = new Date(formData.checkOut);
+    const selectedCheckIn = new Date(formData.checkIn);
+    const selectedCheckOut = new Date(formData.checkOut);
     
-    if (checkInDate < today) {
+    if (selectedCheckIn < today) {
         showCriticalNotification('Check-in date cannot be in the past. Please select today or a future date.', 'error');
         return;
     }
     
-    if (checkOutDate <= checkInDate) {
+    if (selectedCheckOut <= selectedCheckIn) {
         showCriticalNotification('Check-out date must be at least one day after check-in date.', 'error');
         return;
     }
