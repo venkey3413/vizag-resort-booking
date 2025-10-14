@@ -217,10 +217,15 @@
                             <input type="text" id="travelDuration" placeholder="e.g., 8-10 hours" required>
                         </div>
                         <div class="form-group">
-                            <label for="travelImage">Image URL:</label>
+                            <label for="travelImage">Main Image URL:</label>
                             <input type="url" id="travelImage" placeholder="https://..." readonly>
                             <button type="button" onclick="uploadTravelImage()" class="upload-btn">📷 Upload Image</button>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="travelGallery">Additional Images (Gallery):</label>
+                        <textarea id="travelGallery" rows="4" placeholder="Uploaded image URLs will appear here" readonly></textarea>
+                        <button type="button" onclick="uploadTravelGalleryImages()" class="upload-btn">🖼️ Upload Gallery Images</button>
                     </div>
                     <div class="form-group">
                         <label for="travelDescription">Description:</label>
@@ -329,6 +334,24 @@
             }, (error, result) => {
                 if (!error && result && result.event === "success") {
                     document.getElementById('travelImage').value = result.info.secure_url;
+                }
+            });
+        }
+        
+        function uploadTravelGalleryImages() {
+            cloudinary.openUploadWidget({
+                cloudName: CLOUDINARY_CLOUD_NAME,
+                uploadPreset: 'resort_images',
+                sources: ['local', 'url'],
+                multiple: true,
+                resourceType: 'image',
+                maxFileSize: 10000000
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    const currentGallery = document.getElementById('travelGallery').value;
+                    const newUrl = result.info.secure_url;
+                    const updatedGallery = currentGallery ? currentGallery + '\n' + newUrl : newUrl;
+                    document.getElementById('travelGallery').value = updatedGallery;
                 }
             });
         }
