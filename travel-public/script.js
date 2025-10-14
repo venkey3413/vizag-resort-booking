@@ -71,7 +71,7 @@ function loadPackages() {
                 <div class="package-duration">Duration: ${package.duration}</div>
                 <div class="package-item-footer">
                     <span class="price">₹${package.price}</span>
-                    <button class="book-btn" onclick="addPackage(${package.id})">Add Package</button>
+                    <button class="book-btn" onclick="bookPackage(${package.id})">Book Now</button>
                 </div>
             </div>
         `;
@@ -498,8 +498,7 @@ function handleTravelCardPayment(bookingData, paymentId) {
         if (paymentData.success) {
             closePaymentModal();
             showNotification('Travel booking payment submitted for verification. You will be notified once confirmed.', 'success');
-            selectedPackages = [];
-            updateBookingSummary();
+            currentPackage = null;
         } else {
             throw new Error(paymentData.error || 'Payment submission failed');
         }
@@ -531,8 +530,7 @@ function submitTravelBooking(bookingData) {
             showNotification(`Travel booking confirmed! Your booking reference is: ${data.booking_reference}`, 'success');
             
             // Reset form
-            selectedPackages = [];
-            updateBookingSummary();
+            currentPackage = null;
         } else {
             showNotification('Booking failed: ' + (data.error || data.message), 'error');
         }
