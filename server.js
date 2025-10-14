@@ -1595,28 +1595,36 @@ async function initFoodItemsTable() {
             name TEXT NOT NULL,
             description TEXT,
             price INTEGER NOT NULL,
+            category TEXT,
             image TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
     
+    // Add category column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE food_items ADD COLUMN category TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Insert default items if table is empty
     const count = await db.get('SELECT COUNT(*) as count FROM food_items');
     if (count.count === 0) {
         const defaultItems = [
-            { name: "Chicken Biryani", description: "Aromatic basmati rice with tender chicken pieces", price: 250, image: "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=400" },
-            { name: "Paneer Butter Masala", description: "Creamy tomato-based curry with soft paneer cubes", price: 180, image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400" },
-            { name: "Fish Curry", description: "Fresh fish cooked in coconut-based spicy curry", price: 220, image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400" },
-            { name: "Veg Fried Rice", description: "Wok-tossed rice with fresh vegetables", price: 150, image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400" },
-            { name: "Mutton Curry", description: "Tender mutton pieces in rich, spicy gravy", price: 300, image: "https://images.unsplash.com/photo-1574653853027-5d3ac9b9e7c7?w=400" },
-            { name: "Dal Tadka", description: "Yellow lentils tempered with cumin and spices", price: 120, image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400" },
-            { name: "Chicken Tikka", description: "Grilled chicken marinated in yogurt and spices", price: 200, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400" },
-            { name: "Naan Bread", description: "Soft, fluffy Indian bread baked in tandoor", price: 40, image: "https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?w=400" }
+            { name: "Chicken Biryani", description: "Aromatic basmati rice with tender chicken pieces", price: 250, category: "Main Course", image: "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=400" },
+            { name: "Paneer Butter Masala", description: "Creamy tomato-based curry with soft paneer cubes", price: 180, category: "Main Course", image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400" },
+            { name: "Fish Curry", description: "Fresh fish cooked in coconut-based spicy curry", price: 220, category: "Main Course", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400" },
+            { name: "Veg Fried Rice", description: "Wok-tossed rice with fresh vegetables", price: 150, category: "Main Course", image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400" },
+            { name: "Mutton Curry", description: "Tender mutton pieces in rich, spicy gravy", price: 300, category: "Main Course", image: "https://images.unsplash.com/photo-1574653853027-5d3ac9b9e7c7?w=400" },
+            { name: "Dal Tadka", description: "Yellow lentils tempered with cumin and spices", price: 120, category: "Main Course", image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400" },
+            { name: "Chicken Tikka", description: "Grilled chicken marinated in yogurt and spices", price: 200, category: "Starters", image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400" },
+            { name: "Naan Bread", description: "Soft, fluffy Indian bread baked in tandoor", price: 40, category: "Starters", image: "https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?w=400" }
         ];
         
         for (const item of defaultItems) {
-            await db.run('INSERT INTO food_items (name, description, price, image) VALUES (?, ?, ?, ?)', 
-                [item.name, item.description, item.price, item.image]);
+            await db.run('INSERT INTO food_items (name, description, price, category, image) VALUES (?, ?, ?, ?, ?)', 
+                [item.name, item.description, item.price, item.category, item.image]);
         }
     }
 }
@@ -1629,24 +1637,32 @@ async function initTravelPackagesTable() {
             name TEXT NOT NULL,
             description TEXT,
             price INTEGER NOT NULL,
+            duration TEXT,
             image TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
     
+    // Add duration column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE travel_packages ADD COLUMN duration TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Insert default packages if table is empty
     const count = await db.get('SELECT COUNT(*) as count FROM travel_packages');
     if (count.count === 0) {
         const defaultPackages = [
-            { name: "Araku Valley Day Trip", description: "Scenic hill station with coffee plantations and tribal culture", price: 2500, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" },
-            { name: "Borra Caves Adventure", description: "Explore million-year-old limestone caves with stunning formations", price: 1800, image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400" },
-            { name: "Vizag City Tour", description: "Complete city tour covering beaches, temples, and local attractions", price: 1500, image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400" },
-            { name: "Lambasingi Hill Station", description: "Kashmir of Andhra Pradesh with misty hills and cool climate", price: 3000, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" }
+            { name: "Araku Valley Day Trip", description: "Scenic hill station with coffee plantations and tribal culture", price: 2500, duration: "8-10 hours", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" },
+            { name: "Borra Caves Adventure", description: "Explore million-year-old limestone caves with stunning formations", price: 1800, duration: "6-8 hours", image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400" },
+            { name: "Vizag City Tour", description: "Complete city tour covering beaches, temples, and local attractions", price: 1500, duration: "4-6 hours", image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400" },
+            { name: "Lambasingi Hill Station", description: "Kashmir of Andhra Pradesh with misty hills and cool climate", price: 3000, duration: "10-12 hours", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" }
         ];
         
         for (const pkg of defaultPackages) {
-            await db.run('INSERT INTO travel_packages (name, description, price, image) VALUES (?, ?, ?, ?)', 
-                [pkg.name, pkg.description, pkg.price, pkg.image]);
+            await db.run('INSERT INTO travel_packages (name, description, price, duration, image) VALUES (?, ?, ?, ?, ?)', 
+                [pkg.name, pkg.description, pkg.price, pkg.duration, pkg.image]);
         }
     }
 }
@@ -1662,13 +1678,13 @@ app.get('/api/food-items', async (req, res) => {
 
 app.post('/api/food-items', async (req, res) => {
     try {
-        const { name, description, price, image } = req.body;
+        const { name, description, price, category, image } = req.body;
         const result = await db.run(
-            'INSERT INTO food_items (name, description, price, image) VALUES (?, ?, ?, ?)',
-            [name, description, parseInt(price), image]
+            'INSERT INTO food_items (name, description, price, category, image) VALUES (?, ?, ?, ?, ?)',
+            [name, description, parseInt(price), category, image]
         );
         
-        const newItem = { id: result.lastID, name, description, price: parseInt(price), image };
+        const newItem = { id: result.lastID, name, description, price: parseInt(price), category, image };
         
         // Publish EventBridge event
         try {
@@ -1695,18 +1711,18 @@ app.post('/api/food-items', async (req, res) => {
 app.put('/api/food-items/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, description, price, image } = req.body;
+        const { name, description, price, category, image } = req.body;
         
         const result = await db.run(
-            'UPDATE food_items SET name = ?, description = ?, price = ?, image = ? WHERE id = ?',
-            [name, description, parseInt(price), image, id]
+            'UPDATE food_items SET name = ?, description = ?, price = ?, category = ?, image = ? WHERE id = ?',
+            [name, description, parseInt(price), category, image, id]
         );
         
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Food item not found' });
         }
         
-        const updatedItem = { id, name, description, price: parseInt(price), image };
+        const updatedItem = { id, name, description, price: parseInt(price), category, image };
         
         // Publish EventBridge event
         try {
@@ -1775,13 +1791,13 @@ app.get('/api/travel-packages', async (req, res) => {
 
 app.post('/api/travel-packages', async (req, res) => {
     try {
-        const { name, description, price, image } = req.body;
+        const { name, description, price, duration, image } = req.body;
         const result = await db.run(
-            'INSERT INTO travel_packages (name, description, price, image) VALUES (?, ?, ?, ?)',
-            [name, description, parseInt(price), image]
+            'INSERT INTO travel_packages (name, description, price, duration, image) VALUES (?, ?, ?, ?, ?)',
+            [name, description, parseInt(price), duration, image]
         );
         
-        const newPackage = { id: result.lastID, name, description, price: parseInt(price), image };
+        const newPackage = { id: result.lastID, name, description, price: parseInt(price), duration, image };
         
         // Publish EventBridge event
         try {
@@ -1808,18 +1824,18 @@ app.post('/api/travel-packages', async (req, res) => {
 app.put('/api/travel-packages/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, description, price, image } = req.body;
+        const { name, description, price, duration, image } = req.body;
         
         const result = await db.run(
-            'UPDATE travel_packages SET name = ?, description = ?, price = ?, image = ? WHERE id = ?',
-            [name, description, parseInt(price), image, id]
+            'UPDATE travel_packages SET name = ?, description = ?, price = ?, duration = ?, image = ? WHERE id = ?',
+            [name, description, parseInt(price), duration, image, id]
         );
         
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Travel package not found' });
         }
         
-        const updatedPackage = { id, name, description, price: parseInt(price), image };
+        const updatedPackage = { id, name, description, price: parseInt(price), duration, image };
         
         // Publish EventBridge event
         try {
