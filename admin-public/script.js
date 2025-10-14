@@ -481,6 +481,8 @@ async function handleTravelSubmit(e) {
         image: document.getElementById('travelImage').value
     };
 
+    console.log('Submitting travel package data:', travelData);
+
     try {
         let response;
         if (editingTravelId) {
@@ -503,7 +505,9 @@ async function handleTravelSubmit(e) {
             cancelTravelEdit();
             loadTravelPackages();
         } else {
-            alert('Operation failed');
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('Travel package operation failed:', errorData);
+            alert(`Operation failed: ${errorData.error || 'Unknown error'}`);
         }
     } catch (error) {
         console.error('Error:', error);
