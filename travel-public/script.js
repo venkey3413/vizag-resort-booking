@@ -672,7 +672,7 @@ function viewPackageGallery(packageId) {
     
     currentTravelGalleryIndex = 0;
     
-    // Create gallery modal
+    // Create gallery modal with proper structure
     const galleryModal = document.createElement('div');
     galleryModal.id = 'travelGalleryModal';
     galleryModal.className = 'travel-gallery-modal';
@@ -701,6 +701,35 @@ function viewPackageGallery(packageId) {
     
     updateTravelGalleryImage();
     setupTravelGalleryThumbnails();
+    
+    // Add click outside to close
+    galleryModal.addEventListener('click', function(e) {
+        if (e.target === galleryModal) {
+            closeTravelGallery();
+        }
+    });
+    
+    // Add keyboard navigation
+    document.addEventListener('keydown', handleTravelGalleryKeydown);
+}
+
+function handleTravelGalleryKeydown(e) {
+    const modal = document.getElementById('travelGalleryModal');
+    if (!modal) return;
+    
+    switch(e.key) {
+        case 'Escape':
+            closeTravelGallery();
+            break;
+        case 'ArrowLeft':
+            e.preventDefault();
+            prevTravelImage();
+            break;
+        case 'ArrowRight':
+            e.preventDefault();
+            nextTravelImage();
+            break;
+    }
 }
 
 function closeTravelGallery() {
@@ -708,6 +737,8 @@ function closeTravelGallery() {
     if (galleryModal) {
         galleryModal.remove();
         document.body.style.overflow = 'auto';
+        // Remove keyboard event listener
+        document.removeEventListener('keydown', handleTravelGalleryKeydown);
     }
 }
 
@@ -716,8 +747,10 @@ function updateTravelGalleryImage() {
         const currentItem = currentTravelGalleryImages[currentTravelGalleryIndex];
         const container = document.querySelector('.travel-gallery-images');
         
+        if (!container) return;
+        
         container.innerHTML = `
-            <img id="travelGalleryMainImage" src="${currentItem.url}" alt="">
+            <img id="travelGalleryMainImage" src="${currentItem.url}" alt="" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
             <div class="travel-gallery-controls">
                 <button id="travelGalleryPrev" onclick="prevTravelImage()">&lt;</button>
                 <button id="travelGalleryNext" onclick="nextTravelImage()">&gt;</button>
@@ -728,8 +761,10 @@ function updateTravelGalleryImage() {
 
 function setupTravelGalleryThumbnails() {
     const thumbnailsContainer = document.getElementById('travelGalleryThumbnails');
+    if (!thumbnailsContainer) return;
+    
     thumbnailsContainer.innerHTML = currentTravelGalleryImages.map((item, index) => {
-        return `<img src="${item.url}" class="travel-gallery-thumbnail ${index === currentTravelGalleryIndex ? 'active' : ''}" onclick="setTravelGalleryImage(${index})">`;
+        return `<img src="${item.url}" class="travel-gallery-thumbnail ${index === currentTravelGalleryIndex ? 'active' : ''}" onclick="setTravelGalleryImage(${index})" style="width: 80px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; opacity: ${index === currentTravelGalleryIndex ? '1' : '0.6'}; transition: opacity 0.3s, transform 0.3s; border: 2px solid ${index === currentTravelGalleryIndex ? '#28a745' : 'transparent'};">`;
     }).join('');
 }
 

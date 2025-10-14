@@ -1232,6 +1232,7 @@ footer {
     background: none;
     border: none;
     z-index: 10;
+    transition: color 0.3s;
 }
 
 .travel-gallery-close:hover {
@@ -1253,14 +1254,10 @@ footer {
     position: relative;
     text-align: center;
     margin-bottom: 1rem;
-}
-
-.travel-gallery-images img {
-    max-width: 100%;
-    max-height: 400px;
-    object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .travel-gallery-controls {
@@ -1284,11 +1281,19 @@ footer {
     font-size: 1.5rem;
     cursor: pointer;
     pointer-events: auto;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .travel-gallery-controls button:hover {
     background: rgba(0,0,0,0.9);
+    transform: scale(1.1);
+}
+
+.travel-gallery-controls button:active {
+    transform: scale(0.95);
 }
 
 .travel-gallery-thumbnails {
@@ -1299,16 +1304,18 @@ footer {
     margin-bottom: 1.5rem;
     justify-content: center;
     flex-wrap: wrap;
+    max-height: 100px;
 }
 
 .travel-gallery-thumbnail {
+    flex-shrink: 0;
     width: 80px;
     height: 60px;
     object-fit: cover;
     border-radius: 6px;
     cursor: pointer;
     opacity: 0.6;
-    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity 0.3s, transform 0.3s, border-color 0.3s;
     border: 2px solid transparent;
 }
 
@@ -1362,8 +1369,8 @@ footer {
         padding-right: 2rem;
     }
     
-    .travel-gallery-images img {
-        max-height: 250px;
+    .travel-gallery-images {
+        min-height: 250px;
     }
     
     .travel-gallery-controls button {
@@ -1374,6 +1381,7 @@ footer {
     
     .travel-gallery-thumbnails {
         gap: 0.25rem;
+        max-height: 80px;
     }
     
     .travel-gallery-thumbnail {
