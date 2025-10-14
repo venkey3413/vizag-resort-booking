@@ -332,3 +332,22 @@ button[type="submit"]:hover {
         grid-template-columns: 1fr;
     }
 }
+.car-pricing-container {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 1rem;
+    background: #f8f9fa;
+}
+
+.multiplier {
+    min-width: 100px;
+    font-size: 0.85rem;
+    color: #28a745;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.car-pricing-container .pricing-row input[readonly] {
+    background: #e9ecef;
+    color: #6c757d;
+}

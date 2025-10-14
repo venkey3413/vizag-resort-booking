@@ -451,18 +451,34 @@ function displayTravelPackages() {
     const grid = document.getElementById('travelPackagesGrid');
     if (!grid) return;
     
-    grid.innerHTML = travelPackages.map(pkg => `
-        <div class="travel-package-card">
-            <h4>${pkg.name}</h4>
-            <div class="price">₹${pkg.price}</div>
-            <div class="duration">${pkg.duration}</div>
-            ${pkg.description ? `<div class="description">${pkg.description}</div>` : ''}
-            <div class="travel-package-actions">
-                <button class="edit" onclick="editTravelPackage(${pkg.id})">Edit</button>
-                <button class="delete" onclick="deleteTravelPackage(${pkg.id})">Delete</button>
+    grid.innerHTML = travelPackages.map(pkg => {
+        let carPricingInfo = '';
+        if (pkg.car_pricing) {
+            carPricingInfo = `
+                <div class="car-pricing-info">
+                    <strong>Car Pricing:</strong><br>
+                    <small>5 Seater: ₹${pkg.car_pricing['5_seater'] || pkg.price}</small><br>
+                    <small>7 Seater: ₹${pkg.car_pricing['7_seater'] || Math.round(pkg.price * 1.2)}</small><br>
+                    <small>12 Seater: ₹${pkg.car_pricing['12_seater'] || Math.round(pkg.price * 1.5)}</small><br>
+                    <small>14 Seater: ₹${pkg.car_pricing['14_seater'] || Math.round(pkg.price * 1.7)}</small>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="travel-package-card">
+                <h4>${pkg.name}</h4>
+                <div class="price">Base: ₹${pkg.price}</div>
+                <div class="duration">${pkg.duration}</div>
+                ${pkg.description ? `<div class="description">${pkg.description}</div>` : ''}
+                ${carPricingInfo}
+                <div class="travel-package-actions">
+                    <button class="edit" onclick="editTravelPackage(${pkg.id})">Edit</button>
+                    <button class="delete" onclick="deleteTravelPackage(${pkg.id})">Delete</button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 async function handleTravelSubmit(e) {
@@ -478,7 +494,13 @@ async function handleTravelSubmit(e) {
         price: parseInt(document.getElementById('travelPrice').value),
         duration: document.getElementById('travelDuration').value,
         description: document.getElementById('travelDescription').value,
-        image: document.getElementById('travelImage').value
+        image: document.getElementById('travelImage').value,
+        car_pricing: {
+            '5_seater': parseInt(document.getElementById('price5Seater').value) || parseInt(document.getElementById('travelPrice').value),
+            '7_seater': parseInt(document.getElementById('price7Seater').value) || Math.round(parseInt(document.getElementById('travelPrice').value) * 1.2),
+            '12_seater': parseInt(document.getElementById('price12Seater').value) || Math.round(parseInt(document.getElementById('travelPrice').value) * 1.5),
+            '14_seater': parseInt(document.getElementById('price14Seater').value) || Math.round(parseInt(document.getElementById('travelPrice').value) * 1.7)
+        }
     };
 
     console.log('Submitting travel package data:', travelData);
@@ -529,6 +551,20 @@ function editTravelPackage(id) {
     document.getElementById('travelDescription').value = pkg.description || '';
     document.getElementById('travelImage').value = pkg.image || '';
     
+    // Load car pricing if available
+    if (pkg.car_pricing) {
+        document.getElementById('price5Seater').value = pkg.car_pricing['5_seater'] || pkg.price;
+        document.getElementById('price7Seater').value = pkg.car_pricing['7_seater'] || Math.round(pkg.price * 1.2);
+        document.getElementById('price12Seater').value = pkg.car_pricing['12_seater'] || Math.round(pkg.price * 1.5);
+        document.getElementById('price14Seater').value = pkg.car_pricing['14_seater'] || Math.round(pkg.price * 1.7);
+    } else {
+        // Auto-calculate if no car pricing exists
+        document.getElementById('price5Seater').value = pkg.price;
+        document.getElementById('price7Seater').value = Math.round(pkg.price * 1.2);
+        document.getElementById('price12Seater').value = Math.round(pkg.price * 1.5);
+        document.getElementById('price14Seater').value = Math.round(pkg.price * 1.7);
+    }
+    
     document.getElementById('travelSubmitBtn').textContent = 'Update Travel Package';
     const cancelBtn = document.getElementById('travelCancelBtn');
     if (cancelBtn) cancelBtn.style.display = 'inline-block';
@@ -537,6 +573,11 @@ function editTravelPackage(id) {
 function cancelTravelEdit() {
     editingTravelId = null;
     document.getElementById('travelForm').reset();
+    // Clear car pricing fields
+    document.getElementById('price5Seater').value = '';
+    document.getElementById('price7Seater').value = '';
+    document.getElementById('price12Seater').value = '';
+    document.getElementById('price14Seater').value = '';
     document.getElementById('travelSubmitBtn').textContent = 'Add Travel Package';
     const cancelBtn = document.getElementById('travelCancelBtn');
     if (cancelBtn) cancelBtn.style.display = 'none';

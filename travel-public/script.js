@@ -327,15 +327,15 @@ function showPaymentModal(bookingData) {
             </div>
 
             <div class="payment-tabs">
-                <div class="payment-tab active" onclick="switchPaymentTab('upi')">
+                <div class="payment-tab ${bookingData.payment_method === 'upi' ? 'active' : ''}" onclick="switchPaymentTab('upi')">
                     <h4>UPI Payment</h4>
                 </div>
-                <div class="payment-tab" onclick="switchPaymentTab('card')">
+                <div class="payment-tab ${bookingData.payment_method === 'card' ? 'active' : ''}" onclick="switchPaymentTab('card')">
                     <h4>Card Payment</h4>
                 </div>
             </div>
 
-            <div id="upiPayment" class="payment-method active">
+            <div id="upiPayment" class="payment-method ${bookingData.payment_method === 'upi' ? 'active' : ''}">
                 <div class="qr-section">
                     <img src="/qr-code.png.jpeg" alt="UPI QR Code" class="qr-code">
                     <p><strong>Scan & Pay ₹${bookingData.total_amount}</strong></p>
@@ -357,10 +357,10 @@ function showPaymentModal(bookingData) {
                 </div>
             </div>
 
-            <div id="cardPayment" class="payment-method">
+            <div id="cardPayment" class="payment-method ${bookingData.payment_method === 'card' ? 'active' : ''}">
                 <div class="card-pricing">
-                    <p><strong>Card Payment Amount: ₹${Math.round(bookingData.total_amount * 1.02)}</strong></p>
-                    <small>*2% processing fee included</small>
+                    <p><strong>Card Payment Amount: ₹${bookingData.payment_method === 'card' ? bookingData.total_amount : Math.round(bookingData.total_amount * 1.02)}</strong></p>
+                    <small>*2% processing fee ${bookingData.payment_method === 'card' ? 'already' : ''} included</small>
                 </div>
                 <button class="razorpay-btn" onclick="initiateRazorpayPayment()">
                     Pay with Card/UPI
@@ -474,7 +474,7 @@ async function initiateRazorpayPayment() {
             return;
         }
         
-        const amount = Math.round(bookingData.total_amount * 1.02 * 100);
+        const amount = Math.round(bookingData.total_amount * 100);
         console.log('💰 Payment amount:', amount / 100);
 
         const options = {
@@ -540,7 +540,8 @@ function handleTravelCardPayment(bookingData, paymentId) {
         if (paymentData.success) {
             closePaymentModal();
             showNotification('Travel booking payment submitted for verification. You will be notified once confirmed.', 'success');
-            currentPackage = null;
+            selectedPackages = [];
+            updateModalSummary();
         } else {
             throw new Error(paymentData.error || 'Payment submission failed');
         }
