@@ -451,15 +451,15 @@ main {
 }
 
 .selected-packages-section {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
     border-bottom: 2px solid #f0f0f0;
 }
 
 .selected-packages-section h3 {
     color: #333;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -471,15 +471,15 @@ main {
 }
 
 .packages-list {
-    max-height: 300px;
+    max-height: 250px;
     overflow-y: auto;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .total-display {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    padding: 1rem;
-    border-radius: 10px;
+    padding: 0.75rem;
+    border-radius: 8px;
     border: 2px solid #28a745;
 }
 
@@ -487,13 +487,13 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #28a745;
 }
 
 .total-amount {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     color: #28a745;
 }
 
