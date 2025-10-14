@@ -1639,6 +1639,8 @@ async function initTravelPackagesTable() {
             price INTEGER NOT NULL,
             duration TEXT,
             image TEXT,
+            gallery TEXT,
+            sites TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
@@ -1650,6 +1652,13 @@ async function initTravelPackagesTable() {
         // Column already exists, ignore error
     }
     
+    // Add gallery column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE travel_packages ADD COLUMN gallery TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Add sites column if it doesn't exist
     try {
         await db.run('ALTER TABLE travel_packages ADD COLUMN sites TEXT');
@@ -1657,19 +1666,99 @@ async function initTravelPackagesTable() {
         // Column already exists, ignore error
     }
     
+    // Update existing packages with missing data
+    const existingPackages = await db.all('SELECT id, name, duration, gallery, sites FROM travel_packages');
+    
+    for (const pkg of existingPackages) {
+        let needsUpdate = false;
+        let updateFields = [];
+        let updateValues = [];
+        
+        if (!pkg.duration) {
+            needsUpdate = true;
+            updateFields.push('duration = ?');
+            if (pkg.name.includes('Araku')) updateValues.push('8-10 hours');
+            else if (pkg.name.includes('Borra')) updateValues.push('6-8 hours');
+            else if (pkg.name.includes('City')) updateValues.push('4-6 hours');
+            else if (pkg.name.includes('Lambasingi')) updateValues.push('10-12 hours');
+            else updateValues.push('6-8 hours');
+        }
+        
+        if (!pkg.gallery) {
+            needsUpdate = true;
+            updateFields.push('gallery = ?');
+            updateValues.push('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400\nhttps://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400\nhttps://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400');
+        }
+        
+        if (!pkg.sites) {
+            needsUpdate = true;
+            updateFields.push('sites = ?');
+            if (pkg.name.includes('Araku')) {
+                updateValues.push('Araku Valley\nCoffee Museum\nTribal Museum\nBorra Caves\nChaparai Waterfalls');
+            } else if (pkg.name.includes('Borra')) {
+                updateValues.push('Borra Caves\nAnanthagiri Hills\nGalikonda View Point\nDumbriguda Waterfalls');
+            } else if (pkg.name.includes('City') || pkg.name.includes('Vizag')) {
+                updateValues.push('RK Beach\nKailasagiri Hill Park\nSimhachalam Temple\nINS Kurusura Submarine Museum\nVisakha Museum');
+            } else if (pkg.name.includes('Lambasingi')) {
+                updateValues.push('Lambasingi Village\nKothapally Waterfalls\nThajangi Reservoir\nChintapalli Forest\nGalikonda View Point');
+            } else {
+                updateValues.push('Scenic Locations\nLocal Attractions\nPhoto Points\nNature Spots');
+            }
+        }
+        
+        if (needsUpdate) {
+            updateValues.push(pkg.id);
+            const query = `UPDATE travel_packages SET ${updateFields.join(', ')} WHERE id = ?`;
+            await db.run(query, updateValues);
+            console.log(`Updated travel package: ${pkg.name}`);
+        }
+    }
+    
     // Insert default packages if table is empty
     const count = await db.get('SELECT COUNT(*) as count FROM travel_packages');
     if (count.count === 0) {
         const defaultPackages = [
-            { name: "Araku Valley Day Trip", description: "Scenic hill station with coffee plantations and tribal culture", price: 2500, duration: "8-10 hours", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" },
-            { name: "Borra Caves Adventure", description: "Explore million-year-old limestone caves with stunning formations", price: 1800, duration: "6-8 hours", image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400" },
-            { name: "Vizag City Tour", description: "Complete city tour covering beaches, temples, and local attractions", price: 1500, duration: "4-6 hours", image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400" },
-            { name: "Lambasingi Hill Station", description: "Kashmir of Andhra Pradesh with misty hills and cool climate", price: 3000, duration: "10-12 hours", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" }
+            { 
+                name: "Araku Valley Day Trip", 
+                description: "Scenic hill station with coffee plantations and tribal culture", 
+                price: 2500, 
+                duration: "8-10 hours", 
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400", 
+                gallery: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400\nhttps://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400\nhttps://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400",
+                sites: "Araku Valley\nCoffee Museum\nTribal Museum\nBorra Caves\nChaparai Waterfalls" 
+            },
+            { 
+                name: "Borra Caves Adventure", 
+                description: "Explore million-year-old limestone caves with stunning formations", 
+                price: 1800, 
+                duration: "6-8 hours", 
+                image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400", 
+                gallery: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400\nhttps://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400\nhttps://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400",
+                sites: "Borra Caves\nAnanthagiri Hills\nGalikonda View Point\nDumbriguda Waterfalls" 
+            },
+            { 
+                name: "Vizag City Tour", 
+                description: "Complete city tour covering beaches, temples, and local attractions", 
+                price: 1500, 
+                duration: "4-6 hours", 
+                image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400", 
+                gallery: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400\nhttps://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400\nhttps://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400",
+                sites: "RK Beach\nKailasagiri Hill Park\nSimhachalam Temple\nINS Kurusura Submarine Museum\nVisakha Museum" 
+            },
+            { 
+                name: "Lambasingi Hill Station", 
+                description: "Kashmir of Andhra Pradesh with misty hills and cool climate", 
+                price: 3000, 
+                duration: "10-12 hours", 
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400", 
+                gallery: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400\nhttps://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400\nhttps://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400",
+                sites: "Lambasingi Village\nKothapally Waterfalls\nThajangi Reservoir\nChintapalli Forest\nGalikonda View Point" 
+            }
         ];
         
         for (const pkg of defaultPackages) {
-            await db.run('INSERT INTO travel_packages (name, description, price, duration, image) VALUES (?, ?, ?, ?, ?)', 
-                [pkg.name, pkg.description, pkg.price, pkg.duration, pkg.image]);
+            await db.run('INSERT INTO travel_packages (name, description, price, duration, image, gallery, sites) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                [pkg.name, pkg.description, pkg.price, pkg.duration, pkg.image, pkg.gallery, pkg.sites]);
         }
     }
 }
@@ -1789,7 +1878,7 @@ app.delete('/api/food-items/:id', async (req, res) => {
 // Travel packages CRUD endpoints
 app.get('/api/travel-packages', async (req, res) => {
     try {
-        const packages = await db.all('SELECT * FROM travel_packages ORDER BY id');
+        const packages = await db.all('SELECT id, name, description, price, duration, image, gallery, sites, created_at FROM travel_packages ORDER BY id');
         res.json(packages);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch travel packages' });

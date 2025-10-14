@@ -62,10 +62,12 @@ function loadPackages() {
         const packageCard = document.createElement('div');
         packageCard.className = 'package-item';
         const hasGallery = package.gallery && package.gallery.trim();
+        const hasImage = package.image && package.image.trim();
+        console.log(`Package ${package.id}: hasGallery=${hasGallery}, hasImage=${hasImage}, sites=${package.sites}`);
         packageCard.innerHTML = `
             <div class="package-image-container">
                 <img src="${package.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}" alt="${package.name}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'">
-                ${hasGallery ? `<button class="view-more-btn" onclick="viewPackageGallery(${package.id})">📸 View More</button>` : ''}
+                ${hasGallery || hasImage ? `<button class="view-more-btn" onclick="viewPackageGallery(${package.id})">📸 View More</button>` : ''}
             </div>
             <div class="package-item-content">
                 <h3>${package.name}</h3>
