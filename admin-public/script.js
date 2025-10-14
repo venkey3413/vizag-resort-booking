@@ -496,6 +496,7 @@ async function handleTravelSubmit(e) {
         description: document.getElementById('travelDescription').value,
         image: document.getElementById('travelImage').value,
         gallery: document.getElementById('travelGallery').value,
+        sites: document.getElementById('travelSites').value,
         car_pricing: {
             '5_seater': parseInt(document.getElementById('price5Seater').value) || parseInt(document.getElementById('travelPrice').value),
             '7_seater': parseInt(document.getElementById('price7Seater').value) || Math.round(parseInt(document.getElementById('travelPrice').value) * 1.2),
@@ -552,6 +553,7 @@ function editTravelPackage(id) {
     document.getElementById('travelDescription').value = pkg.description || '';
     document.getElementById('travelImage').value = pkg.image || '';
     document.getElementById('travelGallery').value = pkg.gallery || '';
+    document.getElementById('travelSites').value = pkg.sites || '';
     
     // Load car pricing if available
     if (pkg.car_pricing) {

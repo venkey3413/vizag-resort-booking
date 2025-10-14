@@ -1440,3 +1440,104 @@ footer {
 .view-more-desc:hover {
     color: #218838;
 }
+
+/* Package Sites Styles (matching amenities from main page) */
+.package-sites {
+    margin: 12px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.package-sites h4 {
+    margin: 0 0 6px 0;
+    color: #495057;
+    font-size: 0.7rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    letter-spacing: 0.3px;
+}
+
+.sites-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.site-tag {
+    background: #28a745;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: default;
+    font-family: 'Inter', -apple-system, sans-serif;
+    letter-spacing: 0.2px;
+    text-transform: capitalize;
+}
+
+.site-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    background: #218838;
+}
+
+.site-tag:nth-child(even) {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+}
+
+.site-tag:nth-child(even):hover {
+    background: linear-gradient(135deg, #0056b3 0%, #520dc2 100%);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+}
+
+.site-tag:nth-child(3n) {
+    background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+    box-shadow: 0 3px 8px rgba(253, 126, 20, 0.3);
+}
+
+.site-tag:nth-child(3n):hover {
+    background: linear-gradient(135deg, #dc6502 0%, #c2185b 100%);
+    box-shadow: 0 6px 15px rgba(253, 126, 20, 0.4);
+}
+
+.site-tag:nth-child(4n) {
+    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    box-shadow: 0 3px 8px rgba(111, 66, 193, 0.3);
+}
+
+.site-tag:nth-child(4n):hover {
+    background: linear-gradient(135deg, #59359a 0%, #c2185b 100%);
+    box-shadow: 0 6px 15px rgba(111, 66, 193, 0.4);
+}
+
+@media (max-width: 768px) {
+    .package-sites {
+        margin: 8px 0;
+        padding: 6px;
+    }
+    
+    .sites-list {
+        gap: 3px;
+    }
+    
+    .site-tag {
+        padding: 1px 4px;
+        font-size: 0.75rem;
+    }
+    
+    .package-sites h4 {
+        font-size: 0.75rem;
+    }
+}

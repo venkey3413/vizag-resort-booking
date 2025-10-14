@@ -1650,6 +1650,13 @@ async function initTravelPackagesTable() {
         // Column already exists, ignore error
     }
     
+    // Add sites column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE travel_packages ADD COLUMN sites TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Insert default packages if table is empty
     const count = await db.get('SELECT COUNT(*) as count FROM travel_packages');
     if (count.count === 0) {
@@ -1791,10 +1798,10 @@ app.get('/api/travel-packages', async (req, res) => {
 
 app.post('/api/travel-packages', async (req, res) => {
     try {
-        const { name, description, price, duration, image } = req.body;
+        const { name, description, price, duration, image, sites } = req.body;
         const result = await db.run(
-            'INSERT INTO travel_packages (name, description, price, duration, image) VALUES (?, ?, ?, ?, ?)',
-            [name, description, parseInt(price), duration, image]
+            'INSERT INTO travel_packages (name, description, price, duration, image, sites) VALUES (?, ?, ?, ?, ?, ?)',
+            [name, description, parseInt(price), duration, image, sites]
         );
         
         const newPackage = { id: result.lastID, name, description, price: parseInt(price), duration, image };
@@ -1824,11 +1831,11 @@ app.post('/api/travel-packages', async (req, res) => {
 app.put('/api/travel-packages/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, description, price, duration, image } = req.body;
+        const { name, description, price, duration, image, sites } = req.body;
         
         const result = await db.run(
-            'UPDATE travel_packages SET name = ?, description = ?, price = ?, duration = ?, image = ? WHERE id = ?',
-            [name, description, parseInt(price), duration, image, id]
+            'UPDATE travel_packages SET name = ?, description = ?, price = ?, duration = ?, image = ?, sites = ? WHERE id = ?',
+            [name, description, parseInt(price), duration, image, sites, id]
         );
         
         if (result.changes === 0) {

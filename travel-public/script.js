@@ -75,6 +75,16 @@ function loadPackages() {
                     ${package.description.length > 100 ? `<button class="view-more-desc" onclick="toggleDescription(${package.id})">View More</button>` : ''}
                 </div>
                 <div class="package-duration">Duration: ${package.duration}</div>
+                ${package.sites ? `
+                    <div class="package-sites">
+                        <h4>🏞️ Sites to Visit:</h4>
+                        <div class="sites-list">
+                            ${package.sites.split('\n').filter(site => site.trim()).map(site => 
+                                `<span class="site-tag">${site.trim()}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
                 <div class="package-item-footer">
                     <span class="price">₹${package.price}</span>
                     <button class="book-btn" onclick="bookPackage(${package.id})">Book Now</button>
