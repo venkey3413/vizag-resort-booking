@@ -231,12 +231,17 @@ function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
 }
 
+function selectPayment(method) {
+    document.getElementById(method).checked = true;
+}
+
 function confirmBooking() {
     const customerName = document.getElementById('customerName').value;
     const phoneNumber = document.getElementById('phoneNumber').value;
     const customerEmail = document.getElementById('customerEmail').value;
     const travelDate = document.getElementById('travelDate').value;
     const pickupLocation = document.getElementById('pickupLocation').value;
+    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
     if (!customerName || !phoneNumber || !customerEmail || !travelDate || !pickupLocation) {
         alert('Please fill in all required fields');
@@ -249,9 +254,14 @@ function confirmBooking() {
     }
 
     // Calculate total with individual car multipliers
-    const total = selectedPackages.reduce((sum, package) => {
+    let total = selectedPackages.reduce((sum, package) => {
         return sum + Math.round(package.price * package.quantity * (package.carMultiplier || 1));
     }, 0);
+    
+    // Add 2% for card payment
+    if (paymentMethod === 'card') {
+        total = Math.round(total * 1.02);
+    }
 
     // Create booking data
     const bookingData = {
@@ -261,10 +271,11 @@ function confirmBooking() {
         travel_date: travelDate,
         pickup_location: pickupLocation,
         packages: selectedPackages,
-        total_amount: total
+        total_amount: total,
+        payment_method: paymentMethod
     };
 
-    // Show payment options
+    // Show payment modal
     showPaymentModal(bookingData);
 }
 
