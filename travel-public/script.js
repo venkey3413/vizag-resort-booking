@@ -61,11 +61,19 @@ function loadPackages() {
     travelPackages.forEach(package => {
         const packageCard = document.createElement('div');
         packageCard.className = 'package-item';
+        const hasGallery = package.gallery && package.gallery.trim();
         packageCard.innerHTML = `
-            <img src="${package.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}" alt="${package.name}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'">
+            <div class="package-image-container">
+                <img src="${package.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}" alt="${package.name}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'">
+                ${hasGallery ? `<button class="view-more-btn" onclick="viewPackageGallery(${package.id})">View More</button>` : ''}
+            </div>
             <div class="package-item-content">
                 <h3>${package.name}</h3>
-                <p>${package.description}</p>
+                <div class="description-container">
+                    <p class="description-short" id="desc-short-${package.id}">${package.description.length > 100 ? package.description.substring(0, 100) + '...' : package.description}</p>
+                    <p class="description-full" id="desc-full-${package.id}" style="display: none;">${package.description}</p>
+                    ${package.description.length > 100 ? `<button class="view-more-desc" onclick="toggleDescription(${package.id})">View More</button>` : ''}
+                </div>
                 <div class="package-duration">Duration: ${package.duration}</div>
                 <div class="package-item-footer">
                     <span class="price">₹${package.price}</span>
@@ -633,6 +641,85 @@ function setupEventBridgeSync() {
         };
     } catch (error) {
         console.error('Travel EventBridge setup failed:', error);
+    }
+}
+
+function viewPackageGallery(packageId) {
+    const package = travelPackages.find(p => p.id === packageId);
+    if (!package || !package.gallery) return;
+    
+    const images = package.gallery.split('\n').filter(img => img.trim());
+    if (images.length === 0) return;
+    
+    const galleryModal = document.createElement('div');
+    galleryModal.className = 'gallery-modal';
+    galleryModal.innerHTML = `
+        <div class="gallery-content">
+            <span class="gallery-close" onclick="closeGalleryModal()">&times;</span>
+            <h2>${package.name}</h2>
+            <div class="gallery-images">
+                ${images.map((img, index) => `
+                    <img src="${img.trim()}" alt="${package.name} - Image ${index + 1}" 
+                         onclick="openImageViewer('${img.trim()}', '${package.name}')">
+                `).join('')}
+            </div>
+            <div class="package-details-modal">
+                <h3>Package Details</h3>
+                <p><strong>Duration:</strong> ${package.duration}</p>
+                <p><strong>Price:</strong> ₹${package.price}</p>
+                <p><strong>Description:</strong> ${package.description}</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(galleryModal);
+    document.body.style.overflow = 'hidden';
+}
+
+function closeGalleryModal() {
+    const galleryModal = document.querySelector('.gallery-modal');
+    if (galleryModal) {
+        galleryModal.remove();
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function openImageViewer(imageSrc, packageName) {
+    const imageViewer = document.createElement('div');
+    imageViewer.className = 'image-viewer';
+    imageViewer.innerHTML = `
+        <div class="image-viewer-content">
+            <span class="image-viewer-close" onclick="closeImageViewer()">&times;</span>
+            <img src="${imageSrc}" alt="${packageName}">
+            <div class="image-info">
+                <h3>${packageName}</h3>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(imageViewer);
+}
+
+function closeImageViewer() {
+    const imageViewer = document.querySelector('.image-viewer');
+    if (imageViewer) {
+        imageViewer.remove();
+    }
+}
+
+function toggleDescription(packageId) {
+    const shortDesc = document.getElementById(`desc-short-${packageId}`);
+    const fullDesc = document.getElementById(`desc-full-${packageId}`);
+    const button = event.target;
+    
+    if (shortDesc.style.display === 'none') {
+        shortDesc.style.display = 'block';
+        fullDesc.style.display = 'none';
+        button.textContent = 'View More';
+    } else {
+        shortDesc.style.display = 'none';
+        fullDesc.style.display = 'block';
+        button.textContent = 'View Less';
     }
 }
 
