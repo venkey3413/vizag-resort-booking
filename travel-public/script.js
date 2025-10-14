@@ -164,15 +164,20 @@ function openBookingModal() {
         return;
     }
     
-    const modal = document.getElementById('bookingModal');
+    const panel = document.getElementById('bookingPanel');
+    const overlay = document.getElementById('panelOverlay');
     
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('travelDate').min = today;
     
-    // Update modal summary
+    // Update panel summary
     updateModalSummary();
-    modal.style.display = 'block';
+    
+    // Show panel with animation
+    overlay.style.display = 'block';
+    panel.classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 
 function updateModalSummary() {
@@ -228,7 +233,16 @@ function updateModalSummary() {
 
 
 function closeModal() {
-    document.getElementById('bookingModal').style.display = 'none';
+    closePanel();
+}
+
+function closePanel() {
+    const panel = document.getElementById('bookingPanel');
+    const overlay = document.getElementById('panelOverlay');
+    
+    panel.classList.remove('active');
+    overlay.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
 function selectPayment(method) {
@@ -280,7 +294,7 @@ function confirmBooking() {
 }
 
 function showPaymentModal(bookingData) {
-    closeModal();
+    closePanel();
     
     // Store booking data globally
     window.currentTravelBooking = bookingData;
@@ -416,7 +430,7 @@ function confirmUPIPayment() {
             closePaymentModal();
             showNotification('Travel booking payment submitted for verification. You will be notified once confirmed.', 'success');
             selectedPackages = [];
-            updateBookingSummary();
+            updateModalSummary();
         } else {
             throw new Error(paymentData.error || 'Payment submission failed');
         }
@@ -569,14 +583,10 @@ function submitTravelBooking(bookingData) {
     });
 }
 
-// Close modal when clicking outside
+// Close panel when clicking outside
 window.onclick = function(event) {
-    const modal = document.getElementById('bookingModal');
     const paymentModal = document.querySelector('.payment-modal');
     
-    if (event.target === modal) {
-        closeModal();
-    }
     if (event.target === paymentModal) {
         closePaymentModal();
     }
