@@ -1,60 +1,11 @@
-// Travel packages data
-const travelPackages = [
-    {
-        id: 1,
-        name: "Araku Valley Tour",
-        description: "Full day trip to scenic Araku Valley with coffee plantations and tribal museum",
-        duration: "8-10 hours",
-        price: 2500,
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"
-    },
-    {
-        id: 2,
-        name: "Borra Caves Adventure",
-        description: "Explore the famous limestone caves with stalactites and stalagmites",
-        duration: "6-8 hours",
-        price: 1800,
-        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400"
-    },
-    {
-        id: 3,
-        name: "Beach Hopping Tour",
-        description: "Visit RK Beach, Rushikonda, and Yarada Beach in one day",
-        duration: "4-6 hours",
-        price: 1200,
-        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400"
-    },
-    {
-        id: 4,
-        name: "Kailasagiri Hill Station",
-        description: "Cable car ride and panoramic views of Vizag city and coastline",
-        duration: "3-4 hours",
-        price: 800,
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"
-    },
-    {
-        id: 5,
-        name: "Submarine Museum & INS Kurusura",
-        description: "Explore the submarine museum and maritime heritage",
-        duration: "2-3 hours",
-        price: 600,
-        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400"
-    },
-    {
-        id: 6,
-        name: "Simhachalam Temple Tour",
-        description: "Visit the ancient Narasimha temple with architectural marvels",
-        duration: "3-4 hours",
-        price: 700,
-        image: "https://images.unsplash.com/photo-1582632502788-e3d2e7e8e5e5?w=400"
-    }
-];
+// Travel packages data - loaded from database
+let travelPackages = [];
 
 let selectedPackages = [];
 
 // Load packages on page load
 document.addEventListener('DOMContentLoaded', function() {
-    loadPackages();
+    loadPackagesFromDatabase();
     updateBookingSummary();
     initBannerRotation();
     setupEventBridgeSync();
@@ -88,15 +39,32 @@ function scrollToSection(sectionId) {
     }
 }
 
+async function loadPackagesFromDatabase() {
+    try {
+        const response = await fetch('/api/travel-packages');
+        travelPackages = await response.json();
+        loadPackages();
+    } catch (error) {
+        console.error('Error loading travel packages:', error);
+        const packagesGrid = document.getElementById('packagesGrid');
+        packagesGrid.innerHTML = '<p style="text-align:center;padding:2rem;color:#666;">No travel packages available at the moment.</p>';
+    }
+}
+
 function loadPackages() {
     const packagesGrid = document.getElementById('packagesGrid');
     packagesGrid.innerHTML = '';
+
+    if (!travelPackages || travelPackages.length === 0) {
+        packagesGrid.innerHTML = '<p style="text-align:center;padding:2rem;color:#666;">No travel packages available at the moment.</p>';
+        return;
+    }
 
     travelPackages.forEach(package => {
         const packageCard = document.createElement('div');
         packageCard.className = 'package-item';
         packageCard.innerHTML = `
-            <img src="${package.image}" alt="${package.name}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'">
+            <img src="${package.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}" alt="${package.name}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'">
             <div class="package-item-content">
                 <h3>${package.name}</h3>
                 <p>${package.description}</p>
@@ -565,6 +533,11 @@ function setupEventBridgeSync() {
                 if (data.type === 'travel.booking.created' || data.type === 'travel.booking.updated') {
                     console.log('🚗 Travel booking update detected');
                     showNotification('New travel booking activity detected!', 'info');
+                }
+                
+                if (data.type === 'travel.package.created' || data.type === 'travel.package.updated' || data.type === 'travel.package.deleted') {
+                    console.log('📦 Travel package update detected - refreshing packages');
+                    loadPackagesFromDatabase();
                 }
                 
                 if (data.type === 'booking.created' || data.type === 'booking.updated') {
