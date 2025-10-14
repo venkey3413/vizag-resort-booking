@@ -169,13 +169,27 @@ function openBookingModal() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('travelDate').min = today;
 
+    // Reset car selection
+    document.getElementById('carType').value = '';
+
     // Update modal summary
+    updateModalSummary();
+    modal.style.display = 'block';
+}
+
+function updateModalSummary() {
+    const modalTotal = document.getElementById('modalTotal');
+    const bookingSummary = document.getElementById('bookingSummary');
+    const carType = document.getElementById('carType');
+    const selectedOption = carType.options[carType.selectedIndex];
+    const multiplier = selectedOption ? parseFloat(selectedOption.dataset.multiplier || 1) : 1;
+
     let summaryHTML = '';
-    let total = 0;
+    let baseTotal = 0;
 
     selectedPackages.forEach(package => {
         const itemTotal = package.price * package.quantity;
-        total += itemTotal;
+        baseTotal += itemTotal;
         summaryHTML += `
             <div class="summary-item">
                 <span>${package.name} × ${package.quantity}</span>
@@ -184,9 +198,23 @@ function openBookingModal() {
         `;
     });
 
+    const finalTotal = Math.round(baseTotal * multiplier);
+    
+    if (multiplier > 1) {
+        summaryHTML += `
+            <div class="summary-item car-pricing">
+                <span>Car Type: ${carType.value}</span>
+                <span>+${Math.round((multiplier - 1) * 100)}%</span>
+            </div>
+        `;
+    }
+
     bookingSummary.innerHTML = summaryHTML;
-    modalTotal.textContent = `₹${total}`;
-    modal.style.display = 'block';
+    modalTotal.textContent = `₹${finalTotal}`;
+}
+
+function updateCarPricing() {
+    updateModalSummary();
 }
 
 function closeModal() {
@@ -199,14 +227,19 @@ function confirmBooking() {
     const customerEmail = document.getElementById('customerEmail').value;
     const travelDate = document.getElementById('travelDate').value;
     const pickupLocation = document.getElementById('pickupLocation').value;
+    const carType = document.getElementById('carType').value;
 
-    if (!customerName || !phoneNumber || !customerEmail || !travelDate || !pickupLocation) {
-        alert('Please fill in all required fields');
+    if (!customerName || !phoneNumber || !customerEmail || !travelDate || !pickupLocation || !carType) {
+        alert('Please fill in all required fields including car type');
         return;
     }
 
-    // Calculate total
-    const total = selectedPackages.reduce((sum, package) => sum + (package.price * package.quantity), 0);
+    // Calculate total with car multiplier
+    const baseTotal = selectedPackages.reduce((sum, package) => sum + (package.price * package.quantity), 0);
+    const carSelect = document.getElementById('carType');
+    const selectedOption = carSelect.options[carSelect.selectedIndex];
+    const multiplier = parseFloat(selectedOption.dataset.multiplier || 1);
+    const total = Math.round(baseTotal * multiplier);
 
     // Create booking data
     const bookingData = {
@@ -215,7 +248,10 @@ function confirmBooking() {
         email: customerEmail,
         travel_date: travelDate,
         pickup_location: pickupLocation,
+        car_type: carType,
         packages: selectedPackages,
+        base_amount: baseTotal,
+        car_multiplier: multiplier,
         total_amount: total
     };
 
@@ -243,6 +279,8 @@ function showPaymentModal(bookingData) {
                 <p><strong>Phone:</strong> ${bookingData.phone}</p>
                 <p><strong>Travel Date:</strong> ${bookingData.travel_date}</p>
                 <p><strong>Pickup:</strong> ${bookingData.pickup_location}</p>
+                <p><strong>Car Type:</strong> ${bookingData.car_type}</p>
+                ${bookingData.car_multiplier > 1 ? `<p><strong>Base Amount:</strong> ₹${bookingData.base_amount}</p><p><strong>Car Pricing:</strong> +${Math.round((bookingData.car_multiplier - 1) * 100)}%</p>` : ''}
                 <p><strong>Total Amount:</strong> ₹${bookingData.total_amount}</p>
             </div>
 

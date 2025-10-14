@@ -174,6 +174,16 @@
                     <label for="pickupLocation">Pickup Location:</label>
                     <input type="text" id="pickupLocation" placeholder="Enter pickup address" required>
                 </div>
+                <div class="form-group">
+                    <label for="carType">Select Car Type:</label>
+                    <select id="carType" required onchange="updateCarPricing()">
+                        <option value="">Choose car type</option>
+                        <option value="5-seater" data-multiplier="1">5 Seater (Base Price)</option>
+                        <option value="7-seater" data-multiplier="1.2">7 Seater (+20%)</option>
+                        <option value="12-seater" data-multiplier="1.5">12 Seater (+50%)</option>
+                        <option value="14-seater" data-multiplier="1.7">14 Seater (+70%)</option>
+                    </select>
+                </div>
                 <div class="booking-summary">
                     <h3>Booking Summary</h3>
                     <div id="bookingSummary"></div>

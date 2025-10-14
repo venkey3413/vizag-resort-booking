@@ -2157,9 +2157,9 @@ app.get('/api/owner/bookings', verifyOwnerToken, async (req, res) => {
 // Travel booking endpoints
 app.post('/api/travel-bookings', async (req, res) => {
     try {
-        const { customer_name, phone, email, travel_date, pickup_location, packages, total_amount } = req.body;
+        const { customer_name, phone, email, travel_date, pickup_location, car_type, packages, base_amount, car_multiplier, total_amount } = req.body;
         
-        if (!customer_name || !phone || !email || !travel_date || !pickup_location || !packages || !total_amount) {
+        if (!customer_name || !phone || !email || !travel_date || !pickup_location || !car_type || !packages || !total_amount) {
             return res.status(400).json({ error: 'All fields are required' });
         }
         
@@ -2175,7 +2175,10 @@ app.post('/api/travel-bookings', async (req, res) => {
                 email TEXT NOT NULL,
                 travel_date TEXT NOT NULL,
                 pickup_location TEXT NOT NULL,
+                car_type TEXT NOT NULL,
                 packages TEXT NOT NULL,
+                base_amount INTEGER,
+                car_multiplier REAL,
                 total_amount INTEGER NOT NULL,
                 status TEXT DEFAULT 'pending_payment',
                 payment_method TEXT,
@@ -2184,11 +2187,20 @@ app.post('/api/travel-bookings', async (req, res) => {
             )
         `);
         
+        // Add car_type, base_amount, car_multiplier columns if they don't exist
+        try {
+            await db.run('ALTER TABLE travel_bookings ADD COLUMN car_type TEXT');
+            await db.run('ALTER TABLE travel_bookings ADD COLUMN base_amount INTEGER');
+            await db.run('ALTER TABLE travel_bookings ADD COLUMN car_multiplier REAL');
+        } catch (error) {
+            // Columns already exist, ignore error
+        }
+        
         // Insert travel booking
         const result = await db.run(`
-            INSERT INTO travel_bookings (booking_reference, customer_name, phone, email, travel_date, pickup_location, packages, total_amount)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [booking_reference, customer_name, phone, email, travel_date, pickup_location, JSON.stringify(packages), total_amount]);
+            INSERT INTO travel_bookings (booking_reference, customer_name, phone, email, travel_date, pickup_location, car_type, packages, base_amount, car_multiplier, total_amount)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [booking_reference, customer_name, phone, email, travel_date, pickup_location, car_type, JSON.stringify(packages), base_amount || total_amount, car_multiplier || 1, total_amount]);
         
         // Store the booking ID for payment submission
         const bookingId = result.lastID;
@@ -2196,6 +2208,9 @@ app.post('/api/travel-bookings', async (req, res) => {
         // Send Telegram notification
         try {
             const packageNames = packages.map(p => `${p.name} x${p.quantity}`).join(', ');
+            const carPricing = car_multiplier > 1 ? `
+💰 Base Amount: ₹${base_amount.toLocaleString()}
+🚗 Car Pricing: +${Math.round((car_multiplier - 1) * 100)}%` : '';
             const message = `🚗 NEW TRAVEL BOOKING CREATED!
 
 📋 Booking ID: ${booking_reference}
@@ -2204,8 +2219,9 @@ app.post('/api/travel-bookings', async (req, res) => {
 📱 Phone: ${phone}
 📅 Travel Date: ${new Date(travel_date).toLocaleDateString('en-IN')}
 📍 Pickup: ${pickup_location}
-🎯 Packages: ${packageNames}
-💰 Amount: ₹${total_amount.toLocaleString()}
+🚙 Car Type: ${car_type}
+🎯 Packages: ${packageNames}${carPricing}
+💰 Total Amount: ₹${total_amount.toLocaleString()}
 ⚠️ Status: Pending Payment
 
 ⏰ Booked at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
