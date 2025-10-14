@@ -40,7 +40,10 @@ const EVENTS = {
     FOOD_ITEM_DELETED: 'food.item.deleted',
     RESORT_AVAILABILITY_UPDATED: 'resort.availability.updated',
     TRAVEL_BOOKING_CREATED: 'travel.booking.created',
-    TRAVEL_BOOKING_UPDATED: 'travel.booking.updated'
+    TRAVEL_BOOKING_UPDATED: 'travel.booking.updated',
+    TRAVEL_PACKAGE_CREATED: 'travel.package.created',
+    TRAVEL_PACKAGE_UPDATED: 'travel.package.updated',
+    TRAVEL_PACKAGE_DELETED: 'travel.package.deleted'
 };
 
 module.exports = {

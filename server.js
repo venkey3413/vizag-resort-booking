@@ -245,6 +245,7 @@ async function initDB() {
     // Initialize food orders and items tables
     await initFoodOrdersTable();
     await initFoodItemsTable();
+    await initTravelPackagesTable();
 }
 
 // Routes
@@ -1620,6 +1621,36 @@ async function initFoodItemsTable() {
     }
 }
 
+// Initialize travel packages table
+async function initTravelPackagesTable() {
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS travel_packages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            price INTEGER NOT NULL,
+            image TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    // Insert default packages if table is empty
+    const count = await db.get('SELECT COUNT(*) as count FROM travel_packages');
+    if (count.count === 0) {
+        const defaultPackages = [
+            { name: "Araku Valley Day Trip", description: "Scenic hill station with coffee plantations and tribal culture", price: 2500, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" },
+            { name: "Borra Caves Adventure", description: "Explore million-year-old limestone caves with stunning formations", price: 1800, image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400" },
+            { name: "Vizag City Tour", description: "Complete city tour covering beaches, temples, and local attractions", price: 1500, image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400" },
+            { name: "Lambasingi Hill Station", description: "Kashmir of Andhra Pradesh with misty hills and cool climate", price: 3000, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" }
+        ];
+        
+        for (const pkg of defaultPackages) {
+            await db.run('INSERT INTO travel_packages (name, description, price, image) VALUES (?, ?, ?, ?)', 
+                [pkg.name, pkg.description, pkg.price, pkg.image]);
+        }
+    }
+}
+
 app.get('/api/food-items', async (req, res) => {
     try {
         const foodItems = await db.all('SELECT * FROM food_items ORDER BY id');
@@ -1729,6 +1760,119 @@ app.delete('/api/food-items/:id', async (req, res) => {
         res.json({ success: true, message: 'Food item deleted' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete food item' });
+    }
+});
+
+// Travel packages CRUD endpoints
+app.get('/api/travel-packages', async (req, res) => {
+    try {
+        const packages = await db.all('SELECT * FROM travel_packages ORDER BY id');
+        res.json(packages);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch travel packages' });
+    }
+});
+
+app.post('/api/travel-packages', async (req, res) => {
+    try {
+        const { name, description, price, image } = req.body;
+        const result = await db.run(
+            'INSERT INTO travel_packages (name, description, price, image) VALUES (?, ?, ?, ?)',
+            [name, description, parseInt(price), image]
+        );
+        
+        const newPackage = { id: result.lastID, name, description, price: parseInt(price), image };
+        
+        // Publish EventBridge event
+        try {
+            await publishEvent('vizag.travel', EVENTS.TRAVEL_PACKAGE_CREATED, {
+                packageId: newPackage.id,
+                name: name
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.TRAVEL_PACKAGE_CREATED, 'vizag.travel', {
+                packageId: newPackage.id,
+                name: name
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
+        res.json({ success: true, package: newPackage });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add travel package' });
+    }
+});
+
+app.put('/api/travel-packages/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const { name, description, price, image } = req.body;
+        
+        const result = await db.run(
+            'UPDATE travel_packages SET name = ?, description = ?, price = ?, image = ? WHERE id = ?',
+            [name, description, parseInt(price), image, id]
+        );
+        
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Travel package not found' });
+        }
+        
+        const updatedPackage = { id, name, description, price: parseInt(price), image };
+        
+        // Publish EventBridge event
+        try {
+            await publishEvent('vizag.travel', EVENTS.TRAVEL_PACKAGE_UPDATED, {
+                packageId: id,
+                name: name
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.TRAVEL_PACKAGE_UPDATED, 'vizag.travel', {
+                packageId: id,
+                name: name
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
+        res.json({ success: true, package: updatedPackage });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update travel package' });
+    }
+});
+
+app.delete('/api/travel-packages/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        
+        const pkg = await db.get('SELECT name FROM travel_packages WHERE id = ?', [id]);
+        if (!pkg) {
+            return res.status(404).json({ error: 'Travel package not found' });
+        }
+        
+        await db.run('DELETE FROM travel_packages WHERE id = ?', [id]);
+        
+        // Publish EventBridge event
+        try {
+            await publishEvent('vizag.travel', EVENTS.TRAVEL_PACKAGE_DELETED, {
+                packageId: id,
+                name: pkg.name
+            });
+            
+            // Notify EventBridge listener
+            eventBridgeListener.handleEvent(EVENTS.TRAVEL_PACKAGE_DELETED, 'vizag.travel', {
+                packageId: id,
+                name: pkg.name
+            });
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
+        res.json({ success: true, message: 'Travel package deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete travel package' });
     }
 });
 
