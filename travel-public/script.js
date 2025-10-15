@@ -684,23 +684,35 @@ function viewPackageGallery(packageId) {
     const package = travelPackages.find(p => p.id === packageId);
     if (!package) return;
     
+    console.log('📸 Gallery Debug - Package:', package);
+    console.log('📸 Gallery Debug - Gallery field:', package.gallery);
+    
     currentTravelPackageId = packageId;
     currentTravelGalleryImages = [];
     
     // Add main image
     if (package.image) {
         currentTravelGalleryImages.push({type: 'image', url: package.image});
+        console.log('📸 Added main image:', package.image);
     }
     
     // Add gallery images
-    if (package.gallery) {
+    if (package.gallery && package.gallery.trim()) {
         const additionalImages = package.gallery.split('\n').filter(img => img.trim());
+        console.log('📸 Gallery images found:', additionalImages);
         additionalImages.forEach(img => {
             currentTravelGalleryImages.push({type: 'image', url: img.trim()});
         });
+    } else {
+        console.log('📸 No gallery images found for package', packageId);
     }
     
-    if (currentTravelGalleryImages.length === 0) return;
+    console.log('📸 Total images to show:', currentTravelGalleryImages);
+    
+    if (currentTravelGalleryImages.length === 0) {
+        alert('No images available for this package');
+        return;
+    }
     
     currentTravelGalleryIndex = 0;
     
