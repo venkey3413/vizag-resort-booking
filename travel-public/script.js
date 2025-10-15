@@ -212,16 +212,16 @@ function updateCarTypeOptions() {
     const package = selectedPackages[0];
     const carTypes = [
         { type: '5-seater', label: '5 Seater', multiplier: 1, extra: '' },
-        { type: '7-seater', label: '7 Seater', multiplier: 1.2, extra: '+20%' },
-        { type: '12-seater', label: '12 Seater', multiplier: 1.5, extra: '+50%' },
-        { type: '14-seater', label: '14 Seater', multiplier: 1.7, extra: '+70%' }
+        { type: '7-seater', label: '7 Seater', multiplier: 1.2, extra: '' },
+        { type: '12-seater', label: '12 Seater', multiplier: 1.5, extra: '' },
+        { type: '14-seater', label: '14 Seater', multiplier: 1.7, extra: '' }
     ];
     
     carTypeOptions.innerHTML = carTypes.map(car => `
         <div class="car-type-option ${package.carType === car.type ? 'selected' : ''}" onclick="selectCarType('${car.type}', ${car.multiplier})">
             <div class="car-type-info">
                 <span class="car-type-name">${car.label}</span>
-                <span class="car-type-price">₹${Math.round(package.price * car.multiplier)} ${car.extra}</span>
+                <span class="car-type-price">₹${Math.round(package.price * car.multiplier)}</span>
             </div>
         </div>
     `).join('');
