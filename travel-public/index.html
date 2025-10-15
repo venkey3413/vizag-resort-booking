@@ -133,20 +133,42 @@
             <button class="close-panel" onclick="closePanel()">&times;</button>
         </div>
         
-        <div class="panel-content">
-            <!-- Selected Packages Section -->
+        <!-- Stage 1: Package Selection -->
+        <div id="packageSelectionStage" class="panel-content stage-1">
             <div class="selected-packages-section">
+                <h3>Selected Package</h3>
+                <div id="selectedPackageDisplay" class="selected-package-display"></div>
+                
+                <div class="car-type-selection">
+                    <h4>Select Car Type</h4>
+                    <div id="carTypeOptions" class="car-type-options"></div>
+                </div>
+                
                 <div class="total-display">
                     <div class="total-row">
                         <span>Total Amount:</span>
                         <span id="modalTotal" class="total-amount">₹0</span>
                     </div>
                 </div>
-                <h3>Selected Packages</h3>
-                <div id="bookingSummary" class="packages-list"></div>
             </div>
             
-            <!-- Customer Details Section -->
+            <div class="panel-actions">
+                <button onclick="proceedToCustomerDetails()" class="confirm-btn">
+                    <span class="btn-icon">✓</span>
+                    Confirm Package
+                </button>
+                <button onclick="closePanel()" class="close-booking-btn">
+                    Close Panel
+                </button>
+            </div>
+        </div>
+        
+        <!-- Stage 2: Customer Details & Payment -->
+        <div id="customerDetailsStage" class="panel-content stage-2" style="display: none;">
+            <div class="booking-summary-mini">
+                <div id="miniPackageSummary"></div>
+            </div>
+            
             <div class="customer-details-section">
                 <h3>Customer Details</h3>
                 <div class="form-grid">
@@ -173,7 +195,6 @@
                 </div>
             </div>
             
-            <!-- Payment Options -->
             <div class="payment-section">
                 <h3>Payment Method</h3>
                 <div class="payment-options">
@@ -188,14 +209,14 @@
                 </div>
             </div>
             
-            <!-- Action Buttons -->
             <div class="panel-actions">
-                <button onclick="confirmBooking()" class="confirm-booking-btn">
-                    <span class="btn-icon">🚗</span>
-                    Confirm & Pay
+                <button onclick="goBackToPackageSelection()" class="back-btn">
+                    <span class="btn-icon">←</span>
+                    Back
                 </button>
-                <button onclick="closePanel()" class="close-booking-btn">
-                    Close Panel
+                <button onclick="confirmBooking()" class="pay-now-btn">
+                    <span class="btn-icon">💳</span>
+                    Pay Now
                 </button>
             </div>
         </div>

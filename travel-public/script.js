@@ -101,17 +101,13 @@ function bookPackage(packageId) {
     const package = travelPackages.find(p => p.id === packageId);
     if (!package) return;
     
-    const existingPackage = selectedPackages.find(p => p.id === packageId);
-    if (existingPackage) {
-        existingPackage.quantity += 1;
-    } else {
-        selectedPackages.push({
-            ...package,
-            quantity: 1,
-            carType: '5-seater',
-            carMultiplier: 1
-        });
-    }
+    // Clear previous selections and set only this package
+    selectedPackages = [{
+        ...package,
+        quantity: 1,
+        carType: '5-seater',
+        carMultiplier: 1
+    }];
     
     openBookingModal();
 }
@@ -144,30 +140,13 @@ function removePackage(packageId) {
     updateBookingSummary();
 }
 
+// Legacy functions for compatibility - now handled by new stage system
 function updatePackageQuantity(packageId, change) {
-    const package = selectedPackages.find(p => p.id === packageId);
-    if (package) {
-        package.quantity += change;
-        if (package.quantity <= 0) {
-            removePackage(packageId);
-        }
-    }
-    updateModalSummary();
+    // Not used in new single-package flow
 }
 
 function updatePackageCarType(packageId, carType) {
-    const package = selectedPackages.find(p => p.id === packageId);
-    if (package) {
-        package.carType = carType;
-        const multipliers = {
-            '5-seater': 1,
-            '7-seater': 1.2,
-            '12-seater': 1.5,
-            '14-seater': 1.7
-        };
-        package.carMultiplier = multipliers[carType] || 1;
-    }
-    updateModalSummary();
+    // Handled by selectCarType function
 }
 
 function removePackage(packageId) {
@@ -187,12 +166,12 @@ function openBookingModal() {
     const panel = document.getElementById('bookingPanel');
     const overlay = document.getElementById('panelOverlay');
     
+    // Show stage 1 (package selection)
+    showPackageSelectionStage();
+    
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('travelDate').min = today;
-    
-    // Update panel summary
-    updateModalSummary();
     
     // Show panel with animation
     overlay.style.display = 'block';
@@ -200,54 +179,98 @@ function openBookingModal() {
     document.body.style.overflow = 'hidden';
 }
 
-function updateModalSummary() {
-    const modalTotal = document.getElementById('modalTotal');
-    const bookingSummary = document.getElementById('bookingSummary');
+function showPackageSelectionStage() {
+    document.getElementById('packageSelectionStage').style.display = 'block';
+    document.getElementById('customerDetailsStage').style.display = 'none';
     
-    if (!modalTotal || !bookingSummary) return;
+    updatePackageDisplay();
+    updateCarTypeOptions();
+    updateModalTotal();
+}
+
+function updatePackageDisplay() {
+    const selectedPackageDisplay = document.getElementById('selectedPackageDisplay');
+    if (!selectedPackageDisplay || selectedPackages.length === 0) return;
     
-    let summaryHTML = '';
-    let grandTotal = 0;
-    
-    selectedPackages.forEach(package => {
-        const basePrice = package.price * package.quantity;
-        const finalPrice = Math.round(basePrice * (package.carMultiplier || 1));
-        grandTotal += finalPrice;
-        
-        summaryHTML += `
-            <div class="package-summary">
-                <div class="package-header">
-                    <h4>${package.name}</h4>
-                    <button class="remove-package" onclick="removePackage(${package.id})" title="Remove package">×</button>
-                </div>
-                <div class="package-details">
-                    <div class="quantity-control">
-                        <label>Quantity:</label>
-                        <div class="qty-controls">
-                            <button onclick="updatePackageQuantity(${package.id}, -1)">-</button>
-                            <span>${package.quantity}</span>
-                            <button onclick="updatePackageQuantity(${package.id}, 1)">+</button>
-                        </div>
-                    </div>
-                    <div class="car-selection">
-                        <label>Car Type:</label>
-                        <select onchange="updatePackageCarType(${package.id}, this.value)">
-                            <option value="5-seater" ${package.carType === '5-seater' ? 'selected' : ''}>5 Seater (Base)</option>
-                            <option value="7-seater" ${package.carType === '7-seater' ? 'selected' : ''}>7 Seater (+20%)</option>
-                            <option value="12-seater" ${package.carType === '12-seater' ? 'selected' : ''}>12 Seater (+50%)</option>
-                            <option value="14-seater" ${package.carType === '14-seater' ? 'selected' : ''}>14 Seater (+70%)</option>
-                        </select>
-                    </div>
-                    <div class="package-pricing">
-                        <span>₹${package.price} × ${package.quantity} × ${package.carMultiplier} = ₹${finalPrice}</span>
-                    </div>
-                </div>
+    const package = selectedPackages[0];
+    selectedPackageDisplay.innerHTML = `
+        <div class="selected-package-card">
+            <img src="${package.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}" alt="${package.name}" class="package-thumb">
+            <div class="package-info">
+                <h4>${package.name}</h4>
+                <p class="package-duration">Duration: ${package.duration}</p>
+                <p class="package-base-price">Base Price: ₹${package.price}</p>
             </div>
-        `;
-    });
+        </div>
+    `;
+}
+
+function updateCarTypeOptions() {
+    const carTypeOptions = document.getElementById('carTypeOptions');
+    if (!carTypeOptions || selectedPackages.length === 0) return;
     
-    bookingSummary.innerHTML = summaryHTML;
-    modalTotal.textContent = `₹${grandTotal}`;
+    const package = selectedPackages[0];
+    const carTypes = [
+        { type: '5-seater', label: '5 Seater', multiplier: 1, extra: '' },
+        { type: '7-seater', label: '7 Seater', multiplier: 1.2, extra: '+20%' },
+        { type: '12-seater', label: '12 Seater', multiplier: 1.5, extra: '+50%' },
+        { type: '14-seater', label: '14 Seater', multiplier: 1.7, extra: '+70%' }
+    ];
+    
+    carTypeOptions.innerHTML = carTypes.map(car => `
+        <div class="car-type-option ${package.carType === car.type ? 'selected' : ''}" onclick="selectCarType('${car.type}', ${car.multiplier})">
+            <div class="car-type-info">
+                <span class="car-type-name">${car.label}</span>
+                <span class="car-type-price">₹${Math.round(package.price * car.multiplier)} ${car.extra}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectCarType(carType, multiplier) {
+    if (selectedPackages.length > 0) {
+        selectedPackages[0].carType = carType;
+        selectedPackages[0].carMultiplier = multiplier;
+        updateCarTypeOptions();
+        updateModalTotal();
+    }
+}
+
+function updateModalTotal() {
+    const modalTotal = document.getElementById('modalTotal');
+    if (!modalTotal || selectedPackages.length === 0) return;
+    
+    const package = selectedPackages[0];
+    const total = Math.round(package.price * package.carMultiplier);
+    modalTotal.textContent = `₹${total}`;
+}
+
+function proceedToCustomerDetails() {
+    document.getElementById('packageSelectionStage').style.display = 'none';
+    document.getElementById('customerDetailsStage').style.display = 'block';
+    
+    updateMiniPackageSummary();
+}
+
+function updateMiniPackageSummary() {
+    const miniSummary = document.getElementById('miniPackageSummary');
+    if (!miniSummary || selectedPackages.length === 0) return;
+    
+    const package = selectedPackages[0];
+    const total = Math.round(package.price * package.carMultiplier);
+    
+    miniSummary.innerHTML = `
+        <div class="mini-summary">
+            <span class="package-name">${package.name}</span>
+            <span class="car-type">${package.carType}</span>
+            <span class="total-amount">₹${total}</span>
+        </div>
+    `;
+}
+
+function goBackToPackageSelection() {
+    document.getElementById('customerDetailsStage').style.display = 'none';
+    document.getElementById('packageSelectionStage').style.display = 'block';
 }
 
 
@@ -278,19 +301,18 @@ function confirmBooking() {
     const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
     if (!customerName || !phoneNumber || !customerEmail || !travelDate || !pickupLocation) {
-        alert('Please fill in all required fields');
+        showNotification('Please fill in all required fields', 'error');
         return;
     }
 
     if (selectedPackages.length === 0) {
-        alert('Please select at least one package');
+        showNotification('Please select a package', 'error');
         return;
     }
 
-    // Calculate total with individual car multipliers
-    let total = selectedPackages.reduce((sum, package) => {
-        return sum + Math.round(package.price * package.quantity * (package.carMultiplier || 1));
-    }, 0);
+    // Calculate total with car multiplier
+    const package = selectedPackages[0];
+    let total = Math.round(package.price * package.carMultiplier);
     
     // Add 2% for card payment
     if (paymentMethod === 'card') {
@@ -334,12 +356,12 @@ function showPaymentModal(bookingData) {
                 <p><strong>Travel Date:</strong> ${bookingData.travel_date}</p>
                 <p><strong>Pickup:</strong> ${bookingData.pickup_location}</p>
                 <div class="packages-summary">
-                    <h4>Selected Packages:</h4>
+                    <h4>Selected Package:</h4>
                     ${bookingData.packages.map(pkg => `
                         <div class="package-item">
-                            <span>${pkg.name} × ${pkg.quantity}</span>
+                            <span>${pkg.name}</span>
                             <span>${pkg.carType}</span>
-                            <span>₹${Math.round(pkg.price * pkg.quantity * pkg.carMultiplier)}</span>
+                            <span>₹${Math.round(pkg.price * pkg.carMultiplier)}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -358,13 +380,13 @@ function showPaymentModal(bookingData) {
             <div id="upiPayment" class="payment-method ${bookingData.payment_method === 'upi' ? 'active' : ''}">
                 <div class="qr-section">
                     <img src="/qr-code.png.jpeg" alt="UPI QR Code" class="qr-code">
-                    <p><strong>Scan & Pay ₹${bookingData.total_amount}</strong></p>
+                    <p><strong>Scan & Pay ₹${bookingData.payment_method === 'upi' ? bookingData.total_amount : Math.round(bookingData.total_amount / 1.02)}</strong></p>
                 </div>
                 <div class="payment-instructions">
                     <h4>Payment Instructions:</h4>
                     <ol>
                         <li>Scan the QR code with any UPI app</li>
-                        <li>Enter amount: ₹${bookingData.total_amount}</li>
+                        <li>Enter amount: ₹${bookingData.payment_method === 'upi' ? bookingData.total_amount : Math.round(bookingData.total_amount / 1.02)}</li>
                         <li>Complete the payment</li>
                         <li>Enter the 12-digit UTR number below</li>
                     </ol>

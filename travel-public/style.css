@@ -874,6 +874,234 @@ main {
     color: #28a745;
 }
 
+/* Stage-specific styles */
+.stage-1, .stage-2 {
+    transition: opacity 0.3s ease;
+}
+
+/* Selected Package Display */
+.selected-package-display {
+    margin-bottom: 1.5rem;
+}
+
+.selected-package-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid #28a745;
+    margin-bottom: 1rem;
+}
+
+.package-thumb {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.package-info h4 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.package-duration, .package-base-price {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.package-base-price {
+    font-weight: 600;
+    color: #28a745;
+}
+
+/* Car Type Selection */
+.car-type-selection {
+    margin-bottom: 1.5rem;
+}
+
+.car-type-selection h4 {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.car-type-selection h4::before {
+    content: '🚗';
+    font-size: 1.2rem;
+}
+
+.car-type-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.car-type-option {
+    padding: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.car-type-option:hover {
+    border-color: #28a745;
+    background: #f8fff8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+}
+
+.car-type-option.selected {
+    border-color: #28a745;
+    background: #f8fff8;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.car-type-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.car-type-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.car-type-price {
+    font-weight: 700;
+    color: #28a745;
+    font-size: 1rem;
+}
+
+/* Mini Summary for Stage 2 */
+.booking-summary-mini {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    border: 2px solid #28a745;
+}
+
+.mini-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.package-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 120px;
+}
+
+.car-type {
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.total-amount {
+    font-weight: 700;
+    color: #28a745;
+    font-size: 1.1rem;
+}
+
+/* Updated Action Buttons */
+.confirm-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    margin-bottom: 0.75rem;
+}
+
+.confirm-btn:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.back-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-right: 1rem;
+}
+
+.back-btn:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.pay-now-btn {
+    flex: 1;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.pay-now-btn:hover {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Stage 2 Panel Actions Layout */
+.stage-2 .panel-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
 /* Mobile Responsive for Panel */
 @media (max-width: 768px) {
     .booking-panel {
@@ -888,6 +1116,38 @@ main {
     .form-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+    
+    .selected-package-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .package-thumb {
+        width: 100%;
+        height: 120px;
+        align-self: center;
+    }
+    
+    .mini-summary {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .stage-2 .panel-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .back-btn {
+        width: 100%;
+        margin-right: 0;
+        justify-content: center;
+    }
+    
+    .pay-now-btn {
+        width: 100%;
     }
 }
 
@@ -915,6 +1175,24 @@ main {
     
     .panel-header h2 {
         font-size: 1.1rem;
+    }
+    
+    .car-type-option {
+        padding: 0.75rem;
+    }
+    
+    .car-type-info {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .selected-package-card {
+        padding: 0.75rem;
+    }
+    
+    .package-info h4 {
+        font-size: 0.9rem;
     }
 }
 
