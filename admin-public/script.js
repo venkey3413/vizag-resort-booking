@@ -499,13 +499,7 @@ async function handleTravelSubmit(e) {
         description: document.getElementById('travelDescription').value,
         image: document.getElementById('travelImage').value,
         gallery: galleryValue,
-        sites: document.getElementById('travelSites').value,
-        car_pricing: {
-            '5_seater': parseInt(document.getElementById('price5Seater').value) || parseInt(document.getElementById('travelPrice').value),
-            '7_seater': parseInt(document.getElementById('price7Seater').value) || Math.round(parseInt(document.getElementById('travelPrice').value) * 1.2),
-            '12_seater': parseInt(document.getElementById('price12Seater').value) || Math.round(parseInt(document.getElementById('travelPrice').value) * 1.5),
-            '14_seater': parseInt(document.getElementById('price14Seater').value) || Math.round(parseInt(document.getElementById('travelPrice').value) * 1.7)
-        }
+        sites: document.getElementById('travelSites').value
     };
 
     console.log('📤 Submitting travel package data:', travelData);
@@ -559,19 +553,7 @@ function editTravelPackage(id) {
     document.getElementById('travelGallery').value = pkg.gallery || '';
     document.getElementById('travelSites').value = pkg.sites || '';
     
-    // Load car pricing if available
-    if (pkg.car_pricing) {
-        document.getElementById('price5Seater').value = pkg.car_pricing['5_seater'] || pkg.price;
-        document.getElementById('price7Seater').value = pkg.car_pricing['7_seater'] || Math.round(pkg.price * 1.2);
-        document.getElementById('price12Seater').value = pkg.car_pricing['12_seater'] || Math.round(pkg.price * 1.5);
-        document.getElementById('price14Seater').value = pkg.car_pricing['14_seater'] || Math.round(pkg.price * 1.7);
-    } else {
-        // Auto-calculate if no car pricing exists
-        document.getElementById('price5Seater').value = pkg.price;
-        document.getElementById('price7Seater').value = Math.round(pkg.price * 1.2);
-        document.getElementById('price12Seater').value = Math.round(pkg.price * 1.5);
-        document.getElementById('price14Seater').value = Math.round(pkg.price * 1.7);
-    }
+
     
     document.getElementById('travelSubmitBtn').textContent = 'Update Travel Package';
     const cancelBtn = document.getElementById('travelCancelBtn');
@@ -581,11 +563,6 @@ function editTravelPackage(id) {
 function cancelTravelEdit() {
     editingTravelId = null;
     document.getElementById('travelForm').reset();
-    // Clear car pricing fields
-    document.getElementById('price5Seater').value = '';
-    document.getElementById('price7Seater').value = '';
-    document.getElementById('price12Seater').value = '';
-    document.getElementById('price14Seater').value = '';
     document.getElementById('travelGallery').value = '';
     document.getElementById('travelSubmitBtn').textContent = 'Add Travel Package';
     const cancelBtn = document.getElementById('travelCancelBtn');

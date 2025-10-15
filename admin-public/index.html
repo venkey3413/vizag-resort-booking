@@ -188,32 +188,7 @@
                             <input type="number" id="travelPrice" required>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Car Seater Pricing:</label>
-                        <div class="car-pricing-container">
-                            <div class="pricing-row">
-                                <label>5 Seater (Base):</label>
-                                <input type="number" id="price5Seater" placeholder="Base price" readonly>
-                                <span class="multiplier">x1.0</span>
-                            </div>
-                            <div class="pricing-row">
-                                <label>7 Seater:</label>
-                                <input type="number" id="price7Seater" placeholder="Auto calculated">
-                                <span class="multiplier">x1.2 (+20%)</span>
-                            </div>
-                            <div class="pricing-row">
-                                <label>12 Seater:</label>
-                                <input type="number" id="price12Seater" placeholder="Auto calculated">
-                                <span class="multiplier">x1.5 (+50%)</span>
-                            </div>
-                            <div class="pricing-row">
-                                <label>14 Seater:</label>
-                                <input type="number" id="price14Seater" placeholder="Auto calculated">
-                                <span class="multiplier">x1.7 (+70%)</span>
-                            </div>
-                        </div>
-                        <small>Prices auto-calculate based on base price. You can override manually.</small>
-                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="travelDuration">Duration:</label>
@@ -554,19 +529,7 @@
             };
         }
         
-        // Auto-calculate car pricing when base price changes
-        document.addEventListener('DOMContentLoaded', function() {
-            const basePriceInput = document.getElementById('travelPrice');
-            if (basePriceInput) {
-                basePriceInput.addEventListener('input', function() {
-                    const basePrice = parseFloat(this.value) || 0;
-                    document.getElementById('price5Seater').value = basePrice;
-                    document.getElementById('price7Seater').value = Math.round(basePrice * 1.2);
-                    document.getElementById('price12Seater').value = Math.round(basePrice * 1.5);
-                    document.getElementById('price14Seater').value = Math.round(basePrice * 1.7);
-                });
-            }
-        });
+
     </script>
     <script src="script.js?v=20250103020"></script>
 </body>
