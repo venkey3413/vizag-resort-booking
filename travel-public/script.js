@@ -965,78 +965,83 @@ function showCenterNotification(message, type) {
 
 function showNotification(message, type = 'info') {
     const isBookingConfirmation = message.includes('submitted for verification') || message.includes('confirmed');
-    
     const notification = document.createElement('div');
     
-    if (isBookingConfirmation && type === 'success') {
-        notification.innerHTML = `
-            <div class="notification-content">
-                <div class="success-icon">🚗</div>
-                <div class="notification-text">
-                    <strong>Travel Booked!</strong><br>
-                    ${message}
-                </div>
-            </div>
-        `;
-        notification.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 2rem;
-            border-radius: 15px;
-            z-index: 10000;
-            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
-            font-size: 16px;
-            max-width: 400px;
-            text-align: center;
-            animation: bookingPulse 0.6s ease-out;
-            border: 3px solid #fff;
-        `;
+    // Get icon and colors based on type
+    let icon, bgGradient, shadowColor;
+    if (type === 'success') {
+        icon = isBookingConfirmation ? '🚗' : '✅';
+        bgGradient = 'linear-gradient(135deg, #28a745, #20c997)';
+        shadowColor = 'rgba(40, 167, 69, 0.3)';
+    } else if (type === 'error') {
+        icon = '⚠️';
+        bgGradient = 'linear-gradient(135deg, #dc3545, #c82333)';
+        shadowColor = 'rgba(220, 53, 69, 0.3)';
     } else {
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 5px;
-            color: white;
-            z-index: 3000;
-            font-size: 14px;
-            max-width: 300px;
-            background: ${type === 'info' ? '#17a2b8' : type === 'success' ? '#28a745' : '#dc3545'};
-            animation: slideIn 0.3s ease;
-        `;
+        icon = 'ℹ️';
+        bgGradient = 'linear-gradient(135deg, #17a2b8, #138496)';
+        shadowColor = 'rgba(23, 162, 184, 0.3)';
     }
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">${icon}</div>
+            <div class="notification-text">
+                <strong>${isBookingConfirmation ? 'Travel Booked!' : type === 'error' ? 'Error' : 'Info'}</strong><br>
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: ${bgGradient};
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        z-index: 10000;
+        box-shadow: 0 10px 30px ${shadowColor};
+        font-size: 16px;
+        max-width: 400px;
+        text-align: center;
+        animation: notificationPulse 0.6s ease-out;
+        border: 3px solid #fff;
+    `;
     
     document.body.appendChild(notification);
     
-    if (isBookingConfirmation && !document.getElementById('booking-animation-styles')) {
+    // Add animation styles if not already present
+    if (!document.getElementById('notification-animation-styles')) {
         const style = document.createElement('style');
-        style.id = 'booking-animation-styles';
+        style.id = 'notification-animation-styles';
         style.textContent = `
-            @keyframes bookingPulse {
+            @keyframes notificationPulse {
                 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
                 50% { transform: translate(-50%, -50%) scale(1.05); }
                 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             }
-            .success-icon {
+            .notification-icon {
                 font-size: 3rem;
                 margin-bottom: 1rem;
-                animation: bounce 1s infinite alternate;
+                animation: ${type === 'error' ? 'shake 0.5s ease-in-out' : 'bounce 1s infinite alternate'};
             }
             @keyframes bounce {
                 0% { transform: translateY(0); }
                 100% { transform: translateY(-10px); }
             }
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
         `;
         document.head.appendChild(style);
     }
     
-    const duration = isBookingConfirmation ? 10000 : 5000;
+    const duration = isBookingConfirmation ? 8000 : 4000;
     
     setTimeout(() => {
         notification.remove();
