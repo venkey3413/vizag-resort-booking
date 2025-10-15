@@ -1641,6 +1641,7 @@ async function initTravelPackagesTable() {
             image TEXT,
             gallery TEXT,
             sites TEXT,
+            car_pricing TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
@@ -1662,6 +1663,13 @@ async function initTravelPackagesTable() {
     // Add sites column if it doesn't exist
     try {
         await db.run('ALTER TABLE travel_packages ADD COLUMN sites TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
+    // Add car_pricing column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE travel_packages ADD COLUMN car_pricing TEXT');
     } catch (error) {
         // Column already exists, ignore error
     }
@@ -1878,7 +1886,19 @@ app.delete('/api/food-items/:id', async (req, res) => {
 // Travel packages CRUD endpoints
 app.get('/api/travel-packages', async (req, res) => {
     try {
-        const packages = await db.all('SELECT id, name, description, price, duration, image, gallery, sites, created_at FROM travel_packages ORDER BY id');
+        const packages = await db.all('SELECT id, name, description, price, duration, image, gallery, sites, car_pricing, created_at FROM travel_packages ORDER BY id');
+        
+        // Parse car_pricing JSON for each package
+        packages.forEach(pkg => {
+            if (pkg.car_pricing) {
+                try {
+                    pkg.car_pricing = JSON.parse(pkg.car_pricing);
+                } catch (error) {
+                    pkg.car_pricing = null;
+                }
+            }
+        });
+        
         res.json(packages);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch travel packages' });
@@ -1887,13 +1907,15 @@ app.get('/api/travel-packages', async (req, res) => {
 
 app.post('/api/travel-packages', async (req, res) => {
     try {
-        const { name, description, price, duration, image, gallery, sites } = req.body;
+        const { name, description, price, duration, image, gallery, sites, car_pricing } = req.body;
+        const carPricingJson = car_pricing ? JSON.stringify(car_pricing) : null;
+        
         const result = await db.run(
-            'INSERT INTO travel_packages (name, description, price, duration, image, gallery, sites) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [name, description, parseInt(price), duration, image, gallery, sites]
+            'INSERT INTO travel_packages (name, description, price, duration, image, gallery, sites, car_pricing) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, description, parseInt(price), duration, image, gallery, sites, carPricingJson]
         );
         
-        const newPackage = { id: result.lastID, name, description, price: parseInt(price), duration, image, gallery, sites };
+        const newPackage = { id: result.lastID, name, description, price: parseInt(price), duration, image, gallery, sites, car_pricing };
         
         // Publish EventBridge event
         try {
@@ -1920,18 +1942,19 @@ app.post('/api/travel-packages', async (req, res) => {
 app.put('/api/travel-packages/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, description, price, duration, image, gallery, sites } = req.body;
+        const { name, description, price, duration, image, gallery, sites, car_pricing } = req.body;
+        const carPricingJson = car_pricing ? JSON.stringify(car_pricing) : null;
         
         const result = await db.run(
-            'UPDATE travel_packages SET name = ?, description = ?, price = ?, duration = ?, image = ?, gallery = ?, sites = ? WHERE id = ?',
-            [name, description, parseInt(price), duration, image, gallery, sites, id]
+            'UPDATE travel_packages SET name = ?, description = ?, price = ?, duration = ?, image = ?, gallery = ?, sites = ?, car_pricing = ? WHERE id = ?',
+            [name, description, parseInt(price), duration, image, gallery, sites, carPricingJson, id]
         );
         
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Travel package not found' });
         }
         
-        const updatedPackage = { id, name, description, price: parseInt(price), duration, image, gallery, sites };
+        const updatedPackage = { id, name, description, price: parseInt(price), duration, image, gallery, sites, car_pricing };
         
         // Publish EventBridge event
         try {
