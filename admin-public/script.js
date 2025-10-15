@@ -489,13 +489,16 @@ async function handleTravelSubmit(e) {
     submitBtn.textContent = 'Processing...';
     submitBtn.disabled = true;
 
+    const galleryValue = document.getElementById('travelGallery').value;
+    console.log('🖼️ Gallery field value:', galleryValue);
+    
     const travelData = {
         name: document.getElementById('travelName').value,
         price: parseInt(document.getElementById('travelPrice').value),
         duration: document.getElementById('travelDuration').value,
         description: document.getElementById('travelDescription').value,
         image: document.getElementById('travelImage').value,
-        gallery: document.getElementById('travelGallery').value,
+        gallery: galleryValue,
         sites: document.getElementById('travelSites').value,
         car_pricing: {
             '5_seater': parseInt(document.getElementById('price5Seater').value) || parseInt(document.getElementById('travelPrice').value),
@@ -505,7 +508,8 @@ async function handleTravelSubmit(e) {
         }
     };
 
-    console.log('Submitting travel package data:', travelData);
+    console.log('📤 Submitting travel package data:', travelData);
+    console.log('📤 Gallery in data:', travelData.gallery);
 
     try {
         let response;
