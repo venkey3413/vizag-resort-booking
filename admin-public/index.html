@@ -43,7 +43,10 @@
                 <div class="form-group">
                     <label for="gallery">Additional Images:</label>
                     <textarea id="gallery" rows="4" placeholder="Uploaded image URLs will appear here" readonly></textarea>
-                    <button type="button" onclick="uploadGalleryImages()" class="upload-btn">🖼️ Upload Gallery Images</button>
+                    <div class="gallery-buttons">
+                        <button type="button" onclick="uploadGalleryImages()" class="upload-btn">🖼️ Upload Gallery Images</button>
+                        <button type="button" onclick="removeGalleryImages()" class="remove-btn">🗑️ Remove Images</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="videos">Videos:</label>
@@ -293,6 +296,69 @@
             });
         }
         
+        function removeGalleryImages() {
+            const galleryTextarea = document.getElementById('gallery');
+            const currentGallery = galleryTextarea.value.trim();
+            
+            if (!currentGallery) {
+                alert('No images to remove');
+                return;
+            }
+            
+            const images = currentGallery.split('\n').filter(url => url.trim());
+            
+            if (images.length === 0) {
+                alert('No images to remove');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'image-removal-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Select Images to Remove</h3>
+                    <div class="images-grid">
+                        ${images.map((url, index) => `
+                            <div class="image-item">
+                                <img src="${url}" alt="Gallery Image ${index + 1}">
+                                <label>
+                                    <input type="checkbox" value="${index}"> Remove
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="modal-actions">
+                        <button onclick="confirmRemoveResortImages()">Remove Selected</button>
+                        <button onclick="closeResortRemovalModal()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            window.confirmRemoveResortImages = function() {
+                const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
+                const indicesToRemove = Array.from(checkboxes).map(cb => parseInt(cb.value));
+                
+                if (indicesToRemove.length === 0) {
+                    alert('Please select at least one image to remove');
+                    return;
+                }
+                
+                const remainingImages = images.filter((_, index) => !indicesToRemove.includes(index));
+                galleryTextarea.value = remainingImages.join('\n');
+                
+                closeResortRemovalModal();
+                alert(`Removed ${indicesToRemove.length} image(s)`);
+            };
+            
+            window.closeResortRemovalModal = function() {
+                modal.remove();
+                delete window.confirmRemoveResortImages;
+                delete window.closeResortRemovalModal;
+            };
+        }
+        
         function uploadVideos() {
             cloudinary.openUploadWidget({
                 cloudName: CLOUDINARY_CLOUD_NAME,
@@ -476,15 +542,15 @@
                 const remainingImages = images.filter((_, index) => !indicesToRemove.includes(index));
                 galleryTextarea.value = remainingImages.join('\n');
                 
-                closeRemovalModal();
+                closeTravelRemovalModal();
                 alert(`Removed ${indicesToRemove.length} image(s)`);
             };
             
-            window.closeRemovalModal = function() {
+            window.closeTravelRemovalModal = function() {
                 modal.remove();
                 style.remove();
                 delete window.confirmRemoveImages;
-                delete window.closeRemovalModal;
+                delete window.closeTravelRemovalModal;
             };
         }
         
