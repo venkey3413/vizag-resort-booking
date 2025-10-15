@@ -170,9 +170,14 @@ function openBookingModal() {
     // Show stage 1 (package selection)
     showPackageSelectionStage();
     
-    // Set minimum date to today
+    // Set minimum date to today, default to tomorrow
     const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
     document.getElementById('travelDate').min = today;
+    document.getElementById('travelDate').value = tomorrowStr;
     
     // Show panel with animation
     overlay.style.display = 'block';
