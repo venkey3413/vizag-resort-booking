@@ -2278,8 +2278,30 @@ app.post('/api/travel-bookings', async (req, res) => {
     try {
         const { customer_name, phone, email, travel_date, pickup_location, car_type, packages, base_amount, car_multiplier, total_amount } = req.body;
         
-        if (!customer_name || !phone || !email || !travel_date || !pickup_location || !car_type || !packages || !total_amount) {
-            return res.status(400).json({ error: 'All fields are required' });
+        // Detailed validation with specific error messages
+        if (!customer_name) {
+            return res.status(400).json({ error: 'Customer name is required' });
+        }
+        if (!phone) {
+            return res.status(400).json({ error: 'Phone number is required' });
+        }
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+        if (!travel_date) {
+            return res.status(400).json({ error: 'Travel date is required' });
+        }
+        if (!pickup_location) {
+            return res.status(400).json({ error: 'Pickup location is required' });
+        }
+        if (!car_type) {
+            return res.status(400).json({ error: 'Car type is required' });
+        }
+        if (!packages || !Array.isArray(packages) || packages.length === 0) {
+            return res.status(400).json({ error: 'At least one package is required' });
+        }
+        if (!total_amount || total_amount <= 0) {
+            return res.status(400).json({ error: 'Valid total amount is required' });
         }
         
         const booking_reference = `TR${Date.now()}`;

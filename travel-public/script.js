@@ -449,10 +449,26 @@ function confirmUPIPayment() {
 
     console.log('🚗 Creating travel booking first...');
     
+    // Ensure all required fields are present
+    const completeBookingData = {
+        customer_name: bookingData.customer_name,
+        phone: bookingData.phone,
+        email: bookingData.email,
+        travel_date: bookingData.travel_date,
+        pickup_location: bookingData.pickup_location,
+        car_type: bookingData.packages[0].carType,
+        packages: bookingData.packages,
+        base_amount: bookingData.packages[0].price,
+        car_multiplier: (bookingData.packages[0].selectedPrice || bookingData.packages[0].price) / bookingData.packages[0].price,
+        total_amount: bookingData.total_amount
+    };
+    
+    console.log('📋 Complete booking data:', completeBookingData);
+    
     fetch('/api/travel-bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData)
+        body: JSON.stringify(completeBookingData)
     })
     .then(response => response.json())
     .then(data => {
@@ -559,10 +575,24 @@ async function initiateRazorpayPayment() {
 function handleTravelCardPayment(bookingData, paymentId) {
     console.log('💳 Processing travel card payment...');
     
+    // Ensure all required fields are present
+    const completeBookingData = {
+        customer_name: bookingData.customer_name,
+        phone: bookingData.phone,
+        email: bookingData.email,
+        travel_date: bookingData.travel_date,
+        pickup_location: bookingData.pickup_location,
+        car_type: bookingData.packages[0].carType,
+        packages: bookingData.packages,
+        base_amount: bookingData.packages[0].price,
+        car_multiplier: (bookingData.packages[0].selectedPrice || bookingData.packages[0].price) / bookingData.packages[0].price,
+        total_amount: bookingData.total_amount
+    };
+    
     fetch('/api/travel-bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData)
+        body: JSON.stringify(completeBookingData)
     })
     .then(response => response.json())
     .then(data => {
