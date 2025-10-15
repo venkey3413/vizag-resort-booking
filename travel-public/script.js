@@ -472,7 +472,6 @@ function confirmUPIPayment() {
             closePaymentModal();
             showNotification('Travel booking payment submitted for verification. You will be notified once confirmed.', 'success');
             selectedPackages = [];
-            updateModalSummary();
         } else {
             throw new Error(paymentData.error || 'Payment submission failed');
         }
@@ -583,7 +582,6 @@ function handleTravelCardPayment(bookingData, paymentId) {
             closePaymentModal();
             showNotification('Travel booking payment submitted for verification. You will be notified once confirmed.', 'success');
             selectedPackages = [];
-            updateModalSummary();
         } else {
             throw new Error(paymentData.error || 'Payment submission failed');
         }
