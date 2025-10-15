@@ -452,26 +452,12 @@ function displayTravelPackages() {
     if (!grid) return;
     
     grid.innerHTML = travelPackages.map(pkg => {
-        let carPricingInfo = '';
-        if (pkg.car_pricing) {
-            carPricingInfo = `
-                <div class="car-pricing-info">
-                    <strong>Car Pricing:</strong><br>
-                    <small>5 Seater: ₹${pkg.car_pricing['5_seater'] || pkg.price}</small><br>
-                    <small>7 Seater: ₹${pkg.car_pricing['7_seater'] || Math.round(pkg.price * 1.2)}</small><br>
-                    <small>12 Seater: ₹${pkg.car_pricing['12_seater'] || Math.round(pkg.price * 1.5)}</small><br>
-                    <small>14 Seater: ₹${pkg.car_pricing['14_seater'] || Math.round(pkg.price * 1.7)}</small>
-                </div>
-            `;
-        }
-        
         return `
             <div class="travel-package-card">
                 <h4>${pkg.name}</h4>
-                <div class="price">Base: ₹${pkg.price}</div>
+                <div class="price">₹${pkg.price}</div>
                 <div class="duration">${pkg.duration}</div>
                 ${pkg.description ? `<div class="description">${pkg.description}</div>` : ''}
-                ${carPricingInfo}
                 <div class="travel-package-actions">
                     <button class="edit" onclick="editTravelPackage(${pkg.id})">Edit</button>
                     <button class="delete" onclick="deleteTravelPackage(${pkg.id})">Delete</button>

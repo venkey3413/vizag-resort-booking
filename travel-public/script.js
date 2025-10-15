@@ -211,26 +211,25 @@ function updateCarTypeOptions() {
     
     const package = selectedPackages[0];
     const carTypes = [
-        { type: '5-seater', label: '5 Seater', multiplier: 1, extra: '' },
-        { type: '7-seater', label: '7 Seater', multiplier: 1.2, extra: '' },
-        { type: '12-seater', label: '12 Seater', multiplier: 1.5, extra: '' },
-        { type: '14-seater', label: '14 Seater', multiplier: 1.7, extra: '' }
+        { type: '5-seater', label: '5 Seater' },
+        { type: '7-seater', label: '7 Seater' },
+        { type: '12-seater', label: '12 Seater' },
+        { type: '14-seater', label: '14 Seater' }
     ];
     
     carTypeOptions.innerHTML = carTypes.map(car => `
-        <div class="car-type-option ${package.carType === car.type ? 'selected' : ''}" onclick="selectCarType('${car.type}', ${car.multiplier})">
+        <div class="car-type-option ${package.carType === car.type ? 'selected' : ''}" onclick="selectCarType('${car.type}')">
             <div class="car-type-info">
                 <span class="car-type-name">${car.label}</span>
-                <span class="car-type-price">₹${Math.round(package.price * car.multiplier)}</span>
             </div>
         </div>
     `).join('');
 }
 
-function selectCarType(carType, multiplier) {
+function selectCarType(carType) {
     if (selectedPackages.length > 0) {
         selectedPackages[0].carType = carType;
-        selectedPackages[0].carMultiplier = multiplier;
+        selectedPackages[0].carMultiplier = 1;
         updateCarTypeOptions();
         updateModalTotal();
     }
@@ -241,7 +240,7 @@ function updateModalTotal() {
     if (!modalTotal || selectedPackages.length === 0) return;
     
     const package = selectedPackages[0];
-    const total = Math.round(package.price * package.carMultiplier);
+    const total = package.price;
     modalTotal.textContent = `₹${total}`;
 }
 
@@ -257,7 +256,7 @@ function updateMiniPackageSummary() {
     if (!miniSummary || selectedPackages.length === 0) return;
     
     const package = selectedPackages[0];
-    const total = Math.round(package.price * package.carMultiplier);
+    const total = package.price;
     
     miniSummary.innerHTML = `
         <div class="mini-summary">
@@ -310,9 +309,9 @@ function confirmBooking() {
         return;
     }
 
-    // Calculate total with car multiplier
+    // Calculate total
     const package = selectedPackages[0];
-    let total = Math.round(package.price * package.carMultiplier);
+    let total = package.price;
     
     // Add 2% for card payment
     if (paymentMethod === 'card') {
@@ -361,7 +360,7 @@ function showPaymentModal(bookingData) {
                         <div class="package-item">
                             <span>${pkg.name}</span>
                             <span>${pkg.carType}</span>
-                            <span>₹${Math.round(pkg.price * pkg.carMultiplier)}</span>
+                            <span>₹${pkg.price}</span>
                         </div>
                     `).join('')}
                 </div>
