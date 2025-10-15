@@ -1887,13 +1887,13 @@ app.get('/api/travel-packages', async (req, res) => {
 
 app.post('/api/travel-packages', async (req, res) => {
     try {
-        const { name, description, price, duration, image, sites } = req.body;
+        const { name, description, price, duration, image, gallery, sites } = req.body;
         const result = await db.run(
-            'INSERT INTO travel_packages (name, description, price, duration, image, sites) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, description, parseInt(price), duration, image, sites]
+            'INSERT INTO travel_packages (name, description, price, duration, image, gallery, sites) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [name, description, parseInt(price), duration, image, gallery, sites]
         );
         
-        const newPackage = { id: result.lastID, name, description, price: parseInt(price), duration, image };
+        const newPackage = { id: result.lastID, name, description, price: parseInt(price), duration, image, gallery, sites };
         
         // Publish EventBridge event
         try {
@@ -1920,18 +1920,18 @@ app.post('/api/travel-packages', async (req, res) => {
 app.put('/api/travel-packages/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, description, price, duration, image, sites } = req.body;
+        const { name, description, price, duration, image, gallery, sites } = req.body;
         
         const result = await db.run(
-            'UPDATE travel_packages SET name = ?, description = ?, price = ?, duration = ?, image = ?, sites = ? WHERE id = ?',
-            [name, description, parseInt(price), duration, image, sites, id]
+            'UPDATE travel_packages SET name = ?, description = ?, price = ?, duration = ?, image = ?, gallery = ?, sites = ? WHERE id = ?',
+            [name, description, parseInt(price), duration, image, gallery, sites, id]
         );
         
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Travel package not found' });
         }
         
-        const updatedPackage = { id, name, description, price: parseInt(price), duration, image };
+        const updatedPackage = { id, name, description, price: parseInt(price), duration, image, gallery, sites };
         
         // Publish EventBridge event
         try {
