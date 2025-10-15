@@ -170,14 +170,25 @@ function openBookingModal() {
     // Show stage 1 (package selection)
     showPackageSelectionStage();
     
-    // Set minimum date to today, default to tomorrow
-    const today = new Date().toISOString().split('T')[0];
+    // Block same-day booking - set minimum date to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
     
-    document.getElementById('travelDate').min = today;
-    document.getElementById('travelDate').value = tomorrowStr;
+    const travelDateInput = document.getElementById('travelDate');
+    travelDateInput.min = tomorrowStr;
+    travelDateInput.value = tomorrowStr;
+    
+    // Add validation to prevent same-day booking
+    travelDateInput.addEventListener('change', function() {
+        const selectedDate = this.value;
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (selectedDate === today) {
+            showCenterNotification('Same-day travel booking is not allowed. Please select tomorrow or a future date.', 'error');
+            this.value = tomorrowStr;
+        }
+    });
     
     // Show panel with animation
     overlay.style.display = 'block';
@@ -887,6 +898,69 @@ function toggleDescription(packageId) {
         fullDesc.style.display = 'block';
         button.textContent = 'View Less';
     }
+}
+
+function showCenterNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type} center-notification`;
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="error-icon">⚠️</div>
+            <div class="notification-text">
+                <strong>Booking Restriction</strong><br>
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        z-index: 10000;
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+        font-size: 16px;
+        max-width: 400px;
+        text-align: center;
+        animation: errorPulse 0.6s ease-out;
+        border: 3px solid #fff;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Add animation styles if not already present
+    if (!document.getElementById('error-animation-styles')) {
+        const style = document.createElement('style');
+        style.id = 'error-animation-styles';
+        style.textContent = `
+            @keyframes errorPulse {
+                0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.05); }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            }
+            .error-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                animation: shake 0.5s ease-in-out;
+            }
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 4000);
 }
 
 function showNotification(message, type = 'info') {
