@@ -164,39 +164,58 @@ app.delete('/api/food-items/:id', async (req, res) => {
 // Travel packages management endpoints
 app.get('/api/travel-packages', async (req, res) => {
     try {
+        console.log('🔄 Admin server forwarding GET request to main server for travel packages');
         const response = await fetch('http://localhost:3000/api/travel-packages');
         const data = await response.json();
+        console.log(`📥 Retrieved ${data.length} travel packages from main server`);
         res.json(data);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch travel packages' });
+        console.error('❌ Admin server error fetching travel packages:', error);
+        res.status(500).json({ error: `Failed to fetch travel packages: ${error.message}` });
     }
 });
 
 app.post('/api/travel-packages', async (req, res) => {
     try {
+        console.log('🔄 Admin server forwarding POST request to main server for new travel package');
+        console.log('📤 Request body:', req.body);
+        
         const response = await fetch('http://localhost:3000/api/travel-packages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
         });
+        
+        console.log(`📥 Main server response status: ${response.status}`);
         const data = await response.json();
+        console.log('📥 Main server response data:', data);
+        
         res.status(response.status).json(data);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to add travel package' });
+        console.error('❌ Admin server error forwarding travel package creation:', error);
+        res.status(500).json({ error: `Failed to add travel package: ${error.message}` });
     }
 });
 
 app.put('/api/travel-packages/:id', async (req, res) => {
     try {
+        console.log(`🔄 Admin server forwarding PUT request to main server for travel package ${req.params.id}`);
+        console.log('📤 Request body:', req.body);
+        
         const response = await fetch(`http://localhost:3000/api/travel-packages/${req.params.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
         });
+        
+        console.log(`📥 Main server response status: ${response.status}`);
         const data = await response.json();
+        console.log('📥 Main server response data:', data);
+        
         res.status(response.status).json(data);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update travel package' });
+        console.error('❌ Admin server error forwarding travel package update:', error);
+        res.status(500).json({ error: `Failed to update travel package: ${error.message}` });
     }
 });
 
