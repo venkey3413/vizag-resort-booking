@@ -542,15 +542,15 @@
                 const remainingImages = images.filter((_, index) => !indicesToRemove.includes(index));
                 galleryTextarea.value = remainingImages.join('\n');
                 
-                closeTravelRemovalModal();
+                closeRemovalModal();
                 alert(`Removed ${indicesToRemove.length} image(s)`);
             };
             
-            window.closeTravelRemovalModal = function() {
+            window.closeRemovalModal = function() {
                 modal.remove();
                 style.remove();
                 delete window.confirmRemoveImages;
-                delete window.closeTravelRemovalModal;
+                delete window.closeRemovalModal;
             };
         }
         
