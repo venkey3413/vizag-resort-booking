@@ -102,11 +102,12 @@ function bookPackage(packageId) {
     if (!package) return;
     
     // Clear previous selections and set only this package
+    const defaultPrice = package.car_pricing && package.car_pricing['5_seater'] ? package.car_pricing['5_seater'] : package.price;
     selectedPackages = [{
         ...package,
         quantity: 1,
         carType: '5-seater',
-        carMultiplier: 1
+        selectedPrice: defaultPrice
     }];
     
     openBookingModal();
@@ -211,25 +212,29 @@ function updateCarTypeOptions() {
     
     const package = selectedPackages[0];
     const carTypes = [
-        { type: '5-seater', label: '5 Seater' },
-        { type: '7-seater', label: '7 Seater' },
-        { type: '12-seater', label: '12 Seater' },
-        { type: '14-seater', label: '14 Seater' }
+        { type: '5-seater', label: '5 Seater', key: '5_seater' },
+        { type: '7-seater', label: '7 Seater', key: '7_seater' },
+        { type: '12-seater', label: '12 Seater', key: '12_seater' },
+        { type: '14-seater', label: '14 Seater', key: '14_seater' }
     ];
     
-    carTypeOptions.innerHTML = carTypes.map(car => `
-        <div class="car-type-option ${package.carType === car.type ? 'selected' : ''}" onclick="selectCarType('${car.type}')">
-            <div class="car-type-info">
-                <span class="car-type-name">${car.label}</span>
+    carTypeOptions.innerHTML = carTypes.map(car => {
+        const price = package.car_pricing && package.car_pricing[car.key] ? package.car_pricing[car.key] : package.price;
+        return `
+            <div class="car-type-option ${package.carType === car.type ? 'selected' : ''}" onclick="selectCarType('${car.type}', ${price})">
+                <div class="car-type-info">
+                    <span class="car-type-name">${car.label}</span>
+                    <span class="car-type-price">₹${price}</span>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-function selectCarType(carType) {
+function selectCarType(carType, price) {
     if (selectedPackages.length > 0) {
         selectedPackages[0].carType = carType;
-        selectedPackages[0].carMultiplier = 1;
+        selectedPackages[0].selectedPrice = price;
         updateCarTypeOptions();
         updateModalTotal();
     }
@@ -240,7 +245,7 @@ function updateModalTotal() {
     if (!modalTotal || selectedPackages.length === 0) return;
     
     const package = selectedPackages[0];
-    const total = package.price;
+    const total = package.selectedPrice || package.price;
     modalTotal.textContent = `₹${total}`;
 }
 
@@ -256,7 +261,7 @@ function updateMiniPackageSummary() {
     if (!miniSummary || selectedPackages.length === 0) return;
     
     const package = selectedPackages[0];
-    const total = package.price;
+    const total = package.selectedPrice || package.price;
     
     miniSummary.innerHTML = `
         <div class="mini-summary">
@@ -311,7 +316,7 @@ function confirmBooking() {
 
     // Calculate total
     const package = selectedPackages[0];
-    let total = package.price;
+    let total = package.selectedPrice || package.price;
     
     // Add 2% for card payment
     if (paymentMethod === 'card') {
@@ -360,7 +365,7 @@ function showPaymentModal(bookingData) {
                         <div class="package-item">
                             <span>${pkg.name}</span>
                             <span>${pkg.carType}</span>
-                            <span>₹${pkg.price}</span>
+                            <span>₹${pkg.selectedPrice || pkg.price}</span>
                         </div>
                     `).join('')}
                 </div>
