@@ -452,12 +452,26 @@ function displayTravelPackages() {
     if (!grid) return;
     
     grid.innerHTML = travelPackages.map(pkg => {
+        let carPricingInfo = '';
+        if (pkg.car_pricing) {
+            carPricingInfo = `
+                <div class="car-pricing-info">
+                    <strong>Car Pricing:</strong><br>
+                    <small>5 Seater: ₹${pkg.car_pricing['5_seater'] || pkg.price}</small><br>
+                    <small>7 Seater: ₹${pkg.car_pricing['7_seater'] || pkg.price}</small><br>
+                    <small>12 Seater: ₹${pkg.car_pricing['12_seater'] || pkg.price}</small><br>
+                    <small>14 Seater: ₹${pkg.car_pricing['14_seater'] || pkg.price}</small>
+                </div>
+            `;
+        }
+        
         return `
             <div class="travel-package-card">
                 <h4>${pkg.name}</h4>
-                <div class="price">₹${pkg.price}</div>
+                <div class="price">Base: ₹${pkg.price}</div>
                 <div class="duration">${pkg.duration}</div>
                 ${pkg.description ? `<div class="description">${pkg.description}</div>` : ''}
+                ${carPricingInfo}
                 <div class="travel-package-actions">
                     <button class="edit" onclick="editTravelPackage(${pkg.id})">Edit</button>
                     <button class="delete" onclick="deleteTravelPackage(${pkg.id})">Delete</button>
@@ -485,7 +499,13 @@ async function handleTravelSubmit(e) {
         description: document.getElementById('travelDescription').value,
         image: document.getElementById('travelImage').value,
         gallery: galleryValue,
-        sites: document.getElementById('travelSites').value
+        sites: document.getElementById('travelSites').value,
+        car_pricing: {
+            '5_seater': parseInt(document.getElementById('price5Seater').value) || parseInt(document.getElementById('travelPrice').value),
+            '7_seater': parseInt(document.getElementById('price7Seater').value) || parseInt(document.getElementById('travelPrice').value),
+            '12_seater': parseInt(document.getElementById('price12Seater').value) || parseInt(document.getElementById('travelPrice').value),
+            '14_seater': parseInt(document.getElementById('price14Seater').value) || parseInt(document.getElementById('travelPrice').value)
+        }
     };
 
     console.log('📤 Submitting travel package data:', travelData);
@@ -537,6 +557,14 @@ function editTravelPackage(id) {
     document.getElementById('travelDescription').value = pkg.description || '';
     document.getElementById('travelImage').value = pkg.image || '';
     document.getElementById('travelGallery').value = pkg.gallery || '';
+    
+    // Load car pricing if available
+    if (pkg.car_pricing) {
+        document.getElementById('price5Seater').value = pkg.car_pricing['5_seater'] || '';
+        document.getElementById('price7Seater').value = pkg.car_pricing['7_seater'] || '';
+        document.getElementById('price12Seater').value = pkg.car_pricing['12_seater'] || '';
+        document.getElementById('price14Seater').value = pkg.car_pricing['14_seater'] || '';
+    }
     document.getElementById('travelSites').value = pkg.sites || '';
     
 
@@ -550,6 +578,10 @@ function cancelTravelEdit() {
     editingTravelId = null;
     document.getElementById('travelForm').reset();
     document.getElementById('travelGallery').value = '';
+    document.getElementById('price5Seater').value = '';
+    document.getElementById('price7Seater').value = '';
+    document.getElementById('price12Seater').value = '';
+    document.getElementById('price14Seater').value = '';
     document.getElementById('travelSubmitBtn').textContent = 'Add Travel Package';
     const cancelBtn = document.getElementById('travelCancelBtn');
     if (cancelBtn) cancelBtn.style.display = 'none';
