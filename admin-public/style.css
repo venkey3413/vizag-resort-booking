@@ -351,3 +351,23 @@ button[type="submit"]:hover {
     background: #e9ecef;
     color: #6c757d;
 }
+
+.gallery-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.remove-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.remove-btn:hover {
+    background: #c82333;
+}

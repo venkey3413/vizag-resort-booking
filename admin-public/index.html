@@ -225,7 +225,10 @@
                     <div class="form-group">
                         <label for="travelGallery">Additional Images (Gallery):</label>
                         <textarea id="travelGallery" rows="4" placeholder="Uploaded image URLs will appear here" readonly></textarea>
-                        <button type="button" onclick="uploadTravelGalleryImages()" class="upload-btn">🖼️ Upload Gallery Images</button>
+                        <div class="gallery-buttons">
+                            <button type="button" onclick="uploadTravelGalleryImages()" class="upload-btn">🖼️ Upload Gallery Images</button>
+                            <button type="button" onclick="removeTravelGalleryImages()" class="remove-btn">🗑️ Remove Images</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="travelDescription">Description:</label>
@@ -358,6 +361,131 @@
                     document.getElementById('travelGallery').value = updatedGallery;
                 }
             });
+        }
+        
+        function removeTravelGalleryImages() {
+            const galleryTextarea = document.getElementById('travelGallery');
+            const currentGallery = galleryTextarea.value.trim();
+            
+            if (!currentGallery) {
+                alert('No images to remove');
+                return;
+            }
+            
+            const images = currentGallery.split('\n').filter(url => url.trim());
+            
+            if (images.length === 0) {
+                alert('No images to remove');
+                return;
+            }
+            
+            // Create a modal to show images for selection
+            const modal = document.createElement('div');
+            modal.className = 'image-removal-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Select Images to Remove</h3>
+                    <div class="images-grid">
+                        ${images.map((url, index) => `
+                            <div class="image-item">
+                                <img src="${url}" alt="Gallery Image ${index + 1}">
+                                <label>
+                                    <input type="checkbox" value="${index}"> Remove
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="modal-actions">
+                        <button onclick="confirmRemoveImages()">Remove Selected</button>
+                        <button onclick="closeRemovalModal()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add modal styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .image-removal-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                }
+                .image-removal-modal .modal-content {
+                    background: white;
+                    padding: 2rem;
+                    border-radius: 10px;
+                    max-width: 80%;
+                    max-height: 80%;
+                    overflow-y: auto;
+                }
+                .images-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                    gap: 1rem;
+                    margin: 1rem 0;
+                }
+                .image-item {
+                    text-align: center;
+                }
+                .image-item img {
+                    width: 100%;
+                    height: 100px;
+                    object-fit: cover;
+                    border-radius: 5px;
+                }
+                .modal-actions {
+                    text-align: center;
+                    margin-top: 1rem;
+                }
+                .modal-actions button {
+                    margin: 0 0.5rem;
+                    padding: 0.5rem 1rem;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+                .modal-actions button:first-child {
+                    background: #dc3545;
+                    color: white;
+                }
+                .modal-actions button:last-child {
+                    background: #6c757d;
+                    color: white;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            window.confirmRemoveImages = function() {
+                const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
+                const indicesToRemove = Array.from(checkboxes).map(cb => parseInt(cb.value));
+                
+                if (indicesToRemove.length === 0) {
+                    alert('Please select at least one image to remove');
+                    return;
+                }
+                
+                const remainingImages = images.filter((_, index) => !indicesToRemove.includes(index));
+                galleryTextarea.value = remainingImages.join('\n');
+                
+                closeRemovalModal();
+                alert(`Removed ${indicesToRemove.length} image(s)`);
+            };
+            
+            window.closeRemovalModal = function() {
+                modal.remove();
+                style.remove();
+                delete window.confirmRemoveImages;
+                delete window.closeRemovalModal;
+            };
         }
         
         // Auto-calculate car pricing when base price changes
