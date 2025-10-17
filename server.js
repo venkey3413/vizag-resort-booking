@@ -348,6 +348,7 @@ app.post('/api/check-availability', async (req, res) => {
 
 app.post('/api/bookings', async (req, res) => {
     try {
+        console.log('🎯 Booking request received:', req.body);
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount, transactionId } = req.body;
 
         // Enhanced input sanitization
@@ -361,6 +362,7 @@ app.post('/api/bookings', async (req, res) => {
             guests: Math.max(1, Math.min(20, parseInt(guests) || 1)),
             transactionId: sanitizeInput(transactionId || '').substring(0, 50)
         };
+        console.log('🧹 Sanitized data:', sanitizedData);
         
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -382,14 +384,18 @@ app.post('/api/bookings', async (req, res) => {
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
         const todayDate = new Date().toISOString().split('T')[0];
+        console.log('📅 Date validation:', { checkIn, checkOut, todayDate, checkInDate, checkOutDate });
         
         if (checkIn < todayDate) {
+            console.log('❌ Check-in date is in the past');
             return res.status(400).json({ error: 'Check-in date cannot be in the past' });
         }
         
         if (checkOutDate <= checkInDate) {
+            console.log('❌ Check-out date is not after check-in date');
             return res.status(400).json({ error: 'Check-out date must be at least one day after check-in date' });
         }
+        console.log('✅ Date validation passed');
         
         // Define today string for queries
         const todayStr = new Date().toISOString().split('T')[0];
@@ -410,10 +416,13 @@ app.post('/api/bookings', async (req, res) => {
         }
 
         // Get resort details
+        console.log('🏨 Looking for resort with ID:', resortId);
         const resort = await db.get('SELECT * FROM resorts WHERE id = ?', [resortId]);
         if (!resort) {
+            console.log('❌ Resort not found for ID:', resortId);
             return res.status(404).json({ error: 'Resort not found' });
         }
+        console.log('✅ Resort found:', resort.name);
         
         // Check for blocked dates (only check-in date)
         try {
@@ -601,9 +610,11 @@ app.post('/api/bookings', async (req, res) => {
             console.error('EventBridge publish failed:', eventError);
         }
         
+        console.log('✅ Booking created successfully:', booking);
         res.json(booking);
     } catch (error) {
-        console.error('Booking error:', error);
+        console.error('❌ Booking error:', error);
+        console.error('❌ Error stack:', error.stack);
         res.status(500).json({ error: 'Failed to create booking' });
     }
 });
