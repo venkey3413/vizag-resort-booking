@@ -35,7 +35,7 @@ function setupModalEvents(){
         const form=document.getElementById('bookingForm');
         if(form)form.onsubmit=window.handleBookingSubmit;
         
-        // Phone input auto +91
+        // Phone input auto +91 and OTP setup
         const phoneInput=document.getElementById('phone');
         if(phoneInput){
             phoneInput.addEventListener('focus',function(){
@@ -46,7 +46,29 @@ function setupModalEvents(){
                 if(!val.startsWith('+91'))val='+91'+val.replace(/\D/g,'').substring(0,10);
                 if(val.startsWith('+91'))val='+91'+val.substring(3).replace(/\D/g,'').substring(0,10);
                 this.value=val;
+                
+                // Show/hide OTP button based on phone number length
+                const sendOtpBtn=document.getElementById('sendOtpBtn');
+                if(sendOtpBtn){
+                    if(val.length===13){
+                        sendOtpBtn.style.display='inline-block';
+                    }else{
+                        sendOtpBtn.style.display='none';
+                        document.getElementById('otpGroup').style.display='none';
+                    }
+                }
             });
+        }
+        
+        // OTP button events
+        const sendOtpBtn=document.getElementById('sendOtpBtn');
+        if(sendOtpBtn){
+            sendOtpBtn.onclick=sendOTP;
+        }
+        
+        const verifyOtpBtn=document.getElementById('verifyOtpBtn');
+        if(verifyOtpBtn){
+            verifyOtpBtn.onclick=verifyOTP;
         }
     },100);
     
@@ -145,9 +167,31 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('resortPrice').value=resort.price;
             document.getElementById('modalResortName').textContent=`Book ${resortName}`;
             
+            // Reset phone verification state
+            window.phoneVerified = false;
+            window.firebaseConfirmationResult = null;
+            
             // Set default +91 for phone - force it
             const phoneInput=document.getElementById('phone');
-            if(phoneInput){phoneInput.value='+91';phoneInput.focus();phoneInput.blur()}
+            if(phoneInput){
+                phoneInput.value='+91';
+                phoneInput.classList.remove('phone-verified');
+                phoneInput.readOnly = false;
+                phoneInput.focus();
+                phoneInput.blur();
+            }
+            
+            // Reset OTP elements
+            document.getElementById('sendOtpBtn').style.display = 'none';
+            document.getElementById('otpGroup').style.display = 'none';
+            document.getElementById('otpCode').value = '';
+            
+            // Disable booking button initially
+            const bookBtn = document.querySelector('.book-btn');
+            if (bookBtn) {
+                bookBtn.disabled = true;
+                bookBtn.textContent = 'Verify Phone First';
+            }
             
             const today=new Date().toISOString().split('T')[0];
             const tomorrow=new Date();
@@ -184,9 +228,118 @@ window.bookNow=function(resortId,resortName){
     }
 }
 
+// Firebase OTP Variables
+window.firebaseConfirmationResult = null;
+window.phoneVerified = false;
+
+// Send OTP function
+function sendOTP() {
+    const phoneNumber = document.getElementById('phone').value;
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const otpMessage = document.getElementById('otpMessage');
+    
+    if (!phoneNumber || phoneNumber.length !== 13) {
+        showOTPMessage('Please enter a valid 10-digit phone number', 'error');
+        return;
+    }
+    
+    sendOtpBtn.disabled = true;
+    sendOtpBtn.textContent = 'Sending...';
+    
+    // Initialize reCAPTCHA
+    if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            'size': 'invisible',
+            'callback': function(response) {
+                console.log('reCAPTCHA solved');
+            }
+        });
+    }
+    
+    // Send OTP
+    firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+        .then(function(confirmationResult) {
+            window.firebaseConfirmationResult = confirmationResult;
+            document.getElementById('otpGroup').style.display = 'block';
+            showOTPMessage('OTP sent successfully! Please check your phone.', 'success');
+            sendOtpBtn.textContent = 'Resend OTP';
+            sendOtpBtn.disabled = false;
+        })
+        .catch(function(error) {
+            console.error('OTP send error:', error);
+            showOTPMessage('Failed to send OTP. Please try again.', 'error');
+            sendOtpBtn.textContent = 'Send OTP';
+            sendOtpBtn.disabled = false;
+        });
+}
+
+// Verify OTP function
+function verifyOTP() {
+    const otpCode = document.getElementById('otpCode').value;
+    const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+    
+    if (!otpCode || otpCode.length !== 6) {
+        showOTPMessage('Please enter the 6-digit OTP', 'error');
+        return;
+    }
+    
+    if (!window.firebaseConfirmationResult) {
+        showOTPMessage('Please send OTP first', 'error');
+        return;
+    }
+    
+    verifyOtpBtn.disabled = true;
+    verifyOtpBtn.textContent = 'Verifying...';
+    
+    window.firebaseConfirmationResult.confirm(otpCode)
+        .then(function(result) {
+            window.phoneVerified = true;
+            const phoneInput = document.getElementById('phone');
+            phoneInput.classList.add('phone-verified');
+            phoneInput.readOnly = true;
+            
+            showOTPMessage('Phone number verified successfully!', 'success');
+            document.getElementById('otpGroup').style.display = 'none';
+            document.getElementById('sendOtpBtn').style.display = 'none';
+            
+            // Enable booking button
+            const bookBtn = document.querySelector('.book-btn');
+            if (bookBtn) {
+                bookBtn.disabled = false;
+                bookBtn.textContent = 'Confirm Booking';
+            }
+        })
+        .catch(function(error) {
+            console.error('OTP verification error:', error);
+            showOTPMessage('Invalid OTP. Please try again.', 'error');
+            verifyOtpBtn.textContent = 'Verify OTP';
+            verifyOtpBtn.disabled = false;
+        });
+}
+
+// Show OTP message helper
+function showOTPMessage(message, type) {
+    const otpMessage = document.getElementById('otpMessage');
+    if (otpMessage) {
+        otpMessage.textContent = message;
+        otpMessage.className = `otp-message otp-${type}`;
+        setTimeout(() => {
+            otpMessage.textContent = '';
+            otpMessage.className = 'otp-message';
+        }, 5000);
+    }
+}
+
 // Handle booking form submission
 window.handleBookingSubmit=function(e){
     e.preventDefault();
+    
+    // Check phone verification first
+    if (!window.phoneVerified) {
+        showCriticalNotification('Please verify your phone number with OTP first', 'error');
+        return;
+    }
+    
     const formData={
         resortId:document.getElementById('resortId').value,
         guestName:document.getElementById('guestName').value,

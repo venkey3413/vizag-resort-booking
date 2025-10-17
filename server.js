@@ -505,6 +505,7 @@ app.post('/api/bookings', async (req, res) => {
         try {
             await db.run('ALTER TABLE bookings ADD COLUMN coupon_code TEXT');
             await db.run('ALTER TABLE bookings ADD COLUMN discount_amount INTEGER DEFAULT 0');
+            await db.run('ALTER TABLE bookings ADD COLUMN phone_verified INTEGER DEFAULT 0');
         } catch (error) {
             // Columns already exist, ignore error
         }
@@ -513,11 +514,11 @@ app.post('/api/bookings', async (req, res) => {
         const initialStatus = transactionId ? 'pending_verification' : 'pending_payment';
         const paymentStatus = transactionId ? 'pending' : 'pending';
         
-        // Create booking with sanitized data
+        // Create booking with sanitized data (phone is verified via Firebase OTP)
         const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount, status, payment_status, transaction_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [sanitizedData.resortId, sanitizedData.guestName, sanitizedData.email, sanitizedData.phone, sanitizedData.checkIn, sanitizedData.checkOut, sanitizedData.guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount, initialStatus, paymentStatus, sanitizedData.transactionId]);
+            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount, status, payment_status, transaction_id, phone_verified)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [sanitizedData.resortId, sanitizedData.guestName, sanitizedData.email, sanitizedData.phone, sanitizedData.checkIn, sanitizedData.checkOut, sanitizedData.guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount, initialStatus, paymentStatus, sanitizedData.transactionId, 1]);
         
         // Store payment proof if transactionId provided
         if (transactionId) {

@@ -472,6 +472,12 @@ section {
     transition: background 0.3s;
 }
 
+.book-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .book-btn:hover {
     background: #218838;
 }
@@ -1885,4 +1891,75 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         padding: 10px 12px;
         font-size: 0.8rem;
     }
+}
+
+/* OTP Verification Styles */
+.otp-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    transition: background 0.3s;
+}
+
+.otp-btn:hover {
+    background: #218838;
+}
+
+.otp-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.otp-message {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.otp-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.otp-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.otp-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+#otpCode {
+    font-family: monospace;
+    font-size: 1.2rem;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+#recaptcha-container {
+    margin: 10px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.phone-verified {
+    background: #d4edda !important;
+    border-color: #c3e6cb !important;
+}
+
+.phone-verified::after {
+    content: " ✓";
+    color: #28a745;
+    font-weight: bold;
 }

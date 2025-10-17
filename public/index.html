@@ -254,6 +254,15 @@
                 <div class="form-group">
                     <label for="phone">WhatsApp Number (Enter 10 digits number):</label>
                     <input type="tel" id="phone" placeholder="Enter 10 digits number" pattern="\+91[0-9]{10}" maxlength="13" required>
+                    <button type="button" id="sendOtpBtn" class="otp-btn" style="display:none;">Send OTP</button>
+                </div>
+                
+                <div class="form-group" id="otpGroup" style="display:none;">
+                    <label for="otpCode">Enter OTP:</label>
+                    <input type="text" id="otpCode" placeholder="Enter 6-digit OTP" maxlength="6">
+                    <button type="button" id="verifyOtpBtn" class="otp-btn">Verify OTP</button>
+                    <div id="otpMessage" class="otp-message"></div>
+                    <div id="recaptcha-container"></div>
                 </div>
                 
                 <div class="form-row">
@@ -369,7 +378,25 @@
     </script>
     <!--End of Tawk.to Script-->
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
     <script type="module">
+    // Firebase Configuration - REPLACE WITH YOUR ACTUAL FIREBASE PROJECT CREDENTIALS
+    const firebaseConfig = {
+        apiKey: "YOUR_FIREBASE_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    window.firebaseAuth = firebase.auth();
+    
     // Load third-party scripts only when needed
     window.loadRazorpay = () => {
         if (!window.Razorpay) {
