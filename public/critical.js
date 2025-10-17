@@ -238,39 +238,81 @@ function sendOTP() {
     const sendOtpBtn = document.getElementById('sendOtpBtn');
     const otpMessage = document.getElementById('otpMessage');
     
+    console.log('🔥 Firebase available:', typeof firebase !== 'undefined');
+    console.log('🔥 Phone number:', phoneNumber);
+    
     if (!phoneNumber || phoneNumber.length !== 13) {
         showOTPMessage('Please enter a valid 10-digit phone number', 'error');
+        return;
+    }
+    
+    if (typeof firebase === 'undefined') {
+        showOTPMessage('Firebase not loaded. Please refresh the page.', 'error');
         return;
     }
     
     sendOtpBtn.disabled = true;
     sendOtpBtn.textContent = 'Sending...';
     
-    // Initialize reCAPTCHA
-    if (!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-            'size': 'invisible',
-            'callback': function(response) {
-                console.log('reCAPTCHA solved');
-            }
-        });
+    try {
+        // Initialize reCAPTCHA
+        if (!window.recaptchaVerifier) {
+            console.log('🔥 Creating reCAPTCHA verifier');
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                'size': 'normal',
+                'callback': function(response) {
+                    console.log('🔥 reCAPTCHA solved:', response);
+                },
+                'expired-callback': function() {
+                    console.log('🔥 reCAPTCHA expired');
+                }
+            });
+        }
+        
+        console.log('🔥 Sending OTP to:', phoneNumber);
+        
+        // Send OTP
+        firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+            .then(function(confirmationResult) {
+                console.log('🔥 OTP sent successfully');
+                window.firebaseConfirmationResult = confirmationResult;
+                document.getElementById('otpGroup').style.display = 'block';
+                showOTPMessage('OTP sent successfully! Please check your phone.', 'success');
+                sendOtpBtn.textContent = 'Resend OTP';
+                sendOtpBtn.disabled = false;
+            })
+            .catch(function(error) {
+                console.error('🔥 OTP send error:', error);
+                console.error('🔥 Error code:', error.code);
+                console.error('🔥 Error message:', error.message);
+                
+                let errorMsg = 'Failed to send OTP. ';
+                if (error.code === 'auth/invalid-phone-number') {
+                    errorMsg = 'Invalid phone number format.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'Too many requests. Please try again later.';
+                } else if (error.code === 'auth/captcha-check-failed') {
+                    errorMsg = 'reCAPTCHA verification failed. Please try again.';
+                } else {
+                    errorMsg += error.message;
+                }
+                
+                showOTPMessage(errorMsg, 'error');
+                sendOtpBtn.textContent = 'Send OTP';
+                sendOtpBtn.disabled = false;
+                
+                // Reset reCAPTCHA on error
+                if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null;
+                }
+            });
+    } catch (error) {
+        console.error('🔥 Firebase setup error:', error);
+        showOTPMessage('Firebase setup error: ' + error.message, 'error');
+        sendOtpBtn.textContent = 'Send OTP';
+        sendOtpBtn.disabled = false;
     }
-    
-    // Send OTP
-    firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-        .then(function(confirmationResult) {
-            window.firebaseConfirmationResult = confirmationResult;
-            document.getElementById('otpGroup').style.display = 'block';
-            showOTPMessage('OTP sent successfully! Please check your phone.', 'success');
-            sendOtpBtn.textContent = 'Resend OTP';
-            sendOtpBtn.disabled = false;
-        })
-        .catch(function(error) {
-            console.error('OTP send error:', error);
-            showOTPMessage('Failed to send OTP. Please try again.', 'error');
-            sendOtpBtn.textContent = 'Send OTP';
-            sendOtpBtn.disabled = false;
-        });
 }
 
 // Verify OTP function
