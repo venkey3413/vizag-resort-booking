@@ -472,17 +472,48 @@ window.openGallery=function(resortId){
             const container=document.querySelector('.gallery-images');
             const item=galleryImages[currentIndex];
             if(item.type==='image'){
-                container.innerHTML=`<img id="galleryMainImage" src="${item.url}" alt=""><div class="gallery-controls"><button onclick="prevImg()">&lt;</button><button onclick="nextImg()">&gt;</button></div>`;
+                container.innerHTML=`<img id="galleryMainImage" src="${item.url}" alt=""><div class="gallery-controls"><button id="galleryPrev">&lt;</button><button id="galleryNext">&gt;</button></div>`;
+                document.getElementById('galleryPrev').onclick=()=>prevImg();
+                document.getElementById('galleryNext').onclick=()=>nextImg();
+            }else if(item.type==='video'){
+                let videoHtml='';
+                if(item.url.includes('youtube.com')||item.url.includes('youtu.be')){
+                    const videoId=item.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+                    videoHtml=videoId?`<iframe id="galleryMainImage" src="https://www.youtube.com/embed/${videoId[1]}?enablejsapi=1" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>`:'';
+                }else if(item.url.includes('.mp4')||item.url.includes('.webm')||item.url.includes('.ogg')){
+                    videoHtml=`<video id="galleryMainImage" controls preload="metadata" style="width:100%;max-height:400px;border-radius:8px;"><source src="${item.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                }
+                container.innerHTML=`${videoHtml}<div class="gallery-controls"><button id="galleryPrev">&lt;</button><button id="galleryNext">&gt;</button></div>`;
+                document.getElementById('galleryPrev').onclick=()=>prevImg();
+                document.getElementById('galleryNext').onclick=()=>nextImg();
             }
         }
         function updateThumbnails(){
             const thumbs=document.getElementById('galleryThumbnails');
-            thumbs.innerHTML=galleryImages.map((item,i)=>`<img src="${item.url}" class="gallery-thumbnail ${i===currentIndex?'active':''}" onclick="setImg(${i})">`).join('');
+            thumbs.innerHTML=galleryImages.map((item,i)=>{
+                if(item.type==='image'){
+                    return `<img src="${item.url}" class="gallery-thumbnail ${i===currentIndex?'active':''}" onclick="setImg(${i})">`;
+                }else{
+                    let videoThumb='';
+                    if(item.url.includes('youtube.com')||item.url.includes('youtu.be')){
+                        const videoId=item.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+                        const thumbUrl=videoId?`https://img.youtube.com/vi/${videoId[1]}/hqdefault.jpg`:'';
+                        videoThumb=`<div class="gallery-thumbnail video-thumbnail ${i===currentIndex?'active':''}" onclick="setImg(${i})" style="background-image:url('${thumbUrl}');background-size:cover;background-position:center;position:relative;width:80px;height:60px;"><div class="play-overlay">▶</div></div>`;
+                    }else{
+                        videoThumb=`<div class="gallery-thumbnail video-thumb ${i===currentIndex?'active':''}" onclick="setImg(${i})" style="background:#333;color:white;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;width:80px;height:60px;"><div class="play-overlay">▶</div></div>`;
+                    }
+                    return videoThumb;
+                }
+            }).join('');
         }
         
-        window.nextImg=()=>{currentIndex=(currentIndex+1)%galleryImages.length;updateImage();updateThumbnails()};
-        window.prevImg=()=>{currentIndex=currentIndex===0?galleryImages.length-1:currentIndex-1;updateImage();updateThumbnails()};
-        window.setImg=(i)=>{currentIndex=i;updateImage();updateThumbnails()};
+        function nextImg(){currentIndex=(currentIndex+1)%galleryImages.length;updateImage();updateThumbnails()}
+        function prevImg(){currentIndex=currentIndex===0?galleryImages.length-1:currentIndex-1;updateImage();updateThumbnails()}
+        function setImg(i){currentIndex=i;updateImage();updateThumbnails()}
+        
+        window.nextImg=nextImg;
+        window.prevImg=prevImg;
+        window.setImg=setImg;
         
         updateImage();
         updateThumbnails();

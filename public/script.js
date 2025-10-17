@@ -620,6 +620,11 @@ let currentGalleryImages = [];
 let currentResortId = null;
 
 function openGallery(resortId) {
+    // Use critical.js function if available
+    if(window.openGallery && typeof window.openGallery === 'function' && window.resorts) {
+        return window.openGallery(resortId);
+    }
+    
     const resort = resorts.find(r => r.id === resortId);
     if (!resort) return;
     
