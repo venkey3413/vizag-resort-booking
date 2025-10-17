@@ -536,6 +536,31 @@ window.toggleDescription=function(resortId){
     }
 }
 
+// Add logo animation CSS for all pages
+const logoAnimationCSS=document.createElement('style');
+logoAnimationCSS.textContent=`
+.logo-image.rotating{transform:rotate(360deg)}
+.logo-image.auto-rotate{animation:logoAutoRotate 1s ease-in-out}
+@keyframes logoAutoRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+`;
+document.head.appendChild(logoAnimationCSS);
+
+// Setup logo rotation for all pages
+function setupLogoRotation(){
+    const logo=document.querySelector('.logo-image');
+    if(logo){
+        logo.addEventListener('click',function(){
+            this.classList.add('rotating');
+            setTimeout(()=>this.classList.remove('rotating'),600);
+        });
+        setInterval(()=>{
+            logo.classList.add('auto-rotate');
+            setTimeout(()=>logo.classList.remove('auto-rotate'),1000);
+        },15000);
+    }
+}
+setupLogoRotation();
+
 // Load main script immediately
 const script=document.createElement('script');
 script.src='script.js?v=1.0.5';
