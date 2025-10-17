@@ -62,6 +62,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLogoRotation();
     setupWebSocketSync();
     preloadQRCode();
+    
+    // Ensure gallery modal exists
+    if (!document.getElementById('galleryModal')) {
+        console.warn('Gallery modal not found in DOM');
+    }
 });
 
 
@@ -202,6 +207,12 @@ async function loadResorts() {
 }
 
 function displayResorts() {
+    // Skip if critical.js already loaded resorts
+    if (window.resorts && document.getElementById('resortsGrid').innerHTML.trim()) {
+        console.log('✅ Resorts already loaded by critical.js');
+        return;
+    }
+    
     const grid = document.getElementById('resortsGrid');
     grid.innerHTML = resorts.map(resort => {
         let pricingDisplay = `₹${resort.price.toLocaleString()}/night`;
@@ -619,20 +630,62 @@ let currentGalleryIndex = 0;
 let currentGalleryImages = [];
 let currentResortId = null;
 
-// Gallery function handled by critical.js
+// Gallery functionality - ensure it works with critical.js
+function openGallery(resortId) {
+    // Use critical.js function if available, otherwise fallback
+    if (window.openGallery && typeof window.openGallery === 'function') {
+        return window.openGallery(resortId);
+    }
+    
+    // Fallback implementation
+    console.log('🖼️ Opening gallery for resort:', resortId);
+    const resort = resorts.find(r => r.id == resortId);
+    if (!resort) {
+        console.error('Resort not found:', resortId);
+        return;
+    }
+    
+    currentResortId = resortId;
+    currentGalleryImages = [];
+    
+    if (resort.image) currentGalleryImages.push({type: 'image', url: resort.image});
+    if (resort.gallery) {
+        resort.gallery.split('\n').filter(img => img.trim()).forEach(img => {
+            currentGalleryImages.push({type: 'image', url: img});
+        });
+    }
+    if (resort.videos) {
+        resort.videos.split('\n').filter(url => url.trim()).forEach(video => {
+            currentGalleryImages.push({type: 'video', url: video});
+        });
+    }
+    
+    if (currentGalleryImages.length === 0) {
+        currentGalleryImages = [
+            {type: 'image', url: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'},
+            {type: 'image', url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'}
+        ];
+    }
+    
+    currentGalleryIndex = 0;
+    document.getElementById('galleryTitle').textContent = resort.name;
+    document.getElementById('galleryDescription').innerHTML = `<p><strong>Location:</strong> ${resort.location}</p><p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p><p>${resort.description}</p>`;
+    
+    updateGalleryImage();
+    setupGalleryThumbnails();
+    document.getElementById('galleryModal').style.display = 'block';
+}
 
 function closeGallery() {
-    // Stop current video
     const currentVideo = document.getElementById('currentVideo');
     if (currentVideo) {
         if (currentVideo.tagName === 'VIDEO') {
             currentVideo.pause();
             currentVideo.currentTime = 0;
         } else if (currentVideo.tagName === 'IFRAME') {
-            currentVideo.src = currentVideo.src; // Reload iframe to stop
+            currentVideo.src = currentVideo.src;
         }
     }
-    
     document.getElementById('galleryModal').style.display = 'none';
 }
 

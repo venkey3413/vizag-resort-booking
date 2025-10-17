@@ -1168,6 +1168,12 @@ input, select {
 .resort-gallery {
     position: relative;
     overflow: hidden;
+    border-radius: 10px 10px 0 0;
+}
+
+.resort-gallery:hover .view-more-btn {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .view-more-btn {
@@ -1183,11 +1189,18 @@ input, select {
     cursor: pointer;
     transition: all 0.3s;
     backdrop-filter: blur(5px);
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .view-more-btn:hover {
     background: rgba(0,0,0,0.9);
     transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.view-more-btn:active {
+    transform: scale(0.95);
 }
 
 .resort-footer {
@@ -1576,6 +1589,35 @@ footer a:hover {
     
     .video-container {
         position: relative;
+    }
+    
+    .view-more-btn {
+        bottom: 8px;
+        right: 8px;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        border-radius: 15px;
+    }
+    
+    .resort-gallery {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .resort-gallery:hover .view-more-btn,
+    .resort-gallery .view-more-btn {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+@media (max-width: 480px) {
+    .view-more-btn {
+        bottom: 6px;
+        right: 6px;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        border-radius: 12px;
     }
 }
 

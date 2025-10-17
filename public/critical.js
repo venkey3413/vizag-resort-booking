@@ -437,10 +437,14 @@ window.openBookingModal=function(resortId){
     if(resort)bookNow(resortId,resort.name);
 }
 
-// Gallery functionality
-window.openGallery=function(resortId){
+// Gallery functionality - make it globally accessible
+function openGallery(resortId){
+    console.log('🖼️ Opening gallery for resort:', resortId);
     const resort=window.resorts?.find(r=>r.id==resortId);
-    if(!resort)return;
+    if(!resort){
+        console.error('Resort not found:', resortId);
+        return;
+    }
     
     let galleryImages=[];
     if(resort.image)galleryImages.push({type:'image',url:resort.image});
