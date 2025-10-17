@@ -619,59 +619,7 @@ let currentGalleryIndex = 0;
 let currentGalleryImages = [];
 let currentResortId = null;
 
-function openGallery(resortId) {
-    // Don't call self recursively
-    
-    const resort = resorts.find(r => r.id === resortId);
-    if (!resort) return;
-    
-    currentResortId = resortId;
-    currentGalleryImages = [];
-    
-    // Add main image
-    if (resort.image) {
-        currentGalleryImages.push({type: 'image', url: resort.image});
-    }
-    
-    // Add gallery images
-    if (resort.gallery) {
-        const additionalImages = resort.gallery.split('\n').filter(img => img.trim());
-        additionalImages.forEach(img => {
-            currentGalleryImages.push({type: 'image', url: img});
-        });
-    }
-    
-    // Add videos
-    if (resort.videos) {
-        const videoUrls = resort.videos.split('\n').filter(url => url.trim());
-        videoUrls.forEach(video => {
-            currentGalleryImages.push({type: 'video', url: video});
-        });
-    }
-    
-    // If no images found, add some default resort images
-    if (currentGalleryImages.length === 0) {
-        currentGalleryImages = [
-            {type: 'image', url: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'},
-            {type: 'image', url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'},
-            {type: 'image', url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800'}
-        ];
-    }
-    
-    currentGalleryIndex = 0;
-    
-    document.getElementById('galleryTitle').textContent = resort.name;
-    document.getElementById('galleryDescription').innerHTML = `
-        <p><strong>Location:</strong> ${resort.location}</p>
-        <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
-        <p>${resort.description}</p>
-    `;
-    
-    updateGalleryImage();
-    setupGalleryThumbnails();
-    
-    document.getElementById('galleryModal').style.display = 'block';
-}
+// Gallery function handled by critical.js
 
 function closeGallery() {
     // Stop current video
