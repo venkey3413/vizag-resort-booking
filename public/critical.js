@@ -488,10 +488,6 @@ window.openGallery=openGallery;
 window.closeResortGallery=closeResortGallery;
 window.closeGallery=closeResortGallery;
 
-// Simplified gallery function
-function openGallerySimple(resortId){
-
-
 // Description toggle functionality
 window.toggleDescription=function(resortId){
     const shortDesc=document.getElementById(`desc-short-${resortId}`);
