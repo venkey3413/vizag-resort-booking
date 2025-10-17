@@ -505,7 +505,7 @@ app.post('/api/bookings', async (req, res) => {
         try {
             await db.run('ALTER TABLE bookings ADD COLUMN coupon_code TEXT');
             await db.run('ALTER TABLE bookings ADD COLUMN discount_amount INTEGER DEFAULT 0');
-            await db.run('ALTER TABLE bookings ADD COLUMN phone_verified INTEGER DEFAULT 0');
+            await db.run('ALTER TABLE bookings ADD COLUMN email_verified INTEGER DEFAULT 0');
         } catch (error) {
             // Columns already exist, ignore error
         }
@@ -514,9 +514,9 @@ app.post('/api/bookings', async (req, res) => {
         const initialStatus = transactionId ? 'pending_verification' : 'pending_payment';
         const paymentStatus = transactionId ? 'pending' : 'pending';
         
-        // Create booking with sanitized data (phone is verified via Firebase OTP)
+        // Create booking with sanitized data (email is verified via OTP)
         const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount, status, payment_status, transaction_id, phone_verified)
+            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount, status, payment_status, transaction_id, email_verified)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [sanitizedData.resortId, sanitizedData.guestName, sanitizedData.email, sanitizedData.phone, sanitizedData.checkIn, sanitizedData.checkOut, sanitizedData.guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount, initialStatus, paymentStatus, sanitizedData.transactionId, 1]);
         
@@ -1026,6 +1026,43 @@ app.post('/api/check-card-limit', async (req, res) => {
     } catch (error) {
         console.error('Card limit check error:', error);
         res.status(500).json({ error: 'Failed to check card payment limit' });
+    }
+});
+
+// Send Email OTP endpoint
+app.post('/api/send-email-otp', async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        
+        // Basic email validation
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            return res.status(400).json({ success: false, error: 'Invalid email format' });
+        }
+        
+        if (!otp || otp.length !== 6) {
+            return res.status(400).json({ success: false, error: 'Invalid OTP' });
+        }
+        
+        // Send OTP email
+        const { sendInvoiceEmail } = require('./email-service');
+        
+        const otpEmailData = {
+            email: email,
+            otp: otp,
+            guestName: 'Customer' // Generic name for OTP
+        };
+        
+        const emailSent = await sendInvoiceEmail(otpEmailData, 'email_otp');
+        
+        if (emailSent) {
+            res.json({ success: true, message: 'OTP sent successfully' });
+        } else {
+            res.status(500).json({ success: false, error: 'Failed to send email' });
+        }
+    } catch (error) {
+        console.error('Email OTP send error:', error);
+        res.status(500).json({ success: false, error: 'Server error' });
     }
 });
 

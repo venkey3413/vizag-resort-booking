@@ -246,24 +246,24 @@
                     <input type="text" id="guestName" required>
                 </div>
                 
+
+                
                 <div class="form-group">
                     <label for="email">Email (Enter valid working email):</label>
                     <input type="email" id="email" placeholder="example@gmail.com" required>
+                    <button type="button" id="sendEmailOtpBtn" class="otp-btn" style="display:none;">Send Email OTP</button>
+                </div>
+                
+                <div class="form-group" id="emailOtpGroup" style="display:none;">
+                    <label for="emailOtpCode">Enter Email OTP:</label>
+                    <input type="text" id="emailOtpCode" placeholder="Enter 6-digit OTP from email" maxlength="6">
+                    <button type="button" id="verifyEmailOtpBtn" class="otp-btn">Verify Email OTP</button>
+                    <div id="emailOtpMessage" class="otp-message"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="phone">WhatsApp Number (Enter 10 digits number):</label>
                     <input type="tel" id="phone" placeholder="Enter 10 digits number" pattern="\+91[0-9]{10}" maxlength="13" required>
-                    <button type="button" id="sendOtpBtn" class="otp-btn" style="display:none;">Send OTP</button>
-                    <button type="button" onclick="testFirebase()" style="display:none;" id="testFirebaseBtn">Test Firebase</button>
-                </div>
-                
-                <div class="form-group" id="otpGroup" style="display:none;">
-                    <label for="otpCode">Enter OTP:</label>
-                    <input type="text" id="otpCode" placeholder="Enter 6-digit OTP" maxlength="6">
-                    <button type="button" id="verifyOtpBtn" class="otp-btn">Verify OTP</button>
-                    <div id="otpMessage" class="otp-message"></div>
-                    <div id="recaptcha-container" style="margin: 10px 0;"></div>
                 </div>
                 
                 <div class="form-row">
@@ -379,42 +379,7 @@
     </script>
     <!--End of Tawk.to Script-->
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    
     <script type="module">
-    // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyAbhp32idNbVdyNTrG4G5gMk9iTQJSsrag",
-        authDomain: "vizagresortbooking-f468c.firebaseapp.com",
-        projectId: "vizagresortbooking-f468c",
-        storageBucket: "vizagresortbooking-f468c.firebasestorage.app",
-        messagingSenderId: "194587982897",
-        appId: "1:194587982897:web:34ccfd50fd915bef25e910"
-    };
-    
-    // Initialize Firebase
-    try {
-        firebase.initializeApp(firebaseConfig);
-        window.firebaseAuth = firebase.auth();
-        console.log('🔥 Firebase initialized successfully');
-        
-        // Test Firebase connection
-        firebase.auth().onAuthStateChanged(function(user) {
-            console.log('🔥 Auth state changed:', user ? 'User signed in' : 'No user');
-        });
-        
-        // Add test button for Firebase (remove after testing)
-        window.testFirebase = function() {
-            console.log('🔥 Testing Firebase...');
-            console.log('🔥 Firebase app:', firebase.app());
-            console.log('🔥 Firebase auth:', firebase.auth());
-            alert('Check console for Firebase test results');
-        };
-    } catch (error) {
-        console.error('🔥 Firebase initialization error:', error);
-    }
     
     // Load third-party scripts only when needed
     window.loadRazorpay = () => {

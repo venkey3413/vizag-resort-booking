@@ -35,7 +35,24 @@ function setupModalEvents(){
         const form=document.getElementById('bookingForm');
         if(form)form.onsubmit=window.handleBookingSubmit;
         
-        // Phone input auto +91 and OTP setup
+        // Email input and OTP setup
+        const emailInput=document.getElementById('email');
+        if(emailInput){
+            emailInput.addEventListener('input',function(){
+                const email = this.value;
+                const sendEmailOtpBtn=document.getElementById('sendEmailOtpBtn');
+                if(sendEmailOtpBtn){
+                    if(email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+                        sendEmailOtpBtn.style.display='inline-block';
+                    }else{
+                        sendEmailOtpBtn.style.display='none';
+                        document.getElementById('emailOtpGroup').style.display='none';
+                    }
+                }
+            });
+        }
+        
+        // Phone input auto +91
         const phoneInput=document.getElementById('phone');
         if(phoneInput){
             phoneInput.addEventListener('focus',function(){
@@ -46,29 +63,18 @@ function setupModalEvents(){
                 if(!val.startsWith('+91'))val='+91'+val.replace(/\D/g,'').substring(0,10);
                 if(val.startsWith('+91'))val='+91'+val.substring(3).replace(/\D/g,'').substring(0,10);
                 this.value=val;
-                
-                // Show/hide OTP button based on phone number length
-                const sendOtpBtn=document.getElementById('sendOtpBtn');
-                if(sendOtpBtn){
-                    if(val.length===13){
-                        sendOtpBtn.style.display='inline-block';
-                    }else{
-                        sendOtpBtn.style.display='none';
-                        document.getElementById('otpGroup').style.display='none';
-                    }
-                }
             });
         }
         
-        // OTP button events
-        const sendOtpBtn=document.getElementById('sendOtpBtn');
-        if(sendOtpBtn){
-            sendOtpBtn.onclick=sendOTP;
+        // Email OTP button events
+        const sendEmailOtpBtn=document.getElementById('sendEmailOtpBtn');
+        if(sendEmailOtpBtn){
+            sendEmailOtpBtn.onclick=sendEmailOTP;
         }
         
-        const verifyOtpBtn=document.getElementById('verifyOtpBtn');
-        if(verifyOtpBtn){
-            verifyOtpBtn.onclick=verifyOTP;
+        const verifyEmailOtpBtn=document.getElementById('verifyEmailOtpBtn');
+        if(verifyEmailOtpBtn){
+            verifyEmailOtpBtn.onclick=verifyEmailOTP;
         }
     },100);
     
@@ -167,30 +173,35 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('resortPrice').value=resort.price;
             document.getElementById('modalResortName').textContent=`Book ${resortName}`;
             
-            // Reset phone verification state
-            window.phoneVerified = false;
-            window.firebaseConfirmationResult = null;
+            // Reset email verification state
+            window.emailVerified = false;
+            window.emailOtpCode = null;
             
-            // Set default +91 for phone - force it
+            // Reset email input
+            const emailInput=document.getElementById('email');
+            if(emailInput){
+                emailInput.classList.remove('email-verified');
+                emailInput.readOnly = false;
+            }
+            
+            // Set default +91 for phone
             const phoneInput=document.getElementById('phone');
             if(phoneInput){
                 phoneInput.value='+91';
-                phoneInput.classList.remove('phone-verified');
-                phoneInput.readOnly = false;
                 phoneInput.focus();
                 phoneInput.blur();
             }
             
             // Reset OTP elements
-            document.getElementById('sendOtpBtn').style.display = 'none';
-            document.getElementById('otpGroup').style.display = 'none';
-            document.getElementById('otpCode').value = '';
+            document.getElementById('sendEmailOtpBtn').style.display = 'none';
+            document.getElementById('emailOtpGroup').style.display = 'none';
+            document.getElementById('emailOtpCode').value = '';
             
             // Disable booking button initially
             const bookBtn = document.querySelector('.book-btn');
             if (bookBtn) {
                 bookBtn.disabled = true;
-                bookBtn.textContent = 'Verify Phone First';
+                bookBtn.textContent = 'Verify Email First';
             }
             
             const today=new Date().toISOString().split('T')[0];
@@ -228,140 +239,104 @@ window.bookNow=function(resortId,resortName){
     }
 }
 
-// Firebase OTP Variables
-window.firebaseConfirmationResult = null;
-window.phoneVerified = false;
+// Email OTP Variables
+window.emailOtpCode = null;
+window.emailVerified = false;
 
-// Send OTP function
-function sendOTP() {
-    const phoneNumber = document.getElementById('phone').value;
-    const sendOtpBtn = document.getElementById('sendOtpBtn');
-    const otpMessage = document.getElementById('otpMessage');
+// Send Email OTP function
+function sendEmailOTP() {
+    const email = document.getElementById('email').value;
+    const sendEmailOtpBtn = document.getElementById('sendEmailOtpBtn');
     
-    console.log('🔥 Firebase available:', typeof firebase !== 'undefined');
-    console.log('🔥 Phone number:', phoneNumber);
-    
-    if (!phoneNumber || phoneNumber.length !== 13) {
-        showOTPMessage('Please enter a valid 10-digit phone number', 'error');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showEmailOTPMessage('Please enter a valid email address', 'error');
         return;
     }
     
-    if (typeof firebase === 'undefined') {
-        showOTPMessage('Firebase not loaded. Please refresh the page.', 'error');
-        return;
-    }
+    sendEmailOtpBtn.disabled = true;
+    sendEmailOtpBtn.textContent = 'Sending...';
     
-    sendOtpBtn.disabled = true;
-    sendOtpBtn.textContent = 'Sending...';
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    window.emailOtpCode = otp;
     
-    try {
-        // Initialize reCAPTCHA
-        if (!window.recaptchaVerifier) {
-            console.log('🔥 Creating reCAPTCHA verifier');
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                'size': 'normal',
-                'callback': function(response) {
-                    console.log('🔥 reCAPTCHA solved:', response);
-                },
-                'expired-callback': function() {
-                    console.log('🔥 reCAPTCHA expired');
-                }
-            });
-        }
-        
-        console.log('🔥 Sending OTP to:', phoneNumber);
-        
-        // Send OTP
-        firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-            .then(function(confirmationResult) {
-                console.log('🔥 OTP sent successfully');
-                window.firebaseConfirmationResult = confirmationResult;
-                document.getElementById('otpGroup').style.display = 'block';
-                showOTPMessage('OTP sent successfully! Please check your phone.', 'success');
-                sendOtpBtn.textContent = 'Resend OTP';
-                sendOtpBtn.disabled = false;
-            })
-            .catch(function(error) {
-                console.error('🔥 OTP send error:', error);
-                console.error('🔥 Error code:', error.code);
-                console.error('🔥 Error message:', error.message);
-                
-                let errorMsg = 'Failed to send OTP. ';
-                if (error.code === 'auth/invalid-phone-number') {
-                    errorMsg = 'Invalid phone number format.';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMsg = 'Too many requests. Please try again later.';
-                } else if (error.code === 'auth/captcha-check-failed') {
-                    errorMsg = 'reCAPTCHA verification failed. Please try again.';
-                } else {
-                    errorMsg += error.message;
-                }
-                
-                showOTPMessage(errorMsg, 'error');
-                sendOtpBtn.textContent = 'Send OTP';
-                sendOtpBtn.disabled = false;
-                
-                // Reset reCAPTCHA on error
-                if (window.recaptchaVerifier) {
-                    window.recaptchaVerifier.clear();
-                    window.recaptchaVerifier = null;
-                }
-            });
-    } catch (error) {
-        console.error('🔥 Firebase setup error:', error);
-        showOTPMessage('Firebase setup error: ' + error.message, 'error');
-        sendOtpBtn.textContent = 'Send OTP';
-        sendOtpBtn.disabled = false;
-    }
-}
-
-// Verify OTP function
-function verifyOTP() {
-    const otpCode = document.getElementById('otpCode').value;
-    const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-    
-    if (!otpCode || otpCode.length !== 6) {
-        showOTPMessage('Please enter the 6-digit OTP', 'error');
-        return;
-    }
-    
-    if (!window.firebaseConfirmationResult) {
-        showOTPMessage('Please send OTP first', 'error');
-        return;
-    }
-    
-    verifyOtpBtn.disabled = true;
-    verifyOtpBtn.textContent = 'Verifying...';
-    
-    window.firebaseConfirmationResult.confirm(otpCode)
-        .then(function(result) {
-            window.phoneVerified = true;
-            const phoneInput = document.getElementById('phone');
-            phoneInput.classList.add('phone-verified');
-            phoneInput.readOnly = true;
-            
-            showOTPMessage('Phone number verified successfully!', 'success');
-            document.getElementById('otpGroup').style.display = 'none';
-            document.getElementById('sendOtpBtn').style.display = 'none';
-            
-            // Enable booking button
-            const bookBtn = document.querySelector('.book-btn');
-            if (bookBtn) {
-                bookBtn.disabled = false;
-                bookBtn.textContent = 'Confirm Booking';
-            }
+    // Send OTP via server
+    fetch('/api/send-email-otp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            email: email,
+            otp: otp
         })
-        .catch(function(error) {
-            console.error('OTP verification error:', error);
-            showOTPMessage('Invalid OTP. Please try again.', 'error');
-            verifyOtpBtn.textContent = 'Verify OTP';
-            verifyOtpBtn.disabled = false;
-        });
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            document.getElementById('emailOtpGroup').style.display = 'block';
+            showEmailOTPMessage('OTP sent to your email! Please check your inbox.', 'success');
+            sendEmailOtpBtn.textContent = 'Resend OTP';
+            sendEmailOtpBtn.disabled = false;
+        } else {
+            showEmailOTPMessage('Failed to send OTP: ' + (result.error || 'Unknown error'), 'error');
+            sendEmailOtpBtn.textContent = 'Send Email OTP';
+            sendEmailOtpBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Email OTP send error:', error);
+        showEmailOTPMessage('Network error. Please try again.', 'error');
+        sendEmailOtpBtn.textContent = 'Send Email OTP';
+        sendEmailOtpBtn.disabled = false;
+    });
 }
 
-// Show OTP message helper
-function showOTPMessage(message, type) {
-    const otpMessage = document.getElementById('otpMessage');
+// Verify Email OTP function
+function verifyEmailOTP() {
+    const enteredOtp = document.getElementById('emailOtpCode').value;
+    const verifyEmailOtpBtn = document.getElementById('verifyEmailOtpBtn');
+    
+    if (!enteredOtp || enteredOtp.length !== 6) {
+        showEmailOTPMessage('Please enter the 6-digit OTP', 'error');
+        return;
+    }
+    
+    if (!window.emailOtpCode) {
+        showEmailOTPMessage('Please send OTP first', 'error');
+        return;
+    }
+    
+    verifyEmailOtpBtn.disabled = true;
+    verifyEmailOtpBtn.textContent = 'Verifying...';
+    
+    if (enteredOtp === window.emailOtpCode) {
+        window.emailVerified = true;
+        const emailInput = document.getElementById('email');
+        emailInput.classList.add('email-verified');
+        emailInput.readOnly = true;
+        
+        showEmailOTPMessage('Email verified successfully!', 'success');
+        document.getElementById('emailOtpGroup').style.display = 'none';
+        document.getElementById('sendEmailOtpBtn').style.display = 'none';
+        
+        // Enable booking button
+        const bookBtn = document.querySelector('.book-btn');
+        if (bookBtn) {
+            bookBtn.disabled = false;
+            bookBtn.textContent = 'Confirm Booking';
+        }
+    } else {
+        showEmailOTPMessage('Invalid OTP. Please try again.', 'error');
+        verifyEmailOtpBtn.textContent = 'Verify Email OTP';
+        verifyEmailOtpBtn.disabled = false;
+    }
+}
+
+// Show Email OTP message helper
+function showEmailOTPMessage(message, type) {
+    const otpMessage = document.getElementById('emailOtpMessage');
     if (otpMessage) {
         otpMessage.textContent = message;
         otpMessage.className = `otp-message otp-${type}`;
@@ -376,9 +351,9 @@ function showOTPMessage(message, type) {
 window.handleBookingSubmit=function(e){
     e.preventDefault();
     
-    // Check phone verification first
-    if (!window.phoneVerified) {
-        showCriticalNotification('Please verify your phone number with OTP first', 'error');
+    // Check email verification first
+    if (!window.emailVerified) {
+        showCriticalNotification('Please verify your email address with OTP first', 'error');
         return;
     }
     

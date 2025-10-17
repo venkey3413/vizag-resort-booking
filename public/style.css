@@ -1953,12 +1953,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     justify-content: center;
 }
 
-.phone-verified {
+.email-verified {
     background: #d4edda !important;
     border-color: #c3e6cb !important;
 }
 
-.phone-verified::after {
+.email-verified::after {
     content: " ✓";
     color: #28a745;
     font-weight: bold;

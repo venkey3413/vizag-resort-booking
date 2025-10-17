@@ -127,6 +127,41 @@ async function sendInvoiceEmail(booking, type = 'resort') {
                     🌐 <a href="https://vizagresortbooking.in/food" style="color: #667eea;">https://vizagresortbooking.in/food</a></p>
                 </div>
             `;
+        } else if (type === 'email_otp') {
+            // Email OTP verification
+            invoiceHTML = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="https://vizagresortbooking.in/cropped_circle_image.png" alt="Vizag Resort Booking" style="max-width: 150px; height: auto;">
+                    </div>
+                    <h2 style="color: #333; text-align: center;">Email Verification</h2>
+                    
+                    <p>Dear Customer,</p>
+                    
+                    <p>Please use the following OTP to verify your email address for booking:</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <div style="background: #f8f9fa; border: 2px solid #007bff; border-radius: 10px; padding: 20px; display: inline-block;">
+                            <h1 style="color: #007bff; font-size: 2.5rem; margin: 0; letter-spacing: 5px; font-family: monospace;">${booking.otp}</h1>
+                        </div>
+                    </div>
+                    
+                    <p><strong>Important:</strong></p>
+                    <ul>
+                        <li>This OTP is valid for 10 minutes only</li>
+                        <li>Do not share this OTP with anyone</li>
+                        <li>Use this OTP to complete your booking verification</li>
+                    </ul>
+                    
+                    <p>If you didn't request this OTP, please ignore this email.</p>
+                    
+                    <p>Thank you for choosing Vizag Resort Booking!</p>
+                    
+                    <p>Best regards,<br>
+                    Vizag Resort Booking Team<br>
+                    🌐 <a href="https://vizagresortbooking.in" style="color: #667eea;">https://vizagresortbooking.in</a></p>
+                </div>
+            `;
         } else {
             // Resort booking invoice
             invoiceHTML = `
@@ -189,6 +224,7 @@ async function sendInvoiceEmail(booking, type = 'resort') {
         
         const subject = type === 'food' ? 'Food Order Confirmation – My Food' : 
                         type === 'food_cancelled' ? 'Food Order Cancelled – My Food' : 
+                        type === 'email_otp' ? 'Email Verification OTP – Vizag Resort Booking' :
                         'Booking Confirmation – vizagresortbooking.in';
         
         const mailOptions = {
