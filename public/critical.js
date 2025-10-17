@@ -91,7 +91,11 @@ fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type
         const sanitize=s=>{if(!s)return '';const str=String(s);return str.replace(/[<>"'&\/]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;','/':'&#x2F;'}[m]||m));};
         const safeId=parseInt(r.id)||0;
         const safeName=sanitize(r.name).replace(/[^a-zA-Z0-9\s]/g,'');
-        return `<div class="resort-card"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><p class="resort-description">${sanitize(r.description)}</p>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
+        const description = sanitize(r.description);
+        const shortDesc = description.length > 100 ? description.substring(0, 100) + '...' : description;
+        const needsExpansion = description.length > 100;
+        
+        return `<div class="resort-card"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
     }).join('');
     console.log('✅ Resorts displayed successfully');
 }).catch(e=>{
@@ -489,6 +493,23 @@ window.openGallery=function(resortId){
 window.closeGallery=function(){
     const modal=document.getElementById('galleryModal');
     if(modal)modal.style.display='none';
+}
+
+// Description toggle functionality
+window.toggleDescription=function(resortId){
+    const shortDesc=document.getElementById(`desc-short-${resortId}`);
+    const fullDesc=document.getElementById(`desc-full-${resortId}`);
+    const button=event.target;
+    
+    if(shortDesc.style.display==='none'){
+        shortDesc.style.display='block';
+        fullDesc.style.display='none';
+        button.textContent='View More';
+    }else{
+        shortDesc.style.display='none';
+        fullDesc.style.display='block';
+        button.textContent='View Less';
+    }
 }
 
 // Load main script immediately

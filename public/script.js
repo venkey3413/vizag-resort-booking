@@ -236,7 +236,11 @@ function displayResorts() {
                         ${resort.map_link ? `<br><a href="${sanitizeInput(resort.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>` : ''}
                     </p>
                     <p class="resort-price">${pricingDisplay}</p>
-                    <p class="resort-description">${sanitizeInput(resort.description)}</p>
+                    <div class="description-container">
+                        <p class="description-short" id="desc-short-${safeId}">${resort.description.length > 100 ? sanitizeInput(resort.description).substring(0, 100) + '...' : sanitizeInput(resort.description)}</p>
+                        <p class="description-full" id="desc-full-${safeId}" style="display: none;">${sanitizeInput(resort.description)}</p>
+                        ${resort.description.length > 100 ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}
+                    </div>
                     ${resort.amenities ? `
                         <div class="resort-amenities">
                             <h4>🏨 Amenities:</h4>
@@ -1110,6 +1114,22 @@ function highlightStars(stars, rating) {
 }
 
 
+
+function toggleDescription(resortId) {
+    const shortDesc = document.getElementById(`desc-short-${resortId}`);
+    const fullDesc = document.getElementById(`desc-full-${resortId}`);
+    const button = event.target;
+    
+    if (shortDesc.style.display === 'none') {
+        shortDesc.style.display = 'block';
+        fullDesc.style.display = 'none';
+        button.textContent = 'View More';
+    } else {
+        shortDesc.style.display = 'none';
+        fullDesc.style.display = 'block';
+        button.textContent = 'View Less';
+    }
+}
 
 // Real-time email validation
 async function validateEmailField() {
