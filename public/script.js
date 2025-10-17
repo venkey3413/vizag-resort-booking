@@ -225,11 +225,9 @@ function displayResorts() {
             <div class="resort-card">
                 <div class="resort-gallery">
                     <img src="${sanitizeInput(resort.image)}" alt="${sanitizeInput(resort.name)}" class="resort-image main-image">
-                    ${(resort.gallery || resort.videos) ? `
-                        <button class="view-more-btn" onclick="openGallery(${safeId})">
-                            📸 View More
-                        </button>
-                    ` : ''}
+                    <button class="view-more-btn" onclick="openGallery(${safeId})">
+                        📸 View More
+                    </button>
                 </div>
                 <div class="resort-info">
                     <h3>${sanitizeInput(resort.name)}</h3>
@@ -643,6 +641,15 @@ function openGallery(resortId) {
         videoUrls.forEach(video => {
             currentGalleryImages.push({type: 'video', url: video});
         });
+    }
+    
+    // If no images found, add some default resort images
+    if (currentGalleryImages.length === 0) {
+        currentGalleryImages = [
+            {type: 'image', url: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'},
+            {type: 'image', url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'},
+            {type: 'image', url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800'}
+        ];
     }
     
     currentGalleryIndex = 0;
