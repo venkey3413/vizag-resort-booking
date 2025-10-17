@@ -437,7 +437,7 @@ window.openBookingModal=function(resortId){
     if(resort)bookNow(resortId,resort.name);
 }
 
-// Gallery functionality - create dynamic modal like travel page
+// Gallery functionality with multiple images
 function openGallery(resortId){
     console.log('🖼️ Opening gallery for resort:', resortId);
     const resort=window.resorts?.find(r=>r.id==resortId);
@@ -446,27 +446,58 @@ function openGallery(resortId){
         return;
     }
     
+    let galleryImages=[];
+    if(resort.image)galleryImages.push(resort.image);
+    if(resort.gallery){
+        resort.gallery.split('\n').filter(img=>img.trim()).forEach(img=>{
+            galleryImages.push(img.trim());
+        });
+    }
+    if(galleryImages.length===0){
+        galleryImages=['https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'];
+    }
+    
     const existingModal=document.getElementById('resortGalleryModal');
     if(existingModal)existingModal.remove();
+    
+    let currentIndex=0;
     
     const galleryModal=document.createElement('div');
     galleryModal.id='resortGalleryModal';
     galleryModal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;overflow-y:auto;';
-    galleryModal.innerHTML=`
-        <div style="background:white;padding:20px;border-radius:10px;max-width:90%;max-height:90%;overflow-y:auto;position:relative;">
-            <span onclick="closeResortGallery()" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;z-index:10001;">&times;</span>
-            <h2 style="margin-bottom:20px;color:#333;">${resort.name}</h2>
-            <div style="text-align:center;margin-bottom:20px;">
-                <img src="${resort.image||'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'}" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;">
-            </div>
-            <div style="background:#f8f9fa;padding:15px;border-radius:8px;">
-                <p><strong>Location:</strong> ${resort.location}</p>
-                <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
-                <p><strong>Description:</strong> ${resort.description}</p>
-            </div>
-        </div>
-    `;
     
+    function updateModal(){
+        galleryModal.innerHTML=`
+            <div style="background:white;padding:20px;border-radius:10px;max-width:90%;max-height:90%;overflow-y:auto;position:relative;">
+                <span onclick="closeResortGallery()" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;z-index:10001;">&times;</span>
+                <h2 style="margin-bottom:20px;color:#333;">${resort.name}</h2>
+                <div style="text-align:center;margin-bottom:20px;position:relative;">
+                    <img src="${galleryImages[currentIndex]}" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;">
+                    ${galleryImages.length>1?`
+                        <button onclick="prevImage()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.7);color:white;border:none;padding:10px 15px;border-radius:50%;cursor:pointer;font-size:18px;">&lt;</button>
+                        <button onclick="nextImage()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.7);color:white;border:none;padding:10px 15px;border-radius:50%;cursor:pointer;font-size:18px;">&gt;</button>
+                    `:''}
+                </div>
+                ${galleryImages.length>1?`
+                    <div style="display:flex;gap:10px;margin-bottom:20px;overflow-x:auto;padding:10px 0;justify-content:center;">
+                        ${galleryImages.map((img,i)=>`<img src="${img}" onclick="setImage(${i})" style="width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;">`).join('')}
+                    </div>
+                `:''}
+                <div style="background:#f8f9fa;padding:15px;border-radius:8px;">
+                    <p><strong>Location:</strong> ${resort.location}</p>
+                    <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
+                    <p><strong>Description:</strong> ${resort.description}</p>
+                    <p style="margin-top:10px;color:#666;font-size:0.9rem;">Image ${currentIndex+1} of ${galleryImages.length}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    window.nextImage=function(){currentIndex=(currentIndex+1)%galleryImages.length;updateModal()};
+    window.prevImage=function(){currentIndex=currentIndex===0?galleryImages.length-1:currentIndex-1;updateModal()};
+    window.setImage=function(i){currentIndex=i;updateModal()};
+    
+    updateModal();
     document.body.appendChild(galleryModal);
     document.body.style.overflow='hidden';
     
