@@ -63,9 +63,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setupWebSocketSync();
     preloadQRCode();
     
-    // Ensure gallery modal exists
-    if (!document.getElementById('galleryModal')) {
-        console.warn('Gallery modal not found in DOM');
+    // Set fallback gallery function if critical.js didn't load
+    if (!window.openGallery) {
+        window.openGallery = openGalleryFallback;
     }
 });
 
@@ -630,8 +630,8 @@ let currentGalleryIndex = 0;
 let currentGalleryImages = [];
 let currentResortId = null;
 
-// Gallery functionality - ensure it works with critical.js
-function openGallery(resortId) {
+// Gallery functionality - fallback only
+function openGalleryFallback(resortId) {
     console.log('🖼️ Script.js openGallery called for resort:', resortId);
     
     // Try critical.js function first
