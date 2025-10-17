@@ -423,7 +423,6 @@ async function generateInvoice(id) {
                 <div style="margin: 20px 0;">
                     <h3>Vizag Resorts</h3>
                     <p>Email: info@vizagresorts.com</p>
-                    <p>Phone: +91 9876543210</p>
                 </div>
                 <hr>
                 <div style="margin: 20px 0;">
@@ -737,8 +736,7 @@ function sendWhatsAppMessage(serviceType, id, status) {
 
 ❌ Your booking has been cancelled. If you have any questions, please contact us.
 
-Vizag Resort Booking
-Phone: +91 9876543210`;
+Vizag Resort Booking`;
             } else if (data.payment_status === 'paid') {
                 message = `🏨 BOOKING CONFIRMED - Vizag Resort
 
@@ -753,8 +751,7 @@ Phone: +91 9876543210`;
 ✅ Payment Verified
 📧 Invoice sent to email
 
-Thank you for choosing Vizag Resort Booking!
-Phone: +91 9876543210`;
+Thank you for choosing Vizag Resort Booking!`;
             } else {
                 message = `🏨 BOOKING PENDING - Vizag Resort
 
@@ -766,8 +763,7 @@ Phone: +91 9876543210`;
 
 ⏳ Payment verification pending. Please complete payment to confirm your booking.
 
-Vizag Resort Booking
-Phone: +91 9876543210`;
+Vizag Resort Booking`;
             }
         } else if (serviceType === 'food') {
             data = window.currentFoodOrders.find(o => o.orderId === id);
@@ -788,8 +784,7 @@ Phone: +91 9876543210`;
 
 ❌ Your food order has been cancelled. If you have any questions, please contact us.
 
-Vizag Resort Booking
-Phone: +91 9876543210`;
+Vizag Resort Booking`;
             } else if (status === 'confirmed') {
                 message = `🍽️ FOOD ORDER CONFIRMED
 
@@ -814,8 +809,7 @@ Vizag Resort Booking`;
 
 ⏳ Payment verification pending. Please complete payment to confirm your order.
 
-Vizag Resort Booking
-Phone: +91 9876543210`;
+Vizag Resort Booking`;
             }
         } else if (serviceType === 'travel') {
             data = window.currentTravelBookings.find(b => b.id == id);
@@ -839,8 +833,7 @@ Phone: +91 9876543210`;
 
 ❌ Your travel booking has been cancelled. If you have any questions, please contact us.
 
-Vizag Resort Booking
-Phone: +91 9876543210`;
+Vizag Resort Booking`;
             } else if (status === 'confirmed') {
                 message = `🚗 TRAVEL BOOKING CONFIRMED
 
@@ -866,8 +859,7 @@ Vizag Resort Booking`;
 
 ⏳ Payment verification pending. Please complete payment to confirm your booking.
 
-Vizag Resort Booking
-Phone: +91 9876543210`;
+Vizag Resort Booking`;
             }
         }
         
