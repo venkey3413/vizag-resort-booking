@@ -634,16 +634,25 @@ let currentResortId = null;
 function openGallery(resortId) {
     console.log('🖼️ Script.js openGallery called for resort:', resortId);
     
-    // Check if critical.js already handled this
-    if (document.getElementById('resortGalleryModal')) {
-        console.log('✅ Gallery already opened by critical.js');
-        return;
+    // Try critical.js function first
+    if (window.resorts && window.resorts.length > 0) {
+        const resort = window.resorts.find(r => r.id == resortId);
+        if (resort) {
+            console.log('✅ Found resort in window.resorts, using critical.js approach');
+            // Call critical.js openGallery directly
+            if (typeof window.openGallery === 'function') {
+                return;
+            }
+            // Manual critical.js style gallery
+            createDynamicGallery(resort, resortId);
+            return;
+        }
     }
     
-    // Fallback implementation using existing modal
+    // Fallback to script.js resorts array
     const resort = resorts.find(r => r.id == resortId);
     if (!resort) {
-        console.error('Resort not found:', resortId);
+        console.error('Resort not found in both arrays:', resortId);
         return;
     }
     
@@ -684,14 +693,69 @@ function openGallery(resortId) {
     modal.style.display = 'block';
 }
 
+// Create dynamic gallery like critical.js
+function createDynamicGallery(resort, resortId) {
+    let galleryImages = [];
+    if (resort.image) galleryImages.push({type: 'image', url: resort.image});
+    if (resort.gallery) {
+        resort.gallery.split('\n').filter(img => img.trim()).forEach(img => {
+            galleryImages.push({type: 'image', url: img.trim()});
+        });
+    }
+    if (resort.videos) {
+        resort.videos.split('\n').filter(url => url.trim()).forEach(video => {
+            galleryImages.push({type: 'video', url: video.trim()});
+        });
+    }
+    
+    if (galleryImages.length === 0) {
+        galleryImages = [
+            {type: 'image', url: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'}
+        ];
+    }
+    
+    const existingModal = document.getElementById('resortGalleryModal');
+    if (existingModal) existingModal.remove();
+    
+    let currentIndex = 0;
+    
+    const galleryModal = document.createElement('div');
+    galleryModal.id = 'resortGalleryModal';
+    galleryModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;overflow-y:auto;';
+    galleryModal.innerHTML = `
+        <div style="background:white;padding:20px;border-radius:10px;max-width:90%;max-height:90%;overflow-y:auto;position:relative;">
+            <span onclick="closeResortGallery()" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;z-index:10001;">&times;</span>
+            <h2 style="margin-bottom:20px;color:#333;">${resort.name}</h2>
+            <div style="text-align:center;margin-bottom:20px;">
+                <img src="${galleryImages[0].url}" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;">
+            </div>
+            <div style="background:#f8f9fa;padding:15px;border-radius:8px;">
+                <p><strong>Location:</strong> ${resort.location}</p>
+                <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
+                <p><strong>Description:</strong> ${resort.description}</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(galleryModal);
+    document.body.style.overflow = 'hidden';
+    
+    galleryModal.addEventListener('click', function(e) {
+        if (e.target === galleryModal) closeResortGallery();
+    });
+    
+    window.closeResortGallery = function() {
+        galleryModal.remove();
+        document.body.style.overflow = 'auto';
+    };
+}
+
 function closeGallery() {
-    // Try to close resort gallery first (from critical.js)
-    if (window.closeResortGallery && typeof window.closeResortGallery === 'function') {
+    if (window.closeResortGallery) {
         window.closeResortGallery();
         return;
     }
     
-    // Fallback to original modal
     const currentVideo = document.getElementById('currentVideo');
     if (currentVideo) {
         if (currentVideo.tagName === 'VIDEO') {

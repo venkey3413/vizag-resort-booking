@@ -437,8 +437,13 @@ window.openBookingModal=function(resortId){
     if(resort)bookNow(resortId,resort.name);
 }
 
+// Make openGallery globally accessible
+if(!window.openGallery){
+    window.openGallery=openGallery;
+}
+
 // Gallery functionality - create dynamic modal like travel page
-function openGallery(resortId){
+window.openGallery = function openGallery(resortId){
     console.log('🖼️ Opening gallery for resort:', resortId);
     const resort=window.resorts?.find(r=>r.id==resortId);
     if(!resort){
