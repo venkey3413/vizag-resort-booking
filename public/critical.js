@@ -91,7 +91,7 @@ fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type
         const sanitize=s=>{if(!s)return '';const str=String(s);return str.replace(/[<>"'&\/]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;','/':'&#x2F;'}[m]||m));};
         const safeId=parseInt(r.id)||0;
         const safeName=sanitize(r.name).replace(/[^a-zA-Z0-9\s]/g,'');
-        return `<div class="resort-card"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image"><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><p class="resort-description">${sanitize(r.description)}</p>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
+        return `<div class="resort-card"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><p class="resort-description">${sanitize(r.description)}</p>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
     }).join('');
     console.log('✅ Resorts displayed successfully');
 }).catch(e=>{
@@ -431,6 +431,64 @@ function showPaymentInterface(bookingData){
 window.openBookingModal=function(resortId){
     const resort=window.resorts?.find(r=>r.id==resortId);
     if(resort)bookNow(resortId,resort.name);
+}
+
+// Gallery functionality
+window.openGallery=function(resortId){
+    const resort=window.resorts?.find(r=>r.id==resortId);
+    if(!resort)return;
+    
+    let galleryImages=[];
+    if(resort.image)galleryImages.push({type:'image',url:resort.image});
+    if(resort.gallery){
+        resort.gallery.split('\n').filter(img=>img.trim()).forEach(img=>{
+            galleryImages.push({type:'image',url:img});
+        });
+    }
+    if(resort.videos){
+        resort.videos.split('\n').filter(url=>url.trim()).forEach(video=>{
+            galleryImages.push({type:'video',url:video});
+        });
+    }
+    if(galleryImages.length===0){
+        galleryImages=[
+            {type:'image',url:'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'},
+            {type:'image',url:'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'},
+            {type:'image',url:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800'}
+        ];
+    }
+    
+    const modal=document.getElementById('galleryModal');
+    if(modal){
+        document.getElementById('galleryTitle').textContent=resort.name;
+        document.getElementById('galleryDescription').innerHTML=`<p><strong>Location:</strong> ${resort.location}</p><p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p><p>${resort.description}</p>`;
+        
+        let currentIndex=0;
+        function updateImage(){
+            const container=document.querySelector('.gallery-images');
+            const item=galleryImages[currentIndex];
+            if(item.type==='image'){
+                container.innerHTML=`<img id="galleryMainImage" src="${item.url}" alt=""><div class="gallery-controls"><button onclick="prevImg()">&lt;</button><button onclick="nextImg()">&gt;</button></div>`;
+            }
+        }
+        function updateThumbnails(){
+            const thumbs=document.getElementById('galleryThumbnails');
+            thumbs.innerHTML=galleryImages.map((item,i)=>`<img src="${item.url}" class="gallery-thumbnail ${i===currentIndex?'active':''}" onclick="setImg(${i})">`).join('');
+        }
+        
+        window.nextImg=()=>{currentIndex=(currentIndex+1)%galleryImages.length;updateImage();updateThumbnails()};
+        window.prevImg=()=>{currentIndex=currentIndex===0?galleryImages.length-1:currentIndex-1;updateImage();updateThumbnails()};
+        window.setImg=(i)=>{currentIndex=i;updateImage();updateThumbnails()};
+        
+        updateImage();
+        updateThumbnails();
+        modal.style.display='block';
+    }
+}
+
+window.closeGallery=function(){
+    const modal=document.getElementById('galleryModal');
+    if(modal)modal.style.display='none';
 }
 
 // Load main script immediately
