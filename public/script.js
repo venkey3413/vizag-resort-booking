@@ -632,16 +632,24 @@ let currentResortId = null;
 
 // Gallery functionality - ensure it works with critical.js
 function openGallery(resortId) {
-    // Use critical.js function if available, otherwise fallback
-    if (window.openGallery && typeof window.openGallery === 'function') {
-        return window.openGallery(resortId);
+    console.log('🖼️ Script.js openGallery called for resort:', resortId);
+    
+    // Check if critical.js already handled this
+    if (document.getElementById('resortGalleryModal')) {
+        console.log('✅ Gallery already opened by critical.js');
+        return;
     }
     
-    // Fallback implementation
-    console.log('🖼️ Opening gallery for resort:', resortId);
+    // Fallback implementation using existing modal
     const resort = resorts.find(r => r.id == resortId);
     if (!resort) {
         console.error('Resort not found:', resortId);
+        return;
+    }
+    
+    const modal = document.getElementById('galleryModal');
+    if (!modal) {
+        console.error('Gallery modal not found in DOM');
         return;
     }
     
@@ -651,12 +659,12 @@ function openGallery(resortId) {
     if (resort.image) currentGalleryImages.push({type: 'image', url: resort.image});
     if (resort.gallery) {
         resort.gallery.split('\n').filter(img => img.trim()).forEach(img => {
-            currentGalleryImages.push({type: 'image', url: img});
+            currentGalleryImages.push({type: 'image', url: img.trim()});
         });
     }
     if (resort.videos) {
         resort.videos.split('\n').filter(url => url.trim()).forEach(video => {
-            currentGalleryImages.push({type: 'video', url: video});
+            currentGalleryImages.push({type: 'video', url: video.trim()});
         });
     }
     
@@ -673,10 +681,17 @@ function openGallery(resortId) {
     
     updateGalleryImage();
     setupGalleryThumbnails();
-    document.getElementById('galleryModal').style.display = 'block';
+    modal.style.display = 'block';
 }
 
 function closeGallery() {
+    // Try to close resort gallery first (from critical.js)
+    if (window.closeResortGallery && typeof window.closeResortGallery === 'function') {
+        window.closeResortGallery();
+        return;
+    }
+    
+    // Fallback to original modal
     const currentVideo = document.getElementById('currentVideo');
     if (currentVideo) {
         if (currentVideo.tagName === 'VIDEO') {
@@ -686,7 +701,9 @@ function closeGallery() {
             currentVideo.src = currentVideo.src;
         }
     }
-    document.getElementById('galleryModal').style.display = 'none';
+    
+    const modal = document.getElementById('galleryModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function showBuffering() {

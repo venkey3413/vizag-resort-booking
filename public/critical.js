@@ -437,7 +437,7 @@ window.openBookingModal=function(resortId){
     if(resort)bookNow(resortId,resort.name);
 }
 
-// Gallery functionality - make it globally accessible
+// Gallery functionality - create dynamic modal like travel page
 function openGallery(resortId){
     console.log('🖼️ Opening gallery for resort:', resortId);
     const resort=window.resorts?.find(r=>r.id==resortId);
@@ -450,84 +450,126 @@ function openGallery(resortId){
     if(resort.image)galleryImages.push({type:'image',url:resort.image});
     if(resort.gallery){
         resort.gallery.split('\n').filter(img=>img.trim()).forEach(img=>{
-            galleryImages.push({type:'image',url:img});
+            galleryImages.push({type:'image',url:img.trim()});
         });
     }
     if(resort.videos){
         resort.videos.split('\n').filter(url=>url.trim()).forEach(video=>{
-            galleryImages.push({type:'video',url:video});
+            galleryImages.push({type:'video',url:video.trim()});
         });
     }
     if(galleryImages.length===0){
         galleryImages=[
             {type:'image',url:'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'},
-            {type:'image',url:'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'},
-            {type:'image',url:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800'}
+            {type:'image',url:'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'}
         ];
     }
     
-    const modal=document.getElementById('galleryModal');
-    if(modal){
-        document.getElementById('galleryTitle').textContent=resort.name;
-        document.getElementById('galleryDescription').innerHTML=`<p><strong>Location:</strong> ${resort.location}</p><p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p><p>${resort.description}</p>`;
-        
-        let currentIndex=0;
-        function updateImage(){
-            const container=document.querySelector('.gallery-images');
-            const item=galleryImages[currentIndex];
+    // Remove existing gallery modal if any
+    const existingModal=document.getElementById('resortGalleryModal');
+    if(existingModal)existingModal.remove();
+    
+    let currentIndex=0;
+    
+    // Create dynamic gallery modal
+    const galleryModal=document.createElement('div');
+    galleryModal.id='resortGalleryModal';
+    galleryModal.className='resort-gallery-modal';
+    galleryModal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;overflow-y:auto;';
+    galleryModal.innerHTML=`
+        <div style="background:white;padding:20px;border-radius:10px;max-width:90%;max-height:90%;overflow-y:auto;position:relative;">
+            <span onclick="closeResortGallery()" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;z-index:10001;">&times;</span>
+            <h2 style="margin-bottom:20px;color:#333;">${resort.name}</h2>
+            
+            <div class="resort-gallery-main" style="text-align:center;margin-bottom:20px;">
+                <div class="resort-gallery-images" style="position:relative;"></div>
+            </div>
+            
+            <div class="resort-gallery-thumbnails" id="resortGalleryThumbnails" style="display:flex;gap:10px;margin-bottom:20px;overflow-x:auto;padding:10px 0;justify-content:center;"></div>
+            
+            <div style="background:#f8f9fa;padding:15px;border-radius:8px;">
+                <h3 style="color:#333;margin-bottom:10px;">Resort Details</h3>
+                <p><strong>Location:</strong> ${resort.location}</p>
+                <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
+                <p><strong>Description:</strong> ${resort.description}</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(galleryModal);
+    document.body.style.overflow='hidden';
+    
+    function updateImage(){
+        const container=document.querySelector('.resort-gallery-images');
+        const item=galleryImages[currentIndex];
+        if(item.type==='image'){
+            container.innerHTML=`<img src="${item.url}" alt="" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;"><div style="position:absolute;top:50%;width:100%;display:flex;justify-content:space-between;padding:0 20px;transform:translateY(-50%);"><button onclick="prevResortImage()" style="background:rgba(0,0,0,0.7);color:white;border:none;padding:15px 20px;border-radius:50%;cursor:pointer;font-size:20px;">&lt;</button><button onclick="nextResortImage()" style="background:rgba(0,0,0,0.7);color:white;border:none;padding:15px 20px;border-radius:50%;cursor:pointer;font-size:20px;">&gt;</button></div>`;
+        }else if(item.type==='video'){
+            let videoHtml='';
+            if(item.url.includes('youtube.com')||item.url.includes('youtu.be')){
+                const videoId=item.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+                videoHtml=videoId?`<iframe src="https://www.youtube.com/embed/${videoId[1]}?enablejsapi=1" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>`:'';
+            }else if(item.url.includes('.mp4')||item.url.includes('.webm')||item.url.includes('.ogg')){
+                videoHtml=`<video controls preload="metadata" style="width:100%;max-height:400px;border-radius:8px;"><source src="${item.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
+            }
+            container.innerHTML=`${videoHtml}<div style="position:absolute;top:50%;width:100%;display:flex;justify-content:space-between;padding:0 20px;transform:translateY(-50%);"><button onclick="prevResortImage()" style="background:rgba(0,0,0,0.7);color:white;border:none;padding:15px 20px;border-radius:50%;cursor:pointer;font-size:20px;">&lt;</button><button onclick="nextResortImage()" style="background:rgba(0,0,0,0.7);color:white;border:none;padding:15px 20px;border-radius:50%;cursor:pointer;font-size:20px;">&gt;</button></div>`;
+        }
+    }
+    
+    function updateThumbnails(){
+        const thumbs=document.getElementById('resortGalleryThumbnails');
+        thumbs.innerHTML=galleryImages.map((item,i)=>{
             if(item.type==='image'){
-                container.innerHTML=`<img id="galleryMainImage" src="${item.url}" alt=""><div class="gallery-controls"><button id="galleryPrev">&lt;</button><button id="galleryNext">&gt;</button></div>`;
-                document.getElementById('galleryPrev').onclick=()=>prevImg();
-                document.getElementById('galleryNext').onclick=()=>nextImg();
-            }else if(item.type==='video'){
-                let videoHtml='';
+                return `<img src="${item.url}" onclick="setResortImage(${i})" style="width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;">`;
+            }else{
+                let videoThumb='';
                 if(item.url.includes('youtube.com')||item.url.includes('youtu.be')){
                     const videoId=item.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-                    videoHtml=videoId?`<iframe id="galleryMainImage" src="https://www.youtube.com/embed/${videoId[1]}?enablejsapi=1" frameborder="0" allowfullscreen style="width:100%;height:400px;border-radius:8px;"></iframe>`:'';
-                }else if(item.url.includes('.mp4')||item.url.includes('.webm')||item.url.includes('.ogg')){
-                    videoHtml=`<video id="galleryMainImage" controls preload="metadata" style="width:100%;max-height:400px;border-radius:8px;"><source src="${item.url}" type="video/mp4">Your browser does not support the video tag.</video>`;
-                }
-                container.innerHTML=`${videoHtml}<div class="gallery-controls"><button id="galleryPrev">&lt;</button><button id="galleryNext">&gt;</button></div>`;
-                document.getElementById('galleryPrev').onclick=()=>prevImg();
-                document.getElementById('galleryNext').onclick=()=>nextImg();
-            }
-        }
-        function updateThumbnails(){
-            const thumbs=document.getElementById('galleryThumbnails');
-            thumbs.innerHTML=galleryImages.map((item,i)=>{
-                if(item.type==='image'){
-                    return `<img src="${item.url}" class="gallery-thumbnail ${i===currentIndex?'active':''}" onclick="setImg(${i})">`;
+                    const thumbUrl=videoId?`https://img.youtube.com/vi/${videoId[1]}/hqdefault.jpg`:'';
+                    videoThumb=`<div onclick="setResortImage(${i})" style="width:80px;height:60px;background-image:url('${thumbUrl}');background-size:cover;background-position:center;position:relative;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:20px;background:rgba(0,0,0,0.7);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;">▶</div></div>`;
                 }else{
-                    let videoThumb='';
-                    if(item.url.includes('youtube.com')||item.url.includes('youtu.be')){
-                        const videoId=item.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-                        const thumbUrl=videoId?`https://img.youtube.com/vi/${videoId[1]}/hqdefault.jpg`:'';
-                        videoThumb=`<div class="gallery-thumbnail video-thumbnail ${i===currentIndex?'active':''}" onclick="setImg(${i})" style="background-image:url('${thumbUrl}');background-size:cover;background-position:center;position:relative;width:80px;height:60px;"><div class="play-overlay">▶</div></div>`;
-                    }else{
-                        videoThumb=`<div class="gallery-thumbnail video-thumb ${i===currentIndex?'active':''}" onclick="setImg(${i})" style="background:#333;color:white;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;width:80px;height:60px;"><div class="play-overlay">▶</div></div>`;
-                    }
-                    return videoThumb;
+                    videoThumb=`<div onclick="setResortImage(${i})" style="width:80px;height:60px;background:#333;color:white;display:flex;align-items:center;justify-content:center;font-size:24px;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;">▶</div>`;
                 }
-            }).join('');
-        }
-        
-        function nextImg(){currentIndex=(currentIndex+1)%galleryImages.length;updateImage();updateThumbnails()}
-        function prevImg(){currentIndex=currentIndex===0?galleryImages.length-1:currentIndex-1;updateImage();updateThumbnails()}
-        function setImg(i){currentIndex=i;updateImage();updateThumbnails()}
-        
-        window.nextImg=nextImg;
-        window.prevImg=prevImg;
-        window.setImg=setImg;
-        
-        updateImage();
-        updateThumbnails();
-        modal.style.display='block';
+                return videoThumb;
+            }
+        }).join('');
     }
+    
+    window.nextResortImage=function(){currentIndex=(currentIndex+1)%galleryImages.length;updateImage();updateThumbnails()};
+    window.prevResortImage=function(){currentIndex=currentIndex===0?galleryImages.length-1:currentIndex-1;updateImage();updateThumbnails()};
+    window.setResortImage=function(i){currentIndex=i;updateImage();updateThumbnails()};
+    
+    updateImage();
+    updateThumbnails();
+    
+    // Close on click outside
+    galleryModal.addEventListener('click',function(e){
+        if(e.target===galleryModal)closeResortGallery();
+    });
+    
+    // Keyboard navigation
+    function handleKeydown(e){
+        switch(e.key){
+            case 'Escape':closeResortGallery();break;
+            case 'ArrowLeft':e.preventDefault();window.prevResortImage();break;
+            case 'ArrowRight':e.preventDefault();window.nextResortImage();break;
+        }
+    }
+    document.addEventListener('keydown',handleKeydown);
+    galleryModal.handleKeydown=handleKeydown;
 }
 
 window.closeGallery=function(){
-    const modal=document.getElementById('galleryModal');
-    if(modal)modal.style.display='none';
+    closeResortGallery();
+}
+
+window.closeResortGallery=function(){
+    const modal=document.getElementById('resortGalleryModal');
+    if(modal){
+        if(modal.handleKeydown)document.removeEventListener('keydown',modal.handleKeydown);
+        modal.remove();
+        document.body.style.overflow='auto';
+    }
 }
 
 // Description toggle functionality
