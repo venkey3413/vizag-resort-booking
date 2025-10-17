@@ -151,6 +151,13 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add email_verified column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE bookings ADD COLUMN email_verified INTEGER DEFAULT 0');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
 
 
     // Create tables
