@@ -526,6 +526,14 @@ window.closeGallery=function(){
     if(modal)modal.style.display='none';
 }
 
+// Make sure closeGallery is available globally
+if(typeof closeGallery === 'undefined') {
+    window.closeGallery = function(){
+        const modal=document.getElementById('galleryModal');
+        if(modal)modal.style.display='none';
+    }
+}
+
 // Description toggle functionality
 window.toggleDescription=function(resortId){
     const shortDesc=document.getElementById(`desc-short-${resortId}`);
