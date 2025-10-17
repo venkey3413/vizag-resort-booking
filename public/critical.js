@@ -198,7 +198,7 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('emailOtpCode').value = '';
             
             // Disable booking button initially
-            const bookBtn = document.querySelector('.book-btn');
+            const bookBtn = document.querySelector('#bookingModal .book-btn');
             if (bookBtn) {
                 bookBtn.disabled = true;
                 bookBtn.textContent = 'Verify Email First';
@@ -322,7 +322,7 @@ function verifyEmailOTP() {
         document.getElementById('sendEmailOtpBtn').style.display = 'none';
         
         // Enable booking button
-        const bookBtn = document.querySelector('.book-btn');
+        const bookBtn = document.querySelector('#bookingModal .book-btn');
         if (bookBtn) {
             bookBtn.disabled = false;
             bookBtn.textContent = 'Confirm Booking';
@@ -350,12 +350,15 @@ function showEmailOTPMessage(message, type) {
 // Handle booking form submission
 window.handleBookingSubmit=function(e){
     e.preventDefault();
+    console.log('🎯 Booking form submitted');
     
     // Check email verification first
     if (!window.emailVerified) {
+        console.log('❌ Email not verified');
         showCriticalNotification('Please verify your email address with OTP first', 'error');
         return;
     }
+    console.log('✅ Email verified, proceeding with booking');
     
     const formData={
         resortId:document.getElementById('resortId').value,
@@ -403,7 +406,12 @@ window.handleBookingSubmit=function(e){
     
     // Create booking data for payment
     const resort=window.resorts.find(r=>r.id==formData.resortId);
-    if(!resort){showCriticalNotification('Resort not found', 'error');return}
+    if(!resort){
+        console.log('❌ Resort not found for ID:', formData.resortId);
+        showCriticalNotification('Resort not found', 'error');
+        return;
+    }
+    console.log('✅ Resort found:', resort.name);
     
     const checkInDate=new Date(formData.checkIn);
     const checkOutDate=new Date(formData.checkOut);
@@ -421,6 +429,7 @@ window.handleBookingSubmit=function(e){
         bookingReference: `RB${String(Date.now()).slice(-6)}`
     };
     
+    console.log('✅ Booking data prepared:', bookingData);
     showPaymentInterface(bookingData);
     window.closeModal();
 }
@@ -484,9 +493,19 @@ function showPaymentInterface(bookingData){
     }
     
     window.confirmCriticalPayment=function(){
+        console.log('💳 Payment confirmation started');
         const utr=document.getElementById('utrInput').value;
-        if(!utr){showCriticalNotification('Please enter your 12-digit UTR number', 'error');return}
-        if(!/^[0-9]{12}$/.test(utr)){showCriticalNotification('UTR number must be exactly 12 digits', 'error');return}
+        if(!utr){
+            console.log('❌ No UTR entered');
+            showCriticalNotification('Please enter your 12-digit UTR number', 'error');
+            return;
+        }
+        if(!/^[0-9]{12}$/.test(utr)){
+            console.log('❌ Invalid UTR format:', utr);
+            showCriticalNotification('UTR number must be exactly 12 digits', 'error');
+            return;
+        }
+        console.log('✅ UTR validated:', utr);
         
         const btn=document.querySelector('[onclick="confirmCriticalPayment()"]');
         const originalText=btn.textContent;
@@ -510,15 +529,24 @@ function showPaymentInterface(bookingData){
                 guests:Math.max(1,Math.min(20,parseInt(bookingData.guests)||2)),
                 transactionId:sanitizeInput(utr).substring(0,50)
             })
-        }).then(r=>r.json()).then(result=>{
+        }).then(r=>{
+            console.log('📶 Booking API response status:', r.status);
+            return r.json();
+        }).then(result=>{
+            console.log('📶 Booking API result:', result);
             if(result.error){
+                console.log('❌ Booking failed:', result.error);
                 showCriticalNotification('Booking failed: '+result.error, 'error');
             }else{
+                console.log('✅ Booking successful:', result);
                 showCriticalNotification('Payment submitted for verification. You will be notified via email and WhatsApp.', 'success');
                 paymentModal.remove();
                 window.pendingCriticalBooking=null;
             }
-        }).catch(e=>showCriticalNotification('Network error. Please try again.', 'error')).finally(()=>{
+        }).catch(e=>{
+            console.error('❌ Network error:', e);
+            showCriticalNotification('Network error. Please try again.', 'error');
+        }).finally(()=>{
             btn.textContent=originalText;
             btn.disabled=false;
         });
