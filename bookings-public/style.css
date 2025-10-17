@@ -124,7 +124,7 @@ body {
     color: #333;
 }
 
-.paid-btn, .invoice-btn, .email-btn, .delete-btn {
+.paid-btn, .invoice-btn, .email-btn, .delete-btn, .whatsapp-btn {
     padding: 10px 20px;
     border: none;
     border-radius: 25px;
@@ -176,6 +176,16 @@ body {
     transform: scale(1.05);
 }
 
+.whatsapp-btn {
+    background: #25d366;
+    color: white;
+}
+
+.whatsapp-btn:hover {
+    background: #128c7e;
+    transform: scale(1.05);
+}
+
 .payment-pending {
     color: #ffd43b;
     font-weight: bold;
@@ -209,7 +219,7 @@ body {
         align-items: stretch;
     }
     
-    .paid-btn, .invoice-btn, .email-btn, .delete-btn {
+    .paid-btn, .invoice-btn, .email-btn, .delete-btn, .whatsapp-btn {
         margin: 5px 0;
     }
     

@@ -93,6 +93,9 @@ function displayFoodOrders(orders) {
                         ❌ Cancel Order
                     </button>
                 ` : ''}
+                <button class="whatsapp-btn" onclick="sendWhatsAppMessage('food', '${order.orderId}', '${order.status}')">
+                    📱 WhatsApp
+                </button>
             </div>
         </div>
     `).join('');
@@ -256,6 +259,9 @@ function displayBookings() {
                     `<button class="paid-btn" onclick="markAsPaid(${booking.id})">Mark as Paid</button>` : 
                     `<button class="invoice-btn" onclick="generateInvoice(${booking.id})">Download Invoice</button>
                      <button class="email-btn" onclick="sendEmailManually(${booking.id})">Send Email</button>`}
+                <button class="whatsapp-btn" onclick="sendWhatsAppMessage('resort', ${booking.id}, '${booking.status}')">
+                    📱 WhatsApp
+                </button>
                 <button class="delete-btn" onclick="deleteBooking(${booking.id})">
                     Cancel Booking
                 </button>
@@ -677,6 +683,9 @@ function displayTravelBookings(bookings) {
                         ✅ Confirm Payment & Send Confirmation
                     </button>
                 ` : ''}
+                <button class="whatsapp-btn" onclick="sendWhatsAppMessage('travel', ${booking.id}, '${booking.status}')">
+                    📱 WhatsApp
+                </button>
             </div>
         </div>
     `).join('');
@@ -700,5 +709,174 @@ async function confirmTravelBooking(id) {
     } catch (error) {
         console.error('Error confirming travel booking:', error);
         alert('Error confirming travel booking');
+    }
+}
+
+function sendWhatsAppMessage(serviceType, id, status) {
+    let data, phone, message;
+    
+    try {
+        if (serviceType === 'resort') {
+            data = bookings.find(b => b.id == id);
+            if (!data) {
+                alert('Booking not found');
+                return;
+            }
+            
+            phone = data.phone.replace('+91', '').replace(/\D/g, '');
+            const bookingRef = data.booking_reference || `RB${String(data.id).padStart(6, '0')}`;
+            
+            if (status === 'cancelled') {
+                message = `🏨 BOOKING CANCELLED - Vizag Resort
+
+📋 Booking ID: ${bookingRef}
+👤 Guest: ${data.guest_name}
+🏖️ Resort: ${data.resort_name}
+📅 Dates: ${new Date(data.check_in).toLocaleDateString()} - ${new Date(data.check_out).toLocaleDateString()}
+💰 Amount: ₹${data.total_price.toLocaleString()}
+
+❌ Your booking has been cancelled. If you have any questions, please contact us.
+
+Vizag Resort Booking
+Phone: +91 9876543210`;
+            } else if (data.payment_status === 'paid') {
+                message = `🏨 BOOKING CONFIRMED - Vizag Resort
+
+📋 Booking ID: ${bookingRef}
+👤 Guest: ${data.guest_name}
+🏖️ Resort: ${data.resort_name}
+📅 Check-in: ${new Date(data.check_in).toLocaleDateString()}
+📅 Check-out: ${new Date(data.check_out).toLocaleDateString()}
+👥 Guests: ${data.guests}
+💰 Amount: ₹${data.total_price.toLocaleString()}
+
+✅ Payment Verified
+📧 Invoice sent to email
+
+Thank you for choosing Vizag Resort Booking!
+Phone: +91 9876543210`;
+            } else {
+                message = `🏨 BOOKING PENDING - Vizag Resort
+
+📋 Booking ID: ${bookingRef}
+👤 Guest: ${data.guest_name}
+🏖️ Resort: ${data.resort_name}
+📅 Dates: ${new Date(data.check_in).toLocaleDateString()} - ${new Date(data.check_out).toLocaleDateString()}
+💰 Amount: ₹${data.total_price.toLocaleString()}
+
+⏳ Payment verification pending. Please complete payment to confirm your booking.
+
+Vizag Resort Booking
+Phone: +91 9876543210`;
+            }
+        } else if (serviceType === 'food') {
+            data = window.currentFoodOrders.find(o => o.orderId === id);
+            if (!data) {
+                alert('Food order not found');
+                return;
+            }
+            
+            phone = data.phoneNumber.replace('+91', '').replace(/\D/g, '');
+            
+            if (status === 'cancelled') {
+                message = `🍽️ FOOD ORDER CANCELLED
+
+📋 Order ID: ${data.orderId}
+🏨 Resort: ${data.resortName}
+👤 Guest: ${data.guestName}
+💰 Amount: ₹${data.total.toLocaleString()}
+
+❌ Your food order has been cancelled. If you have any questions, please contact us.
+
+Vizag Resort Booking
+Phone: +91 9876543210`;
+            } else if (status === 'confirmed') {
+                message = `🍽️ FOOD ORDER CONFIRMED
+
+📋 Order ID: ${data.orderId}
+🏨 Resort: ${data.resortName}
+👤 Guest: ${data.guestName}
+🕰️ Delivery: ${new Date(data.deliveryTime).toLocaleString()}
+💰 Amount: ₹${data.total.toLocaleString()}
+
+✅ Order confirmed! Food will be delivered at scheduled time.
+📧 Invoice sent to email
+
+Thank you!
+Vizag Resort Booking`;
+            } else {
+                message = `🍽️ FOOD ORDER PENDING
+
+📋 Order ID: ${data.orderId}
+🏨 Resort: ${data.resortName}
+👤 Guest: ${data.guestName}
+💰 Amount: ₹${data.total.toLocaleString()}
+
+⏳ Payment verification pending. Please complete payment to confirm your order.
+
+Vizag Resort Booking
+Phone: +91 9876543210`;
+            }
+        } else if (serviceType === 'travel') {
+            data = window.currentTravelBookings.find(b => b.id == id);
+            if (!data) {
+                alert('Travel booking not found');
+                return;
+            }
+            
+            phone = data.phone.replace('+91', '').replace(/\D/g, '');
+            const packageNames = data.packages.map(p => `${p.name} x${p.quantity}`).join(', ');
+            
+            if (status === 'cancelled') {
+                message = `🚗 TRAVEL BOOKING CANCELLED
+
+📋 Booking ID: ${data.booking_reference}
+👤 Customer: ${data.customer_name}
+📅 Travel Date: ${new Date(data.travel_date).toLocaleDateString()}
+📍 Pickup: ${data.pickup_location}
+🎯 Packages: ${packageNames}
+💰 Amount: ₹${data.total_amount.toLocaleString()}
+
+❌ Your travel booking has been cancelled. If you have any questions, please contact us.
+
+Vizag Resort Booking
+Phone: +91 9876543210`;
+            } else if (status === 'confirmed') {
+                message = `🚗 TRAVEL BOOKING CONFIRMED
+
+📋 Booking ID: ${data.booking_reference}
+👤 Customer: ${data.customer_name}
+📅 Travel Date: ${new Date(data.travel_date).toLocaleDateString()}
+📍 Pickup: ${data.pickup_location}
+🎯 Packages: ${packageNames}
+💰 Amount: ₹${data.total_amount.toLocaleString()}
+
+✅ Booking confirmed! We will contact you before travel date.
+📧 Confirmation sent to email
+
+Thank you!
+Vizag Resort Booking`;
+            } else {
+                message = `🚗 TRAVEL BOOKING PENDING
+
+📋 Booking ID: ${data.booking_reference}
+👤 Customer: ${data.customer_name}
+📅 Travel Date: ${new Date(data.travel_date).toLocaleDateString()}
+💰 Amount: ₹${data.total_amount.toLocaleString()}
+
+⏳ Payment verification pending. Please complete payment to confirm your booking.
+
+Vizag Resort Booking
+Phone: +91 9876543210`;
+            }
+        }
+        
+        // Open WhatsApp with pre-filled message
+        const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+        
+    } catch (error) {
+        console.error('Error creating WhatsApp message:', error);
+        alert('Error creating WhatsApp message');
     }
 }
