@@ -215,22 +215,56 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('checkIn').value=today;
             document.getElementById('checkOut').value=tomorrow.toISOString().split('T')[0];
             
-            // Auto-update checkout when checkin changes
+            // Auto-update checkout and pricing when dates change
             const checkInInput = document.getElementById('checkIn');
-            checkInInput.removeEventListener('change', arguments.callee);
+            const checkOutInput = document.getElementById('checkOut');
+            
             checkInInput.addEventListener('change', function() {
                 const checkInDate = new Date(this.value);
                 const nextDay = new Date(checkInDate);
                 nextDay.setDate(nextDay.getDate() + 1);
                 document.getElementById('checkOut').value = nextDay.toISOString().split('T')[0];
                 document.getElementById('checkOut').min = nextDay.toISOString().split('T')[0];
+                updatePricing();
             });
             
-            const basePrice=resort.price;
-            const platformFee=Math.round(basePrice*0.015);
-            const total=basePrice+platformFee;
-            document.getElementById('baseAmount').textContent=`₹${total.toLocaleString()}`;
-            document.getElementById('totalAmount').textContent=`₹${total.toLocaleString()}`;
+            checkOutInput.addEventListener('change', updatePricing);
+            
+            // Dynamic pricing calculation function
+            function updatePricing() {
+                const checkIn = document.getElementById('checkIn').value;
+                const checkOut = document.getElementById('checkOut').value;
+                
+                if (checkIn && checkOut) {
+                    const checkInDate = new Date(checkIn);
+                    const checkOutDate = new Date(checkOut);
+                    const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
+                    
+                    // Apply dynamic pricing
+                    const checkInDayOfWeek = checkInDate.getDay();
+                    let nightlyRate = resort.price;
+                    
+                    if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+                        if (checkInDayOfWeek === 0 || checkInDayOfWeek === 5 || checkInDayOfWeek === 6) {
+                            const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
+                            if (weekendPrice) nightlyRate = weekendPrice.price;
+                        } else {
+                            const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+                            if (weekdayPrice) nightlyRate = weekdayPrice.price;
+                        }
+                    }
+                    
+                    const basePrice = nightlyRate * nights;
+                    const platformFee = Math.round(basePrice * 0.015);
+                    const total = basePrice + platformFee;
+                    
+                    document.getElementById('baseAmount').textContent = `₹${total.toLocaleString()}`;
+                    document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
+                }
+            }
+            
+            // Initial pricing calculation
+            updatePricing();
             
             modal.style.display='block';
         }
@@ -416,7 +450,23 @@ window.handleBookingSubmit=function(e){
     const checkInDate=new Date(formData.checkIn);
     const checkOutDate=new Date(formData.checkOut);
     const nights=Math.max(1,Math.ceil((checkOutDate-checkInDate)/(1000*60*60*24)));
-    const basePrice=resort.price*nights;
+    
+    // Apply dynamic pricing based on check-in date
+    const checkInDayOfWeek = checkInDate.getDay();
+    let nightlyRate = resort.price;
+    
+    if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+        // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
+        if (checkInDayOfWeek === 0 || checkInDayOfWeek === 5 || checkInDayOfWeek === 6) {
+            const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
+            if (weekendPrice) nightlyRate = weekendPrice.price;
+        } else {
+            const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+            if (weekdayPrice) nightlyRate = weekdayPrice.price;
+        }
+    }
+    
+    const basePrice=nightlyRate*nights;
     const platformFee=Math.round(basePrice*0.015);
     const total=basePrice+platformFee;
     
