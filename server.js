@@ -2234,7 +2234,14 @@ app.post('/api/owner/login', async (req, res) => {
         console.log('✅ Owner found:', { id: owner.id, name: owner.name, email: owner.email });
         console.log('🔐 Comparing password with hash...');
         
-        const validPassword = await bcrypt.compare(password, owner.password);
+        let validPassword = false;
+        try {
+            // Try bcrypt comparison first
+            validPassword = await bcrypt.compare(password, owner.password);
+        } catch (error) {
+            // If bcrypt fails, try plain text comparison (fallback)
+            validPassword = password === owner.password;
+        }
         console.log('🔐 Password validation result:', validPassword);
         
         if (!validPassword) {
