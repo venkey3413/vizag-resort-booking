@@ -18,6 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const ownerCredentials = document.getElementById('ownerCredentials');
         ownerCredentials.style.display = this.checked ? 'block' : 'none';
     });
+    
+    // Toggle coupon credentials visibility
+    document.getElementById('createCoupon').addEventListener('change', function() {
+        const couponCredentials = document.getElementById('couponCredentials');
+        couponCredentials.style.display = this.checked ? 'block' : 'none';
+    });
 });
 
 function setupEventBridgeSync() {
@@ -228,7 +234,41 @@ async function handleSubmit(e) {
         }
 
         if (response.ok) {
-            alert(editingId ? 'Resort updated successfully' : 'Resort added successfully');
+            let successMessage = editingId ? 'Resort updated successfully' : 'Resort added successfully';
+            
+            // Create coupon if checkbox is checked
+            if (document.getElementById('createCoupon').checked) {
+                const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
+                const couponType = document.getElementById('couponType').value;
+                const couponDiscount = parseInt(document.getElementById('couponDiscount').value);
+                const couponDayType = document.getElementById('couponDayType').value;
+                
+                if (couponCode && couponDiscount) {
+                    try {
+                        const couponResponse = await fetch('/api/coupons', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                code: couponCode,
+                                type: couponType,
+                                discount: couponDiscount,
+                                day_type: couponDayType
+                            })
+                        });
+                        
+                        if (couponResponse.ok) {
+                            successMessage += ` and coupon ${couponCode} created successfully!`;
+                        } else {
+                            const couponError = await couponResponse.json();
+                            successMessage += `, but coupon creation failed: ${couponError.error}`;
+                        }
+                    } catch (couponError) {
+                        successMessage += ', but coupon creation failed due to network error';
+                    }
+                }
+            }
+            
+            alert(successMessage);
             document.getElementById('resortForm').reset();
             cancelEdit();
             loadResorts();
@@ -289,6 +329,8 @@ function cancelEdit() {
     document.getElementById('holidayPrice').value = '';
     document.getElementById('createOwnerAccount').checked = false;
     document.getElementById('ownerCredentials').style.display = 'none';
+    document.getElementById('createCoupon').checked = false;
+    document.getElementById('couponCredentials').style.display = 'none';
     document.getElementById('submitBtn').textContent = 'Add Resort';
     const cancelBtn = document.getElementById('cancelBtn');
     if (cancelBtn) cancelBtn.style.display = 'none';

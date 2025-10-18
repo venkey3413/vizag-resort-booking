@@ -107,6 +107,41 @@
                         <small>Owner will be able to login and manage availability for this resort</small>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="createCoupon"> Create Coupon for this Resort
+                    </label>
+                    <div id="couponCredentials" class="coupon-credentials" style="display:none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="couponCode">Coupon Code:</label>
+                                <input type="text" id="couponCode" placeholder="e.g., RESORT20" maxlength="20">
+                            </div>
+                            <div class="form-group">
+                                <label for="couponType">Discount Type:</label>
+                                <select id="couponType">
+                                    <option value="percentage">Percentage (%)</option>
+                                    <option value="fixed">Fixed Amount (₹)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="couponDiscount">Discount Value:</label>
+                                <input type="number" id="couponDiscount" placeholder="20" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="couponDayType">Valid Days:</label>
+                                <select id="couponDayType">
+                                    <option value="all">All Days</option>
+                                    <option value="weekday">Weekdays (Mon-Fri)</option>
+                                    <option value="weekend">Weekends (Sat-Sun)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <small>Coupon will be available for customers to use during booking</small>
+                    </div>
+                </div>
                 <button type="submit" id="submitBtn">Add Resort</button>
                 <button type="button" id="cancelBtn" onclick="cancelEdit()" style="display:none;">Cancel</button>
             </form>

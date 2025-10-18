@@ -95,12 +95,17 @@ body {
     margin-left: 1rem;
 }
 
-.owner-credentials {
+.owner-credentials, .coupon-credentials {
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 1rem;
     background: #f8f9fa;
     margin-top: 1rem;
+}
+
+.coupon-credentials {
+    background: #e8f5e8;
+    border-color: #28a745;
 }
 
 button[type="submit"] {

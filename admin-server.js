@@ -283,6 +283,43 @@ app.post('/api/bookings/:id/send-email', async (req, res) => {
     }
 });
 
+// Coupon management endpoints
+app.get('/api/coupons', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3002/api/coupons');
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch coupons' });
+    }
+});
+
+app.post('/api/coupons', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3002/api/coupons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create coupon' });
+    }
+});
+
+app.delete('/api/coupons/:code', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3002/api/coupons/${req.params.code}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete coupon' });
+    }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`👨‍💼 Admin Panel running on http://0.0.0.0:${PORT}`);
 });
