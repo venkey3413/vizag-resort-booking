@@ -517,7 +517,6 @@ app.put('/api/resorts/:id', async (req, res) => {
                 image = ?, gallery = ?, videos = ?, map_link = ?, amenities = ?
                 WHERE id = ?
             `, [name, location, price, description, image, gallery, videos, map_link, amenities, resortId]);
-        }
             
             // Update dynamic pricing only if not just toggling availability
             await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
