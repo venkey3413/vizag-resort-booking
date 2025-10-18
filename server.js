@@ -2213,16 +2213,24 @@ app.get('/owner-dashboard', (req, res) => {
 // Owner login
 app.post('/api/owner/login', async (req, res) => {
     try {
+        if (!bcrypt || !jwt) {
+            return res.status(500).json({ error: 'Owner login system not available' });
+        }
+        
         const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
         
         const owner = await db.get('SELECT * FROM resort_owners WHERE email = ?', [email]);
         if (!owner) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ success: false, error: 'Invalid email or password' });
         }
         
         const validPassword = await bcrypt.compare(password, owner.password);
         if (!validPassword) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ success: false, error: 'Invalid email or password' });
         }
         
         const token = jwt.sign({ ownerId: owner.id, email: owner.email }, JWT_SECRET, { expiresIn: '24h' });
@@ -2238,7 +2246,8 @@ app.post('/api/owner/login', async (req, res) => {
             } 
         });
     } catch (error) {
-        res.status(500).json({ error: 'Login failed' });
+        console.error('Owner login error:', error);
+        res.status(500).json({ success: false, error: 'Login failed. Please try again.' });
     }
 });
 
