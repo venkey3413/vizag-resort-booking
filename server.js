@@ -515,7 +515,7 @@ app.post('/api/bookings', async (req, res) => {
         const totalPrice = subtotal - discount;
 
         // Generate booking reference
-        const bookingReference = `RB${String(Date.now()).slice(-6)}`;
+        const bookingReference = `VE${String(Date.now()).padStart(12, '0')}`;
         
         // Add coupon columns to bookings table if they don't exist
         try {
@@ -1298,7 +1298,7 @@ app.post('/api/food-orders', async (req, res) => {
             });
         }
         
-        const orderId = `FO${Date.now()}`;
+        const orderId = `PA${String(Date.now()).padStart(12, '0')}`;
         
         // Store order in database
         await db.run(`
@@ -2360,7 +2360,7 @@ app.post('/api/travel-bookings', async (req, res) => {
             return res.status(400).json({ error: 'Valid total amount is required' });
         }
         
-        const booking_reference = `TR${Date.now()}`;
+        const booking_reference = `KE${String(Date.now()).padStart(12, '0')}`;
         
         // Create travel bookings table if it doesn't exist
         await db.exec(`
