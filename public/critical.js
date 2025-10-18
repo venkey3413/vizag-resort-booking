@@ -539,7 +539,7 @@ function showEmailOTPMessage(message, type) {
 }
 
 // Handle booking form submission
-window.handleBookingSubmit=function(e){
+window.handleBookingSubmit=async function(e){
     e.preventDefault();
     console.log('🎯 Booking form submitted');
     
