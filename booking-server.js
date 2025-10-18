@@ -368,7 +368,8 @@ app.get('/api/coupons', async (req, res) => {
         if (checkIn) {
             const checkInDate = new Date(checkIn);
             const dayOfWeek = checkInDate.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
             const dayType = isWeekend ? 'weekend' : 'weekday';
             
             coupons = await db.all(
