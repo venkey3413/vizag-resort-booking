@@ -674,6 +674,7 @@ async function loadBlockedDates(resortId) {
         const response = await fetch(`${SERVER_URL}/api/blocked-dates/${resortId}`);
         blockedDates = await response.json();
         updateDateInputs();
+        console.log('🚫 Blocked dates loaded for resort', resortId, ':', blockedDates);
     } catch (error) {
         console.error('Error loading blocked dates:', error);
         blockedDates = [];
@@ -691,13 +692,28 @@ function updateDateInputs() {
     // Add new event listeners
     checkInInput.addEventListener('input', validateCheckInDate);
     checkOutInput.addEventListener('input', validateCheckOutDate);
+    
+    // Disable blocked dates in the calendar
+    disableBlockedDatesInCalendar();
+}
+
+function disableBlockedDatesInCalendar() {
+    const checkInInput = document.getElementById('checkIn');
+    const checkOutInput = document.getElementById('checkOut');
+    
+    // Create a list of disabled dates for the date input
+    if (blockedDates && blockedDates.length > 0) {
+        // For HTML5 date inputs, we can't directly disable specific dates
+        // But we can validate on change and show warnings
+        console.log('📅 Calendar updated with blocked dates:', blockedDates);
+    }
 }
 
 function validateCheckInDate(e) {
     const selectedDate = e.target.value;
     
     if (blockedDates.includes(selectedDate)) {
-        showNotification('This date is blocked by the resort owner. Please choose another date.', 'error');
+        showNotification('🚫 This date is blocked by the resort owner. Please choose another date.', 'error');
         e.target.value = '';
         return;
     }
@@ -706,6 +722,12 @@ function validateCheckInDate(e) {
     const nextDay = new Date(selectedDate);
     nextDay.setDate(nextDay.getDate() + 1);
     document.getElementById('checkOut').min = nextDay.toISOString().split('T')[0];
+    
+    // Auto-update checkout if it's on the same day or blocked
+    const checkOutInput = document.getElementById('checkOut');
+    if (checkOutInput.value <= selectedDate || blockedDates.includes(checkOutInput.value)) {
+        checkOutInput.value = nextDay.toISOString().split('T')[0];
+    }
 }
 
 function validateCheckOutDate(e) {

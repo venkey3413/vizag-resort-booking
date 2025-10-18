@@ -222,12 +222,27 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('checkIn').value=today;
             document.getElementById('checkOut').value=tomorrow.toISOString().split('T')[0];
             
+            // Load blocked dates for this resort
+            fetch(`/api/blocked-dates/${resortId}`).then(r=>r.json()).then(blockedDates=>{
+                console.log('🚫 Blocked dates for resort', resortId, ':', blockedDates);
+                window.currentResortBlockedDates = blockedDates;
+            }).catch(e=>console.log('Failed to load blocked dates:', e));
+            
             // Auto-update checkout and pricing when dates change
             const checkInInput = document.getElementById('checkIn');
             const checkOutInput = document.getElementById('checkOut');
             
             checkInInput.addEventListener('change', function() {
-                const checkInDate = new Date(this.value);
+                const selectedDate = this.value;
+                
+                // Check if selected date is blocked
+                if (window.currentResortBlockedDates && window.currentResortBlockedDates.includes(selectedDate)) {
+                    showCriticalNotification('🚫 This date is blocked by the resort owner. Please choose another date.', 'error');
+                    this.value = '';
+                    return;
+                }
+                
+                const checkInDate = new Date(selectedDate);
                 const nextDay = new Date(checkInDate);
                 nextDay.setDate(nextDay.getDate() + 1);
                 document.getElementById('checkOut').value = nextDay.toISOString().split('T')[0];
