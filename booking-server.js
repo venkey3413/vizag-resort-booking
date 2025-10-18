@@ -504,23 +504,29 @@ app.post('/api/resorts', async (req, res) => {
 
 app.put('/api/resorts/:id', async (req, res) => {
     try {
-        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword } = req.body;
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword, available } = req.body;
         const resortId = req.params.id;
         
-        await db.run(`
-            UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, 
-            image = ?, gallery = ?, videos = ?, map_link = ?, amenities = ?
-            WHERE id = ?
-        `, [name, location, price, description, image, gallery, videos, map_link, amenities, resortId]);
-        
-        // Update dynamic pricing
-        await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
-        if (dynamic_pricing && dynamic_pricing.length > 0) {
-            for (const item of dynamic_pricing) {
-                await db.run(
-                    'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
-                    [resortId, item.day_type, item.price]
-                );
+        // Handle availability toggle separately
+        if (available !== undefined) {
+            await db.run('UPDATE resorts SET available = ? WHERE id = ?', [available ? 1 : 0, resortId]);
+        } else {
+            await db.run(`
+                UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, 
+                image = ?, gallery = ?, videos = ?, map_link = ?, amenities = ?
+                WHERE id = ?
+            `, [name, location, price, description, image, gallery, videos, map_link, amenities, resortId]);
+        }
+            
+            // Update dynamic pricing only if not just toggling availability
+            await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
+            if (dynamic_pricing && dynamic_pricing.length > 0) {
+                for (const item of dynamic_pricing) {
+                    await db.run(
+                        'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                        [resortId, item.day_type, item.price]
+                    );
+                }
             }
         }
         

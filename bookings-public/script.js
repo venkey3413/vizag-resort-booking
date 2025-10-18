@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
     loadFoodOrders();
     loadTravelBookings();
+    loadResorts();
     setupEventBridgeSync();
 });
 
@@ -759,6 +760,232 @@ async function removeTravelBooking(id) {
     } catch (error) {
         console.error('Error removing travel booking:', error);
         alert('Error removing travel booking');
+    }
+}
+
+// Resort Management Functions
+async function loadResorts() {
+    try {
+        const response = await fetch('/api/resorts');
+        const resorts = await response.json();
+        displayResorts(resorts);
+    } catch (error) {
+        console.error('Error loading resorts:', error);
+        document.getElementById('resortsGrid').innerHTML = '<p>Error loading resorts</p>';
+    }
+}
+
+function displayResorts(resorts) {
+    const grid = document.getElementById('resortsGrid');
+    
+    if (resorts.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No resorts found</div>';
+        return;
+    }
+    
+    grid.innerHTML = resorts.map(resort => `
+        <div class="resort-card">
+            <div class="resort-header">
+                <h4>${resort.name}</h4>
+                <div class="resort-status ${resort.available ? 'available' : 'unavailable'}">
+                    ${resort.available ? 'AVAILABLE' : 'UNAVAILABLE'}
+                </div>
+            </div>
+            
+            <div class="resort-details">
+                <p><strong>Location:</strong> ${resort.location}</p>
+                <p><strong>Base Price:</strong> ₹${resort.price.toLocaleString()}</p>
+                <p><strong>Description:</strong> ${resort.description || 'No description'}</p>
+                ${resort.amenities ? `<p><strong>Amenities:</strong> ${resort.amenities}</p>` : ''}
+            </div>
+            
+            <div class="resort-actions">
+                <button class="edit-resort-btn" onclick="editResort(${resort.id})">
+                    ✏️ Edit Resort
+                </button>
+                <button class="toggle-availability-btn" onclick="toggleResortAvailability(${resort.id}, ${resort.available})">
+                    ${resort.available ? '❌ Disable' : '✅ Enable'}
+                </button>
+                <button class="delete-resort-btn" onclick="deleteResort(${resort.id})">
+                    🗑️ Delete
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function showAddResortModal() {
+    document.getElementById('resortModalTitle').textContent = 'Add New Resort';
+    document.getElementById('resortForm').reset();
+    document.getElementById('resortId').value = '';
+    document.getElementById('createCouponToggle').checked = false;
+    document.getElementById('couponFormSection').style.display = 'none';
+    document.getElementById('resortModal').style.display = 'block';
+}
+
+function closeResortModal() {
+    document.getElementById('resortModal').style.display = 'none';
+}
+
+function toggleCouponForm() {
+    const toggle = document.getElementById('createCouponToggle');
+    const section = document.getElementById('couponFormSection');
+    section.style.display = toggle.checked ? 'block' : 'none';
+}
+
+async function editResort(id) {
+    try {
+        const response = await fetch('/api/resorts');
+        const resorts = await response.json();
+        const resort = resorts.find(r => r.id === id);
+        
+        if (!resort) {
+            alert('Resort not found');
+            return;
+        }
+        
+        document.getElementById('resortModalTitle').textContent = 'Edit Resort';
+        document.getElementById('resortId').value = resort.id;
+        document.getElementById('resortName').value = resort.name;
+        document.getElementById('resortLocation').value = resort.location;
+        document.getElementById('resortPrice').value = resort.price;
+        document.getElementById('resortDescription').value = resort.description || '';
+        document.getElementById('resortImage').value = resort.image || '';
+        document.getElementById('resortGallery').value = resort.gallery || '';
+        document.getElementById('resortVideos').value = resort.videos || '';
+        document.getElementById('resortMapLink').value = resort.map_link || '';
+        document.getElementById('resortAmenities').value = resort.amenities || '';
+        
+        document.getElementById('createCouponToggle').checked = false;
+        document.getElementById('couponFormSection').style.display = 'none';
+        document.getElementById('resortModal').style.display = 'block';
+    } catch (error) {
+        console.error('Error loading resort:', error);
+        alert('Error loading resort details');
+    }
+}
+
+// Resort form submission
+document.getElementById('resortForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const resortId = document.getElementById('resortId').value;
+    const isEdit = !!resortId;
+    
+    const resortData = {
+        name: document.getElementById('resortName').value,
+        location: document.getElementById('resortLocation').value,
+        price: parseInt(document.getElementById('resortPrice').value),
+        description: document.getElementById('resortDescription').value,
+        image: document.getElementById('resortImage').value,
+        gallery: document.getElementById('resortGallery').value,
+        videos: document.getElementById('resortVideos').value,
+        map_link: document.getElementById('resortMapLink').value,
+        amenities: document.getElementById('resortAmenities').value
+    };
+    
+    try {
+        const url = isEdit ? `/api/resorts/${resortId}` : '/api/resorts';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(resortData)
+        });
+        
+        if (response.ok) {
+            // Create coupon if requested
+            const createCoupon = document.getElementById('createCouponToggle').checked;
+            if (createCoupon) {
+                const couponCode = document.getElementById('newCouponCode').value.trim().toUpperCase();
+                const couponType = document.getElementById('newCouponType').value;
+                const couponDiscount = parseInt(document.getElementById('newCouponDiscount').value);
+                const couponDayType = document.getElementById('newCouponDayType').value;
+                
+                if (couponCode && couponDiscount) {
+                    try {
+                        const couponResponse = await fetch('/api/coupons', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                code: couponCode,
+                                type: couponType,
+                                discount: couponDiscount,
+                                day_type: couponDayType
+                            })
+                        });
+                        
+                        if (couponResponse.ok) {
+                            alert(`Resort ${isEdit ? 'updated' : 'created'} successfully with coupon ${couponCode}!`);
+                        } else {
+                            const couponError = await couponResponse.json();
+                            alert(`Resort ${isEdit ? 'updated' : 'created'} successfully, but coupon creation failed: ${couponError.error}`);
+                        }
+                    } catch (couponError) {
+                        alert(`Resort ${isEdit ? 'updated' : 'created'} successfully, but coupon creation failed`);
+                    }
+                } else {
+                    alert(`Resort ${isEdit ? 'updated' : 'created'} successfully!`);
+                }
+            } else {
+                alert(`Resort ${isEdit ? 'updated' : 'created'} successfully!`);
+            }
+            
+            closeResortModal();
+            loadResorts();
+        } else {
+            const error = await response.json();
+            alert(error.error || `Failed to ${isEdit ? 'update' : 'create'} resort`);
+        }
+    } catch (error) {
+        console.error('Error saving resort:', error);
+        alert('Network error. Please try again.');
+    }
+});
+
+async function toggleResortAvailability(id, currentStatus) {
+    const newStatus = !currentStatus;
+    const action = newStatus ? 'enable' : 'disable';
+    
+    if (!confirm(`Are you sure you want to ${action} this resort?`)) return;
+    
+    try {
+        const response = await fetch(`/api/resorts/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ available: newStatus })
+        });
+        
+        if (response.ok) {
+            alert(`Resort ${action}d successfully`);
+            loadResorts();
+        } else {
+            alert(`Failed to ${action} resort`);
+        }
+    } catch (error) {
+        console.error('Error toggling resort availability:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+async function deleteResort(id) {
+    if (!confirm('Are you sure you want to delete this resort? This action cannot be undone.')) return;
+    
+    try {
+        const response = await fetch(`/api/resorts/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            alert('Resort deleted successfully');
+            loadResorts();
+        } else {
+            alert('Failed to delete resort');
+        }
+    } catch (error) {
+        console.error('Error deleting resort:', error);
+        alert('Network error. Please try again.');
     }
 }
 

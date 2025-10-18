@@ -604,6 +604,238 @@ body {
     box-shadow: none;
 }
 
+/* Resort Management Styles */
+.add-resort-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+}
+
+.add-resort-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.resorts-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.resort-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-left: 4px solid #28a745;
+}
+
+.resort-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.resort-header h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.resort-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.resort-status.available {
+    background: #d4edda;
+    color: #155724;
+}
+
+.resort-status.unavailable {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.resort-details {
+    margin-bottom: 1rem;
+}
+
+.resort-details p {
+    margin: 0.5rem 0;
+    color: #666;
+}
+
+.resort-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.edit-resort-btn, .toggle-availability-btn, .delete-resort-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.edit-resort-btn {
+    background: #007bff;
+    color: white;
+}
+
+.edit-resort-btn:hover {
+    background: #0056b3;
+}
+
+.toggle-availability-btn {
+    background: #ffc107;
+    color: #333;
+}
+
+.toggle-availability-btn:hover {
+    background: #e0a800;
+}
+
+.delete-resort-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-resort-btn:hover {
+    background: #c82333;
+}
+
+/* Resort Modal Styles */
+.resort-modal {
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.resort-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.coupon-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+    margin: 1rem 0;
+}
+
+.coupon-section h4 {
+    margin: 0 0 1rem 0;
+    color: #495057;
+}
+
+.coupon-toggle {
+    margin-bottom: 1rem;
+}
+
+.coupon-toggle input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.coupon-toggle label {
+    font-weight: normal;
+    cursor: pointer;
+    color: #495057;
+}
+
+.coupon-form-section {
+    background: white;
+    padding: 1rem;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.form-actions button {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.form-actions button[type="submit"] {
+    background: #28a745;
+    color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+    background: #218838;
+}
+
+.form-actions button[type="button"] {
+    background: #6c757d;
+    color: white;
+}
+
+.form-actions button[type="button"]:hover {
+    background: #5a6268;
+}
+
 @media (max-width: 768px) {
     .section-header {
         flex-direction: column;
@@ -611,7 +843,20 @@ body {
         text-align: center;
     }
     
-    .clear-all-btn {
+    .clear-all-btn, .add-resort-btn {
         width: 100%;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .resort-actions {
+        flex-direction: column;
+    }
+    
+    .resort-modal {
+        width: 95%;
+        margin: 2.5%;
     }
 }
