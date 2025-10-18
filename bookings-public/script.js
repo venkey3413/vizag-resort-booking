@@ -687,6 +687,9 @@ function displayTravelBookings(bookings) {
                         ❌ Cancel Booking
                     </button>
                 ` : ''}
+                <button class="remove-travel-btn" onclick="removeTravelBooking(${booking.id})">
+                    🗑️ Remove
+                </button>
                 <button class="whatsapp-btn" onclick="sendWhatsAppMessage('travel', ${booking.id}, '${booking.status}')">
                     📱 WhatsApp
                 </button>
@@ -735,6 +738,27 @@ async function cancelTravelBooking(id) {
     } catch (error) {
         console.error('Error cancelling travel booking:', error);
         alert('Error cancelling travel booking');
+    }
+}
+
+async function removeTravelBooking(id) {
+    if (!confirm('Permanently remove this travel booking from the system?')) return;
+    
+    try {
+        const response = await fetch(`/api/travel-bookings/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            alert('Travel booking removed successfully!');
+            loadTravelBookings();
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Failed to remove travel booking');
+        }
+    } catch (error) {
+        console.error('Error removing travel booking:', error);
+        alert('Error removing travel booking');
     }
 }
 

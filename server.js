@@ -2631,6 +2631,45 @@ app.post('/api/travel-bookings/:id/cancel', async (req, res) => {
     }
 });
 
+// Remove travel booking
+app.delete('/api/travel-bookings/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const booking = await db.get('SELECT * FROM travel_bookings WHERE id = ?', [id]);
+        
+        if (!booking) {
+            return res.status(404).json({ error: 'Travel booking not found' });
+        }
+        
+        // Delete booking from database
+        await db.run('DELETE FROM travel_bookings WHERE id = ?', [id]);
+        
+        // Send Telegram notification
+        try {
+            const packageNames = JSON.parse(booking.packages).map(p => `${p.name} x${p.quantity}`).join(', ');
+            const message = `🗑️ TRAVEL BOOKING REMOVED!
+
+📋 Booking ID: ${booking.booking_reference}
+👤 Customer: ${booking.customer_name}
+📅 Travel Date: ${new Date(booking.travel_date).toLocaleDateString('en-IN')}
+🎯 Packages: ${packageNames}
+💰 Amount: ₹${booking.total_amount.toLocaleString()}
+⏰ Removed at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Travel booking removed successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to remove travel booking' });
+    }
+});
+
 // Initialize and start server
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {

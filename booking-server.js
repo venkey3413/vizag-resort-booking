@@ -811,6 +811,18 @@ app.post('/api/travel-bookings/:id/cancel', async (req, res) => {
     }
 });
 
+app.delete('/api/travel-bookings/:id', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/travel-bookings/${req.params.id}`, {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to remove travel booking' });
+    }
+});
+
 
 
 
