@@ -427,11 +427,15 @@ function verifyEmailOTP() {
     
     if (!enteredOtp || enteredOtp.length !== 6) {
         showEmailOTPMessage('Please enter the 6-digit OTP', 'error');
+        verifyEmailOtpBtn.textContent = 'Verify Email OTP';
+        verifyEmailOtpBtn.disabled = false;
         return;
     }
     
     if (!window.emailOtpCode) {
         showEmailOTPMessage('Please send OTP first', 'error');
+        verifyEmailOtpBtn.textContent = 'Verify Email OTP';
+        verifyEmailOtpBtn.disabled = false;
         return;
     }
     
