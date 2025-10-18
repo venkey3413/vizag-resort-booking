@@ -123,11 +123,23 @@ function setupEventListeners() {
 
 async function loadResorts() {
     try {
+        console.log('Loading resorts from admin server...');
         const response = await fetch('/api/resorts');
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         resorts = await response.json();
+        console.log('Loaded resorts:', resorts.length);
         displayResorts();
     } catch (error) {
         console.error('Error loading resorts:', error);
+        const grid = document.getElementById('resortsGrid');
+        if (grid) {
+            grid.innerHTML = `<div style="color: red; padding: 20px; text-align: center;">Failed to load resorts: ${error.message}</div>`;
+        }
     }
 }
 
@@ -146,6 +158,11 @@ function populateCouponResortDropdown() {
 function displayResorts() {
     const grid = document.getElementById('resortsGrid');
     if (!grid) return;
+    
+    if (!resorts || resorts.length === 0) {
+        grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No resorts found. Add your first resort using the form above.</div>';
+        return;
+    }
     
     grid.innerHTML = resorts.map(resort => {
         let pricingInfo = `<p><strong>Base Price:</strong> ₹${resort.price.toLocaleString()}/night</p>`;
