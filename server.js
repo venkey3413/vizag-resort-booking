@@ -201,12 +201,16 @@ async function initDB() {
     }
     
     // Add sample coupons if none exist
-    const couponCount = await db.get('SELECT COUNT(*) as count FROM coupons');
-    if (couponCount.count === 0) {
-        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['SAVE10', 'percentage', 10, 'all']);
-        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKEND20', 'percentage', 20, 'weekend']);
-        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKDAY15', 'percentage', 15, 'weekday']);
-        console.log('✅ Sample coupons added: SAVE10, WEEKEND20, WEEKDAY15');
+    try {
+        const couponCount = await db.get('SELECT COUNT(*) as count FROM coupons');
+        if (couponCount.count === 0) {
+            await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['SAVE10', 'percentage', 10, 'all']);
+            await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKEND20', 'percentage', 20, 'weekend']);
+            await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKDAY15', 'percentage', 15, 'weekday']);
+            console.log('✅ Sample coupons added: SAVE10, WEEKEND20, WEEKDAY15');
+        }
+    } catch (error) {
+        console.log('Coupon table initialization error:', error);
     }
     
 

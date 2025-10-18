@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
     loadFoodItems();
     loadTravelPackages();
+    loadCoupons();
     setupEventListeners();
     // Delay EventBridge setup to ensure page is fully loaded
     setTimeout(setupEventBridgeSync, 1000);
@@ -392,6 +393,65 @@ async function deleteResort(id) {
             loadResorts();
         } else {
             alert('Failed to delete resort');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+// Coupon Management Functions
+let coupons = [];
+
+async function loadCoupons() {
+    try {
+        const response = await fetch('/api/coupons');
+        coupons = await response.json();
+        displayCoupons();
+        console.log('Loaded coupons:', coupons);
+    } catch (error) {
+        console.error('Error loading coupons:', error);
+    }
+}
+
+function displayCoupons() {
+    const grid = document.getElementById('couponsGrid');
+    if (!grid) return;
+    
+    if (!coupons || coupons.length === 0) {
+        grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No coupons found.</div>';
+        return;
+    }
+    
+    grid.innerHTML = coupons.map(coupon => `
+        <div class="coupon-item">
+            <h4>${coupon.code}</h4>
+            <div class="coupon-details">
+                <p><strong>Type:</strong> ${coupon.type}</p>
+                <p><strong>Discount:</strong> ${coupon.type === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount}</p>
+                <p><strong>Valid for:</strong> ${coupon.day_type === 'all' ? 'All days' : coupon.day_type}</p>
+                <p><strong>Created:</strong> ${new Date(coupon.created_at).toLocaleDateString()}</p>
+            </div>
+            <div class="coupon-actions">
+                <button class="delete" onclick="deleteCoupon('${coupon.code}')">Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function deleteCoupon(code) {
+    if (!confirm(`Are you sure you want to delete coupon ${code}?`)) return;
+
+    try {
+        const response = await fetch(`/api/coupons/${code}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Coupon deleted successfully');
+            loadCoupons();
+        } else {
+            alert('Failed to delete coupon');
         }
     } catch (error) {
         console.error('Error:', error);
