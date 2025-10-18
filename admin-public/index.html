@@ -114,9 +114,17 @@
                     <div id="couponCredentials" class="coupon-credentials" style="display:none;">
                         <div class="form-row">
                             <div class="form-group">
+                                <label for="couponResort">Select Resort:</label>
+                                <select id="couponResort">
+                                    <option value="current">Current Resort</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="couponCode">Coupon Code:</label>
                                 <input type="text" id="couponCode" placeholder="e.g., RESORT20" maxlength="20">
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="couponType">Discount Type:</label>
                                 <select id="couponType">
@@ -124,7 +132,6 @@
                                     <option value="fixed">Fixed Amount (₹)</option>
                                 </select>
                             </div>
-                        </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="couponDiscount">Discount Value:</label>

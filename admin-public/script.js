@@ -22,7 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle coupon credentials visibility
     document.getElementById('createCoupon').addEventListener('change', function() {
         const couponCredentials = document.getElementById('couponCredentials');
-        couponCredentials.style.display = this.checked ? 'block' : 'none';
+        if (this.checked) {
+            populateCouponResortDropdown();
+            couponCredentials.style.display = 'block';
+        } else {
+            couponCredentials.style.display = 'none';
+        }
     });
 });
 
@@ -124,6 +129,18 @@ async function loadResorts() {
     } catch (error) {
         console.error('Error loading resorts:', error);
     }
+}
+
+function populateCouponResortDropdown() {
+    const select = document.getElementById('couponResort');
+    select.innerHTML = '<option value="current">Current Resort</option>';
+    
+    resorts.forEach(resort => {
+        const option = document.createElement('option');
+        option.value = resort.id;
+        option.textContent = resort.name;
+        select.appendChild(option);
+    });
 }
 
 function displayResorts() {
@@ -242,22 +259,31 @@ async function handleSubmit(e) {
                 const couponType = document.getElementById('couponType').value;
                 const couponDiscount = parseInt(document.getElementById('couponDiscount').value);
                 const couponDayType = document.getElementById('couponDayType').value;
+                const selectedResort = document.getElementById('couponResort').value;
                 
                 if (couponCode && couponDiscount) {
                     try {
+                        const couponData = {
+                            code: couponCode,
+                            type: couponType,
+                            discount: couponDiscount,
+                            day_type: couponDayType
+                        };
+                        
+                        // Add resort-specific coupon code if not current resort
+                        if (selectedResort !== 'current') {
+                            const selectedResortName = resorts.find(r => r.id == selectedResort)?.name || 'Resort';
+                            couponData.code = `${selectedResortName.replace(/\s+/g, '').toUpperCase()}${couponCode}`;
+                        }
+                        
                         const couponResponse = await fetch('/api/coupons', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                code: couponCode,
-                                type: couponType,
-                                discount: couponDiscount,
-                                day_type: couponDayType
-                            })
+                            body: JSON.stringify(couponData)
                         });
                         
                         if (couponResponse.ok) {
-                            successMessage += ` and coupon ${couponCode} created successfully!`;
+                            successMessage += ` and coupon ${couponData.code} created successfully!`;
                         } else {
                             const couponError = await couponResponse.json();
                             successMessage += `, but coupon creation failed: ${couponError.error}`;
