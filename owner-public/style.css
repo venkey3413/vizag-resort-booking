@@ -108,7 +108,25 @@ body {
 .dashboard-header {
     background: white;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px 0;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left h1 {
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.header-left p {
+    color: #666;
+    font-size: 14px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
 }
 
 .header-content {
