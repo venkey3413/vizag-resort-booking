@@ -158,6 +158,48 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Create dynamic pricing table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS dynamic_pricing (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resort_id INTEGER NOT NULL,
+            day_type TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts (id)
+        )
+    `);
+    
+    // Create coupons table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS coupons (
+            code TEXT PRIMARY KEY,
+            type TEXT NOT NULL,
+            discount INTEGER NOT NULL,
+            day_type TEXT DEFAULT 'all',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    // Add sample dynamic pricing if none exists
+    const pricingCount = await db.get('SELECT COUNT(*) as count FROM dynamic_pricing');
+    if (pricingCount.count === 0) {
+        const resorts = await db.all('SELECT id, price FROM resorts LIMIT 3');
+        for (const resort of resorts) {
+            // Add weekday pricing (20% less than base)
+            await db.run(
+                'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                [resort.id, 'weekday', Math.round(resort.price * 0.8)]
+            );
+            // Add weekend pricing (30% more than base)
+            await db.run(
+                'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                [resort.id, 'weekend', Math.round(resort.price * 1.3)]
+            );
+        }
+        console.log('✅ Sample dynamic pricing added for', resorts.length, 'resorts');
+    }
+    
 
 
     // Create tables
@@ -943,6 +985,17 @@ app.get('/api/coupons', async (req, res) => {
         const { checkIn } = req.query;
         let coupons;
         
+        // Create coupons table if it doesn't exist
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS coupons (
+                code TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                discount INTEGER NOT NULL,
+                day_type TEXT DEFAULT 'all',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
         if (checkIn) {
             const checkInDate = new Date(checkIn);
             const dayOfWeek = checkInDate.getDay();
@@ -960,7 +1013,35 @@ app.get('/api/coupons', async (req, res) => {
         
         res.json(coupons);
     } catch (error) {
+        console.error('Coupon fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch coupons' });
+    }
+});
+
+// Create coupon endpoint
+app.post('/api/coupons', async (req, res) => {
+    try {
+        const { code, type, discount, day_type } = req.body;
+        
+        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', 
+            [code, type, discount, day_type || 'all']);
+        res.json({ message: 'Coupon created successfully' });
+    } catch (error) {
+        if (error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY') {
+            res.status(400).json({ error: 'Coupon code already exists' });
+        } else {
+            res.status(500).json({ error: 'Failed to create coupon' });
+        }
+    }
+});
+
+// Delete coupon endpoint
+app.delete('/api/coupons/:code', async (req, res) => {
+    try {
+        await db.run('DELETE FROM coupons WHERE code = ?', [req.params.code]);
+        res.json({ message: 'Coupon deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete coupon' });
     }
 });
 
