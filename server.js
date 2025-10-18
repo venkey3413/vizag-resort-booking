@@ -493,12 +493,12 @@ app.post('/api/bookings', async (req, res) => {
             );
             
             if (dynamicPricing.length > 0) {
-                // Check if check-in is weekend (Saturday=6, Sunday=0)
-                if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+                // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
+                if (checkInDayOfWeek === 0 || checkInDayOfWeek === 5 || checkInDayOfWeek === 6) {
                     const weekendPrice = dynamicPricing.find(p => p.day_type === 'weekend');
                     if (weekendPrice) nightlyRate = weekendPrice.price;
                 } else {
-                    // Weekday (Monday=1 to Friday=5)
+                    // Weekday (Monday=1 to Thursday=4)
                     const weekdayPrice = dynamicPricing.find(p => p.day_type === 'weekday');
                     if (weekdayPrice) nightlyRate = weekdayPrice.price;
                 }
@@ -946,7 +946,8 @@ app.get('/api/coupons', async (req, res) => {
         if (checkIn) {
             const checkInDate = new Date(checkIn);
             const dayOfWeek = checkInDate.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
             const dayType = isWeekend ? 'weekend' : 'weekday';
             
             coupons = await db.all(
