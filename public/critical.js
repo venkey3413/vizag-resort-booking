@@ -177,6 +177,13 @@ window.bookNow=function(resortId,resortName){
             window.emailVerified = false;
             window.emailOtpCode = null;
             
+            // Reset coupon data
+            window.appliedCouponCode = null;
+            window.appliedDiscountAmount = 0;
+            document.getElementById('couponCode').value = '';
+            document.getElementById('couponMessage').innerHTML = '';
+            document.getElementById('discountRow').style.display = 'none';
+            
             // Reset email input
             const emailInput=document.getElementById('email');
             if(emailInput){
@@ -230,6 +237,82 @@ window.bookNow=function(resortId,resortName){
             
             checkOutInput.addEventListener('change', updatePricing);
             
+            // Load coupons for booking modal
+            fetch('/api/coupons').then(r=>r.json()).then(coupons=>{
+                window.bookingModalCoupons = {};
+                coupons.forEach(c => {
+                    window.bookingModalCoupons[c.code] = {discount: c.discount, type: c.type, day_type: c.day_type};
+                });
+                console.log('✅ Booking modal coupons loaded:', window.bookingModalCoupons);
+            }).catch(e=>console.log('❌ Booking modal coupon load failed:', e));
+            
+            // Setup coupon application in booking modal
+            const applyCouponBtn = document.getElementById('applyCouponBtn');
+            if (applyCouponBtn) {
+                applyCouponBtn.onclick = function() {
+                    const code = document.getElementById('couponCode').value.trim().toUpperCase();
+                    const checkIn = document.getElementById('checkIn').value;
+                    const msg = document.getElementById('couponMessage');
+                    
+                    console.log('🎫 Applying coupon in booking modal:', code);
+                    
+                    if (!code) {
+                        msg.innerHTML = '<span style="color:#dc3545;">Enter coupon code</span>';
+                        return;
+                    }
+                    
+                    if (!window.bookingModalCoupons) {
+                        msg.innerHTML = '<span style="color:#dc3545;">Coupons not loaded yet, please try again</span>';
+                        return;
+                    }
+                    
+                    const coupon = window.bookingModalCoupons[code];
+                    if (!coupon) {
+                        msg.innerHTML = '<span style="color:#dc3545;">Invalid coupon code</span>';
+                        console.log('❌ Coupon not found:', code);
+                        return;
+                    }
+                    
+                    console.log('✅ Found coupon:', coupon);
+                    
+                    // Check day type
+                    const checkInDate = new Date(checkIn);
+                    const dayOfWeek = checkInDate.getDay();
+                    const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+                    const dayType = isWeekend ? 'weekend' : 'weekday';
+                    
+                    if (coupon.day_type !== 'all' && coupon.day_type !== dayType) {
+                        const validDays = coupon.day_type === 'weekday' ? 'weekdays (Mon-Thu)' : 'weekends (Fri-Sun)';
+                        msg.innerHTML = `<span style="color:#dc3545;">Valid only for ${validDays}</span>`;
+                        return;
+                    }
+                    
+                    // Calculate current total
+                    const baseAmountText = document.getElementById('baseAmount').textContent;
+                    const currentTotal = parseInt(baseAmountText.replace(/[^0-9]/g, '')) || 0;
+                    
+                    // Calculate discount
+                    let discountAmount = 0;
+                    if (coupon.type === 'percentage') {
+                        discountAmount = Math.round(currentTotal * coupon.discount / 100);
+                    } else {
+                        discountAmount = coupon.discount;
+                    }
+                    
+                    // Update display
+                    document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
+                    document.getElementById('discountRow').style.display = 'block';
+                    document.getElementById('totalAmount').textContent = `₹${(currentTotal - discountAmount).toLocaleString()}`;
+                    msg.innerHTML = `<span style="color:#28a745;">Coupon applied! Saved ₹${discountAmount.toLocaleString()}</span>`;
+                    
+                    // Store coupon data for form submission
+                    window.appliedCouponCode = code;
+                    window.appliedDiscountAmount = discountAmount;
+                    
+                    console.log('✅ Coupon applied in booking modal:', {code, discountAmount});
+                };
+            }
+            
             // Dynamic pricing calculation function
             function updatePricing() {
                 const checkIn = document.getElementById('checkIn').value;
@@ -259,7 +342,17 @@ window.bookNow=function(resortId,resortName){
                     const total = basePrice + platformFee;
                     
                     document.getElementById('baseAmount').textContent = `₹${total.toLocaleString()}`;
-                    document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
+                    
+                    // Apply existing coupon discount if any
+                    if (window.appliedDiscountAmount) {
+                        const finalTotal = total - window.appliedDiscountAmount;
+                        document.getElementById('totalAmount').textContent = `₹${finalTotal.toLocaleString()}`;
+                        document.getElementById('discountAmount').textContent = `-₹${window.appliedDiscountAmount.toLocaleString()}`;
+                        document.getElementById('discountRow').style.display = 'block';
+                    } else {
+                        document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
+                        document.getElementById('discountRow').style.display = 'none';
+                    }
                 }
             }
             
@@ -476,7 +569,9 @@ window.handleBookingSubmit=function(e){
         basePrice: basePrice,
         platformFee: platformFee,
         totalPrice: total,
-        bookingReference: `RB${String(Date.now()).slice(-6)}`
+        bookingReference: `RB${String(Date.now()).slice(-6)}`,
+        couponCode: window.appliedCouponCode || null,
+        discountAmount: window.appliedDiscountAmount || 0
     };
     
     console.log('✅ Booking data prepared:', bookingData);
