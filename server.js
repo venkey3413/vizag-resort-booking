@@ -2482,6 +2482,7 @@ app.get('/api/owner/bookings', verifyOwnerToken, async (req, res) => {
              FROM bookings b 
              JOIN resorts r ON b.resort_id = r.id 
              WHERE b.resort_id IN (${resortIds.map(() => '?').join(',')}) 
+             AND b.payment_status = 'paid'
              ORDER BY b.booking_date DESC`,
             resortIds
         );
