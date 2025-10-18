@@ -181,15 +181,21 @@ async function initDB() {
         )
     `);
     
-    // Add sample dynamic pricing if none exists
+    // Ensure all resorts have dynamic pricing
     const pricingCount = await db.get('SELECT COUNT(*) as count FROM dynamic_pricing');
     console.log('🔍 Dynamic pricing count:', pricingCount.count);
     
-    if (pricingCount.count === 0) {
-        const resorts = await db.all('SELECT id, price FROM resorts');
-        console.log('🏨 Found resorts for dynamic pricing:', resorts.map(r => ({id: r.id, price: r.price})));
+    const resorts = await db.all('SELECT id, price FROM resorts WHERE available = 1');
+    console.log('🏨 Available resorts:', resorts.map(r => ({id: r.id, price: r.price})));
+    
+    // Check which resorts are missing dynamic pricing
+    for (const resort of resorts) {
+        const existingPricing = await db.get(
+            'SELECT COUNT(*) as count FROM dynamic_pricing WHERE resort_id = ?',
+            [resort.id]
+        );
         
-        for (const resort of resorts) {
+        if (existingPricing.count === 0) {
             const weekdayPrice = Math.round(resort.price * 0.8);
             const weekendPrice = Math.round(resort.price * 1.3);
             
@@ -204,30 +210,37 @@ async function initDB() {
                 [resort.id, 'weekend', weekendPrice]
             );
             
-            console.log(`💰 Resort ${resort.id}: Base ₹${resort.price}, Weekday ₹${weekdayPrice}, Weekend ₹${weekendPrice}`);
+            console.log(`💰 Added pricing for Resort ${resort.id}: Base ₹${resort.price}, Weekday ₹${weekdayPrice}, Weekend ₹${weekendPrice}`);
         }
-        console.log('✅ Sample dynamic pricing added for', resorts.length, 'resorts');
-    } else {
-        // Show existing dynamic pricing
-        const existingPricing = await db.all('SELECT resort_id, day_type, price FROM dynamic_pricing ORDER BY resort_id, day_type');
-        console.log('📊 Existing dynamic pricing:', existingPricing);
     }
     
-    // Add sample coupons if none exist
+    // Show all dynamic pricing
+    const allPricing = await db.all('SELECT resort_id, day_type, price FROM dynamic_pricing ORDER BY resort_id, day_type');
+    console.log('📊 All dynamic pricing:', allPricing);
+    
+    // Ensure sample coupons exist
     try {
         const couponCount = await db.get('SELECT COUNT(*) as count FROM coupons');
         console.log('🎫 Coupon count:', couponCount.count);
         
-        if (couponCount.count === 0) {
-            await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['SAVE10', 'percentage', 10, 'all']);
-            await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKEND20', 'percentage', 20, 'weekend']);
-            await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKDAY15', 'percentage', 15, 'weekday']);
-            console.log('✅ Sample coupons added: SAVE10, WEEKEND20, WEEKDAY15');
-        } else {
-            // Show existing coupons
-            const existingCoupons = await db.all('SELECT code, type, discount, day_type FROM coupons');
-            console.log('🎟️ Existing coupons:', existingCoupons);
+        // Add standard coupons if they don't exist
+        const standardCoupons = [
+            ['SAVE10', 'percentage', 10, 'all'],
+            ['WEEKEND20', 'percentage', 20, 'weekend'],
+            ['WEEKDAY15', 'percentage', 15, 'weekday']
+        ];
+        
+        for (const [code, type, discount, day_type] of standardCoupons) {
+            const existing = await db.get('SELECT code FROM coupons WHERE code = ?', [code]);
+            if (!existing) {
+                await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', [code, type, discount, day_type]);
+                console.log(`✅ Added coupon: ${code}`);
+            }
         }
+        
+        // Show all coupons
+        const allCoupons = await db.all('SELECT code, type, discount, day_type FROM coupons ORDER BY code');
+        console.log('🎟️ All coupons:', allCoupons);
     } catch (error) {
         console.log('❌ Coupon table initialization error:', error);
     }
