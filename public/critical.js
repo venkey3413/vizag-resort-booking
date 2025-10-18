@@ -500,6 +500,18 @@ function showPaymentInterface(bookingData){
                 <p><strong>Reference:</strong> ${bookingData.bookingReference}</p>
             </div>
             
+            <div style="margin:15px 0;border:1px solid #ddd;padding:15px;border-radius:5px;">
+                <h4>🎫 Apply Coupon</h4>
+                <div style="display:flex;gap:10px;margin:10px 0;">
+                    <input type="text" id="couponCode" placeholder="Enter coupon code" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:3px;text-transform:uppercase;">
+                    <button onclick="applyCoupon()" style="padding:8px 15px;background:#28a745;color:white;border:none;border-radius:3px;cursor:pointer;">Apply</button>
+                </div>
+                <div id="couponMessage" style="margin:5px 0;font-size:14px;"></div>
+                <div id="discountRow" style="display:none;margin:10px 0;padding:10px;background:#d4edda;border-radius:3px;">
+                    <span>Discount: </span><span id="discountAmount">-₹0</span>
+                </div>
+            </div>
+            
             <div style="margin:20px 0;">
                 <div style="display:flex;margin-bottom:15px;">
                     <button onclick="showCriticalPaymentMethod('upi')" id="upiTab" style="flex:1;padding:10px;border:2px solid #007bff;background:#007bff;color:white;border-radius:5px 0 0 5px;cursor:pointer;">🔗 UPI Payment</button>
@@ -532,6 +544,59 @@ function showPaymentInterface(bookingData){
     document.body.appendChild(paymentModal);
     
     window.pendingCriticalBooking=bookingData;
+    window.appliedDiscount = 0;
+    
+    // Load coupons
+    fetch('/api/coupons').then(r=>r.json()).then(coupons=>{
+        window.availableCoupons = {};
+        coupons.forEach(c => {
+            window.availableCoupons[c.code] = {discount: c.discount, type: c.type, day_type: c.day_type};
+        });
+    }).catch(e=>console.log('Coupon load failed'));
+    
+    window.applyCoupon = function() {
+        const code = document.getElementById('couponCode').value.trim().toUpperCase();
+        const checkIn = bookingData.checkIn;
+        const msg = document.getElementById('couponMessage');
+        
+        if (!code) {
+            msg.innerHTML = '<span style="color:#dc3545;">Enter coupon code</span>';
+            return;
+        }
+        
+        const coupon = window.availableCoupons[code];
+        if (!coupon) {
+            msg.innerHTML = '<span style="color:#dc3545;">Invalid coupon code</span>';
+            return;
+        }
+        
+        // Check day type
+        const checkInDate = new Date(checkIn);
+        const dayOfWeek = checkInDate.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+        const dayType = isWeekend ? 'weekend' : 'weekday';
+        
+        if (coupon.day_type !== 'all' && coupon.day_type !== dayType) {
+            const validDays = coupon.day_type === 'weekday' ? 'weekdays (Mon-Thu)' : 'weekends (Fri-Sun)';
+            msg.innerHTML = `<span style="color:#dc3545;">Valid only for ${validDays}</span>`;
+            return;
+        }
+        
+        // Calculate discount
+        if (coupon.type === 'percentage') {
+            window.appliedDiscount = Math.round(bookingData.totalPrice * coupon.discount / 100);
+        } else {
+            window.appliedDiscount = coupon.discount;
+        }
+        
+        document.getElementById('discountAmount').textContent = `-₹${window.appliedDiscount.toLocaleString()}`;
+        document.getElementById('discountRow').style.display = 'block';
+        msg.innerHTML = `<span style="color:#28a745;">Coupon applied! Saved ₹${window.appliedDiscount.toLocaleString()}</span>`;
+        
+        bookingData.couponCode = code;
+        bookingData.discountAmount = window.appliedDiscount;
+        bookingData.finalAmount = bookingData.totalPrice - window.appliedDiscount;
+    };
     
     window.showCriticalPaymentMethod=function(method){
         document.getElementById('upiPayment').style.display=method==='upi'?'block':'none';
@@ -577,7 +642,9 @@ function showPaymentInterface(bookingData){
                 checkIn:sanitizeInput(bookingData.checkIn).substring(0,10),
                 checkOut:sanitizeInput(bookingData.checkOut).substring(0,10),
                 guests:Math.max(1,Math.min(20,parseInt(bookingData.guests)||2)),
-                transactionId:sanitizeInput(utr).substring(0,50)
+                transactionId:sanitizeInput(utr).substring(0,50),
+                couponCode: bookingData.couponCode || null,
+                discountAmount: bookingData.discountAmount || 0
             })
         }).then(r=>{
             console.log('📶 Booking API response status:', r.status);
