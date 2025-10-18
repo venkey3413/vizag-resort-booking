@@ -385,7 +385,7 @@ app.post('/api/check-availability', async (req, res) => {
             
             if (ownerBlockedCheckIn) {
                 return res.status(400).json({ 
-                    error: `?? This date is blocked by the resort owner. Please choose another date.
+                    error: `?? This date is blocked by the resort owner. Please choose another date.`
                 });
             }
         } catch (error) {
@@ -532,7 +532,7 @@ app.post('/api/bookings', async (req, res) => {
             
             if (ownerBlockedCheckIn) {
                 return res.status(400).json({ 
-                    error: `?? This date is blocked by the resort owner. Please choose another date.
+                    error: `?? This date is blocked by the resort owner. Please choose another date.`
                 });
             }
         } catch (error) {
