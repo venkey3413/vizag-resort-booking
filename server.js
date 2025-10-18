@@ -184,7 +184,7 @@ async function initDB() {
     // Add sample dynamic pricing if none exists
     const pricingCount = await db.get('SELECT COUNT(*) as count FROM dynamic_pricing');
     if (pricingCount.count === 0) {
-        const resorts = await db.all('SELECT id, price FROM resorts LIMIT 3');
+        const resorts = await db.all('SELECT id, price FROM resorts');
         for (const resort of resorts) {
             // Add weekday pricing (20% less than base)
             await db.run(
@@ -198,6 +198,15 @@ async function initDB() {
             );
         }
         console.log('✅ Sample dynamic pricing added for', resorts.length, 'resorts');
+    }
+    
+    // Add sample coupons if none exist
+    const couponCount = await db.get('SELECT COUNT(*) as count FROM coupons');
+    if (couponCount.count === 0) {
+        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['SAVE10', 'percentage', 10, 'all']);
+        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKEND20', 'percentage', 20, 'weekend']);
+        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKDAY15', 'percentage', 15, 'weekday']);
+        console.log('✅ Sample coupons added: SAVE10, WEEKEND20, WEEKDAY15');
     }
     
 
