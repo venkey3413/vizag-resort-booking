@@ -124,6 +124,18 @@ async function initDB() {
         )
     `);
     
+    // Create resort owners table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS resort_owners (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            resort_ids TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
     // Add sample dynamic pricing if none exists
     const pricingCount = await db.get('SELECT COUNT(*) as count FROM dynamic_pricing');
     if (pricingCount.count === 0) {
@@ -888,6 +900,31 @@ app.delete('/api/travel-bookings/:id', async (req, res) => {
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Failed to remove travel booking' });
+    }
+});
+
+// Owner management endpoints
+app.get('/api/owners', async (req, res) => {
+    try {
+        const owners = await db.all(`
+            SELECT ro.*, GROUP_CONCAT(r.name) as resort_names
+            FROM resort_owners ro
+            LEFT JOIN resorts r ON INSTR(',' || ro.resort_ids || ',', ',' || r.id || ',') > 0
+            GROUP BY ro.id
+            ORDER BY ro.created_at DESC
+        `);
+        res.json(owners);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch owners' });
+    }
+});
+
+app.delete('/api/owners/:id', async (req, res) => {
+    try {
+        await db.run('DELETE FROM resort_owners WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Owner deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete owner' });
     }
 });
 

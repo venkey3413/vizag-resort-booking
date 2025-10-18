@@ -423,3 +423,57 @@ button[type="submit"]:hover {
     gap: 0.5rem;
     margin-top: 1rem;
 }
+/* Owner Management Styles */
+.owners-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.owner-item {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.owner-item h4 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.owner-details {
+    margin-bottom: 1rem;
+}
+
+.owner-details p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.owner-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.owner-actions button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.owner-actions .delete {
+    background: #dc3545;
+    color: white;
+}
+
+.owner-actions .delete:hover {
+    background: #c82333;
+}

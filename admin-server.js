@@ -329,6 +329,29 @@ app.delete('/api/coupons/:code', async (req, res) => {
     }
 });
 
+// Owner management endpoints
+app.get('/api/owners', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3002/api/owners');
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch owners' });
+    }
+});
+
+app.delete('/api/owners/:id', async (req, res) => {
+    try {
+        const response = await fetch(`http://localhost:3002/api/owners/${req.params.id}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete owner' });
+    }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`👨‍💼 Admin Panel running on http://0.0.0.0:${PORT}`);
 });

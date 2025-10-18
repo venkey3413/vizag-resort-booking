@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadFoodItems();
     loadTravelPackages();
     loadCoupons();
+    loadOwners();
     setupEventListeners();
     // Delay EventBridge setup to ensure page is fully loaded
     setTimeout(setupEventBridgeSync, 1000);
@@ -746,3 +747,63 @@ async function deleteTravelPackage(id) {
     }
 }
 
+// Owner Management Functions
+let owners = [];
+
+async function loadOwners() {
+    try {
+        const response = await fetch('/api/owners');
+        owners = await response.json();
+        displayOwners();
+        console.log('Loaded owners:', owners);
+    } catch (error) {
+        console.error('Error loading owners:', error);
+    }
+}
+
+function displayOwners() {
+    const grid = document.getElementById('ownersGrid');
+    if (!grid) return;
+    
+    if (!owners || owners.length === 0) {
+        grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No resort owners found.</div>';
+        return;
+    }
+    
+    grid.innerHTML = owners.map(owner => {
+        const resortNames = owner.resort_names ? owner.resort_names.split(',').join(', ') : 'No resorts assigned';
+        return `
+            <div class="owner-item">
+                <h4>${owner.name}</h4>
+                <div class="owner-details">
+                    <p><strong>Email:</strong> ${owner.email}</p>
+                    <p><strong>Resorts:</strong> ${resortNames}</p>
+                    <p><strong>Created:</strong> ${new Date(owner.created_at).toLocaleDateString()}</p>
+                </div>
+                <div class="owner-actions">
+                    <button class="delete" onclick="deleteOwner(${owner.id})">Delete</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function deleteOwner(id) {
+    if (!confirm('Are you sure you want to delete this owner account?')) return;
+
+    try {
+        const response = await fetch(`/api/owners/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Owner deleted successfully');
+            loadOwners();
+        } else {
+            alert('Failed to delete owner');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    }
+}
