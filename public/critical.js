@@ -595,6 +595,28 @@ window.handleBookingSubmit=function(e){
         return;
     }
     
+    // Check availability before proceeding to payment
+    try {
+        const availabilityResponse = await fetch('/api/check-availability', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                resortId: formData.resortId,
+                checkIn: formData.checkIn,
+                checkOut: formData.checkOut
+            })
+        });
+        
+        if (!availabilityResponse.ok) {
+            const error = await availabilityResponse.json();
+            showCriticalNotification(error.error || 'Resort not available for selected dates', 'error');
+            return;
+        }
+    } catch (error) {
+        showCriticalNotification('Failed to check availability. Please try again.', 'error');
+        return;
+    }
+    
     // Create booking data for payment
     const resort=window.resorts.find(r=>r.id==formData.resortId);
     if(!resort){
