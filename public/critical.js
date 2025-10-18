@@ -552,23 +552,34 @@ function showPaymentInterface(bookingData){
         coupons.forEach(c => {
             window.availableCoupons[c.code] = {discount: c.discount, type: c.type, day_type: c.day_type};
         });
-    }).catch(e=>console.log('Coupon load failed'));
+        console.log('✅ Coupons loaded:', window.availableCoupons);
+    }).catch(e=>console.log('❌ Coupon load failed:', e));
     
     window.applyCoupon = function() {
         const code = document.getElementById('couponCode').value.trim().toUpperCase();
         const checkIn = bookingData.checkIn;
         const msg = document.getElementById('couponMessage');
         
+        console.log('🎫 Applying coupon:', code, 'Available:', window.availableCoupons);
+        
         if (!code) {
             msg.innerHTML = '<span style="color:#dc3545;">Enter coupon code</span>';
+            return;
+        }
+        
+        if (!window.availableCoupons) {
+            msg.innerHTML = '<span style="color:#dc3545;">Coupons not loaded yet, please try again</span>';
             return;
         }
         
         const coupon = window.availableCoupons[code];
         if (!coupon) {
             msg.innerHTML = '<span style="color:#dc3545;">Invalid coupon code</span>';
+            console.log('❌ Coupon not found:', code, 'in', Object.keys(window.availableCoupons));
             return;
         }
+        
+        console.log('✅ Found coupon:', coupon);
         
         // Check day type
         const checkInDate = new Date(checkIn);
