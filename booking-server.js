@@ -123,6 +123,25 @@ async function initDB() {
             FOREIGN KEY (resort_id) REFERENCES resorts (id)
         )
     `);
+    
+    // Add sample dynamic pricing if none exists
+    const pricingCount = await db.get('SELECT COUNT(*) as count FROM dynamic_pricing');
+    if (pricingCount.count === 0) {
+        const resorts = await db.all('SELECT id, price FROM resorts LIMIT 3');
+        for (const resort of resorts) {
+            // Add weekday pricing (20% less than base)
+            await db.run(
+                'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                [resort.id, 'weekday', Math.round(resort.price * 0.8)]
+            );
+            // Add weekend pricing (30% more than base)
+            await db.run(
+                'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                [resort.id, 'weekend', Math.round(resort.price * 1.3)]
+            );
+        }
+        console.log('✅ Sample dynamic pricing added for', resorts.length, 'resorts');
+    }
 
 }
 
