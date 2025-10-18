@@ -183,34 +183,53 @@ async function initDB() {
     
     // Add sample dynamic pricing if none exists
     const pricingCount = await db.get('SELECT COUNT(*) as count FROM dynamic_pricing');
+    console.log('🔍 Dynamic pricing count:', pricingCount.count);
+    
     if (pricingCount.count === 0) {
         const resorts = await db.all('SELECT id, price FROM resorts');
+        console.log('🏨 Found resorts for dynamic pricing:', resorts.map(r => ({id: r.id, price: r.price})));
+        
         for (const resort of resorts) {
+            const weekdayPrice = Math.round(resort.price * 0.8);
+            const weekendPrice = Math.round(resort.price * 1.3);
+            
             // Add weekday pricing (20% less than base)
             await db.run(
                 'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
-                [resort.id, 'weekday', Math.round(resort.price * 0.8)]
+                [resort.id, 'weekday', weekdayPrice]
             );
             // Add weekend pricing (30% more than base)
             await db.run(
                 'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
-                [resort.id, 'weekend', Math.round(resort.price * 1.3)]
+                [resort.id, 'weekend', weekendPrice]
             );
+            
+            console.log(`💰 Resort ${resort.id}: Base ₹${resort.price}, Weekday ₹${weekdayPrice}, Weekend ₹${weekendPrice}`);
         }
         console.log('✅ Sample dynamic pricing added for', resorts.length, 'resorts');
+    } else {
+        // Show existing dynamic pricing
+        const existingPricing = await db.all('SELECT resort_id, day_type, price FROM dynamic_pricing ORDER BY resort_id, day_type');
+        console.log('📊 Existing dynamic pricing:', existingPricing);
     }
     
     // Add sample coupons if none exist
     try {
         const couponCount = await db.get('SELECT COUNT(*) as count FROM coupons');
+        console.log('🎫 Coupon count:', couponCount.count);
+        
         if (couponCount.count === 0) {
             await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['SAVE10', 'percentage', 10, 'all']);
             await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKEND20', 'percentage', 20, 'weekend']);
             await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', ['WEEKDAY15', 'percentage', 15, 'weekday']);
             console.log('✅ Sample coupons added: SAVE10, WEEKEND20, WEEKDAY15');
+        } else {
+            // Show existing coupons
+            const existingCoupons = await db.all('SELECT code, type, discount, day_type FROM coupons');
+            console.log('🎟️ Existing coupons:', existingCoupons);
         }
     } catch (error) {
-        console.log('Coupon table initialization error:', error);
+        console.log('❌ Coupon table initialization error:', error);
     }
     
 
@@ -314,6 +333,7 @@ async function initDB() {
 app.get('/api/resorts', async (req, res) => {
     try {
         const resorts = await db.all('SELECT id, name, location, price, description, image, gallery, videos, map_link, amenities, available FROM resorts WHERE available = 1');
+        console.log('🏨 Fetching resorts:', resorts.length, 'found');
         
         // Add dynamic pricing to each resort
         for (let resort of resorts) {
@@ -323,14 +343,18 @@ app.get('/api/resorts', async (req, res) => {
                     [resort.id]
                 );
                 resort.dynamic_pricing = pricing;
+                console.log(`💰 Resort ${resort.id} (${resort.name}) pricing:`, pricing);
             } catch (error) {
                 // Dynamic pricing table might not exist yet
+                console.log(`⚠️ No dynamic pricing for resort ${resort.id}:`, error.message);
                 resort.dynamic_pricing = [];
             }
         }
         
+        console.log('📤 Sending resorts with dynamic pricing to frontend');
         res.json(resorts);
     } catch (error) {
+        console.error('❌ Resort fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch resorts' });
     }
 });
@@ -998,6 +1022,8 @@ app.get('/api/coupons', async (req, res) => {
         const { checkIn } = req.query;
         let coupons;
         
+        console.log('🎫 Coupon request:', { checkIn });
+        
         // Create coupons table if it doesn't exist
         await db.exec(`
             CREATE TABLE IF NOT EXISTS coupons (
@@ -1016,6 +1042,13 @@ app.get('/api/coupons', async (req, res) => {
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
             const dayType = isWeekend ? 'weekend' : 'weekday';
             
+            console.log('📅 Date filtering:', {
+                checkIn: checkIn,
+                dayOfWeek: dayOfWeek,
+                isWeekend: isWeekend,
+                dayType: dayType
+            });
+            
             coupons = await db.all(
                 'SELECT * FROM coupons WHERE day_type = ? OR day_type = "all" ORDER BY created_at DESC',
                 [dayType]
@@ -1024,9 +1057,10 @@ app.get('/api/coupons', async (req, res) => {
             coupons = await db.all('SELECT * FROM coupons ORDER BY created_at DESC');
         }
         
+        console.log('🎟️ Returning coupons:', coupons);
         res.json(coupons);
     } catch (error) {
-        console.error('Coupon fetch error:', error);
+        console.error('❌ Coupon fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch coupons' });
     }
 });
@@ -2767,11 +2801,14 @@ app.delete('/api/travel-bookings/:id', async (req, res) => {
 
 // Initialize and start server
 initDB().then(() => {
+    console.log('✅ Database initialization completed successfully');
+    
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Resort Booking Server running on http://0.0.0.0:${PORT}`);
         console.log(`🍽️ My Food Service available at http://0.0.0.0:${PORT}/food`);
         console.log(`👤 Owner Dashboard available at http://0.0.0.0:${PORT}/owner-dashboard`);
+        console.log('🔧 Debug mode enabled - check console for detailed logs');
     });
 }).catch(error => {
-    console.error('Failed to start server:', error);
+    console.error('❌ Failed to start server:', error);
 });
