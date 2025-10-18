@@ -11,6 +11,8 @@ function applyCouponImpl() {
     const messageDiv = document.getElementById('couponMessage');
     const checkIn = document.getElementById('checkIn').value;
     
+    console.log('🎫 Applying coupon:', couponCode, 'Available coupons:', coupons);
+    
     if (!couponCode) {
         messageDiv.innerHTML = '<span class="coupon-error">Please enter a coupon code</span>';
         return;
@@ -23,6 +25,7 @@ function applyCouponImpl() {
     
     if (coupons[couponCode]) {
         const coupon = coupons[couponCode];
+        console.log('✅ Found coupon:', coupon);
         
         // Validate coupon for selected date
         const checkInDate = new Date(checkIn);
@@ -30,6 +33,14 @@ function applyCouponImpl() {
         // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
         const dayType = isWeekend ? 'weekend' : 'weekday';
+        
+        console.log('📅 Date validation:', {
+            checkIn: checkIn,
+            dayOfWeek: dayOfWeek,
+            isWeekend: isWeekend,
+            dayType: dayType,
+            couponDayType: coupon.day_type
+        });
         
         // Check if coupon is valid for this day type
         if (coupon.day_type !== 'all' && coupon.day_type !== dayType) {
@@ -41,13 +52,23 @@ function applyCouponImpl() {
         appliedCoupon = couponCode;
         
         // Calculate discount
-        const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
+        const baseAmountText = document.getElementById('baseAmount').textContent;
+        const baseAmount = parseInt(baseAmountText.replace('₹', '').replace(/,/g, ''));
+        
+        console.log('💰 Discount calculation:', {
+            baseAmountText: baseAmountText,
+            baseAmount: baseAmount,
+            couponType: coupon.type,
+            couponDiscount: coupon.discount
+        });
         
         if (coupon.type === 'percentage') {
             discountAmount = Math.round(baseAmount * coupon.discount / 100);
         } else {
             discountAmount = coupon.discount;
         }
+        
+        console.log('✅ Final discount amount:', discountAmount);
         
         // Update UI
         document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
@@ -57,13 +78,23 @@ function applyCouponImpl() {
         // Update total
         updateTotalPrice();
     } else {
+        console.log('❌ Coupon not found:', couponCode);
         messageDiv.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
     }
 }
 
 function updateTotalPrice() {
-    const baseAmount = parseInt(document.getElementById('baseAmount').textContent.replace('₹', '').replace(',', ''));
-    const finalAmount = baseAmount - discountAmount;
+    const baseAmountText = document.getElementById('baseAmount').textContent;
+    const baseAmount = parseInt(baseAmountText.replace('₹', '').replace(/,/g, ''));
+    const finalAmount = Math.max(0, baseAmount - discountAmount);
+    
+    console.log('🔄 Updating total price:', {
+        baseAmountText: baseAmountText,
+        baseAmount: baseAmount,
+        discountAmount: discountAmount,
+        finalAmount: finalAmount
+    });
+    
     document.getElementById('totalAmount').textContent = `₹${finalAmount.toLocaleString()}`;
 }
 
@@ -97,7 +128,13 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadCoupons(checkIn = null) {
     try {
         const url = checkIn ? `${SERVER_URL}/api/coupons?checkIn=${checkIn}` : `${SERVER_URL}/api/coupons`;
+        console.log('🎫 Loading coupons from:', url);
+        
         const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const couponList = await response.json();
         coupons = {};
         couponList.forEach(coupon => {
@@ -107,9 +144,28 @@ async function loadCoupons(checkIn = null) {
                 day_type: coupon.day_type
             };
         });
-        console.log('Loaded coupons:', coupons);
+        
+        console.log('✅ Loaded coupons:', {
+            count: couponList.length,
+            coupons: coupons,
+            checkInFilter: checkIn
+        });
+        
+        if (checkIn) {
+            const checkInDate = new Date(checkIn);
+            const dayOfWeek = checkInDate.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+            const dayType = isWeekend ? 'weekend' : 'weekday';
+            console.log('📅 Coupon date filter:', {
+                checkIn: checkIn,
+                dayOfWeek: dayOfWeek,
+                dayType: dayType,
+                availableCoupons: Object.keys(coupons)
+            });
+        }
     } catch (error) {
-        console.error('Error loading coupons:', error);
+        console.error('❌ Error loading coupons:', error);
+        coupons = {};
     }
 }
 
@@ -154,10 +210,19 @@ function setupEventListeners() {
     // Form submission
     document.getElementById('bookingForm').addEventListener('submit', handleBooking);
 
-    // Date change events
-    document.getElementById('checkIn').addEventListener('change', calculateTotal);
-    document.getElementById('checkOut').addEventListener('change', calculateTotal);
-    document.getElementById('guests').addEventListener('change', calculateTotal);
+    // Date change events with debug logging
+    document.getElementById('checkIn').addEventListener('change', function() {
+        console.log('📅 Check-in date changed to:', this.value);
+        calculateTotal();
+    });
+    document.getElementById('checkOut').addEventListener('change', function() {
+        console.log('📅 Check-out date changed to:', this.value);
+        calculateTotal();
+    });
+    document.getElementById('guests').addEventListener('change', function() {
+        console.log('👥 Guests changed to:', this.value);
+        calculateTotal();
+    });
     
     // Email validation on blur
     document.getElementById('email').addEventListener('blur', validateEmailField);
@@ -220,7 +285,23 @@ async function loadResorts() {
         const data = await response.json();
         resorts = data;
         console.log('✅ Resorts loaded:', resorts.length, 'resorts');
-        console.log('🏷️ Resort dynamic pricing data:', resorts.map(r => ({id: r.id, name: r.name, dynamic_pricing: r.dynamic_pricing})));
+        console.log('🏷️ Resort dynamic pricing data:', resorts.map(r => ({
+            id: r.id, 
+            name: r.name, 
+            basePrice: r.price,
+            dynamic_pricing: r.dynamic_pricing,
+            hasDynamicPricing: !!(r.dynamic_pricing && r.dynamic_pricing.length > 0)
+        })));
+        
+        // Validate dynamic pricing data
+        resorts.forEach(resort => {
+            if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+                console.log(`📊 Resort ${resort.name} pricing:`, resort.dynamic_pricing);
+            } else {
+                console.log(`⚠️ Resort ${resort.name} has no dynamic pricing, using base price: ₹${resort.price}`);
+            }
+        });
+        
         displayResorts();
         
     } catch (error) {
@@ -323,7 +404,12 @@ async function openBookingModal(resortId){
     const resort=resorts.find(r=>r.id===resortId);
     if(!resort)return;
     
-    console.log('Opening booking modal for resort:', resort);
+    console.log('🏨 Opening booking modal for resort:', {
+        id: resort.id,
+        name: resort.name,
+        basePrice: resort.price,
+        dynamicPricing: resort.dynamic_pricing
+    });
     
     document.getElementById('resortId').value=resortId;
     document.getElementById('resortPrice').value=resort.price;
@@ -363,12 +449,14 @@ function calculateTotal() {
     const checkInDayOfWeek = startDate.getDay();
     let nightlyRate = resort.price;
     
-    console.log('Dynamic pricing calculation:', {
+    console.log('🔍 Dynamic pricing calculation:', {
         resortId: resort.id,
+        resortName: resort.name,
         checkIn: checkIn,
         dayOfWeek: checkInDayOfWeek,
         basePriceFromResort: resort.price,
-        dynamicPricing: resort.dynamic_pricing
+        dynamicPricing: resort.dynamic_pricing,
+        nights: nights
     });
     
     if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
@@ -377,23 +465,31 @@ function calculateTotal() {
             const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
             if (weekendPrice) {
                 nightlyRate = weekendPrice.price;
-                console.log('Applied weekend pricing:', weekendPrice.price);
+                console.log('✅ Applied weekend pricing:', weekendPrice.price);
             }
         } else {
             // Weekday (Monday=1 to Thursday=4)
             const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
             if (weekdayPrice) {
                 nightlyRate = weekdayPrice.price;
-                console.log('Applied weekday pricing:', weekdayPrice.price);
+                console.log('✅ Applied weekday pricing:', weekdayPrice.price);
             }
         }
     } else {
-        console.log('No dynamic pricing found, using base price:', resort.price);
+        console.log('⚠️ No dynamic pricing found, using base price:', resort.price);
     }
     
     const basePrice = nightlyRate * nights;
     const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
     const total = basePrice + platformFee;
+    
+    console.log('💰 Final pricing calculation:', {
+        nightlyRate: nightlyRate,
+        nights: nights,
+        basePrice: basePrice,
+        platformFee: platformFee,
+        total: total
+    });
     
     document.getElementById('baseAmount').textContent = `₹${total.toLocaleString()}`;
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
