@@ -203,6 +203,29 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
             } catch (error) {
                 console.error('❌ Invoice/Backup error:', error);
             }
+            
+            // Publish availability update to refresh blocked dates
+            try {
+                await publishEvent('vizag.resort', EVENTS.RESORT_AVAILABILITY_UPDATED, {
+                    resortId: booking.resort_id,
+                    date: booking.check_in,
+                    action: 'booking_confirmed'
+                });
+                
+                // Notify main server directly
+                const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
+                await fetch(mainServerUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'resort.availability.updated',
+                        source: 'vizag.resort',
+                        data: { resortId: booking.resort_id, action: 'booking_confirmed' }
+                    })
+                }).catch(err => console.log('Main server availability notification failed:', err.message));
+            } catch (eventError) {
+                console.error('Availability update event failed:', eventError);
+            }
         }
         
         // Publish payment updated event

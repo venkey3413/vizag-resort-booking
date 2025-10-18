@@ -1117,7 +1117,18 @@ app.get('/api/blocked-dates/:resortId', async (req, res) => {
             // Table might not exist
         }
         
-        res.json(blockedDates);
+        // Get confirmed booking dates
+        try {
+            const confirmedBookings = await db.all(
+                'SELECT check_in FROM bookings WHERE resort_id = ? AND payment_status = "paid"',
+                [resortId]
+            );
+            confirmedBookings.forEach(booking => blockedDates.push(booking.check_in));
+        } catch (error) {
+            // Table might not exist
+        }
+        
+        res.json([...new Set(blockedDates)]);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch blocked dates' });
     }
