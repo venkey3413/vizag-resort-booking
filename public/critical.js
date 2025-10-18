@@ -149,6 +149,17 @@ try{
                 console.log('🏨 Resort update detected - refreshing resorts now!');
                 location.reload();
             }
+            if(data.type==='resort.availability.updated'){
+                console.log('📅 Resort availability updated - reloading blocked dates');
+                const resortIdInput=document.getElementById('resortId');
+                if(resortIdInput&&resortIdInput.value){
+                    const currentResortId=resortIdInput.value;
+                    fetch(`/api/blocked-dates/${currentResortId}`).then(r=>r.json()).then(blockedDates=>{
+                        window.currentResortBlockedDates=blockedDates;
+                        console.log('✅ Updated blocked dates:',blockedDates);
+                    }).catch(e=>console.log('Failed to reload blocked dates:',e));
+                }
+            }
         }catch(error){
             console.log('📡 EventBridge ping or invalid data:',event.data);
         }
