@@ -484,22 +484,26 @@ function verifyEmailOTP() {
     
     if (!enteredOtp || enteredOtp.length !== 6) {
         showEmailOTPMessage('Please enter the 6-digit OTP', 'error');
-        verifyEmailOtpBtn.textContent = 'Verify Email OTP';
-        verifyEmailOtpBtn.disabled = false;
         return;
     }
     
     if (!window.emailOtpCode) {
         showEmailOTPMessage('Please send OTP first', 'error');
-        verifyEmailOtpBtn.textContent = 'Verify Email OTP';
-        verifyEmailOtpBtn.disabled = false;
         return;
     }
     
+    // Immediate validation without delay
+    if (enteredOtp !== window.emailOtpCode) {
+        showEmailOTPMessage('Invalid OTP. Please try again.', 'error');
+        return;
+    }
+    
+    // Only show verifying for valid OTP
     verifyEmailOtpBtn.disabled = true;
     verifyEmailOtpBtn.textContent = 'Verifying...';
     
-    if (enteredOtp === window.emailOtpCode) {
+    // Quick success response
+    setTimeout(() => {
         window.emailVerified = true;
         const emailInput = document.getElementById('email');
         emailInput.classList.add('email-verified');
@@ -515,11 +519,10 @@ function verifyEmailOTP() {
             bookBtn.disabled = false;
             bookBtn.textContent = 'Confirm Booking';
         }
-    } else {
-        showEmailOTPMessage('Invalid OTP. Please try again.', 'error');
+        
         verifyEmailOtpBtn.textContent = 'Verify Email OTP';
         verifyEmailOtpBtn.disabled = false;
-    }
+    }, 300);
 }
 
 // Show Email OTP message helper
