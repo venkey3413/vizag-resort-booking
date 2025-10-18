@@ -218,27 +218,11 @@ async function initDB() {
     const allPricing = await db.all('SELECT resort_id, day_type, price FROM dynamic_pricing ORDER BY resort_id, day_type');
     console.log('📊 All dynamic pricing:', allPricing);
     
-    // Ensure sample coupons exist
+    // Show existing coupons
     try {
         const couponCount = await db.get('SELECT COUNT(*) as count FROM coupons');
         console.log('🎫 Coupon count:', couponCount.count);
         
-        // Add standard coupons if they don't exist
-        const standardCoupons = [
-            ['SAVE10', 'percentage', 10, 'all'],
-            ['WEEKEND20', 'percentage', 20, 'weekend'],
-            ['WEEKDAY15', 'percentage', 15, 'weekday']
-        ];
-        
-        for (const [code, type, discount, day_type] of standardCoupons) {
-            const existing = await db.get('SELECT code FROM coupons WHERE code = ?', [code]);
-            if (!existing) {
-                await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', [code, type, discount, day_type]);
-                console.log(`✅ Added coupon: ${code}`);
-            }
-        }
-        
-        // Show all coupons
         const allCoupons = await db.all('SELECT code, type, discount, day_type FROM coupons ORDER BY code');
         console.log('🎟️ All coupons:', allCoupons);
     } catch (error) {
