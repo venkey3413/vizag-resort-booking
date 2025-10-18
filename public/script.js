@@ -220,6 +220,7 @@ async function loadResorts() {
         const data = await response.json();
         resorts = data;
         console.log('✅ Resorts loaded:', resorts.length, 'resorts');
+        console.log('🏷️ Resort dynamic pricing data:', resorts.map(r => ({id: r.id, name: r.name, dynamic_pricing: r.dynamic_pricing})));
         displayResorts();
         
     } catch (error) {
@@ -321,6 +322,8 @@ async function openBookingModal(resortId){
     // Fallback implementation
     const resort=resorts.find(r=>r.id===resortId);
     if(!resort)return;
+    
+    console.log('Opening booking modal for resort:', resort);
     
     document.getElementById('resortId').value=resortId;
     document.getElementById('resortPrice').value=resort.price;
