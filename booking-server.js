@@ -504,14 +504,33 @@ app.post('/api/resorts', async (req, res) => {
             }
         }
         
-        // Publish to EventBridge only
+        // Publish to EventBridge and notify all servers
         try {
             await publishEvent('vizag.admin', 'resort.added', { resortId });
             
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent('resort.added', 'vizag.admin', {
-                resortId: resortId
-            });
+            // Notify main server directly
+            const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
+            await fetch(mainServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'resort.added',
+                    source: 'vizag.admin',
+                    data: { resortId }
+                })
+            }).catch(err => console.log('Main server notification failed:', err.message));
+            
+            // Notify admin server directly
+            const adminServerUrl = 'http://localhost:3001/api/eventbridge-notify';
+            await fetch(adminServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'resort.added',
+                    source: 'vizag.admin',
+                    data: { resortId }
+                })
+            }).catch(err => console.log('Admin server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -599,7 +618,7 @@ app.put('/api/resorts/:id', async (req, res) => {
             }
         }
         
-        // Publish to EventBridge only
+        // Publish to EventBridge and notify all servers
         try {
             await publishEvent('vizag.admin', 'resort.updated', { resortId });
             
@@ -614,6 +633,18 @@ app.put('/api/resorts/:id', async (req, res) => {
                     data: { resortId }
                 })
             }).catch(err => console.log('Main server notification failed:', err.message));
+            
+            // Notify admin server directly
+            const adminServerUrl = 'http://localhost:3001/api/eventbridge-notify';
+            await fetch(adminServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'resort.updated',
+                    source: 'vizag.admin',
+                    data: { resortId }
+                })
+            }).catch(err => console.log('Admin server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }
@@ -704,7 +735,7 @@ app.delete('/api/resorts/:id', async (req, res) => {
         await db.run('DELETE FROM resorts WHERE id = ?', [resortId]);
         await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
         
-        // Publish to EventBridge only
+        // Publish to EventBridge and notify all servers
         try {
             await publishEvent('vizag.admin', 'resort.deleted', { resortId });
             
@@ -719,6 +750,18 @@ app.delete('/api/resorts/:id', async (req, res) => {
                     data: { resortId }
                 })
             }).catch(err => console.log('Main server notification failed:', err.message));
+            
+            // Notify admin server directly
+            const adminServerUrl = 'http://localhost:3001/api/eventbridge-notify';
+            await fetch(adminServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'resort.deleted',
+                    source: 'vizag.admin',
+                    data: { resortId }
+                })
+            }).catch(err => console.log('Admin server notification failed:', err.message));
         } catch (eventError) {
             console.error('EventBridge publish failed:', eventError);
         }

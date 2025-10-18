@@ -28,6 +28,15 @@ app.get('/health', (req, res) => {
 app.get('/api/events', (req, res) => {
     const clientId = `admin-${Date.now()}-${Math.random()}`;
     eventBridgeListener.subscribe(clientId, res, 'admin');
+    console.log('📡 Admin panel connected to EventBridge');
+});
+
+// EventBridge notification endpoint
+app.post('/api/eventbridge-notify', (req, res) => {
+    const { type, source, data } = req.body;
+    console.log(`📡 Admin server received EventBridge notification: ${type}`);
+    eventBridgeListener.handleEvent(type, source, data);
+    res.json({ success: true });
 });
 
 // Serve admin panel
