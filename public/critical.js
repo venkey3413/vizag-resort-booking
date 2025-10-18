@@ -343,12 +343,43 @@ window.bookNow=function(resortId,resortName){
                     
                     document.getElementById('baseAmount').textContent = `₹${total.toLocaleString()}`;
                     
-                    // Apply existing coupon discount if any
-                    if (window.appliedDiscountAmount) {
-                        const finalTotal = total - window.appliedDiscountAmount;
-                        document.getElementById('totalAmount').textContent = `₹${finalTotal.toLocaleString()}`;
-                        document.getElementById('discountAmount').textContent = `-₹${window.appliedDiscountAmount.toLocaleString()}`;
-                        document.getElementById('discountRow').style.display = 'block';
+                    // Recalculate coupon discount if applied
+                    if (window.appliedCouponCode && window.bookingModalCoupons) {
+                        const coupon = window.bookingModalCoupons[window.appliedCouponCode];
+                        if (coupon) {
+                            // Check day type for new date
+                            const dayOfWeek = checkInDate.getDay();
+                            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+                            const dayType = isWeekend ? 'weekend' : 'weekday';
+                            
+                            if (coupon.day_type === 'all' || coupon.day_type === dayType) {
+                                // Recalculate discount
+                                let discountAmount = 0;
+                                if (coupon.type === 'percentage') {
+                                    discountAmount = Math.round(total * coupon.discount / 100);
+                                } else {
+                                    discountAmount = coupon.discount;
+                                }
+                                
+                                window.appliedDiscountAmount = discountAmount;
+                                const finalTotal = total - discountAmount;
+                                document.getElementById('totalAmount').textContent = `₹${finalTotal.toLocaleString()}`;
+                                document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
+                                document.getElementById('discountRow').style.display = 'block';
+                                document.getElementById('couponMessage').innerHTML = `<span style="color:#28a745;">Coupon applied! Saved ₹${discountAmount.toLocaleString()}</span>`;
+                            } else {
+                                // Coupon not valid for new date
+                                window.appliedCouponCode = null;
+                                window.appliedDiscountAmount = 0;
+                                document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
+                                document.getElementById('discountRow').style.display = 'none';
+                                const validDays = coupon.day_type === 'weekday' ? 'weekdays (Mon-Thu)' : 'weekends (Fri-Sun)';
+                                document.getElementById('couponMessage').innerHTML = `<span style="color:#dc3545;">Coupon removed - valid only for ${validDays}</span>`;
+                            }
+                        } else {
+                            document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
+                            document.getElementById('discountRow').style.display = 'none';
+                        }
                     } else {
                         document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
                         document.getElementById('discountRow').style.display = 'none';
