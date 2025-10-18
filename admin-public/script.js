@@ -53,6 +53,7 @@ function setupEventBridgeSync() {
                     if (data.type === 'resort.updated' || data.type === 'resort.added' || data.type === 'resort.deleted') {
                         console.log('🏨 Resort update received - refreshing resorts');
                         loadResorts();
+                        loadOwners(); // Refresh owners when resorts change
                     }
                     
                     // Food item events
@@ -101,6 +102,7 @@ function setupEventBridgeSync() {
         loadResorts();
         loadFoodItems();
         loadTravelPackages();
+        loadOwners();
     }, 60000);
 }
 
@@ -311,6 +313,7 @@ async function handleSubmit(e) {
             document.getElementById('resortForm').reset();
             cancelEdit();
             loadResorts();
+            loadOwners(); // Refresh owners list
         } else {
             alert('Operation failed');
         }
