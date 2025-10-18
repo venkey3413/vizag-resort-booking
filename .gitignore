@@ -2,3 +2,12 @@ node_modules/
 *.db
 .env
 *.log
+nohup.out
+test-*.js
+debug-*.js
+setup*.js
+start-all.js
+*.md
+!README.md
+*.sh
+iam-policy.json
