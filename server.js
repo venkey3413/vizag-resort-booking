@@ -2214,26 +2214,37 @@ app.get('/owner-dashboard', (req, res) => {
 app.post('/api/owner/login', async (req, res) => {
     try {
         if (!bcrypt || !jwt) {
-            return res.status(500).json({ error: 'Owner login system not available' });
+            return res.status(500).json({ success: false, error: 'Owner login system not available' });
         }
         
         const { email, password } = req.body;
         
         if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password are required' });
+            return res.status(400).json({ success: false, error: 'Email and password are required' });
         }
+        
+        console.log('🔍 Owner login attempt for:', email);
         
         const owner = await db.get('SELECT * FROM resort_owners WHERE email = ?', [email]);
         if (!owner) {
+            console.log('❌ Owner not found for email:', email);
             return res.status(401).json({ success: false, error: 'Invalid email or password' });
         }
         
+        console.log('✅ Owner found:', { id: owner.id, name: owner.name, email: owner.email });
+        console.log('🔐 Comparing password with hash...');
+        
         const validPassword = await bcrypt.compare(password, owner.password);
+        console.log('🔐 Password validation result:', validPassword);
+        
         if (!validPassword) {
+            console.log('❌ Invalid password for owner:', email);
             return res.status(401).json({ success: false, error: 'Invalid email or password' });
         }
         
         const token = jwt.sign({ ownerId: owner.id, email: owner.email }, JWT_SECRET, { expiresIn: '24h' });
+        
+        console.log('✅ Owner login successful for:', email);
         
         res.json({ 
             success: true, 
@@ -2246,7 +2257,7 @@ app.post('/api/owner/login', async (req, res) => {
             } 
         });
     } catch (error) {
-        console.error('Owner login error:', error);
+        console.error('❌ Owner login error:', error);
         res.status(500).json({ success: false, error: 'Login failed. Please try again.' });
     }
 });
@@ -2439,6 +2450,16 @@ app.delete('/api/owner/unblock-date/:id', verifyOwnerToken, async (req, res) => 
         res.json({ success: true, message: 'Date unblocked successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to unblock date' });
+    }
+});
+
+// Debug endpoint to check owners in database
+app.get('/api/debug/owners', async (req, res) => {
+    try {
+        const owners = await db.all('SELECT id, name, email, resort_ids, created_at FROM resort_owners ORDER BY created_at DESC');
+        res.json({ count: owners.length, owners });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch owners' });
     }
 });
 
