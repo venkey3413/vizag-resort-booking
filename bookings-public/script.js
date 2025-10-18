@@ -677,9 +677,14 @@ function displayTravelBookings(bookings) {
             </div>
             
             <div class="travel-booking-actions">
-                ${booking.status === 'pending_payment' ? `
+                ${booking.status === 'pending_verification' ? `
                     <button class="confirm-travel-btn" onclick="confirmTravelBooking(${booking.id})">
                         ✅ Confirm Payment & Send Confirmation
+                    </button>
+                ` : ''}
+                ${booking.status !== 'cancelled' ? `
+                    <button class="cancel-travel-btn" onclick="cancelTravelBooking(${booking.id})">
+                        ❌ Cancel Booking
                     </button>
                 ` : ''}
                 <button class="whatsapp-btn" onclick="sendWhatsAppMessage('travel', ${booking.id}, '${booking.status}')">
@@ -708,6 +713,28 @@ async function confirmTravelBooking(id) {
     } catch (error) {
         console.error('Error confirming travel booking:', error);
         alert('Error confirming travel booking');
+    }
+}
+
+async function cancelTravelBooking(id) {
+    if (!confirm('Cancel this travel booking?')) return;
+    
+    try {
+        const response = await fetch(`/api/travel-bookings/${id}/cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            alert('Travel booking cancelled successfully!');
+            loadTravelBookings();
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Failed to cancel travel booking');
+        }
+    } catch (error) {
+        console.error('Error cancelling travel booking:', error);
+        alert('Error cancelling travel booking');
     }
 }
 

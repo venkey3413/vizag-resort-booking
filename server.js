@@ -2590,6 +2590,47 @@ app.post('/api/travel-bookings/:id/confirm', async (req, res) => {
     }
 });
 
+// Cancel travel booking
+app.post('/api/travel-bookings/:id/cancel', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const booking = await db.get('SELECT * FROM travel_bookings WHERE id = ?', [id]);
+        
+        if (!booking) {
+            return res.status(404).json({ error: 'Travel booking not found' });
+        }
+        
+        // Update booking status
+        await db.run('UPDATE travel_bookings SET status = ? WHERE id = ?', ['cancelled', id]);
+        
+        // Send Telegram notification
+        try {
+            const packageNames = JSON.parse(booking.packages).map(p => `${p.name} x${p.quantity}`).join(', ');
+            const message = `❌ TRAVEL BOOKING CANCELLED!
+
+📋 Booking ID: ${booking.booking_reference}
+👤 Customer: ${booking.customer_name}
+📱 Phone: ${booking.phone}
+📅 Travel Date: ${new Date(booking.travel_date).toLocaleDateString('en-IN')}
+📍 Pickup: ${booking.pickup_location}
+🎯 Packages: ${packageNames}
+💰 Amount: ₹${booking.total_amount.toLocaleString()}
+⏰ Cancelled at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Travel booking cancelled successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to cancel travel booking' });
+    }
+});
+
 // Initialize and start server
 initDB().then(() => {
     app.listen(PORT, '0.0.0.0', () => {
