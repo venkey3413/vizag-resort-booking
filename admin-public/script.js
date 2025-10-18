@@ -288,12 +288,6 @@ async function handleSubmit(e) {
                             day_type: couponDayType
                         };
                         
-                        // Add resort-specific coupon code if not current resort
-                        if (selectedResort !== 'current') {
-                            const selectedResortName = resorts.find(r => r.id == selectedResort)?.name || 'Resort';
-                            couponData.code = `${selectedResortName.replace(/\s+/g, '').toUpperCase()}${couponCode}`;
-                        }
-                        
                         const couponResponse = await fetch('/api/coupons', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
