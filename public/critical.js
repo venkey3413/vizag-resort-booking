@@ -652,10 +652,11 @@ window.handleBookingSubmit=async function(e){
     const bookingData = {
         ...formData,
         resortName: resort.name,
+        resortNote: resort.note,
         basePrice: basePrice,
         platformFee: platformFee,
         totalPrice: total,
-        bookingReference: `RB${String(Date.now()).slice(-6)}`,
+        bookingReference: `VE${String(Date.now()).padStart(12, '0')}`,
         couponCode: window.appliedCouponCode || null,
         discountAmount: window.appliedDiscountAmount || 0
     };
@@ -680,6 +681,7 @@ function showPaymentInterface(bookingData){
                 <p><strong>Total:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
                 <p><strong>Reference:</strong> ${bookingData.bookingReference}</p>
             </div>
+            ${bookingData.resortNote ? `<div class="payment-note" style="background:#f8f9fa;padding:10px;border-left:4px solid #007bff;margin:10px 0;border-radius:5px;"><strong>📝 Note:</strong> ${bookingData.resortNote}</div>` : ''}
             
 
             

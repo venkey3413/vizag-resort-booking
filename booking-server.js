@@ -85,6 +85,7 @@ async function initDB() {
             videos TEXT,
             map_link TEXT,
             amenities TEXT,
+            note TEXT,
             available INTEGER DEFAULT 1
         )
     `);
@@ -490,12 +491,12 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword } = req.body;
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, note, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword } = req.body;
         
         const result = await db.run(`
-            INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link, amenities)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [name, location, price, description, image, gallery, videos, map_link, amenities]);
+            INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link, amenities, note)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [name, location, price, description, image, gallery, videos, map_link, amenities, note]);
         
         const resortId = result.lastID;
         
@@ -578,7 +579,7 @@ app.post('/api/resorts', async (req, res) => {
 
 app.put('/api/resorts/:id', async (req, res) => {
     try {
-        const { name, location, price, description, image, gallery, videos, map_link, amenities, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword, available } = req.body;
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, note, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword, available } = req.body;
         const resortId = req.params.id;
         
         // Handle availability toggle separately
@@ -587,9 +588,9 @@ app.put('/api/resorts/:id', async (req, res) => {
         } else {
             await db.run(`
                 UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, 
-                image = ?, gallery = ?, videos = ?, map_link = ?, amenities = ?
+                image = ?, gallery = ?, videos = ?, map_link = ?, amenities = ?, note = ?
                 WHERE id = ?
-            `, [name, location, price, description, image, gallery, videos, map_link, amenities, resortId]);
+            `, [name, location, price, description, image, gallery, videos, map_link, amenities, note, resortId]);
             
             // Update dynamic pricing only if not just toggling availability
             await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);

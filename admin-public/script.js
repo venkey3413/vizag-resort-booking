@@ -188,6 +188,7 @@ function displayResorts() {
                     ${pricingInfo}
                     <p><strong>Description:</strong> ${resort.description}</p>
                     ${resort.amenities ? `<p><strong>Amenities:</strong> ${resort.amenities.replace(/\n/g, ', ')}</p>` : ''}
+                    ${resort.note ? `<p><strong>Payment Note:</strong> ${resort.note}</p>` : ''}
                 </div>
                 <div class="resort-actions">
                     <button class="edit" onclick="editResort(${resort.id})">Edit</button>
@@ -222,6 +223,7 @@ async function handleSubmit(e) {
         price: parseInt(document.getElementById('price').value),
         description: document.getElementById('description').value,
         amenities: document.getElementById('amenities').value,
+        note: document.getElementById('note').value,
         image: document.getElementById('image').value,
         gallery: document.getElementById('gallery').value,
         videos: document.getElementById('videos').value,
@@ -336,6 +338,7 @@ function editResort(id) {
     document.getElementById('price').value = resort.price;
     document.getElementById('description').value = resort.description;
     document.getElementById('amenities').value = resort.amenities || '';
+    document.getElementById('note').value = resort.note || '';
     document.getElementById('image').value = resort.image;
     document.getElementById('gallery').value = resort.gallery || '';
     document.getElementById('videos').value = resort.videos || '';
