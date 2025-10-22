@@ -1141,7 +1141,9 @@ Vizag Resort Booking`;
         const whatsappWebUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`;
         
         // Copy to clipboard as backup
-        navigator.clipboard.writeText(message).catch(() => {});
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(message).catch(() => {});
+        }
         
         // Try desktop app first
         const desktopLink = document.createElement('a');
