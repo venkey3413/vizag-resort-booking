@@ -390,7 +390,8 @@ window.bookNow=function(resortId,resortName){
                     const platformFee = Math.round(basePrice * 0.015);
                     const total = basePrice + platformFee;
                     
-                    document.getElementById('baseAmount').textContent = `₹${total.toLocaleString()}`;
+                    document.getElementById('baseAmount').textContent = `₹${basePrice.toLocaleString()}`;
+                    document.getElementById('platformFee').textContent = `₹${platformFee.toLocaleString()}`;
                     
                     // Recalculate coupon discount if applied
                     if (window.appliedCouponCode && window.bookingModalCoupons) {
