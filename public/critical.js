@@ -904,15 +904,20 @@ function openGallery(resortId){
         return;
     }
     
-    let galleryImages=[];
-    if(resort.image)galleryImages.push(resort.image);
+    let galleryItems=[];
+    if(resort.image)galleryItems.push({type:'image',src:resort.image});
     if(resort.gallery){
         resort.gallery.split('\n').filter(img=>img.trim()).forEach(img=>{
-            galleryImages.push(img.trim());
+            galleryItems.push({type:'image',src:img.trim()});
         });
     }
-    if(galleryImages.length===0){
-        galleryImages=['https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'];
+    if(resort.videos){
+        resort.videos.split('\n').filter(vid=>vid.trim()).forEach(vid=>{
+            galleryItems.push({type:'video',src:vid.trim()});
+        });
+    }
+    if(galleryItems.length===0){
+        galleryItems=[{type:'image',src:'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'}];
     }
     
     const existingModal=document.getElementById('resortGalleryModal');
@@ -930,29 +935,38 @@ function openGallery(resortId){
                 <span onclick="closeResortGallery()" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;z-index:10001;">&times;</span>
                 <h2 style="margin-bottom:20px;color:#333;">${resort.name}</h2>
                 <div style="text-align:center;margin-bottom:20px;position:relative;">
-                    <img src="${galleryImages[currentIndex]}" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;">
-                    ${galleryImages.length>1?`
+                    ${galleryItems[currentIndex].type==='video'?
+                        `<video controls style="max-width:100%;max-height:400px;border-radius:8px;" src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}"></video>`:
+                        `<img src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;">`
+                    }
+                    ${galleryItems.length>1?`
                         <button onclick="prevImage()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.7);color:white;border:none;padding:10px 15px;border-radius:50%;cursor:pointer;font-size:18px;">&lt;</button>
                         <button onclick="nextImage()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.7);color:white;border:none;padding:10px 15px;border-radius:50%;cursor:pointer;font-size:18px;">&gt;</button>
                     `:''}
                 </div>
-                ${galleryImages.length>1?`
+                ${galleryItems.length>1?`
                     <div style="display:flex;gap:10px;margin-bottom:20px;overflow-x:auto;padding:10px 0;justify-content:center;">
-                        ${galleryImages.map((img,i)=>`<img src="${img}" onclick="setImage(${i})" style="width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;">`).join('')}
+                        ${galleryItems.map((item,i)=>{
+                            if(item.type==='video'){
+                                return `<div onclick="setImage(${i})" style="width:80px;height:60px;background:#000;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;display:flex;align-items:center;justify-content:center;color:white;font-size:20px;">▶️</div>`;
+                            }else{
+                                return `<img src="${item.src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" onclick="setImage(${i})" style="width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;">`;
+                            }
+                        }).join('')}
                     </div>
                 `:''}
                 <div style="background:#f8f9fa;padding:15px;border-radius:8px;">
                     <p><strong>Location:</strong> ${resort.location}</p>
                     <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
                     <p><strong>Description:</strong> ${resort.description}</p>
-                    <p style="margin-top:10px;color:#666;font-size:0.9rem;">Image ${currentIndex+1} of ${galleryImages.length}</p>
+                    <p style="margin-top:10px;color:#666;font-size:0.9rem;">${galleryItems[currentIndex].type==='video'?'Video':'Image'} ${currentIndex+1} of ${galleryItems.length}</p>
                 </div>
             </div>
         `;
     }
     
-    window.nextImage=function(){currentIndex=(currentIndex+1)%galleryImages.length;updateModal()};
-    window.prevImage=function(){currentIndex=currentIndex===0?galleryImages.length-1:currentIndex-1;updateModal()};
+    window.nextImage=function(){currentIndex=(currentIndex+1)%galleryItems.length;updateModal()};
+    window.prevImage=function(){currentIndex=currentIndex===0?galleryItems.length-1:currentIndex-1;updateModal()};
     window.setImage=function(i){currentIndex=i;updateModal()};
     
     updateModal();
