@@ -121,6 +121,13 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add max_guests column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE resorts ADD COLUMN max_guests INTEGER');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Add payment_status column if it doesn't exist
     try {
         await db.run('ALTER TABLE bookings ADD COLUMN payment_status TEXT DEFAULT "pending"');
@@ -337,7 +344,7 @@ async function initDB() {
 // Routes
 app.get('/api/resorts', async (req, res) => {
     try {
-        const resorts = await db.all('SELECT id, name, location, price, description, image, gallery, videos, map_link, amenities, note, available FROM resorts WHERE available = 1');
+        const resorts = await db.all('SELECT id, name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, available FROM resorts WHERE available = 1');
         console.log('🏨 Fetching resorts:', resorts.length, 'found');
         
         // Add dynamic pricing to each resort

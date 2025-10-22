@@ -263,6 +263,21 @@ window.bookNow=function(resortId,resortName){
             
             checkOutInput.addEventListener('change', updatePricing);
             
+            // Guest count warning
+            const guestsInput = document.getElementById('guests');
+            const guestWarning = document.getElementById('guestWarning');
+            
+            guestsInput.addEventListener('input', function() {
+                const guestCount = parseInt(this.value) || 0;
+                const maxGuests = resort.max_guests;
+                
+                if (maxGuests && guestCount > maxGuests) {
+                    guestWarning.style.display = 'block';
+                } else {
+                    guestWarning.style.display = 'none';
+                }
+            });
+            
             // Load coupons for booking modal
             fetch('/api/coupons').then(r=>r.json()).then(coupons=>{
                 window.bookingModalCoupons = {};

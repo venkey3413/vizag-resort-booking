@@ -224,6 +224,7 @@ async function handleSubmit(e) {
         description: document.getElementById('description').value,
         amenities: document.getElementById('amenities').value,
         note: document.getElementById('note').value,
+        max_guests: parseInt(document.getElementById('maxGuests').value) || null,
         image: document.getElementById('image').value,
         gallery: document.getElementById('gallery').value,
         videos: document.getElementById('videos').value,
@@ -339,6 +340,7 @@ function editResort(id) {
     document.getElementById('description').value = resort.description;
     document.getElementById('amenities').value = resort.amenities || '';
     document.getElementById('note').value = resort.note || '';
+    document.getElementById('maxGuests').value = resort.max_guests || '';
     document.getElementById('image').value = resort.image;
     document.getElementById('gallery').value = resort.gallery || '';
     document.getElementById('videos').value = resort.videos || '';
