@@ -674,14 +674,14 @@ function submitTravelBooking(bookingData) {
     });
 }
 
-// Close panel when clicking outside
-window.onclick = function(event) {
-    const paymentModal = document.querySelector('.payment-modal');
-    
-    if (event.target === paymentModal) {
-        closePaymentModal();
-    }
-}
+// Disable close panel when clicking outside
+// window.onclick = function(event) {
+//     const paymentModal = document.querySelector('.payment-modal');
+//     
+//     if (event.target === paymentModal) {
+//         closePaymentModal();
+//     }
+// }
 
 // EventBridge real-time sync
 function setupEventBridgeSync() {

@@ -827,10 +827,10 @@ document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Close modal when clicking outside
-window.addEventListener('click', function(event) {
-    const modal = document.getElementById('bookingModal');
-    if (event.target === modal) {
-        closeModal();
-    }
-});
+// Disable close modal when clicking outside
+// window.addEventListener('click', function(event) {
+//     const modal = document.getElementById('bookingModal');
+//     if (event.target === modal) {
+//         closeModal();
+//     }
+// });

@@ -78,11 +78,11 @@ function setupModalEvents(){
         }
     },100);
     
-    // Click outside modal to close
-    window.onclick=function(event){
-        const modal=document.getElementById('bookingModal');
-        if(event.target===modal)window.closeModal();
-    }
+    // Disable click outside modal to close
+    // window.onclick=function(event){
+    //     const modal=document.getElementById('bookingModal');
+    //     if(event.target===modal)window.closeModal();
+    // }
 }
 
 // Load resorts immediately with CSRF protection
