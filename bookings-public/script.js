@@ -1136,9 +1136,22 @@ Vizag Resort Booking`;
             }
         }
         
-        // Open WhatsApp with pre-filled message
-        const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
+        // Try WhatsApp desktop app first, then web as fallback
+        const whatsappDesktopUrl = `whatsapp://send?phone=91${phone}&text=${encodeURIComponent(message)}`;
+        const whatsappWebUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`;
+        
+        // Copy to clipboard as backup
+        navigator.clipboard.writeText(message).catch(() => {});
+        
+        // Try desktop app first
+        const desktopLink = document.createElement('a');
+        desktopLink.href = whatsappDesktopUrl;
+        desktopLink.click();
+        
+        // Fallback to web after 2 seconds if desktop doesn't open
+        setTimeout(() => {
+            window.open(whatsappWebUrl, '_blank');
+        }, 2000);
         
     } catch (error) {
         console.error('Error creating WhatsApp message:', error);
