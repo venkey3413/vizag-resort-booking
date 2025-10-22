@@ -49,7 +49,50 @@
         
     </main>
 
+    <!-- Resort Modal -->
+    <div id="resortModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeResortModal()">&times;</span>
+            <h3 id="resortModalTitle">Add New Resort</h3>
+            <form id="resortForm">
+                <input type="hidden" id="resortId">
+                <input type="text" id="resortName" placeholder="Resort Name" required>
+                <input type="text" id="resortLocation" placeholder="Location" required>
+                <input type="number" id="resortPrice" placeholder="Base Price" required>
+                <textarea id="resortDescription" placeholder="Description"></textarea>
+                <input type="url" id="resortImage" placeholder="Main Image URL">
+                <textarea id="resortGallery" placeholder="Gallery URLs (one per line)"></textarea>
+                <textarea id="resortVideos" placeholder="Video URLs (one per line)"></textarea>
+                <input type="url" id="resortMapLink" placeholder="Google Maps Link">
+                <textarea id="resortAmenities" placeholder="Amenities"></textarea>
+                
+                <div class="coupon-toggle">
+                    <label>
+                        <input type="checkbox" id="createCouponToggle" onchange="toggleCouponForm()">
+                        Create Coupon for this Resort
+                    </label>
+                </div>
+                
+                <div id="couponFormSection" style="display: none;">
+                    <input type="text" id="newCouponCode" placeholder="Coupon Code">
+                    <select id="newCouponType">
+                        <option value="percentage">Percentage</option>
+                        <option value="fixed">Fixed Amount</option>
+                    </select>
+                    <input type="number" id="newCouponDiscount" placeholder="Discount Value">
+                    <select id="newCouponDayType">
+                        <option value="all">All Days</option>
+                        <option value="weekday">Weekdays Only</option>
+                        <option value="weekend">Weekends Only</option>
+                    </select>
+                </div>
+                
+                <button type="submit">Save Resort</button>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="script.js?v=20250103020"></script>
+    <script src="script.js?v=20250103021"></script>
 </body>
 </html>

@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
     loadFoodOrders();
     loadTravelBookings();
-    loadResorts();
     setupEventBridgeSync();
 });
 
@@ -552,8 +551,10 @@ async function loadResorts() {
         const response = await fetch('/api/resorts');
         const resorts = await response.json();
         const select = document.getElementById('blockResortId');
-        select.innerHTML = '<option value="">Select Resort</option>' + 
-            resorts.map(resort => `<option value="${resort.id}">${resort.name}</option>`).join('');
+        if (select) {
+            select.innerHTML = '<option value="">Select Resort</option>' + 
+                resorts.map(resort => `<option value="${resort.id}">${resort.name}</option>`).join('');
+        }
     } catch (error) {
         console.error('Error loading resorts:', error);
     }
@@ -763,17 +764,7 @@ async function removeTravelBooking(id) {
     }
 }
 
-// Resort Management Functions
-async function loadResorts() {
-    try {
-        const response = await fetch('/api/resorts');
-        const resorts = await response.json();
-        displayResorts(resorts);
-    } catch (error) {
-        console.error('Error loading resorts:', error);
-        document.getElementById('resortsGrid').innerHTML = '<p>Error loading resorts</p>';
-    }
-}
+
 
 function displayResorts(resorts) {
     const grid = document.getElementById('resortsGrid');
@@ -865,8 +856,10 @@ async function editResort(id) {
     }
 }
 
-// Resort form submission
-document.getElementById('resortForm').addEventListener('submit', async function(e) {
+// Resort form submission (if form exists)
+const resortForm = document.getElementById('resortForm');
+if (resortForm) {
+    resortForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const resortId = document.getElementById('resortId').value;
@@ -942,7 +935,8 @@ document.getElementById('resortForm').addEventListener('submit', async function(
         console.error('Error saving resort:', error);
         alert('Network error. Please try again.');
     }
-});
+    });
+}
 
 async function toggleResortAvailability(id, currentStatus) {
     const newStatus = !currentStatus;
