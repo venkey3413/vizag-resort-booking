@@ -996,6 +996,7 @@ function sendWhatsAppMessage(serviceType, id, status) {
         if (serviceType === 'resort') {
             data = bookings.find(b => b.id == id);
             if (!data) {
+                console.error('Booking not found for ID:', id, 'Available bookings:', bookings);
                 alert('Booking not found');
                 return;
             }
