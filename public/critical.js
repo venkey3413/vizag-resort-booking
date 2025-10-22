@@ -263,6 +263,14 @@ window.bookNow=function(resortId,resortName){
             
             checkOutInput.addEventListener('change', updatePricing);
             
+            // Update guests label to show max guests
+            const guestsLabel = document.getElementById('guestsLabel');
+            if (resort.max_guests) {
+                guestsLabel.textContent = `Number of Guests (Max: ${resort.max_guests}):`;
+            } else {
+                guestsLabel.textContent = 'Number of Guests:';
+            }
+            
             // Guest count warning
             const guestsInput = document.getElementById('guests');
             const guestWarning = document.getElementById('guestWarning');
