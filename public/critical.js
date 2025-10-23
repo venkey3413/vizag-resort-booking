@@ -797,7 +797,6 @@ function showPaymentInterface(bookingData){
     document.body.appendChild(paymentModal);
     
     window.pendingCriticalBooking=bookingData;
-}
     
     window.showCriticalPaymentMethod=function(method){
         document.getElementById('upiPayment').style.display=method==='upi'?'block':'none';
