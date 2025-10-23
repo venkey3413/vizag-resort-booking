@@ -259,9 +259,13 @@ window.bookNow=function(resortId,resortName){
                 document.getElementById('checkOut').value = nextDay.toISOString().split('T')[0];
                 document.getElementById('checkOut').min = nextDay.toISOString().split('T')[0];
                 updatePricing();
+                showAvailableCouponsForDate();
             });
             
-            checkOutInput.addEventListener('change', updatePricing);
+            checkOutInput.addEventListener('change', function(){
+                updatePricing();
+                showAvailableCouponsForDate();
+            });
             
             // Update guests label to show max guests
             const guestsLabel = document.getElementById('guestsLabel');
@@ -494,6 +498,50 @@ window.bookNow=function(resortId,resortName){
                 document.getElementById('couponCode').value = code;
                 document.getElementById('availableCoupons').style.display = 'none';
                 document.getElementById('applyCouponBtn').click();
+            }
+            
+            window.showAvailableCouponsForDate = function(){
+                const checkIn = document.getElementById('checkIn').value;
+                if (!checkIn || !window.allCoupons) return;
+                
+                const checkInDate = new Date(checkIn);
+                const dayOfWeek = checkInDate.getDay();
+                const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+                const dayType = isWeekend ? 'weekend' : 'weekday';
+                
+                const validCoupons = window.allCoupons.filter(c => 
+                    c.day_type === 'all' || c.day_type === dayType
+                );
+                
+                const couponInput = document.getElementById('couponCode');
+                const couponsDiv = document.getElementById('availableCoupons');
+                
+                if (validCoupons.length > 0) {
+                    const bestCoupon = validCoupons[0];
+                    couponInput.placeholder = `Available: ${bestCoupon.code} - ${bestCoupon.type === 'percentage' ? bestCoupon.discount + '% OFF' : '₹' + bestCoupon.discount + ' OFF'}`;
+                    couponsDiv.style.display = 'block';
+                    couponsDiv.innerHTML = validCoupons.map(coupon => {
+                        const discountText = coupon.type === 'percentage' ? `${coupon.discount}% OFF` : `₹${coupon.discount} OFF`;
+                        const dayText = coupon.day_type === 'weekday' ? ' (Weekdays)' : 
+                                      coupon.day_type === 'weekend' ? ' (Weekends)' : '';
+                        return `
+                            <div class="coupon-option" onclick="selectCoupon('${coupon.code}')" style="
+                                padding:8px 12px;
+                                border:1px solid #ddd;
+                                margin:5px 0;
+                                cursor:pointer;
+                                border-radius:5px;
+                                background:#f8f9fa;
+                                transition:background 0.2s;
+                            " onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+                                <strong>${coupon.code}</strong> - ${discountText}${dayText}
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    couponInput.placeholder = 'Enter coupon code or click to see available coupons';
+                    couponsDiv.style.display = 'none';
+                }
             }
             
             modal.style.display='block';
