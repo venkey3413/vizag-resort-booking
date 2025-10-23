@@ -441,6 +441,61 @@ window.bookNow=function(resortId,resortName){
             // Initial pricing calculation
             updatePricing();
             
+            // Setup global coupon functions
+            window.showAvailableCoupons = function(){
+                const checkIn = document.getElementById('checkIn').value;
+                const couponsDiv = document.getElementById('availableCoupons');
+                
+                if (!window.allCoupons || window.allCoupons.length === 0) {
+                    couponsDiv.innerHTML = '<p style="color:#666;padding:10px;">No coupons available</p>';
+                    couponsDiv.style.display = 'block';
+                    return;
+                }
+                
+                let validCoupons = window.allCoupons;
+                if (checkIn) {
+                    const checkInDate = new Date(checkIn);
+                    const dayOfWeek = checkInDate.getDay();
+                    const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+                    const dayType = isWeekend ? 'weekend' : 'weekday';
+                    
+                    validCoupons = window.allCoupons.filter(c => 
+                        c.day_type === 'all' || c.day_type === dayType
+                    );
+                }
+                
+                if (validCoupons.length === 0) {
+                    couponsDiv.innerHTML = '<p style="color:#666;padding:10px;">No coupons available for selected date</p>';
+                } else {
+                    couponsDiv.innerHTML = validCoupons.map(coupon => {
+                        const discountText = coupon.type === 'percentage' ? `${coupon.discount}% OFF` : `₹${coupon.discount} OFF`;
+                        const dayText = coupon.day_type === 'weekday' ? ' (Weekdays)' : 
+                                      coupon.day_type === 'weekend' ? ' (Weekends)' : '';
+                        return `
+                            <div class="coupon-option" onclick="selectCoupon('${coupon.code}')" style="
+                                padding:8px 12px;
+                                border:1px solid #ddd;
+                                margin:5px 0;
+                                cursor:pointer;
+                                border-radius:5px;
+                                background:#f8f9fa;
+                                transition:background 0.2s;
+                            " onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+                                <strong>${coupon.code}</strong> - ${discountText}${dayText}
+                            </div>
+                        `;
+                    }).join('');
+                }
+                
+                couponsDiv.style.display = couponsDiv.style.display === 'none' ? 'block' : 'none';
+            }
+            
+            window.selectCoupon = function(code){
+                document.getElementById('couponCode').value = code;
+                document.getElementById('availableCoupons').style.display = 'none';
+                document.getElementById('applyCouponBtn').click();
+            }
+            
             modal.style.display='block';
         }
     }else{
@@ -742,63 +797,7 @@ function showPaymentInterface(bookingData){
     document.body.appendChild(paymentModal);
     
     window.pendingCriticalBooking=bookingData;
-    
-    // Show available coupons function
-    window.showAvailableCoupons=function(){
-        const checkIn = document.getElementById('checkIn').value;
-        const couponsDiv = document.getElementById('availableCoupons');
-        
-        if (!window.allCoupons || window.allCoupons.length === 0) {
-            couponsDiv.innerHTML = '<p style="color:#666;padding:10px;">No coupons available</p>';
-            couponsDiv.style.display = 'block';
-            return;
-        }
-        
-        // Filter coupons based on check-in date
-        let validCoupons = window.allCoupons;
-        if (checkIn) {
-            const checkInDate = new Date(checkIn);
-            const dayOfWeek = checkInDate.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
-            const dayType = isWeekend ? 'weekend' : 'weekday';
-            
-            validCoupons = window.allCoupons.filter(c => 
-                c.day_type === 'all' || c.day_type === dayType
-            );
-        }
-        
-        if (validCoupons.length === 0) {
-            couponsDiv.innerHTML = '<p style="color:#666;padding:10px;">No coupons available for selected date</p>';
-        } else {
-            couponsDiv.innerHTML = validCoupons.map(coupon => {
-                const discountText = coupon.type === 'percentage' ? `${coupon.discount}% OFF` : `₹${coupon.discount} OFF`;
-                const dayText = coupon.day_type === 'weekday' ? ' (Weekdays)' : 
-                              coupon.day_type === 'weekend' ? ' (Weekends)' : '';
-                return `
-                    <div class="coupon-option" onclick="selectCoupon('${coupon.code}')" style="
-                        padding:8px 12px;
-                        border:1px solid #ddd;
-                        margin:5px 0;
-                        cursor:pointer;
-                        border-radius:5px;
-                        background:#f8f9fa;
-                        transition:background 0.2s;
-                    " onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
-                        <strong>${coupon.code}</strong> - ${discountText}${dayText}
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        couponsDiv.style.display = couponsDiv.style.display === 'none' ? 'block' : 'none';
-    }
-    
-    window.selectCoupon=function(code){
-        document.getElementById('couponCode').value = code;
-        document.getElementById('availableCoupons').style.display = 'none';
-        // Auto-apply the selected coupon
-        document.getElementById('applyCouponBtn').click();
-    }
+}
     
     window.showCriticalPaymentMethod=function(method){
         document.getElementById('upiPayment').style.display=method==='upi'?'block':'none';
