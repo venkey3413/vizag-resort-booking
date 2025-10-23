@@ -286,9 +286,10 @@
                 <div class="form-group">
                     <label for="couponCode">Coupon Code (Optional):</label>
                     <div class="coupon-input">
-                        <input type="text" id="couponCode" placeholder="Enter coupon code">
+                        <input type="text" id="couponCode" placeholder="Enter coupon code or click to see available coupons" onclick="showAvailableCoupons()">
                         <button type="button" id="applyCouponBtn">Apply</button>
                     </div>
+                    <div id="availableCoupons" class="available-coupons" style="display:none;"></div>
                     <div id="couponMessage" class="coupon-message"></div>
                 </div>
                 
