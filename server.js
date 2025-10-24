@@ -1061,6 +1061,10 @@ app.get('/api/coupons', async (req, res) => {
         const allCoupons = await db.all('SELECT code, resort_id, day_type FROM coupons ORDER BY code');
         console.log('🎫 All coupons in database:', allCoupons);
         
+        // Debug: Show all resorts
+        const allResorts = await db.all('SELECT id, name FROM resorts ORDER BY id');
+        console.log('🏨 All resorts in database:', allResorts);
+        
         // Add resort_id column if it doesn't exist
         try {
             await db.run('ALTER TABLE coupons ADD COLUMN resort_id INTEGER');
