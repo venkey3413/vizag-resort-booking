@@ -259,11 +259,13 @@ window.bookNow=function(resortId,resortName){
                 document.getElementById('checkOut').value = nextDay.toISOString().split('T')[0];
                 document.getElementById('checkOut').min = nextDay.toISOString().split('T')[0];
                 updatePricing();
+                loadBookingModalCoupons();
                 showAvailableCouponsForDate();
             });
             
             checkOutInput.addEventListener('change', function(){
                 updatePricing();
+                loadBookingModalCoupons();
                 showAvailableCouponsForDate();
             });
             
@@ -290,15 +292,27 @@ window.bookNow=function(resortId,resortName){
                 }
             });
             
-            // Load coupons for booking modal
-            fetch('/api/coupons').then(r=>r.json()).then(coupons=>{
-                window.bookingModalCoupons = {};
-                window.allCoupons = coupons;
-                coupons.forEach(c => {
-                    window.bookingModalCoupons[c.code] = {discount: c.discount, type: c.type, day_type: c.day_type};
-                });
-                console.log('✅ Booking modal coupons loaded:', window.bookingModalCoupons);
-            }).catch(e=>console.log('❌ Booking modal coupon load failed:', e));
+            // Load coupons for booking modal with resort filter
+            const loadBookingModalCoupons = () => {
+                const checkIn = document.getElementById('checkIn').value;
+                let url = '/api/coupons';
+                const params = new URLSearchParams();
+                if (checkIn) params.append('checkIn', checkIn);
+                if (resortId) params.append('resortId', resortId);
+                if (params.toString()) url += '?' + params.toString();
+                
+                fetch(url).then(r=>r.json()).then(coupons=>{
+                    window.bookingModalCoupons = {};
+                    window.allCoupons = coupons;
+                    coupons.forEach(c => {
+                        window.bookingModalCoupons[c.code] = {discount: c.discount, type: c.type, day_type: c.day_type};
+                    });
+                    console.log('✅ Booking modal coupons loaded:', window.bookingModalCoupons);
+                }).catch(e=>console.log('❌ Booking modal coupon load failed:', e));
+            };
+            
+            // Initial load
+            loadBookingModalCoupons();
             
             // Setup coupon application in booking modal
             const applyCouponBtn = document.getElementById('applyCouponBtn');
@@ -322,8 +336,9 @@ window.bookNow=function(resortId,resortName){
                     
                     const coupon = window.bookingModalCoupons[code];
                     if (!coupon) {
-                        msg.innerHTML = '<span style="color:#dc3545;">Invalid coupon code</span>';
-                        console.log('❌ Coupon not found:', code);
+                        const resortName = window.resorts.find(r => r.id == resortId)?.name || 'this resort';
+                        msg.innerHTML = `<span style="color:#dc3545;">This coupon is not valid for ${resortName} on the selected date</span>`;
+                        console.log('❌ Coupon not found for resort:', code, 'Resort ID:', resortId);
                         return;
                     }
                     
