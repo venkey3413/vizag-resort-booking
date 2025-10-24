@@ -10,8 +10,9 @@ function applyCouponImpl() {
     const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
     const messageDiv = document.getElementById('couponMessage');
     const checkIn = document.getElementById('checkIn').value;
+    const resortId = document.getElementById('resortId').value;
     
-    console.log('🎫 Applying coupon:', couponCode, 'Available coupons:', coupons);
+    console.log('🎫 Applying coupon:', couponCode, 'Available coupons:', coupons, 'Resort ID:', resortId);
     
     if (!couponCode) {
         messageDiv.innerHTML = '<span class="coupon-error">Please enter a coupon code</span>';
@@ -20,6 +21,11 @@ function applyCouponImpl() {
     
     if (!checkIn) {
         messageDiv.innerHTML = '<span class="coupon-error">Please select check-in date first</span>';
+        return;
+    }
+    
+    if (!resortId) {
+        messageDiv.innerHTML = '<span class="coupon-error">Please select a resort first</span>';
         return;
     }
     
@@ -41,9 +47,9 @@ function applyCouponImpl() {
         console.log('📅 Date validation:', {
             checkIn: checkIn,
             dayOfWeek: dayOfWeek,
-            isWeekend: isWeekend,
             dayType: dayType,
-            couponDayType: coupon.day_type
+            couponDayType: coupon.day_type,
+            resortId: resortId
         });
         
         // Check if coupon is valid for this day type
@@ -83,7 +89,11 @@ function applyCouponImpl() {
         updateTotalPrice();
     } else {
         console.log('❌ Coupon not found:', couponCode);
-        messageDiv.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
+        console.log('📝 Available coupons for this resort/date:', Object.keys(coupons));
+        
+        // Check if it's a resort-specific issue
+        const resortName = resorts.find(r => r.id == resortId)?.name || 'this resort';
+        messageDiv.innerHTML = `<span class="coupon-error">This coupon is not valid for ${resortName} on the selected date</span>`;
     }
 }
 
@@ -515,12 +525,15 @@ function calculateTotal() {
     document.getElementById('baseAmount').textContent = `₹${total.toLocaleString()}`;
     document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
     
-    // Reset coupon when dates change and reload applicable coupons
-    appliedCoupon = null;
-    discountAmount = 0;
-    document.getElementById('discountRow').style.display = 'none';
-    document.getElementById('couponCode').value = '';
-    document.getElementById('couponMessage').innerHTML = '';
+    // Reset coupon when dates or resort change and reload applicable coupons
+    if (appliedCoupon) {
+        appliedCoupon = null;
+        discountAmount = 0;
+        document.getElementById('discountRow').style.display = 'none';
+        document.getElementById('couponCode').value = '';
+        document.getElementById('couponMessage').innerHTML = '';
+        console.log('🗑️ Cleared coupon due to date/resort change');
+    }
     
     // Reload coupons based on check-in date and resort
     loadCoupons(checkIn, resortId);
