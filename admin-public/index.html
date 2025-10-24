@@ -137,7 +137,8 @@
                             <div class="form-group">
                                 <label for="couponResort">Select Resort:</label>
                                 <select id="couponResort">
-                                    <option value="current">Current Resort</option>
+                                    <option value="current">Current Resort Only</option>
+                                    <option value="all">All Resorts (Global)</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -324,6 +325,48 @@
 
         <section class="coupon-management">
             <h2>Coupon Management</h2>
+            
+            <div class="coupon-form">
+                <h3>Create New Coupon</h3>
+                <form id="standaloneCouponForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="standaloneCouponCode">Coupon Code:</label>
+                            <input type="text" id="standaloneCouponCode" placeholder="e.g., SILVER10" maxlength="20" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="standaloneCouponType">Discount Type:</label>
+                            <select id="standaloneCouponType" required>
+                                <option value="percentage">Percentage (%)</option>
+                                <option value="fixed">Fixed Amount (₹)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="standaloneCouponDiscount">Discount Value:</label>
+                            <input type="number" id="standaloneCouponDiscount" placeholder="1000" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="standaloneCouponDayType">Valid Days:</label>
+                            <select id="standaloneCouponDayType" required>
+                                <option value="all">All Days</option>
+                                <option value="weekday">Weekdays (Mon-Thu)</option>
+                                <option value="weekend">Weekends (Fri-Sun)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="standaloneCouponResort">Valid For Resort:</label>
+                        <select id="standaloneCouponResort" required>
+                            <option value="">All Resorts (Global)</option>
+                            <!-- Resort options will be loaded here -->
+                        </select>
+                    </div>
+                    <button type="submit">Create Coupon</button>
+                </form>
+            </div>
+            
             <div class="coupon-list">
                 <h3>Active Coupons</h3>
                 <div id="couponsGrid" class="coupons-grid">

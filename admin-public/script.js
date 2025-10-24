@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadCoupons();
     loadOwners();
     setupEventListeners();
+    setupStandaloneCouponForm();
     // Delay EventBridge setup to ensure page is fully loaded
     setTimeout(setupEventBridgeSync, 1000);
     
@@ -138,6 +139,7 @@ async function loadResorts() {
         resorts = await response.json();
         console.log('Loaded resorts:', resorts.length);
         displayResorts();
+        loadResortsForStandaloneCoupons();
     } catch (error) {
         console.error('Error loading resorts:', error);
         const grid = document.getElementById('resortsGrid');
@@ -440,20 +442,27 @@ function displayCoupons() {
         return;
     }
     
-    grid.innerHTML = coupons.map(coupon => `
-        <div class="coupon-item">
-            <h4>${coupon.code}</h4>
-            <div class="coupon-details">
-                <p><strong>Type:</strong> ${coupon.type}</p>
-                <p><strong>Discount:</strong> ${coupon.type === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount}</p>
-                <p><strong>Valid for:</strong> ${coupon.day_type === 'all' ? 'All days' : coupon.day_type}</p>
-                <p><strong>Created:</strong> ${new Date(coupon.created_at).toLocaleDateString()}</p>
+    grid.innerHTML = coupons.map(coupon => {
+        const resortName = coupon.resort_id ? 
+            (resorts.find(r => r.id === coupon.resort_id)?.name || `Resort ID ${coupon.resort_id}`) : 
+            'All Resorts';
+        
+        return `
+            <div class="coupon-item">
+                <h4>${coupon.code}</h4>
+                <div class="coupon-details">
+                    <p><strong>Type:</strong> ${coupon.type}</p>
+                    <p><strong>Discount:</strong> ${coupon.type === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount}</p>
+                    <p><strong>Valid for:</strong> ${coupon.day_type === 'all' ? 'All days' : coupon.day_type}</p>
+                    <p><strong>Resort:</strong> ${resortName}</p>
+                    <p><strong>Created:</strong> ${new Date(coupon.created_at).toLocaleDateString()}</p>
+                </div>
+                <div class="coupon-actions">
+                    <button class="delete" onclick="deleteCoupon('${coupon.code}')">Delete</button>
+                </div>
             </div>
-            <div class="coupon-actions">
-                <button class="delete" onclick="deleteCoupon('${coupon.code}')">Delete</button>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 async function deleteCoupon(code) {
@@ -473,6 +482,56 @@ async function deleteCoupon(code) {
     } catch (error) {
         console.error('Error:', error);
         alert('Network error. Please try again.');
+    }
+}
+
+function setupStandaloneCouponForm() {
+    const form = document.getElementById('standaloneCouponForm');
+    if (form) {
+        form.addEventListener('submit', handleStandaloneCouponSubmit);
+        loadResortsForStandaloneCoupons();
+    }
+}
+
+async function loadResortsForStandaloneCoupons() {
+    const select = document.getElementById('standaloneCouponResort');
+    if (select && resorts.length > 0) {
+        select.innerHTML = '<option value="">All Resorts (Global)</option>' + 
+            resorts.map(resort => `<option value="${resort.id}">${resort.name}</option>`).join('');
+    }
+}
+
+async function handleStandaloneCouponSubmit(e) {
+    e.preventDefault();
+    
+    const code = document.getElementById('standaloneCouponCode').value.trim().toUpperCase();
+    const type = document.getElementById('standaloneCouponType').value;
+    const discount = parseInt(document.getElementById('standaloneCouponDiscount').value);
+    const day_type = document.getElementById('standaloneCouponDayType').value;
+    const resort_id = document.getElementById('standaloneCouponResort').value || null;
+    
+    if (!code || !discount) {
+        alert('Please fill all required fields');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/coupons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, type, discount, day_type, resort_id })
+        });
+        
+        if (response.ok) {
+            alert('Coupon created successfully');
+            document.getElementById('standaloneCouponForm').reset();
+            loadCoupons();
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Failed to create coupon');
+        }
+    } catch (error) {
+        alert('Network error');
     }
 }
 

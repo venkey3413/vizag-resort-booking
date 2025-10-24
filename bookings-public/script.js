@@ -461,7 +461,22 @@ async function generateInvoice(id) {
 }
 function showCouponModal() {
     loadCoupons();
+    loadResortsForCoupons();
     document.getElementById('couponModal').style.display = 'block';
+}
+
+async function loadResortsForCoupons() {
+    try {
+        const response = await fetch('/api/resorts');
+        const resorts = await response.json();
+        const select = document.getElementById('couponResortId');
+        if (select) {
+            select.innerHTML = '<option value="">All Resorts (Global)</option>' + 
+                resorts.map(resort => `<option value="${resort.id}">${resort.name}</option>`).join('');
+        }
+    } catch (error) {
+        console.error('Error loading resorts for coupons:', error);
+    }
 }
 
 function closeCouponModal() {
@@ -472,13 +487,19 @@ async function loadCoupons() {
     try {
         const response = await fetch('/api/coupons');
         const coupons = await response.json();
+        const resortsResponse = await fetch('/api/resorts');
+        const resorts = await resortsResponse.json();
+        
         const list = document.getElementById('couponList');
         list.innerHTML = coupons.map(coupon => {
             const dayTypeText = coupon.day_type === 'weekday' ? 'Weekdays' : 
                                coupon.day_type === 'weekend' ? 'Weekends' : 'All Days';
+            const resortName = coupon.resort_id ? 
+                (resorts.find(r => r.id === coupon.resort_id)?.name || `Resort ID ${coupon.resort_id}`) : 
+                'All Resorts';
             return `
                 <div class="coupon-item">
-                    <span><strong>${coupon.code}</strong> - ${coupon.type === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount} (${dayTypeText})</span>
+                    <span><strong>${coupon.code}</strong> - ${coupon.type === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount} (${dayTypeText}) - ${resortName}</span>
                     <button onclick="deleteCoupon('${coupon.code}')">Delete</button>
                 </div>
             `;
@@ -493,6 +514,7 @@ async function createCoupon() {
     const type = document.getElementById('couponType').value;
     const discount = parseInt(document.getElementById('couponDiscount').value);
     const day_type = document.getElementById('couponDayType').value;
+    const resort_id = document.getElementById('couponResortId').value || null;
     
     if (!code || !discount) {
         alert('Please fill all fields');
@@ -503,7 +525,7 @@ async function createCoupon() {
         const response = await fetch('/api/coupons', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, type, discount, day_type })
+            body: JSON.stringify({ code, type, discount, day_type, resort_id })
         });
         
         if (response.ok) {
