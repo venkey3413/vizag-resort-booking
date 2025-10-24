@@ -85,12 +85,15 @@ function setupModalEvents(){
     // }
 }
 
-// Load resorts immediately with CSRF protection
-fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}}).then(r=>{
+// Load resorts immediately with CSRF protection - start fetch early
+const resortsPromise = fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}}).then(r=>{
     console.log('🏨 Resort API response status:', r.status);
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json();
-}).then(resorts=>{
+});
+
+// Function to render resorts when both data and DOM are ready
+function renderResorts(resorts) {
     console.log('🏨 Resorts loaded:', resorts.length, 'resorts');
     window.resorts=resorts;
     const grid=document.getElementById('resortsGrid');
@@ -126,13 +129,22 @@ fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type
         return `<div class="resort-card"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
     }).join('');
     console.log('✅ Resorts displayed successfully');
-}).catch(e=>{
-    console.error('❌ Resort loading failed:', e);
-    const grid=document.getElementById('resortsGrid');
-    if(grid){
-        grid.innerHTML='<p style="text-align:center;padding:2rem;color:#dc3545;">Failed to load resorts. Please refresh the page.</p>';
-    }
-})
+}
+
+// Handle both DOM ready and data ready with safety checks
+function handleResortsLoad(){
+    resortsPromise.then(renderResorts).catch(e=>{
+        console.error('❌ Resort loading failed:', e);
+        const grid=document.getElementById('resortsGrid');
+        if(grid)grid.innerHTML='<p style="text-align:center;padding:2rem;color:#dc3545;">Failed to load resorts. Please refresh the page.</p>';
+    });
+}
+
+if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',handleResortsLoad);
+}else{
+    handleResortsLoad();
+}
 
 // Cache clearing
 if(!sessionStorage.getItem('cache_cleared_v7')){sessionStorage.setItem('cache_cleared_v7','true');window.location.reload(true)}
