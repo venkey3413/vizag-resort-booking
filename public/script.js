@@ -129,9 +129,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-async function loadCoupons(checkIn = null) {
+async function loadCoupons(checkIn = null, resortId = null) {
     try {
-        const url = checkIn ? `${SERVER_URL}/api/coupons?checkIn=${checkIn}` : `${SERVER_URL}/api/coupons`;
+        let url = `${SERVER_URL}/api/coupons`;
+        const params = new URLSearchParams();
+        if (checkIn) params.append('checkIn', checkIn);
+        if (resortId) params.append('resortId', resortId);
+        if (params.toString()) url += '?' + params.toString();
+        
         console.log('🎫 Loading coupons from:', url);
         
         const response = await fetch(url);
@@ -517,8 +522,8 @@ function calculateTotal() {
     document.getElementById('couponCode').value = '';
     document.getElementById('couponMessage').innerHTML = '';
     
-    // Reload coupons based on check-in date
-    loadCoupons(checkIn);
+    // Reload coupons based on check-in date and resort
+    loadCoupons(checkIn, resortId);
 }
 
 let pendingBookingData = null;
