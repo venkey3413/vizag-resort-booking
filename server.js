@@ -2291,8 +2291,8 @@ app.post('/api/owner/login', async (req, res) => {
             searchParams = [email];
             console.log('🔍 Searching by phone:', email);
         } else {
-            // Email format, search by email
-            searchQuery = 'SELECT * FROM resort_owners WHERE email = ?';
+            // Email format, search by email (exclude dummy emails)
+            searchQuery = 'SELECT * FROM resort_owners WHERE email = ? AND email NOT LIKE "phone_%@dummy.local"';
             searchParams = [email];
             console.log('🔍 Searching by email:', email);
         }

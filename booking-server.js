@@ -132,8 +132,8 @@ async function initDB() {
         CREATE TABLE IF NOT EXISTS resort_owners (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            phone TEXT,
+            email TEXT UNIQUE,
+            phone TEXT UNIQUE,
             password TEXT NOT NULL,
             resort_ids TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -544,9 +544,12 @@ app.post('/api/resorts', async (req, res) => {
                     email = null;
                 }
                 
+                // Use a dummy email if phone-only to avoid constraint issues
+                const finalEmail = email || `phone_${phone.replace('+', '')}@dummy.local`;
+                
                 await db.run(
                     'INSERT INTO resort_owners (name, email, phone, password, resort_ids) VALUES (?, ?, ?, ?, ?)',
-                    [ownerName, email, phone, hashedPassword, resortId.toString()]
+                    [ownerName, finalEmail, phone, hashedPassword, resortId.toString()]
                 );
                 
                 // Send Telegram notification about new owner
@@ -671,9 +674,11 @@ app.put('/api/resorts/:id', async (req, res) => {
                     }
                 } else {
                     // Create new owner
+                    const finalEmail = email || `phone_${phone.replace('+', '')}@dummy.local`;
+                    
                     await db.run(
                         'INSERT INTO resort_owners (name, email, phone, password, resort_ids) VALUES (?, ?, ?, ?, ?)',
-                        [ownerName, email, phone, hashedPassword, resortId.toString()]
+                        [ownerName, finalEmail, phone, hashedPassword, resortId.toString()]
                     );
                 }
                 
@@ -1009,7 +1014,7 @@ app.get('/api/owners', async (req, res) => {
     try {
         const owners = await db.all(`
             SELECT ro.id, ro.name, 
-                   COALESCE(ro.email, '') as email, 
+                   CASE WHEN ro.email LIKE 'phone_%@dummy.local' THEN '' ELSE COALESCE(ro.email, '') END as email, 
                    COALESCE(ro.phone, '') as phone, 
                    ro.resort_ids, ro.created_at, 
                    COALESCE(GROUP_CONCAT(r.name), '') as resort_names
@@ -1018,7 +1023,13 @@ app.get('/api/owners', async (req, res) => {
             GROUP BY ro.id, ro.name, ro.email, ro.phone, ro.resort_ids, ro.created_at
             ORDER BY ro.created_at DESC
         `);
-        res.json(owners);
+        // Clean up the display for phone-only accounts
+        const cleanedOwners = owners.map(owner => ({
+            ...owner,
+            email: owner.email.includes('@dummy.local') ? '' : owner.email
+        }));
+        
+        res.json(cleanedOwners);
     } catch (error) {
         console.error('Owner fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch owners' });
