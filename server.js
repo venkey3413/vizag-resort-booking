@@ -2276,40 +2276,51 @@ app.post('/api/owner/login', async (req, res) => {
         console.log('🔍 Owner login attempt for:', email);
         
         // Check if input is phone or email and normalize phone
-        let searchEmail = email;
-        let searchPhone = null;
+        let searchQuery;
+        let searchParams;
         
         if (/^[0-9]{10}$/.test(email)) {
-            // 10 digit number, add +91
-            searchPhone = '+91' + email;
-            searchEmail = null;
+            // 10 digit number, add +91 and search by phone
+            const phoneWithPrefix = '+91' + email;
+            searchQuery = 'SELECT * FROM resort_owners WHERE phone = ?';
+            searchParams = [phoneWithPrefix];
+            console.log('🔍 Searching by phone:', phoneWithPrefix);
         } else if (/^\+91[0-9]{10}$/.test(email)) {
-            // Already has +91
-            searchPhone = email;
-            searchEmail = null;
+            // Already has +91, search by phone
+            searchQuery = 'SELECT * FROM resort_owners WHERE phone = ?';
+            searchParams = [email];
+            console.log('🔍 Searching by phone:', email);
+        } else {
+            // Email format, search by email
+            searchQuery = 'SELECT * FROM resort_owners WHERE email = ?';
+            searchParams = [email];
+            console.log('🔍 Searching by email:', email);
         }
         
-        const owner = await db.get(
-            'SELECT * FROM resort_owners WHERE email = ? OR phone = ?', 
-            [searchEmail, searchPhone]
-        );
+        const owner = await db.get(searchQuery, searchParams);
         if (!owner) {
             console.log('❌ Owner not found for:', email);
             return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
         
-        console.log('✅ Owner found:', { id: owner.id, name: owner.name, email: owner.email });
+        console.log('✅ Owner found:', { id: owner.id, name: owner.name, email: owner.email, phone: owner.phone });
         console.log('🔐 Comparing password with hash...');
+        console.log('🔐 Input password length:', password.length);
+        console.log('🔐 Stored password hash length:', owner.password ? owner.password.length : 'null');
+        console.log('🔐 Stored password starts with $2b:', owner.password ? owner.password.startsWith('$2b$') : false);
         
         let validPassword = false;
         try {
             // Try bcrypt comparison first
             validPassword = await bcrypt.compare(password, owner.password);
+            console.log('🔐 Bcrypt comparison result:', validPassword);
         } catch (error) {
+            console.log('🔐 Bcrypt comparison failed, trying plain text:', error.message);
             // If bcrypt fails, try plain text comparison (fallback)
             validPassword = password === owner.password;
+            console.log('🔐 Plain text comparison result:', validPassword);
         }
-        console.log('🔐 Password validation result:', validPassword);
+        console.log('🔐 Final password validation result:', validPassword);
         
         if (!validPassword) {
             console.log('❌ Invalid password for owner:', email);
@@ -2530,7 +2541,7 @@ app.delete('/api/owner/unblock-date/:id', verifyOwnerToken, async (req, res) => 
 // Debug endpoint to check owners in database
 app.get('/api/debug/owners', async (req, res) => {
     try {
-        const owners = await db.all('SELECT id, name, email, resort_ids, created_at FROM resort_owners ORDER BY created_at DESC');
+        const owners = await db.all('SELECT id, name, email, phone, resort_ids, created_at FROM resort_owners ORDER BY created_at DESC');
         res.json({ count: owners.length, owners });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch owners' });
