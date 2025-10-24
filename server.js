@@ -1055,6 +1055,7 @@ app.get('/api/coupons', async (req, res) => {
         let coupons;
         
         console.log('🎫 Coupon request:', { checkIn, resortId });
+        console.log('🎫 Query params - checkIn:', checkIn, 'resortId:', resortId, 'type:', typeof resortId);
         
         // Add resort_id column if it doesn't exist
         try {
@@ -1083,10 +1084,12 @@ app.get('/api/coupons', async (req, res) => {
             
             // Filter by day type and resort (resort-specific OR global coupons)
             if (resortId) {
+                console.log('🎫 Filtering coupons for resort:', resortId, 'dayType:', dayType);
                 coupons = await db.all(
                     'SELECT * FROM coupons WHERE (day_type = ? OR day_type = "all") AND (resort_id = ? OR resort_id IS NULL) ORDER BY created_at DESC',
-                    [dayType, resortId]
+                    [dayType, parseInt(resortId)]
                 );
+                console.log('🎫 Found coupons after filtering:', coupons.map(c => ({code: c.code, resort_id: c.resort_id, day_type: c.day_type})));
             } else {
                 coupons = await db.all(
                     'SELECT * FROM coupons WHERE (day_type = ? OR day_type = "all") AND resort_id IS NULL ORDER BY created_at DESC',
