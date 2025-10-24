@@ -304,10 +304,14 @@ window.bookNow=function(resortId,resortName){
                 fetch(url).then(r=>r.json()).then(coupons=>{
                     window.bookingModalCoupons = {};
                     window.allCoupons = coupons;
-                    coupons.forEach(c => {
-                        window.bookingModalCoupons[c.code] = {discount: c.discount, type: c.type, day_type: c.day_type};
+                    // Filter coupons for this specific resort
+                    const filteredCoupons = coupons.filter(c => 
+                        !c.resort_id || c.resort_id == resortId
+                    );
+                    filteredCoupons.forEach(c => {
+                        window.bookingModalCoupons[c.code] = {discount: c.discount, type: c.type, day_type: c.day_type, resort_id: c.resort_id};
                     });
-                    console.log('✅ Booking modal coupons loaded:', window.bookingModalCoupons);
+                    console.log('✅ Booking modal coupons loaded for resort', resortId, ':', window.bookingModalCoupons);
                 }).catch(e=>console.log('❌ Booking modal coupon load failed:', e));
             };
             
@@ -342,6 +346,8 @@ window.bookNow=function(resortId,resortName){
                         return;
                     }
                     
+
+                    
                     console.log('✅ Found coupon:', coupon);
                     
                     // Check day type
@@ -354,8 +360,17 @@ window.bookNow=function(resortId,resortName){
                         dayType = 'weekend';
                     }
                     
-                    if (coupon.day_type !== 'all' && coupon.day_type !== dayType) {
-                        const validDays = coupon.day_type === 'weekday' ? 'weekdays (Mon-Thu)' : 'weekends (Fri-Sun)';
+                    if (coupon.day_type && coupon.day_type !== 'all' && coupon.day_type !== dayType) {
+                        let validDays;
+                        if (coupon.day_type === 'weekday') {
+                            validDays = 'weekdays (Mon-Thu)';
+                        } else if (coupon.day_type === 'friday') {
+                            validDays = 'Friday';
+                        } else if (coupon.day_type === 'weekend') {
+                            validDays = 'weekends (Sat-Sun)';
+                        } else {
+                            validDays = coupon.day_type;
+                        }
                         msg.innerHTML = `<span style="color:#dc3545;">Valid only for ${validDays}</span>`;
                         return;
                     }
@@ -486,7 +501,10 @@ window.bookNow=function(resortId,resortName){
                     return;
                 }
                 
-                let validCoupons = window.allCoupons;
+                let validCoupons = window.allCoupons.filter(c => 
+                    !c.resort_id || c.resort_id == resortId
+                );
+                
                 if (checkIn) {
                     const checkInDate = new Date(checkIn);
                     const dayOfWeek = checkInDate.getDay();
@@ -497,7 +515,7 @@ window.bookNow=function(resortId,resortName){
                         dayType = 'weekend';
                     }
                     
-                    validCoupons = window.allCoupons.filter(c => 
+                    validCoupons = validCoupons.filter(c => 
                         c.day_type === 'all' || c.day_type === dayType
                     );
                 }
@@ -544,7 +562,8 @@ window.bookNow=function(resortId,resortName){
                 const dayType = isWeekend ? 'weekend' : 'weekday';
                 
                 const validCoupons = window.allCoupons.filter(c => 
-                    c.day_type === 'all' || c.day_type === dayType
+                    (!c.resort_id || c.resort_id == resortId) &&
+                    (c.day_type === 'all' || c.day_type === dayType)
                 );
                 
                 const couponInput = document.getElementById('couponCode');
@@ -573,7 +592,7 @@ window.bookNow=function(resortId,resortName){
                         `;
                     }).join('');
                 } else {
-                    couponInput.placeholder = 'Enter coupon code or click to see available coupons';
+                    couponInput.placeholder = 'No coupons available for this resort/date';
                     couponsDiv.style.display = 'none';
                 }
             }

@@ -1054,6 +1054,11 @@ app.get('/api/coupons', async (req, res) => {
         const { checkIn, resortId } = req.query;
         let coupons;
         
+        // Validate resortId if provided
+        if (resortId && (isNaN(parseInt(resortId)) || parseInt(resortId) <= 0)) {
+            return res.status(400).json({ error: 'Invalid resort ID' });
+        }
+        
         console.log('🎫 Coupon request:', { checkIn, resortId });
         console.log('🎫 Query params - checkIn:', checkIn, 'resortId:', resortId, 'type:', typeof resortId);
         

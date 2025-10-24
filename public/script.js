@@ -33,6 +33,13 @@ function applyCouponImpl() {
         const coupon = coupons[couponCode];
         console.log('✅ Found coupon:', coupon);
         
+        // Additional resort validation check
+        if (coupon.resort_id && coupon.resort_id != resortId) {
+            const resortName = resorts.find(r => r.id == resortId)?.name || 'this resort';
+            messageDiv.innerHTML = `<span class="coupon-error">This coupon is not valid for ${resortName}</span>`;
+            return;
+        }
+        
         // Validate coupon for selected date
         const checkInDate = new Date(checkIn);
         const dayOfWeek = checkInDate.getDay();
@@ -53,8 +60,17 @@ function applyCouponImpl() {
         });
         
         // Check if coupon is valid for this day type
-        if (coupon.day_type !== 'all' && coupon.day_type !== dayType) {
-            const validDays = coupon.day_type === 'weekday' ? 'weekdays (Mon-Thu)' : 'weekends (Fri-Sun)';
+        if (coupon.day_type && coupon.day_type !== 'all' && coupon.day_type !== dayType) {
+            let validDays;
+            if (coupon.day_type === 'weekday') {
+                validDays = 'weekdays (Mon-Thu)';
+            } else if (coupon.day_type === 'friday') {
+                validDays = 'Friday';
+            } else if (coupon.day_type === 'weekend') {
+                validDays = 'weekends (Sat-Sun)';
+            } else {
+                validDays = coupon.day_type;
+            }
             messageDiv.innerHTML = `<span class="coupon-error">This coupon is only valid for ${validDays}</span>`;
             return;
         }
