@@ -776,11 +776,15 @@ input, select {
         color: #ff6b6b;
     }
     
-    /* Hide complex elements on mobile for performance */
-    .description-container,
-    .resort-amenities,
+    /* Hide only map link on mobile for performance */
     .view-map-btn {
         display: none !important;
+    }
+    
+    /* Show description and amenities on mobile */
+    .description-container,
+    .resort-amenities {
+        display: block !important;
     }
     
     /* Optimize button rendering */

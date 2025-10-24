@@ -175,6 +175,10 @@ function createMobileResortCard(r, sanitize) {
             </div>
         `;
     } else {
+        const description = sanitize(r.description);
+        const shortDesc = description.length > 100 ? description.substring(0, 100) + '...' : description;
+        const needsExpansion = description.length > 100;
+        
         card.innerHTML = `
             <div class="resort-gallery">
                 <img data-src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image lazy-load" loading="lazy">
@@ -184,6 +188,12 @@ function createMobileResortCard(r, sanitize) {
                 <h3>${sanitize(r.name)}</h3>
                 <p class="resort-location">📍 ${sanitize(r.location)}</p>
                 <p class="resort-price">${pricingDisplay}</p>
+                <div class="description-container">
+                    <p class="description-short" id="desc-short-${safeId}">${shortDesc}</p>
+                    <p class="description-full" id="desc-full-${safeId}" style="display: none;">${description}</p>
+                    ${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}
+                </div>
+                ${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}
                 <button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button>
             </div>
         `;
