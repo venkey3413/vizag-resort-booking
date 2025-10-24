@@ -87,6 +87,7 @@ async function initDB() {
             amenities TEXT,
             note TEXT,
             max_guests INTEGER,
+            sort_order INTEGER DEFAULT 0,
             available INTEGER DEFAULT 1
         )
     `);
@@ -424,9 +425,13 @@ app.get('/api/coupons', async (req, res) => {
         if (checkIn) {
             const checkInDate = new Date(checkIn);
             const dayOfWeek = checkInDate.getDay();
-            // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
-            const dayType = isWeekend ? 'weekend' : 'weekday';
+            // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
+            let dayType = 'weekday';
+            if (dayOfWeek === 5) {
+                dayType = 'friday';
+            } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                dayType = 'weekend';
+            }
             
             coupons = await db.all(
                 'SELECT * FROM coupons WHERE day_type = ? OR day_type = "all" ORDER BY created_at DESC',
@@ -473,7 +478,7 @@ app.delete('/api/coupons/:code', async (req, res) => {
 // Resort management endpoints
 app.get('/api/resorts', async (req, res) => {
     try {
-        const resorts = await db.all('SELECT * FROM resorts ORDER BY id DESC');
+        const resorts = await db.all('SELECT * FROM resorts ORDER BY sort_order ASC, id ASC');
         
         // Add dynamic pricing to each resort
         for (let resort of resorts) {
@@ -492,12 +497,12 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const { name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword } = req.body;
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, sort_order, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword } = req.body;
         
         const result = await db.run(`
-            INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests]);
+            INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, sort_order || 0]);
         
         const resortId = result.lastID;
         
@@ -580,7 +585,7 @@ app.post('/api/resorts', async (req, res) => {
 
 app.put('/api/resorts/:id', async (req, res) => {
     try {
-        const { name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword, available } = req.body;
+        const { name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, sort_order, dynamic_pricing, createOwner, ownerName, ownerEmail, ownerPassword, available } = req.body;
         const resortId = req.params.id;
         
         // Handle availability toggle separately
@@ -589,9 +594,9 @@ app.put('/api/resorts/:id', async (req, res) => {
         } else {
             await db.run(`
                 UPDATE resorts SET name = ?, location = ?, price = ?, description = ?, 
-                image = ?, gallery = ?, videos = ?, map_link = ?, amenities = ?, note = ?, max_guests = ?
+                image = ?, gallery = ?, videos = ?, map_link = ?, amenities = ?, note = ?, max_guests = ?, sort_order = ?
                 WHERE id = ?
-            `, [name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, resortId]);
+            `, [name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, sort_order || 0, resortId]);
             
             // Update dynamic pricing only if not just toggling availability
             await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
@@ -925,6 +930,21 @@ app.delete('/api/travel-bookings/:id', async (req, res) => {
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Failed to remove travel booking' });
+    }
+});
+
+// Resort ordering endpoint
+app.post('/api/resorts/reorder', async (req, res) => {
+    try {
+        const { resortOrders } = req.body; // Array of {id, sort_order}
+        
+        for (const resort of resortOrders) {
+            await db.run('UPDATE resorts SET sort_order = ? WHERE id = ?', [resort.sort_order, resort.id]);
+        }
+        
+        res.json({ message: 'Resort order updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update resort order' });
     }
 });
 

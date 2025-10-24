@@ -72,10 +72,17 @@
                     <textarea id="note" rows="2" placeholder="Special instructions or notes for payment (e.g., 'Pay 50% advance', 'Full payment required')" maxlength="200"></textarea>
                     <small>This note will be displayed during payment if entered. Leave empty to hide.</small>
                 </div>
-                <div class="form-group">
-                    <label for="maxGuests">Maximum Guests (optional):</label>
-                    <input type="number" id="maxGuests" min="1" max="50" placeholder="e.g., 6">
-                    <small>If set, shows warning when guests exceed this limit. Leave empty for no limit.</small>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="maxGuests">Maximum Guests (optional):</label>
+                        <input type="number" id="maxGuests" min="1" max="50" placeholder="e.g., 6">
+                        <small>If set, shows warning when guests exceed this limit. Leave empty for no limit.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="sortOrder">Display Order:</label>
+                        <input type="number" id="sortOrder" min="0" placeholder="0" value="0">
+                        <small>Lower numbers appear first on main page. Use drag-drop below to reorder.</small>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Dynamic Pricing:</label>
@@ -85,7 +92,11 @@
                             <input type="number" id="weekdayPrice" placeholder="₹ per night">
                         </div>
                         <div class="pricing-row">
-                            <label>Weekend (Fri-Sun):</label>
+                            <label>Friday:</label>
+                            <input type="number" id="fridayPrice" placeholder="₹ per night">
+                        </div>
+                        <div class="pricing-row">
+                            <label>Weekend (Sat-Sun):</label>
                             <input type="number" id="weekendPrice" placeholder="₹ per night">
                         </div>
                         <div class="pricing-row">
@@ -166,6 +177,14 @@
 
         <section class="resorts-list">
             <h2>Manage Resorts</h2>
+            <div class="resort-ordering">
+                <h3>Resort Display Order</h3>
+                <p>Drag and drop to reorder how resorts appear on the main page:</p>
+                <div id="sortableResorts" class="sortable-resorts">
+                    <!-- Sortable resort list will be loaded here -->
+                </div>
+                <button id="saveOrderBtn" onclick="saveResortOrder()" class="save-order-btn" style="display:none;">💾 Save New Order</button>
+            </div>
             <div id="resortsGrid" class="resorts-grid">
                 <!-- Resorts will be loaded here -->
             </div>

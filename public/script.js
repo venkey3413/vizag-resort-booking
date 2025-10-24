@@ -30,9 +30,13 @@ function applyCouponImpl() {
         // Validate coupon for selected date
         const checkInDate = new Date(checkIn);
         const dayOfWeek = checkInDate.getDay();
-        // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
-        const dayType = isWeekend ? 'weekend' : 'weekday';
+        // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
+        let dayType = 'weekday';
+        if (dayOfWeek === 5) {
+            dayType = 'friday';
+        } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+            dayType = 'weekend';
+        }
         
         console.log('📅 Date validation:', {
             checkIn: checkIn,
@@ -154,8 +158,12 @@ async function loadCoupons(checkIn = null) {
         if (checkIn) {
             const checkInDate = new Date(checkIn);
             const dayOfWeek = checkInDate.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
-            const dayType = isWeekend ? 'weekend' : 'weekday';
+            let dayType = 'weekday';
+            if (dayOfWeek === 5) {
+                dayType = 'friday';
+            } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                dayType = 'weekend';
+            }
             console.log('📅 Coupon date filter:', {
                 checkIn: checkIn,
                 dayOfWeek: dayOfWeek,
@@ -460,8 +468,16 @@ function calculateTotal() {
     });
     
     if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-        // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
-        if (checkInDayOfWeek === 0 || checkInDayOfWeek === 5 || checkInDayOfWeek === 6) {
+        // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
+        if (checkInDayOfWeek === 5) {
+            // Friday
+            const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
+            if (fridayPrice) {
+                nightlyRate = fridayPrice.price;
+                console.log('✅ Applied Friday pricing:', fridayPrice.price);
+            }
+        } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+            // Weekend (Saturday=6, Sunday=0)
             const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
             if (weekendPrice) {
                 nightlyRate = weekendPrice.price;
@@ -619,8 +635,13 @@ async function handleBooking(e) {
         let nightlyRate = resort.price;
         
         if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-            // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
-            if (checkInDayOfWeek === 0 || checkInDayOfWeek === 5 || checkInDayOfWeek === 6) {
+            // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
+            if (checkInDayOfWeek === 5) {
+                // Friday
+                const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
+                if (fridayPrice) nightlyRate = fridayPrice.price;
+            } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+                // Weekend (Saturday=6, Sunday=0)
                 const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
                 if (weekendPrice) nightlyRate = weekendPrice.price;
             } else {

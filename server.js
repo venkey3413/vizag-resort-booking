@@ -128,6 +128,13 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add sort_order column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE resorts ADD COLUMN sort_order INTEGER DEFAULT 0');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Add payment_status column if it doesn't exist
     try {
         await db.run('ALTER TABLE bookings ADD COLUMN payment_status TEXT DEFAULT "pending"');
@@ -344,7 +351,7 @@ async function initDB() {
 // Routes
 app.get('/api/resorts', async (req, res) => {
     try {
-        const resorts = await db.all('SELECT id, name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, available FROM resorts WHERE available = 1');
+        const resorts = await db.all('SELECT id, name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, available, sort_order FROM resorts WHERE available = 1 ORDER BY sort_order ASC, id ASC');
         console.log('🏨 Fetching resorts:', resorts.length, 'found');
         
         // Add dynamic pricing to each resort
@@ -584,8 +591,13 @@ app.post('/api/bookings', async (req, res) => {
             );
             
             if (dynamicPricing.length > 0) {
-                // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
-                if (checkInDayOfWeek === 0 || checkInDayOfWeek === 5 || checkInDayOfWeek === 6) {
+                // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
+                if (checkInDayOfWeek === 5) {
+                    // Friday
+                    const fridayPrice = dynamicPricing.find(p => p.day_type === 'friday');
+                    if (fridayPrice) nightlyRate = fridayPrice.price;
+                } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+                    // Weekend (Saturday=6, Sunday=0)
                     const weekendPrice = dynamicPricing.find(p => p.day_type === 'weekend');
                     if (weekendPrice) nightlyRate = weekendPrice.price;
                 } else {
@@ -1050,9 +1062,13 @@ app.get('/api/coupons', async (req, res) => {
         if (checkIn) {
             const checkInDate = new Date(checkIn);
             const dayOfWeek = checkInDate.getDay();
-            // Mon-Thu = weekdays (1,2,3,4), Fri-Sun = weekends (5,6,0)
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
-            const dayType = isWeekend ? 'weekend' : 'weekday';
+            // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
+            let dayType = 'weekday';
+            if (dayOfWeek === 5) {
+                dayType = 'friday';
+            } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                dayType = 'weekend';
+            }
             
             console.log('📅 Date filtering:', {
                 checkIn: checkIn,

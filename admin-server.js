@@ -119,6 +119,20 @@ app.delete('/api/resorts/:id', async (req, res) => {
     }
 });
 
+app.post('/api/resorts/reorder', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3002/api/resorts/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to reorder resorts' });
+    }
+});
+
 // Food item management endpoints
 app.get('/api/food-items', async (req, res) => {
     try {

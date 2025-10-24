@@ -477,3 +477,146 @@ button[type="submit"]:hover {
 .owner-actions .delete:hover {
     background: #c82333;
 }
+
+/* Resort Ordering Styles */
+.resort-ordering {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.resort-ordering h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.resort-ordering p {
+    margin: 0 0 1rem 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.sortable-resorts {
+    min-height: 100px;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    background: white;
+}
+
+.sortable-resort-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    cursor: move;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sortable-resort-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.sortable-resort-item:last-child {
+    margin-bottom: 0;
+}
+
+.drag-handle {
+    font-size: 1.2rem;
+    color: #6c757d;
+    margin-right: 1rem;
+    cursor: grab;
+    user-select: none;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.resort-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.sortable-resort-item .resort-info {
+    flex: 1;
+}
+
+.sortable-resort-item .resort-info h4 {
+    margin: 0 0 0.25rem 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.sortable-resort-item .resort-info p {
+    margin: 0;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.sort-order {
+    background: #007bff;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 1rem;
+    flex-shrink: 0;
+}
+
+.save-order-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s;
+}
+
+.save-order-btn:hover {
+    background: #218838;
+}
+
+.sortable-resort-item[draggable="true"] {
+    opacity: 1;
+}
+
+.sortable-resort-item.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+@media (max-width: 768px) {
+    .sortable-resort-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .resort-thumb {
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .drag-handle {
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .sort-order {
+        margin: 0.5rem 0 0 0;
+    }
+}

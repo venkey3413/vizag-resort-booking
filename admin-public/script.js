@@ -165,6 +165,11 @@ function displayResorts() {
     
     if (!resorts || resorts.length === 0) {
         grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No resorts found. Add your first resort using the form above.</div>';
+        // Also clear sortable resorts
+        const sortableContainer = document.getElementById('sortableResorts');
+        if (sortableContainer) {
+            sortableContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No resorts to order.</div>';
+        }
         return;
     }
     
@@ -197,6 +202,9 @@ function displayResorts() {
             </div>
         `;
     }).join('');
+    
+    // Also populate the sortable resorts section
+    displaySortableResorts(resorts);
 }
 
 async function handleSubmit(e) {
@@ -210,10 +218,12 @@ async function handleSubmit(e) {
     // Collect dynamic pricing data
     const dynamicPricing = [];
     const weekdayPrice = document.getElementById('weekdayPrice').value;
+    const fridayPrice = document.getElementById('fridayPrice').value;
     const weekendPrice = document.getElementById('weekendPrice').value;
     const holidayPrice = document.getElementById('holidayPrice').value;
     
     if (weekdayPrice) dynamicPricing.push({ day_type: 'weekday', price: parseInt(weekdayPrice) });
+    if (fridayPrice) dynamicPricing.push({ day_type: 'friday', price: parseInt(fridayPrice) });
     if (weekendPrice) dynamicPricing.push({ day_type: 'weekend', price: parseInt(weekendPrice) });
     if (holidayPrice) dynamicPricing.push({ day_type: 'holiday', price: parseInt(holidayPrice) });
 
@@ -348,6 +358,7 @@ function editResort(id) {
     
     // Load dynamic pricing
     document.getElementById('weekdayPrice').value = '';
+    document.getElementById('fridayPrice').value = '';
     document.getElementById('weekendPrice').value = '';
     document.getElementById('holidayPrice').value = '';
     
@@ -355,6 +366,8 @@ function editResort(id) {
         resort.dynamic_pricing.forEach(pricing => {
             if (pricing.day_type === 'weekday') {
                 document.getElementById('weekdayPrice').value = pricing.price;
+            } else if (pricing.day_type === 'friday') {
+                document.getElementById('fridayPrice').value = pricing.price;
             } else if (pricing.day_type === 'weekend') {
                 document.getElementById('weekendPrice').value = pricing.price;
             } else if (pricing.day_type === 'holiday') {
@@ -372,6 +385,7 @@ function cancelEdit() {
     editingId = null;
     document.getElementById('resortForm').reset();
     document.getElementById('weekdayPrice').value = '';
+    document.getElementById('fridayPrice').value = '';
     document.getElementById('weekendPrice').value = '';
     document.getElementById('holidayPrice').value = '';
     document.getElementById('createOwnerAccount').checked = false;
@@ -813,5 +827,100 @@ async function deleteOwner(id) {
     } catch (error) {
         console.error('Error:', error);
         alert('Network error. Please try again.');
+    }
+}
+
+// Resort ordering functionality
+function displaySortableResorts(resorts) {
+    const container = document.getElementById('sortableResorts');
+    container.innerHTML = resorts.map(resort => `
+        <div class="sortable-resort-item" data-id="${resort.id}" draggable="true">
+            <div class="drag-handle">⋮⋮</div>
+            <img src="${resort.image}" alt="${resort.name}" class="resort-thumb">
+            <div class="resort-info">
+                <h4>${resort.name}</h4>
+                <p>${resort.location}</p>
+            </div>
+            <div class="sort-order">#${resort.sort_order || 0}</div>
+        </div>
+    `).join('');
+    
+    // Add drag and drop functionality
+    setupDragAndDrop();
+}
+
+function setupDragAndDrop() {
+    const container = document.getElementById('sortableResorts');
+    let draggedElement = null;
+    
+    container.addEventListener('dragstart', (e) => {
+        draggedElement = e.target.closest('.sortable-resort-item');
+        e.dataTransfer.effectAllowed = 'move';
+        draggedElement.style.opacity = '0.5';
+    });
+    
+    container.addEventListener('dragend', (e) => {
+        if (draggedElement) {
+            draggedElement.style.opacity = '1';
+            draggedElement = null;
+            document.getElementById('saveOrderBtn').style.display = 'block';
+        }
+    });
+    
+    container.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    });
+    
+    container.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const dropTarget = e.target.closest('.sortable-resort-item');
+        
+        if (dropTarget && draggedElement && dropTarget !== draggedElement) {
+            const rect = dropTarget.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            
+            if (e.clientY < midpoint) {
+                container.insertBefore(draggedElement, dropTarget);
+            } else {
+                container.insertBefore(draggedElement, dropTarget.nextSibling);
+            }
+            
+            updateSortOrderNumbers();
+        }
+    });
+}
+
+function updateSortOrderNumbers() {
+    const items = document.querySelectorAll('.sortable-resort-item');
+    items.forEach((item, index) => {
+        const orderElement = item.querySelector('.sort-order');
+        orderElement.textContent = `#${index}`;
+    });
+}
+
+async function saveResortOrder() {
+    const items = document.querySelectorAll('.sortable-resort-item');
+    const resortOrders = Array.from(items).map((item, index) => ({
+        id: parseInt(item.dataset.id),
+        sort_order: index
+    }));
+    
+    try {
+        const response = await fetch('/api/resorts/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resortOrders })
+        });
+        
+        if (response.ok) {
+            alert('Resort order saved successfully!');
+            document.getElementById('saveOrderBtn').style.display = 'none';
+            loadResorts(); // Reload to reflect changes
+        } else {
+            alert('Failed to save resort order');
+        }
+    } catch (error) {
+        alert('Error saving resort order');
     }
 }
