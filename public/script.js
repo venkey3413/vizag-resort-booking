@@ -793,7 +793,7 @@ function setupWebSocketSync() {
                 const data = JSON.parse(event.data);
                 console.log('📡 EventBridge event received:', data);
                 
-                if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted') {
+                if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
                     console.log('🏨 Resort update detected - refreshing resorts now!');
                     loadResorts();
                 }

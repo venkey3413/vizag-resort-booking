@@ -311,11 +311,19 @@ async function initDB() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
+            phone TEXT,
             password TEXT NOT NULL,
             resort_ids TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
+    
+    // Add phone column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE resort_owners ADD COLUMN phone TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
     
     // Create resort availability table
     await db.exec(`
@@ -2262,15 +2270,32 @@ app.post('/api/owner/login', async (req, res) => {
         const { email, password } = req.body;
         
         if (!email || !password) {
-            return res.status(400).json({ success: false, error: 'Email and password are required' });
+            return res.status(400).json({ success: false, error: 'Email or phone and password are required' });
         }
         
         console.log('🔍 Owner login attempt for:', email);
         
-        const owner = await db.get('SELECT * FROM resort_owners WHERE email = ?', [email]);
+        // Check if input is phone or email and normalize phone
+        let searchEmail = email;
+        let searchPhone = null;
+        
+        if (/^[0-9]{10}$/.test(email)) {
+            // 10 digit number, add +91
+            searchPhone = '+91' + email;
+            searchEmail = null;
+        } else if (/^\+91[0-9]{10}$/.test(email)) {
+            // Already has +91
+            searchPhone = email;
+            searchEmail = null;
+        }
+        
+        const owner = await db.get(
+            'SELECT * FROM resort_owners WHERE email = ? OR phone = ?', 
+            [searchEmail, searchPhone]
+        );
         if (!owner) {
-            console.log('❌ Owner not found for email:', email);
-            return res.status(401).json({ success: false, error: 'Invalid email or password' });
+            console.log('❌ Owner not found for:', email);
+            return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
         
         console.log('✅ Owner found:', { id: owner.id, name: owner.name, email: owner.email });

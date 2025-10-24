@@ -133,11 +133,19 @@ async function initDB() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
+            phone TEXT,
             password TEXT NOT NULL,
             resort_ids TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
+    
+    // Add phone column if it doesn't exist
+    try {
+        await db.run('ALTER TABLE resort_owners ADD COLUMN phone TEXT');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
     
     // Add sample dynamic pricing if none exists
     const pricingCount = await db.get('SELECT COUNT(*) as count FROM dynamic_pricing');
@@ -521,9 +529,24 @@ app.post('/api/resorts', async (req, res) => {
             try {
                 const bcrypt = require('bcrypt');
                 const hashedPassword = await bcrypt.hash(ownerPassword, 10);
+                
+                // Check if input is phone or email and normalize phone
+                let email = ownerEmail;
+                let phone = null;
+                
+                if (/^[0-9]{10}$/.test(ownerEmail)) {
+                    // 10 digit number, add +91
+                    phone = '+91' + ownerEmail;
+                    email = null;
+                } else if (/^\+91[0-9]{10}$/.test(ownerEmail)) {
+                    // Already has +91
+                    phone = ownerEmail;
+                    email = null;
+                }
+                
                 await db.run(
-                    'INSERT INTO resort_owners (name, email, password, resort_ids) VALUES (?, ?, ?, ?)',
-                    [ownerName, ownerEmail, hashedPassword, resortId.toString()]
+                    'INSERT INTO resort_owners (name, email, phone, password, resort_ids) VALUES (?, ?, ?, ?, ?)',
+                    [ownerName, email, phone, hashedPassword, resortId.toString()]
                 );
                 
                 // Send Telegram notification about new owner
@@ -616,10 +639,24 @@ app.put('/api/resorts/:id', async (req, res) => {
                 const bcrypt = require('bcrypt');
                 const hashedPassword = await bcrypt.hash(ownerPassword, 10);
                 
+                // Check if input is phone or email and normalize phone
+                let email = ownerEmail;
+                let phone = null;
+                
+                if (/^[0-9]{10}$/.test(ownerEmail)) {
+                    // 10 digit number, add +91
+                    phone = '+91' + ownerEmail;
+                    email = null;
+                } else if (/^\+91[0-9]{10}$/.test(ownerEmail)) {
+                    // Already has +91
+                    phone = ownerEmail;
+                    email = null;
+                }
+                
                 // Check if owner already exists for this resort
                 const existingOwner = await db.get(
-                    'SELECT id, resort_ids FROM resort_owners WHERE email = ?',
-                    [ownerEmail]
+                    'SELECT id, resort_ids FROM resort_owners WHERE email = ? OR phone = ?',
+                    [email, phone]
                 );
                 
                 if (existingOwner) {
@@ -635,8 +672,8 @@ app.put('/api/resorts/:id', async (req, res) => {
                 } else {
                     // Create new owner
                     await db.run(
-                        'INSERT INTO resort_owners (name, email, password, resort_ids) VALUES (?, ?, ?, ?)',
-                        [ownerName, ownerEmail, hashedPassword, resortId.toString()]
+                        'INSERT INTO resort_owners (name, email, phone, password, resort_ids) VALUES (?, ?, ?, ?, ?)',
+                        [ownerName, email, phone, hashedPassword, resortId.toString()]
                     );
                 }
                 
@@ -942,6 +979,25 @@ app.post('/api/resorts/reorder', async (req, res) => {
             await db.run('UPDATE resorts SET sort_order = ? WHERE id = ?', [resort.sort_order, resort.id]);
         }
         
+        // Publish to EventBridge and notify all servers
+        try {
+            await publishEvent('vizag.admin', 'resort.order.updated', { resortOrders });
+            
+            // Notify main server directly
+            const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
+            await fetch(mainServerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'resort.order.updated',
+                    source: 'vizag.admin',
+                    data: { resortOrders }
+                })
+            }).catch(err => console.log('Main server notification failed:', err.message));
+        } catch (eventError) {
+            console.error('EventBridge publish failed:', eventError);
+        }
+        
         res.json({ message: 'Resort order updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update resort order' });
@@ -952,7 +1008,7 @@ app.post('/api/resorts/reorder', async (req, res) => {
 app.get('/api/owners', async (req, res) => {
     try {
         const owners = await db.all(`
-            SELECT ro.*, GROUP_CONCAT(r.name) as resort_names
+            SELECT ro.id, ro.name, ro.email, ro.phone, ro.resort_ids, ro.created_at, GROUP_CONCAT(r.name) as resort_names
             FROM resort_owners ro
             LEFT JOIN resorts r ON INSTR(',' || ro.resort_ids || ',', ',' || r.id || ',') > 0
             GROUP BY ro.id

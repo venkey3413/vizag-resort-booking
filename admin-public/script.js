@@ -798,7 +798,7 @@ function displayOwners() {
             <div class="owner-item">
                 <h4>${owner.name}</h4>
                 <div class="owner-details">
-                    <p><strong>Email:</strong> ${owner.email}</p>
+                    <p><strong>Contact:</strong> ${owner.email || owner.phone || 'No contact info'}</p>
                     <p><strong>Resorts:</strong> ${resortNames}</p>
                     <p><strong>Created:</strong> ${new Date(owner.created_at).toLocaleDateString()}</p>
                 </div>
