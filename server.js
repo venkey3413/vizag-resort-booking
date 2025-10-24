@@ -1051,21 +1051,17 @@ app.get('/api/razorpay-key', (req, res) => {
 // Endpoint to get active coupons
 app.get('/api/coupons', async (req, res) => {
     try {
-        const { checkIn } = req.query;
+        const { checkIn, resortId } = req.query;
         let coupons;
         
-        console.log('🎫 Coupon request:', { checkIn });
+        console.log('🎫 Coupon request:', { checkIn, resortId });
         
-        // Create coupons table if it doesn't exist
-        await db.exec(`
-            CREATE TABLE IF NOT EXISTS coupons (
-                code TEXT PRIMARY KEY,
-                type TEXT NOT NULL,
-                discount INTEGER NOT NULL,
-                day_type TEXT DEFAULT 'all',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
+        // Add resort_id column if it doesn't exist
+        try {
+            await db.run('ALTER TABLE coupons ADD COLUMN resort_id INTEGER');
+        } catch (error) {
+            // Column already exists, ignore error
+        }
         
         if (checkIn) {
             const checkInDate = new Date(checkIn);
@@ -1081,16 +1077,32 @@ app.get('/api/coupons', async (req, res) => {
             console.log('📅 Date filtering:', {
                 checkIn: checkIn,
                 dayOfWeek: dayOfWeek,
-                isWeekend: isWeekend,
-                dayType: dayType
+                dayType: dayType,
+                resortId: resortId
             });
             
-            coupons = await db.all(
-                'SELECT * FROM coupons WHERE day_type = ? OR day_type = "all" ORDER BY created_at DESC',
-                [dayType]
-            );
+            // Filter by day type and resort (resort-specific OR global coupons)
+            if (resortId) {
+                coupons = await db.all(
+                    'SELECT * FROM coupons WHERE (day_type = ? OR day_type = "all") AND (resort_id = ? OR resort_id IS NULL) ORDER BY created_at DESC',
+                    [dayType, resortId]
+                );
+            } else {
+                coupons = await db.all(
+                    'SELECT * FROM coupons WHERE (day_type = ? OR day_type = "all") AND resort_id IS NULL ORDER BY created_at DESC',
+                    [dayType]
+                );
+            }
         } else {
-            coupons = await db.all('SELECT * FROM coupons ORDER BY created_at DESC');
+            // No date filter, just resort filter
+            if (resortId) {
+                coupons = await db.all(
+                    'SELECT * FROM coupons WHERE resort_id = ? OR resort_id IS NULL ORDER BY created_at DESC',
+                    [resortId]
+                );
+            } else {
+                coupons = await db.all('SELECT * FROM coupons WHERE resort_id IS NULL ORDER BY created_at DESC');
+            }
         }
         
         console.log('🎟️ Returning coupons:', coupons);
@@ -1104,10 +1116,10 @@ app.get('/api/coupons', async (req, res) => {
 // Create coupon endpoint
 app.post('/api/coupons', async (req, res) => {
     try {
-        const { code, type, discount, day_type } = req.body;
+        const { code, type, discount, day_type, resort_id } = req.body;
         
-        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', 
-            [code, type, discount, day_type || 'all']);
+        await db.run('INSERT INTO coupons (code, type, discount, day_type, resort_id) VALUES (?, ?, ?, ?, ?)', 
+            [code, type, discount, day_type || 'all', resort_id || null]);
         res.json({ message: 'Coupon created successfully' });
     } catch (error) {
         if (error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY') {

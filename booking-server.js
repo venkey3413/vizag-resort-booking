@@ -72,6 +72,13 @@ async function initDB() {
         // Column already exists, ignore error
     }
     
+    // Add resort_id column to coupons if it doesn't exist
+    try {
+        await db.run('ALTER TABLE coupons ADD COLUMN resort_id INTEGER');
+    } catch (error) {
+        // Column already exists, ignore error
+    }
+    
     // Create resorts table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS resorts (
@@ -99,6 +106,7 @@ async function initDB() {
             type TEXT NOT NULL,
             discount INTEGER NOT NULL,
             day_type TEXT DEFAULT 'all',
+            resort_id INTEGER,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
@@ -457,13 +465,14 @@ app.get('/api/coupons', async (req, res) => {
 
 app.post('/api/coupons', async (req, res) => {
     try {
-        const { code, type, discount, day_type } = req.body;
+        const { code, type, discount, day_type, resort_id } = req.body;
         
         if (!code || !type || !discount) {
             return res.status(400).json({ error: 'All fields required' });
         }
         
-        await db.run('INSERT INTO coupons (code, type, discount, day_type) VALUES (?, ?, ?, ?)', [code, type, discount, day_type || 'all']);
+        await db.run('INSERT INTO coupons (code, type, discount, day_type, resort_id) VALUES (?, ?, ?, ?, ?)', 
+            [code, type, discount, day_type || 'all', resort_id || null]);
         res.json({ message: 'Coupon created successfully' });
     } catch (error) {
         if (error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY') {
