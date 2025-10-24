@@ -85,14 +85,29 @@ function setupModalEvents(){
     // }
 }
 
+// Mobile performance detection
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+const isSlowDevice = navigator.hardwareConcurrency <= 2 || navigator.deviceMemory <= 2;
+
 // Load resorts immediately with CSRF protection - start fetch early
 const resortsPromise = fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}}).then(r=>{
     console.log('🏨 Resort API response status:', r.status);
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json();
+}).then(resorts => {
+    // Preload first 3 resort images for faster rendering
+    if(resorts && resorts.length > 0) {
+        resorts.slice(0, 3).forEach(resort => {
+            if(resort.image) {
+                const img = new Image();
+                img.src = resort.image;
+            }
+        });
+    }
+    return resorts;
 });
 
-// Function to render resorts when both data and DOM are ready
+// Mobile-optimized resort rendering with lazy loading
 function renderResorts(resorts) {
     console.log('🏨 Resorts loaded:', resorts.length, 'resorts');
     window.resorts=resorts;
@@ -105,30 +120,116 @@ function renderResorts(resorts) {
         grid.innerHTML='<p style="text-align:center;padding:2rem;color:#666;">No resorts available at the moment.</p>';
         return;
     }
-    grid.innerHTML=resorts.map(r=>{
-        let pricingDisplay=`₹${r.price.toLocaleString()}/night`;
-        if(r.dynamic_pricing&&r.dynamic_pricing.length>0){
-            pricingDisplay=`From ₹${r.price.toLocaleString()}/night`;
-            const weekdayPrice=r.dynamic_pricing.find(p=>p.day_type==='weekday');
-            const weekendPrice=r.dynamic_pricing.find(p=>p.day_type==='weekend');
-            if(weekdayPrice||weekendPrice){
-                pricingDisplay+='<br><small>';
-                if(weekdayPrice)pricingDisplay+=`Weekday: ₹${weekdayPrice.price.toLocaleString()}`;
-                if(weekdayPrice&&weekendPrice)pricingDisplay+=' | ';
-                if(weekendPrice)pricingDisplay+=`Weekend: ₹${weekendPrice.price.toLocaleString()}`;
-                pricingDisplay+='</small>';
-            }
-        }
-        const sanitize=s=>{if(!s)return '';const str=String(s);return str.replace(/[<>"'&\/]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;','/':'&#x2F;'}[m]||m));};
-        const safeId=parseInt(r.id)||0;
-        const safeName=sanitize(r.name).replace(/[^a-zA-Z0-9\s]/g,'');
-        const description = sanitize(r.description);
-        const shortDesc = description.length > 100 ? description.substring(0, 100) + '...' : description;
-        const needsExpansion = description.length > 100;
+    
+    const isMobile = window.innerWidth <= 768;
+    const sanitize=s=>{if(!s)return '';const str=String(s);return str.replace(/[<>"'&\/]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;','/':'&#x2F;'}[m]||m));};
+    
+    if(isMobile) {
+        // Mobile-optimized rendering with progressive loading
+        grid.innerHTML = '';
         
-        return `<div class="resort-card"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
-    }).join('');
+        // Load first 3 cards immediately for better perceived performance
+        const immediateLoad = resorts.slice(0, 3);
+        const deferredLoad = resorts.slice(3);
+        
+        immediateLoad.forEach(r => {
+            const card = createMobileResortCard(r, sanitize);
+            grid.appendChild(card);
+        });
+        
+        // Load remaining cards with staggered timing
+        deferredLoad.forEach((r, index) => {
+            setTimeout(() => {
+                const card = createMobileResortCard(r, sanitize);
+                grid.appendChild(card);
+            }, (index + 1) * (isSlowDevice ? 100 : 30));
+        });
+    } else {
+        // Desktop rendering (existing logic)
+        grid.innerHTML=resorts.map(r=>createDesktopResortHTML(r, sanitize)).join('');
+    }
     console.log('✅ Resorts displayed successfully');
+}
+
+// Mobile-optimized resort card creation
+function createMobileResortCard(r, sanitize) {
+    const safeId=parseInt(r.id)||0;
+    const safeName=sanitize(r.name).replace(/[^a-zA-Z0-9\s]/g,'');
+    
+    let pricingDisplay=`₹${r.price.toLocaleString()}/night`;
+    if(r.dynamic_pricing&&r.dynamic_pricing.length>0){
+        pricingDisplay=`From ₹${r.price.toLocaleString()}/night`;
+    }
+    
+    const card = document.createElement('div');
+    card.className = 'resort-card';
+    
+    // Use different rendering for slow devices
+    if(isSlowDevice) {
+        card.innerHTML = `
+            <div class="resort-info">
+                <h3>${sanitize(r.name)}</h3>
+                <p class="resort-location">📍 ${sanitize(r.location)}</p>
+                <p class="resort-price">${pricingDisplay}</p>
+                <button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button>
+            </div>
+        `;
+    } else {
+        card.innerHTML = `
+            <div class="resort-gallery">
+                <img data-src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image lazy-load" loading="lazy">
+                <button class="view-more-btn" onclick="openGallery(${safeId})">📸</button>
+            </div>
+            <div class="resort-info">
+                <h3>${sanitize(r.name)}</h3>
+                <p class="resort-location">📍 ${sanitize(r.location)}</p>
+                <p class="resort-price">${pricingDisplay}</p>
+                <button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button>
+            </div>
+        `;
+        
+        // Setup lazy loading only for devices with images
+        const img = card.querySelector('.lazy-load');
+        if(img) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy-load');
+                        observer.unobserve(img);
+                    }
+                });
+            }, { rootMargin: '100px' });
+            observer.observe(img);
+        }
+    }
+    
+    return card;
+}
+
+// Desktop resort HTML creation
+function createDesktopResortHTML(r, sanitize) {
+    let pricingDisplay=`₹${r.price.toLocaleString()}/night`;
+    if(r.dynamic_pricing&&r.dynamic_pricing.length>0){
+        pricingDisplay=`From ₹${r.price.toLocaleString()}/night`;
+        const weekdayPrice=r.dynamic_pricing.find(p=>p.day_type==='weekday');
+        const weekendPrice=r.dynamic_pricing.find(p=>p.day_type==='weekend');
+        if(weekdayPrice||weekendPrice){
+            pricingDisplay+='<br><small>';
+            if(weekdayPrice)pricingDisplay+=`Weekday: ₹${weekdayPrice.price.toLocaleString()}`;
+            if(weekdayPrice&&weekendPrice)pricingDisplay+=' | ';
+            if(weekendPrice)pricingDisplay+=`Weekend: ₹${weekendPrice.price.toLocaleString()}`;
+            pricingDisplay+='</small>';
+        }
+    }
+    const safeId=parseInt(r.id)||0;
+    const safeName=sanitize(r.name).replace(/[^a-zA-Z0-9\s]/g,'');
+    const description = sanitize(r.description);
+    const shortDesc = description.length > 100 ? description.substring(0, 100) + '...' : description;
+    const needsExpansion = description.length > 100;
+    
+    return `<div class="resort-card"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
 }
 
 // Handle both DOM ready and data ready with safety checks
