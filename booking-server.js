@@ -1008,14 +1008,19 @@ app.post('/api/resorts/reorder', async (req, res) => {
 app.get('/api/owners', async (req, res) => {
     try {
         const owners = await db.all(`
-            SELECT ro.id, ro.name, ro.email, ro.phone, ro.resort_ids, ro.created_at, GROUP_CONCAT(r.name) as resort_names
+            SELECT ro.id, ro.name, 
+                   COALESCE(ro.email, '') as email, 
+                   COALESCE(ro.phone, '') as phone, 
+                   ro.resort_ids, ro.created_at, 
+                   COALESCE(GROUP_CONCAT(r.name), '') as resort_names
             FROM resort_owners ro
-            LEFT JOIN resorts r ON INSTR(',' || ro.resort_ids || ',', ',' || r.id || ',') > 0
-            GROUP BY ro.id
+            LEFT JOIN resorts r ON (',' || ro.resort_ids || ',' LIKE '%,' || r.id || ',%')
+            GROUP BY ro.id, ro.name, ro.email, ro.phone, ro.resort_ids, ro.created_at
             ORDER BY ro.created_at DESC
         `);
         res.json(owners);
     } catch (error) {
+        console.error('Owner fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch owners' });
     }
 });
