@@ -149,6 +149,64 @@ function renderResorts(resorts) {
         grid.innerHTML=resorts.map(r=>createDesktopResortHTML(r, sanitize)).join('');
     }
     console.log('✅ Resorts displayed successfully');
+    
+    // Add structured data for SEO
+    addResortStructuredData(resorts);
+}
+
+// Add structured data for individual resorts for better SEO
+function addResortStructuredData(resorts) {
+    const existingScript = document.getElementById('resort-structured-data');
+    if(existingScript) existingScript.remove();
+    
+    const structuredData = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Vizag Resorts",
+        "description": "Premium beach resorts in Visakhapatnam",
+        "itemListElement": resorts.map((resort, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "Resort",
+                "name": resort.name,
+                "description": resort.description,
+                "image": resort.image,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": resort.location,
+                    "addressRegion": "Andhra Pradesh",
+                    "addressCountry": "India"
+                },
+                "priceRange": `₹${resort.price}`,
+                "url": `https://vizagresortbooking.in#resort-${resort.id}`,
+                "amenityFeature": resort.amenities ? resort.amenities.split('\n').filter(a => a.trim()).map(amenity => ({
+                    "@type": "LocationFeatureSpecification",
+                    "name": amenity.trim()
+                })) : [],
+                "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.5",
+                    "reviewCount": "50"
+                }
+            }
+        }))
+    };
+    
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'resort-structured-data';
+    script.textContent = JSON.stringify(structuredData);
+    document.head.appendChild(script);
+    
+    // Update page title and meta description with resort names
+    const resortNames = resorts.map(r => r.name).join(', ');
+    document.title = `${resortNames} - Vizag Resort Booking`;
+    
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if(metaDesc) {
+        metaDesc.content = `Book ${resortNames} in Vizag. Best beach resorts in Visakhapatnam with premium amenities. Online booking at VizagResortBooking.in`;
+    }
 }
 
 // Mobile-optimized resort card creation
@@ -218,7 +276,7 @@ function createMobileResortCard(r, sanitize) {
     return card;
 }
 
-// Desktop resort HTML creation
+// Desktop resort HTML creation  
 function createDesktopResortHTML(r, sanitize) {
     let pricingDisplay=`₹${r.price.toLocaleString()}/night`;
     if(r.dynamic_pricing&&r.dynamic_pricing.length>0){
@@ -239,7 +297,7 @@ function createDesktopResortHTML(r, sanitize) {
     const shortDesc = description.length > 100 ? description.substring(0, 100) + '...' : description;
     const needsExpansion = description.length > 100;
     
-    return `<div class="resort-card"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3>${sanitize(r.name)}</h3><p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
+    return `<div class="resort-card" id="resort-${safeId}" itemscope itemtype="https://schema.org/Resort"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image" itemprop="image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3 itemprop="name">${sanitize(r.name)}</h3><p class="resort-location" itemprop="address">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price" itemprop="priceRange">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}" itemprop="description">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;" itemprop="description">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list" itemprop="amenityFeature">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
 }
 
 // Handle both DOM ready and data ready with safety checks

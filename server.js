@@ -8,6 +8,7 @@ const eventBridgeListener = require('./eventbridge-listener');
 // UPI service removed - generate payment details inline
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
+const { generateSitemap } = require('./generate-sitemap');
 const AWS = require('aws-sdk');
 
 const path = require('path');
@@ -2943,6 +2944,13 @@ app.delete('/api/travel-bookings/:id', async (req, res) => {
 // Initialize and start server
 initDB().then(() => {
     console.log('✅ Database initialization completed successfully');
+    
+    // Generate initial sitemap
+    try {
+        generateSitemap();
+    } catch (error) {
+        console.error('❌ Failed to generate initial sitemap:', error);
+    }
     
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Resort Booking Server running on http://0.0.0.0:${PORT}`);
