@@ -776,9 +776,9 @@ input, select {
         color: #ff6b6b;
     }
     
-    /* Hide only map link on mobile for performance */
+    /* Show all elements on mobile */
     .view-map-btn {
-        display: none !important;
+        display: inline !important;
     }
     
     /* Show description and amenities on mobile */

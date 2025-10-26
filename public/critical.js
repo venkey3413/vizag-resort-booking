@@ -186,7 +186,7 @@ function createMobileResortCard(r, sanitize) {
             </div>
             <div class="resort-info">
                 <h3>${sanitize(r.name)}</h3>
-                <p class="resort-location">📍 ${sanitize(r.location)}</p>
+                <p class="resort-location">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p>
                 <p class="resort-price">${pricingDisplay}</p>
                 <div class="description-container">
                     <p class="description-short" id="desc-short-${safeId}">${shortDesc}</p>
