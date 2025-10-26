@@ -171,7 +171,12 @@ function addResortStructuredData(resorts) {
                 "@type": "Resort",
                 "name": resort.name,
                 "description": resort.description,
-                "image": resort.image,
+                "image": {
+                    "@type": "ImageObject",
+                    "url": resort.image,
+                    "description": `${resort.name} - Premium beach resort in ${resort.location}, Visakhapatnam`,
+                    "caption": `Luxury accommodation at ${resort.name} resort with ocean views and modern amenities`
+                },
                 "address": {
                     "@type": "PostalAddress",
                     "addressLocality": resort.location,
@@ -239,7 +244,7 @@ function createMobileResortCard(r, sanitize) {
         
         card.innerHTML = `
             <div class="resort-gallery">
-                <img data-src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image lazy-load" loading="lazy">
+                <img data-src="${sanitize(r.image)}" alt="${sanitize(r.name)} - Premium beach resort in ${sanitize(r.location)}, Vizag with luxury amenities and stunning ocean views" class="resort-image lazy-load" loading="lazy" title="Book ${sanitize(r.name)} resort in ${sanitize(r.location)} - Best prices guaranteed">
                 <button class="view-more-btn" onclick="openGallery(${safeId})">📸</button>
             </div>
             <div class="resort-info">
@@ -297,7 +302,7 @@ function createDesktopResortHTML(r, sanitize) {
     const shortDesc = description.length > 100 ? description.substring(0, 100) + '...' : description;
     const needsExpansion = description.length > 100;
     
-    return `<div class="resort-card" id="resort-${safeId}" itemscope itemtype="https://schema.org/Resort"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)}" class="resort-image main-image" itemprop="image"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3 itemprop="name">${sanitize(r.name)}</h3><p class="resort-location" itemprop="address">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price" itemprop="priceRange">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}" itemprop="description">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;" itemprop="description">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list" itemprop="amenityFeature">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
+    return `<div class="resort-card" id="resort-${safeId}" itemscope itemtype="https://schema.org/Resort"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)} - Luxury beach resort in ${sanitize(r.location)}, Visakhapatnam. Book premium accommodation with ocean views, modern amenities and best prices at VizagResortBooking.in" class="resort-image main-image" itemprop="image" title="${sanitize(r.name)} Resort - ${sanitize(r.location)} | Starting from ₹${r.price}/night"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3 itemprop="name">${sanitize(r.name)}</h3><p class="resort-location" itemprop="address">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price" itemprop="priceRange">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}" itemprop="description">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;" itemprop="description">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list" itemprop="amenityFeature">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
 }
 
 // Handle both DOM ready and data ready with safety checks
@@ -1281,8 +1286,8 @@ function openGallery(resortId){
                 <h2 style="margin-bottom:20px;color:#333;">${resort.name}</h2>
                 <div style="text-align:center;margin-bottom:20px;position:relative;">
                     ${galleryItems[currentIndex].type==='video'?
-                        `<video controls style="max-width:100%;max-height:400px;border-radius:8px;" src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}"></video>`:
-                        `<img src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;">`
+                        `<video controls style="max-width:100%;max-height:400px;border-radius:8px;" src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" title="${resort.name} resort video - ${resort.location}, Vizag"></video>`:
+                        `<img src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" alt="${resort.name} resort gallery image ${currentIndex+1} - Premium accommodation in ${resort.location}, Visakhapatnam with luxury amenities" title="${resort.name} Resort Gallery - ${resort.location} | Book at VizagResortBooking.in" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;">`
                     }
                     ${galleryItems.length>1?`
                         <button onclick="prevImage()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.7);color:white;border:none;padding:10px 15px;border-radius:50%;cursor:pointer;font-size:18px;">&lt;</button>
@@ -1295,7 +1300,7 @@ function openGallery(resortId){
                             if(item.type==='video'){
                                 return `<div onclick="setImage(${i})" style="width:80px;height:60px;background:#000;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;display:flex;align-items:center;justify-content:center;color:white;font-size:20px;">▶️</div>`;
                             }else{
-                                return `<img src="${item.src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" onclick="setImage(${i})" style="width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;">`;
+                                return `<img src="${item.src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" alt="${resort.name} gallery thumbnail ${i+1} - ${resort.location} resort" title="View ${resort.name} image ${i+1}" onclick="setImage(${i})" style="width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;opacity:${i===currentIndex?'1':'0.6'};border:2px solid ${i===currentIndex?'#28a745':'transparent'};transition:all 0.3s;">`;
                             }
                         }).join('')}
                     </div>

@@ -427,10 +427,30 @@ section {
 .lazy-load {
     opacity: 0;
     transition: opacity 0.3s;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
 }
 
 .lazy-load[src] {
     opacity: 1;
+    animation: none;
+    background: none;
+}
+
+/* Image optimization for SEO */
+.resort-image {
+    /* Ensure images are crawlable */
+    max-width: 100%;
+    height: auto;
+    /* Improve Core Web Vitals */
+    content-visibility: auto;
+    contain-intrinsic-size: 250px;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 .resort-info {
