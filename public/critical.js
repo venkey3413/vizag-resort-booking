@@ -204,13 +204,21 @@ function addResortStructuredData(resorts) {
     script.textContent = JSON.stringify(structuredData);
     document.head.appendChild(script);
     
-    // Update page title and meta description with resort names
-    const resortNames = resorts.map(r => r.name).join(', ');
-    document.title = `${resortNames} - Best Resorts in Vizag with Private Pool | Top Vizag Resorts`;
+    // Update page title and meta description with resort names for better SEO
+    const resortNames = resorts.slice(0, 3).map(r => r.name).join(', ');
+    const locationNames = [...new Set(resorts.map(r => r.location))].slice(0, 3).join(', ');
+    document.title = `Book Resorts in Vizag | ${resortNames} | Best Resorts in Visakhapatnam with Private Pool`;
     
     let metaDesc = document.querySelector('meta[name="description"]');
     if(metaDesc) {
-        metaDesc.content = `Book ${resortNames} - Best resorts in Vizag with private pool, swimming pool. Top vizag resorts near beach, nearby resorts for weekend getaway with luxury amenities`;
+        metaDesc.content = `Book resorts in Vizag with instant confirmation. ${resortNames} and more best resorts in ${locationNames}, Visakhapatnam with private pool, swimming pool. Top vizag resorts near RK Beach, Rushikonda, Yarada with luxury amenities and best prices.`;
+    }
+    
+    // Update meta keywords dynamically
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if(metaKeywords) {
+        const dynamicKeywords = resorts.map(r => `${r.name.toLowerCase()}, book ${r.name.toLowerCase()}, ${r.location.toLowerCase()} resorts`).slice(0, 5).join(', ');
+        metaKeywords.content += `, ${dynamicKeywords}`;
     }
 }
 

@@ -1,4 +1,26 @@
 User-agent: *
 Allow: /
 
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
 Sitemap: https://vizagresortbooking.in/sitemap.xml
+
+# Disallow admin areas
+Disallow: /owner-dashboard/
+Disallow: /booking-management/
+Disallow: /admin/
+
+# Allow important pages
+Allow: /food/
+Allow: /travel/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.webp
