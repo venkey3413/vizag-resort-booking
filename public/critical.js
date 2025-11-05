@@ -265,7 +265,11 @@ function createMobileResortCard(r, sanitize) {
                     ${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}
                 </div>
                 ${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}
-                <button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button>
+                <div class="resort-actions">
+                    <button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button>
+                    <button class="review-btn" onclick="openReviewModal(${safeId},'${safeName}')">Write a Review</button>
+                    <button class="view-reviews-btn" onclick="viewReviews(${safeId},'${safeName}')">View Reviews</button>
+                </div>
             </div>
         `;
         
@@ -310,7 +314,7 @@ function createDesktopResortHTML(r, sanitize) {
     const shortDesc = description.length > 100 ? description.substring(0, 100) + '...' : description;
     const needsExpansion = description.length > 100;
     
-    return `<div class="resort-card" id="resort-${safeId}" itemscope itemtype="https://schema.org/Resort"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)} - Best resorts in Vizag ${sanitize(r.location)} with private pool, swimming pool. Top vizag resorts near beach, nearby resorts for weekend getaway" class="resort-image main-image" itemprop="image" title="${sanitize(r.name)} - Best resort in Vizag with private pool | Nearby resorts ${sanitize(r.location)} | ₹${r.price}/night"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3 itemprop="name">${sanitize(r.name)}</h3><p class="resort-location" itemprop="address">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price" itemprop="priceRange">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}" itemprop="description">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;" itemprop="description">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list" itemprop="amenityFeature">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button></div></div>`;
+    return `<div class="resort-card" id="resort-${safeId}" itemscope itemtype="https://schema.org/Resort"><div class="resort-gallery"><img src="${sanitize(r.image)}" alt="${sanitize(r.name)} - Best resorts in Vizag ${sanitize(r.location)} with private pool, swimming pool. Top vizag resorts near beach, nearby resorts for weekend getaway" class="resort-image main-image" itemprop="image" title="${sanitize(r.name)} - Best resort in Vizag with private pool | Nearby resorts ${sanitize(r.location)} | ₹${r.price}/night"><button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button></div><div class="resort-info"><h3 itemprop="name">${sanitize(r.name)}</h3><p class="resort-location" itemprop="address">📍 ${sanitize(r.location)}${r.map_link?`<br><a href="${sanitize(r.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>`:''}</p><p class="resort-price" itemprop="priceRange">${pricingDisplay}</p><div class="description-container"><p class="description-short" id="desc-short-${safeId}" itemprop="description">${shortDesc}</p><p class="description-full" id="desc-full-${safeId}" style="display: none;" itemprop="description">${description}</p>${needsExpansion ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}</div>${r.amenities?`<div class="resort-amenities"><h4>🏨 Amenities:</h4><div class="amenities-list" itemprop="amenityFeature">${r.amenities.split('\n').filter(a=>a.trim()).map(amenity=>`<span class="amenity-tag">${sanitize(amenity.trim())}</span>`).join('')}</div></div>`:''}<div class="resort-actions"><button class="book-btn" onclick="bookNow(${safeId},'${safeName}')">Book Now</button><button class="review-btn" onclick="openReviewModal(${safeId},'${safeName}')">Write a Review</button><button class="view-reviews-btn" onclick="viewReviews(${safeId},'${safeName}')">View Reviews</button></div></div></div>`;
 }
 
 // Handle both DOM ready and data ready with safety checks
@@ -1409,6 +1413,197 @@ window.loadRazorpay=function(){
 
 // Load Razorpay immediately
 window.loadRazorpay();
+
+// Review system functions
+window.openReviewModal = function(resortId, resortName) {
+    const modal = document.createElement('div');
+    modal.id = 'reviewModal';
+    modal.className = 'modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="background:white;padding:30px;border-radius:10px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;position:relative;">
+            <span class="close" onclick="closeReviewModal()" style="position:absolute;top:15px;right:20px;font-size:28px;cursor:pointer;color:#999;">&times;</span>
+            <h2>Write a Review for ${resortName}</h2>
+            <form id="reviewForm" onsubmit="submitReview(event, ${resortId})">
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label for="reviewGuestName">Full Name:</label>
+                    <input type="text" id="reviewGuestName" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;margin-top:5px;">
+                </div>
+                
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label for="reviewPhone">Phone Number:</label>
+                    <input type="tel" id="reviewPhone" placeholder="Enter 10 digits number" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;margin-top:5px;">
+                </div>
+                
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label for="reviewBookingId">Booking ID:</label>
+                    <input type="text" id="reviewBookingId" placeholder="Enter your booking reference" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;margin-top:5px;">
+                    <small style="color:#666;font-size:0.9rem;">Enter your booking reference (e.g., VE123456789012)</small>
+                </div>
+                
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label>Rating:</label>
+                    <div class="star-rating" style="margin-top:5px;">
+                        <span class="star" data-rating="1" onclick="setRating(1)">⭐</span>
+                        <span class="star" data-rating="2" onclick="setRating(2)">⭐</span>
+                        <span class="star" data-rating="3" onclick="setRating(3)">⭐</span>
+                        <span class="star" data-rating="4" onclick="setRating(4)">⭐</span>
+                        <span class="star" data-rating="5" onclick="setRating(5)">⭐</span>
+                    </div>
+                    <input type="hidden" id="reviewRating" required>
+                </div>
+                
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label for="reviewText">Your Review:</label>
+                    <textarea id="reviewText" rows="4" required placeholder="Share your experience..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;margin-top:5px;resize:vertical;"></textarea>
+                </div>
+                
+                <button type="submit" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;font-size:16px;">Submit Review</button>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Setup phone input formatting
+    const phoneInput = document.getElementById('reviewPhone');
+    phoneInput.addEventListener('input', function() {
+        let val = this.value.replace(/\D/g, '');
+        if (val.length > 10) val = val.substring(0, 10);
+        this.value = val;
+    });
+};
+
+window.closeReviewModal = function() {
+    const modal = document.getElementById('reviewModal');
+    if (modal) modal.remove();
+};
+
+window.setRating = function(rating) {
+    document.getElementById('reviewRating').value = rating;
+    const stars = document.querySelectorAll('.star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.style.color = '#ffc107';
+            star.style.fontSize = '24px';
+        } else {
+            star.style.color = '#ddd';
+            star.style.fontSize = '20px';
+        }
+    });
+};
+
+window.submitReview = async function(event, resortId) {
+    event.preventDefault();
+    
+    const formData = {
+        bookingId: document.getElementById('reviewBookingId').value.trim(),
+        guestName: document.getElementById('reviewGuestName').value.trim(),
+        phone: document.getElementById('reviewPhone').value.trim(),
+        rating: parseInt(document.getElementById('reviewRating').value),
+        reviewText: document.getElementById('reviewText').value.trim()
+    };
+    
+    if (!formData.rating) {
+        showCriticalNotification('Please select a rating', 'error');
+        return;
+    }
+    
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Validating...';
+    
+    try {
+        // First validate booking
+        const validateResponse = await fetch('/api/validate-booking-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                bookingId: formData.bookingId,
+                phone: formData.phone
+            })
+        });
+        
+        const validateResult = await validateResponse.json();
+        
+        if (!validateResult.valid) {
+            showCriticalNotification(validateResult.error, 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Review';
+            return;
+        }
+        
+        submitBtn.textContent = 'Submitting...';
+        
+        // Submit review
+        const reviewResponse = await fetch('/api/reviews', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        
+        const reviewResult = await reviewResponse.json();
+        
+        if (reviewResult.success) {
+            showCriticalNotification('Review submitted successfully! Thank you for your feedback.', 'success');
+            closeReviewModal();
+        } else {
+            showCriticalNotification(reviewResult.error || 'Failed to submit review', 'error');
+        }
+    } catch (error) {
+        showCriticalNotification('Network error. Please try again.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Review';
+    }
+};
+
+window.viewReviews = async function(resortId, resortName) {
+    try {
+        const response = await fetch(`/api/reviews/${resortId}`);
+        const reviews = await response.json();
+        
+        const modal = document.createElement('div');
+        modal.id = 'viewReviewsModal';
+        modal.className = 'modal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+        
+        const reviewsHTML = reviews.length > 0 ? reviews.map(review => {
+            const stars = '⭐'.repeat(review.rating);
+            const date = new Date(review.created_at).toLocaleDateString('en-IN');
+            return `
+                <div style="border-bottom:1px solid #eee;padding:15px 0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <strong>${review.guest_name}</strong>
+                        <span style="color:#666;font-size:0.9rem;">${date}</span>
+                    </div>
+                    <div style="margin-bottom:8px;">${stars} (${review.rating}/5)</div>
+                    <p style="color:#555;line-height:1.4;">${review.review_text}</p>
+                </div>
+            `;
+        }).join('') : '<p style="text-align:center;color:#666;padding:20px;">No reviews yet. Be the first to review!</p>';
+        
+        modal.innerHTML = `
+            <div class="modal-content" style="background:white;padding:30px;border-radius:10px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;position:relative;">
+                <span class="close" onclick="closeViewReviewsModal()" style="position:absolute;top:15px;right:20px;font-size:28px;cursor:pointer;color:#999;">&times;</span>
+                <h2>Reviews for ${resortName}</h2>
+                <div style="margin-top:20px;">
+                    ${reviewsHTML}
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    } catch (error) {
+        showCriticalNotification('Failed to load reviews', 'error');
+    }
+};
+
+window.closeViewReviewsModal = function() {
+    const modal = document.getElementById('viewReviewsModal');
+    if (modal) modal.remove();
+};
 
 // Enhanced notification system
 function showCriticalNotification(message, type = 'success') {

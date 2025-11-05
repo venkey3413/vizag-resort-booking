@@ -319,6 +319,22 @@ async function initDB() {
         )
     `);
     
+    // Create reviews table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            booking_id TEXT NOT NULL,
+            resort_id INTEGER NOT NULL,
+            guest_name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+            review_text TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts(id),
+            FOREIGN KEY (booking_id) REFERENCES bookings(booking_reference)
+        )
+    `);
+    
     // Add phone column if it doesn't exist
     try {
         await db.run('ALTER TABLE resort_owners ADD COLUMN phone TEXT');
@@ -2938,6 +2954,180 @@ app.delete('/api/travel-bookings/:id', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to remove travel booking' });
+    }
+});
+
+// Review system endpoints
+
+// Validate booking for review
+app.post('/api/validate-booking-review', async (req, res) => {
+    try {
+        const { bookingId, phone } = req.body;
+        
+        if (!bookingId || !phone) {
+            return res.status(400).json({ error: 'Booking ID and phone number are required' });
+        }
+        
+        // Check if booking exists, is paid, and phone matches
+        const booking = await db.get(`
+            SELECT b.id, b.booking_reference, b.guest_name, b.email, b.phone, b.resort_id, b.check_out, r.name as resort_name
+            FROM bookings b 
+            JOIN resorts r ON b.resort_id = r.id 
+            WHERE (b.booking_reference = ? OR b.id = ?) AND b.payment_status = 'paid'
+        `, [bookingId, bookingId]);
+        
+        if (!booking) {
+            return res.status(404).json({ 
+                valid: false, 
+                error: 'Invalid booking ID or booking not confirmed' 
+            });
+        }
+        
+        // Normalize phone numbers for comparison
+        const normalizePhone = (phone) => {
+            return phone.replace(/[^0-9]/g, '').slice(-10);
+        };
+        
+        if (normalizePhone(booking.phone) !== normalizePhone(phone)) {
+            return res.status(400).json({ 
+                valid: false, 
+                error: 'Phone number does not match booking records' 
+            });
+        }
+        
+        // Check if checkout date has passed
+        const checkOutDate = new Date(booking.check_out);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (checkOutDate > today) {
+            return res.status(400).json({ 
+                valid: false, 
+                error: 'Reviews can only be submitted after checkout date' 
+            });
+        }
+        
+        // Check if review already exists
+        const existingReview = await db.get(
+            'SELECT id FROM reviews WHERE booking_id = ?',
+            [booking.booking_reference || booking.id]
+        );
+        
+        if (existingReview) {
+            return res.status(400).json({ 
+                valid: false, 
+                error: 'Review already submitted for this booking' 
+            });
+        }
+        
+        res.json({ 
+            valid: true, 
+            booking: {
+                id: booking.id,
+                reference: booking.booking_reference,
+                guestName: booking.guest_name,
+                email: booking.email,
+                phone: booking.phone,
+                resortId: booking.resort_id,
+                resortName: booking.resort_name
+            }
+        });
+    } catch (error) {
+        console.error('Booking validation error:', error);
+        res.status(500).json({ error: 'Failed to validate booking' });
+    }
+});
+
+// Submit review
+app.post('/api/reviews', async (req, res) => {
+    try {
+        const { bookingId, guestName, phone, rating, reviewText } = req.body;
+        
+        if (!bookingId || !guestName || !phone || !rating || !reviewText) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+        
+        if (rating < 1 || rating > 5) {
+            return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+        }
+        
+        // Validate booking again
+        const booking = await db.get(`
+            SELECT b.id, b.booking_reference, b.guest_name, b.phone, b.resort_id, b.check_out
+            FROM bookings b 
+            WHERE (b.booking_reference = ? OR b.id = ?) AND b.payment_status = 'paid'
+        `, [bookingId, bookingId]);
+        
+        if (!booking) {
+            return res.status(404).json({ error: 'Invalid booking ID' });
+        }
+        
+        // Normalize phone numbers for comparison
+        const normalizePhone = (phone) => {
+            return phone.replace(/[^0-9]/g, '').slice(-10);
+        };
+        
+        if (normalizePhone(booking.phone) !== normalizePhone(phone)) {
+            return res.status(400).json({ error: 'Phone number does not match' });
+        }
+        
+        // Check if review already exists
+        const existingReview = await db.get(
+            'SELECT id FROM reviews WHERE booking_id = ?',
+            [booking.booking_reference || booking.id]
+        );
+        
+        if (existingReview) {
+            return res.status(400).json({ error: 'Review already submitted' });
+        }
+        
+        // Insert review
+        await db.run(`
+            INSERT INTO reviews (booking_id, resort_id, guest_name, phone, rating, review_text)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [booking.booking_reference || booking.id, booking.resort_id, guestName, phone, rating, reviewText]);
+        
+        // Send Telegram notification
+        try {
+            const resort = await db.get('SELECT name FROM resorts WHERE id = ?', [booking.resort_id]);
+            const stars = '⭐'.repeat(rating);
+            const message = `⭐ NEW REVIEW SUBMITTED!
+
+🏨 Resort: ${resort.name}
+👤 Guest: ${guestName}
+📋 Booking: ${booking.booking_reference || booking.id}
+${stars} Rating: ${rating}/5
+💬 Review: ${reviewText}
+⏰ Submitted: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        res.json({ success: true, message: 'Review submitted successfully' });
+    } catch (error) {
+        console.error('Review submission error:', error);
+        res.status(500).json({ error: 'Failed to submit review' });
+    }
+});
+
+// Get reviews for a resort
+app.get('/api/reviews/:resortId', async (req, res) => {
+    try {
+        const { resortId } = req.params;
+        
+        const reviews = await db.all(`
+            SELECT id, guest_name, rating, review_text, created_at
+            FROM reviews 
+            WHERE resort_id = ? 
+            ORDER BY created_at DESC
+        `, [resortId]);
+        
+        res.json(reviews);
+    } catch (error) {
+        console.error('Reviews fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch reviews' });
     }
 });
 

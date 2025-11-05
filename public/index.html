@@ -98,6 +98,12 @@
     .loading-spinner{width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #667eea;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     .social-media a:hover{transform:scale(1.2)!important}
+    .resort-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .review-btn,.view-reviews-btn{background:#6c757d;color:white;padding:8px 12px;border:none;border-radius:4px;cursor:pointer;font-size:0.85rem;flex:1;min-width:100px}
+    .review-btn:hover{background:#5a6268}
+    .view-reviews-btn{background:#17a2b8}
+    .view-reviews-btn:hover{background:#138496}
+    @media (max-width:768px){.resort-actions{flex-direction:column}.review-btn,.view-reviews-btn{flex:none;width:100%}}
     </style>
 
     <style>
