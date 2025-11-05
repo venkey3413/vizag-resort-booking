@@ -253,7 +253,7 @@ function createMobileResortCard(r, sanitize) {
         card.innerHTML = `
             <div class="resort-gallery">
                 <img data-src="${sanitize(r.image)}" alt="${sanitize(r.name)} - Best resorts in Vizag near ${sanitize(r.location)} with private pool, luxury amenities. Top vizag resorts for family vacation and corporate stays" class="resort-image lazy-load" loading="lazy" title="${sanitize(r.name)} - Best resort in Vizag with private pool | Nearby resorts ${sanitize(r.location)} | Book now">
-                <button class="view-more-btn" onclick="openGallery(${safeId})">📸</button>
+                <button class="view-more-btn" onclick="openGallery(${safeId})">📸 View More</button>
             </div>
             <div class="resort-info">
                 <h3>${sanitize(r.name)}</h3>
