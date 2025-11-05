@@ -103,7 +103,7 @@
     .review-btn:hover{background:#5a6268}
     .view-reviews-btn{background:#17a2b8}
     .view-reviews-btn:hover{background:#138496}
-    @media (max-width:768px){.resort-actions{flex-direction:column;gap:8px}.resort-actions .book-btn{width:100%;order:1}.resort-actions .review-btn,.resort-actions .view-reviews-btn{flex:1;order:2;width:auto}}
+    @media (max-width:768px){.resort-actions{display:flex;flex-wrap:wrap;gap:8px}.resort-actions .book-btn{width:100%;order:1;flex-basis:100%}.resort-actions .review-btn{order:2;flex:1;min-width:calc(50% - 4px)}.resort-actions .view-reviews-btn{order:2;flex:1;min-width:calc(50% - 4px)}}
     </style>
 
     <style>

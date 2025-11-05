@@ -2093,6 +2093,69 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
 }
 
+/* Review Button Styles */
+.resort-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.review-btn, .view-reviews-btn {
+    background: #6c757d;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 100px;
+}
+
+.review-btn:hover {
+    background: #5a6268;
+}
+
+.view-reviews-btn {
+    background: #17a2b8;
+}
+
+.view-reviews-btn:hover {
+    background: #138496;
+}
+
+/* Mobile Review Button Layout */
+@media (max-width: 768px) {
+    .resort-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        width: 100%;
+    }
+    
+    .resort-actions .book-btn {
+        width: 100%;
+        order: 1;
+        flex-basis: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .resort-actions .review-btn {
+        order: 2;
+        flex: 1;
+        min-width: calc(50% - 4px);
+        width: auto;
+    }
+    
+    .resort-actions .view-reviews-btn {
+        order: 2;
+        flex: 1;
+        min-width: calc(50% - 4px);
+        width: auto;
+    }
+}
+
 /* OTP Verification Styles */
 .otp-btn {
     background: #28a745;
