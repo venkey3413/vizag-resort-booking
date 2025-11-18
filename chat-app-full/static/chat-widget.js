@@ -1,6 +1,6 @@
 (function() {
-  const API_BASE = "https://vizagresortbooking.in/api/chat";
-  const STATIC_BASE = "https://vizagresortbooking.in/static";
+  const API_BASE = "/api/chat";
+  const STATIC_BASE = "/static";
   const sessionId = "sess-" + Math.random().toString(36).slice(2);
 
   const style = document.createElement("style");
