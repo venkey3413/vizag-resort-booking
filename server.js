@@ -90,6 +90,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.use(express.static('public'));
+app.use('/static', express.static('chat-app-full/static'));
 
 
 // Database
