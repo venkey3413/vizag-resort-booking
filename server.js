@@ -3131,6 +3131,30 @@ app.get('/api/reviews/:resortId', async (req, res) => {
     }
 });
 
+// AI Chat service integration
+const AIChatService = require('./ai-chat-service');
+const aiChatService = new AIChatService();
+
+// AI Chat endpoint
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { message, session_id } = req.body;
+        const response = await aiChatService.queryAI(message, session_id || 'default');
+        res.json(response);
+    } catch (error) {
+        res.status(500).json({ error: 'AI Chat service error' });
+    }
+});
+
+// Serve chat widget
+app.use('/chat', express.static('chat-public'));
+
+// Cleanup on exit
+process.on('SIGINT', () => {
+    aiChatService.cleanup();
+    process.exit();
+});
+
 // Initialize and start server
 initDB().then(() => {
     console.log('✅ Database initialization completed successfully');
@@ -3146,6 +3170,8 @@ initDB().then(() => {
         console.log(`🚀 Resort Booking Server running on http://0.0.0.0:${PORT}`);
         console.log(`🍽️ My Food Service available at http://0.0.0.0:${PORT}/food`);
         console.log(`👤 Owner Dashboard available at http://0.0.0.0:${PORT}/owner-dashboard`);
+        console.log(`🤖 AI Chat Widget available at http://0.0.0.0:${PORT}/chat`);
+        console.log(`🤖 AI Service starting on port 8001...`);
         console.log('🔧 Debug mode enabled - check console for detailed logs');
     });
 }).catch(error => {
