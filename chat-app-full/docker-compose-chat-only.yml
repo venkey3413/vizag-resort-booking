@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  ai-chat:
+    build:
+      context: .
+      dockerfile: Dockerfile-minimal
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=sqlite:///./resort_booking.db
+      - RAG_DB_DIR=/app/chroma_store
+    volumes:
+      - ../resort_booking.db:/app/resort_booking.db:ro
+      - chat-data:/app/chroma_store
+    restart: unless-stopped
+
+volumes:
+  chat-data:
