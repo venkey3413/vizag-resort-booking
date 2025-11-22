@@ -17,21 +17,31 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(setupEventBridgeSync, 1000);
     
     // Toggle owner credentials visibility
-    document.getElementById('createOwnerAccount').addEventListener('change', function() {
-        const ownerCredentials = document.getElementById('ownerCredentials');
-        ownerCredentials.style.display = this.checked ? 'block' : 'none';
-    });
+    const createOwnerElement = document.getElementById('createOwnerAccount');
+    if (createOwnerElement) {
+        createOwnerElement.addEventListener('change', function() {
+            const ownerCredentials = document.getElementById('ownerCredentials');
+            if (ownerCredentials) {
+                ownerCredentials.style.display = this.checked ? 'block' : 'none';
+            }
+        });
+    }
     
     // Toggle coupon credentials visibility
-    document.getElementById('createCoupon').addEventListener('change', function() {
-        const couponCredentials = document.getElementById('couponCredentials');
-        if (this.checked) {
-            populateCouponResortDropdown();
-            couponCredentials.style.display = 'block';
-        } else {
-            couponCredentials.style.display = 'none';
-        }
-    });
+    const createCouponElement = document.getElementById('createCoupon');
+    if (createCouponElement) {
+        createCouponElement.addEventListener('change', function() {
+            const couponCredentials = document.getElementById('couponCredentials');
+            if (couponCredentials) {
+                if (this.checked) {
+                    populateCouponResortDropdown();
+                    couponCredentials.style.display = 'block';
+                } else {
+                    couponCredentials.style.display = 'none';
+                }
+            }
+        });
+    }
 });
 
 function setupEventBridgeSync() {
@@ -245,10 +255,15 @@ async function handleSubmit(e) {
     };
     
     // Add owner credentials if checkbox is checked
-    if (document.getElementById('createOwnerAccount').checked) {
-        const ownerName = document.getElementById('ownerName').value;
-        const ownerEmail = document.getElementById('ownerEmail').value;
-        const ownerPassword = document.getElementById('ownerPassword').value;
+    const createOwnerAccountEl = document.getElementById('createOwnerAccount');
+    if (createOwnerAccountEl && createOwnerAccountEl.checked) {
+        const ownerNameEl = document.getElementById('ownerName');
+        const ownerEmailEl = document.getElementById('ownerEmail');
+        const ownerPasswordEl = document.getElementById('ownerPassword');
+        
+        const ownerName = ownerNameEl ? ownerNameEl.value : '';
+        const ownerEmail = ownerEmailEl ? ownerEmailEl.value : '';
+        const ownerPassword = ownerPasswordEl ? ownerPasswordEl.value : '';
         
         if (!ownerName || !ownerEmail || !ownerPassword) {
             alert('Please fill all owner credential fields');
@@ -290,12 +305,19 @@ async function handleSubmit(e) {
             let successMessage = editingId ? 'Resort updated successfully' : 'Resort added successfully';
             
             // Create coupon if checkbox is checked
-            if (document.getElementById('createCoupon').checked) {
-                const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
-                const couponType = document.getElementById('couponType').value;
-                const couponDiscount = parseInt(document.getElementById('couponDiscount').value);
-                const couponDayType = document.getElementById('couponDayType').value;
-                const selectedResort = document.getElementById('couponResort').value;
+            const createCouponEl = document.getElementById('createCoupon');
+            if (createCouponEl && createCouponEl.checked) {
+                const couponCodeEl = document.getElementById('couponCode');
+                const couponTypeEl = document.getElementById('couponType');
+                const couponDiscountEl = document.getElementById('couponDiscount');
+                const couponDayTypeEl = document.getElementById('couponDayType');
+                const selectedResortEl = document.getElementById('couponResort');
+                
+                const couponCode = couponCodeEl ? couponCodeEl.value.trim().toUpperCase() : '';
+                const couponType = couponTypeEl ? couponTypeEl.value : '';
+                const couponDiscount = couponDiscountEl ? parseInt(couponDiscountEl.value) : 0;
+                const couponDayType = couponDayTypeEl ? couponDayTypeEl.value : '';
+                const selectedResort = selectedResortEl ? selectedResortEl.value : '';
                 
                 if (couponCode && couponDiscount) {
                     try {
