@@ -1000,13 +1000,7 @@ app.get('/api/events', (req, res) => {
     console.log('📡 Main website connected to EventBridge');
 });
 
-// EventBridge notification endpoint
-app.post('/api/eventbridge-notify', (req, res) => {
-    const { type, source, data } = req.body;
-    console.log(`📡 Received EventBridge notification: ${type}`);
-    eventBridgeListener.handleEvent(type, source, data);
-    res.json({ success: true });
-});
+
 
 
 

@@ -42,12 +42,20 @@ app.get('/api/events', (req, res) => {
     eventBridgeListener.subscribe(clientId, res, 'booking');
 });
 
-// EventBridge notification endpoint
-app.post('/api/eventbridge-notify', (req, res) => {
-    const { type, source, data } = req.body;
-    console.log(`📡 Booking server received EventBridge notification: ${type}`);
-    eventBridgeListener.handleEvent(type, source, data);
-    res.json({ success: true });
+
+
+// EventBridge webhook endpoint for AWS EventBridge
+app.post('/webhook/eventbridge', (req, res) => {
+    console.log('📡 Booking server received EventBridge webhook:', req.body);
+    const event = req.body;
+    
+    // Handle different event types
+    if (event.source && event['detail-type']) {
+        console.log(`📡 Processing ${event['detail-type']} from ${event.source}`);
+        eventBridgeListener.handleEvent(event['detail-type'], event.source, event.detail);
+    }
+    
+    res.status(200).json({ success: true, message: 'Event received' });
 });
 
 let db;
