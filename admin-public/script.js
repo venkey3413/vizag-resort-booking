@@ -118,24 +118,27 @@ function setupEventBridgeSync() {
 }
 
 function setupEventListeners() {
-    try {
-        const form = document.getElementById('resortForm');
-        if (form) {
-            form.addEventListener('submit', handleSubmit);
-        }
-        
-        const foodForm = document.getElementById('foodForm');
-        if (foodForm) {
-            foodForm.addEventListener('submit', handleFoodSubmit);
-        }
-        
-        const travelForm = document.getElementById('travelForm');
-        if (travelForm) {
-            travelForm.addEventListener('submit', handleTravelSubmit);
-        }
-    } catch (error) {
-        console.error('setupEventListeners error:', error);
+    console.log('🔧 Setting up event listeners...');
+    
+    const form = document.getElementById('resortForm');
+    console.log('resortForm:', form);
+    if (form) {
+        form.addEventListener('submit', handleSubmit);
     }
+    
+    const foodForm = document.getElementById('foodForm');
+    console.log('foodForm:', foodForm);
+    if (foodForm) {
+        foodForm.addEventListener('submit', handleFoodSubmit);
+    }
+    
+    const travelForm = document.getElementById('travelForm');
+    console.log('travelForm:', travelForm);
+    if (travelForm) {
+        travelForm.addEventListener('submit', handleTravelSubmit);
+    }
+    
+    console.log('✅ Event listeners setup complete');
 }
 
 async function loadResorts() {
