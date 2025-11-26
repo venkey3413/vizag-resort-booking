@@ -118,19 +118,23 @@ function setupEventBridgeSync() {
 }
 
 function setupEventListeners() {
-    const form = document.getElementById('resortForm');
-    if (form) {
-        form.addEventListener('submit', handleSubmit);
-    }
-    
-    const foodForm = document.getElementById('foodForm');
-    if (foodForm) {
-        foodForm.addEventListener('submit', handleFoodSubmit);
-    }
-    
-    const travelForm = document.getElementById('travelForm');
-    if (travelForm) {
-        travelForm.addEventListener('submit', handleTravelSubmit);
+    try {
+        const form = document.getElementById('resortForm');
+        if (form) {
+            form.addEventListener('submit', handleSubmit);
+        }
+        
+        const foodForm = document.getElementById('foodForm');
+        if (foodForm) {
+            foodForm.addEventListener('submit', handleFoodSubmit);
+        }
+        
+        const travelForm = document.getElementById('travelForm');
+        if (travelForm) {
+            travelForm.addEventListener('submit', handleTravelSubmit);
+        }
+    } catch (error) {
+        console.error('setupEventListeners error:', error);
     }
 }
 
