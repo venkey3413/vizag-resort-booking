@@ -13,10 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     loadOwners();
     setupEventListeners();
     setupStandaloneCouponForm();
-    // Delay EventBridge setup to ensure page is fully loaded
     setTimeout(setupEventBridgeSync, 1000);
     
-    // Toggle owner credentials visibility
     const createOwnerElement = document.getElementById('createOwnerAccount');
     if (createOwnerElement) {
         createOwnerElement.addEventListener('change', function() {
@@ -27,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Toggle coupon credentials visibility
     const createCouponElement = document.getElementById('createCoupon');
     if (createCouponElement) {
         createCouponElement.addEventListener('change', function() {
@@ -60,26 +57,21 @@ function setupEventBridgeSync() {
                     const data = JSON.parse(event.data);
                     console.log('📡 Admin EventBridge event received:', data);
                     
-                    // Resort events
                     if (data.type === 'resort.updated' || data.type === 'resort.added' || data.type === 'resort.deleted') {
                         console.log('🏨 Resort update received - refreshing resorts');
                         loadResorts();
-                        loadOwners(); // Refresh owners when resorts change
+                        loadOwners();
                     }
                     
-                    // Food item events
                     if (data.type === 'food.item.created' || data.type === 'food.item.updated' || data.type === 'food.item.deleted') {
                         console.log('🍽️ Food item update received - refreshing menu');
                         loadFoodItems();
                     }
                     
-                    // Travel package events
                     if (data.type === 'travel.package.created' || data.type === 'travel.package.updated' || data.type === 'travel.package.deleted') {
                         console.log('🚗 Travel package update received - refreshing packages');
                         loadTravelPackages();
                     }
-                    
-
                 } catch (error) {
                     // Ignore ping messages
                 }
@@ -108,7 +100,6 @@ function setupEventBridgeSync() {
     
     connectEventSource();
     
-    // Fallback polling
     setInterval(() => {
         loadResorts();
         loadFoodItems();
@@ -118,27 +109,20 @@ function setupEventBridgeSync() {
 }
 
 function setupEventListeners() {
-    console.log('🔧 Setting up event listeners...');
-    
     const form = document.getElementById('resortForm');
-    console.log('resortForm:', form);
     if (form) {
         form.addEventListener('submit', handleSubmit);
     }
     
     const foodForm = document.getElementById('foodForm');
-    console.log('foodForm:', foodForm);
     if (foodForm) {
         foodForm.addEventListener('submit', handleFoodSubmit);
     }
     
     const travelForm = document.getElementById('travelForm');
-    console.log('travelForm:', travelForm);
     if (travelForm) {
         travelForm.addEventListener('submit', handleTravelSubmit);
     }
-    
-    console.log('✅ Event listeners setup complete');
 }
 
 async function loadResorts() {
@@ -184,7 +168,6 @@ function displayResorts() {
     
     if (!resorts || resorts.length === 0) {
         grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No resorts found. Add your first resort using the form above.</div>';
-        // Also clear sortable resorts
         const sortableContainer = document.getElementById('sortableResorts');
         if (sortableContainer) {
             sortableContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No resorts to order.</div>';
@@ -222,7 +205,6 @@ function displayResorts() {
         `;
     }).join('');
     
-    // Also populate the sortable resorts section
     displaySortableResorts(resorts);
 }
 
@@ -234,7 +216,6 @@ async function handleSubmit(e) {
     submitBtn.textContent = 'Processing...';
     submitBtn.disabled = true;
 
-    // Collect dynamic pricing data
     const dynamicPricing = [];
     const weekdayPrice = document.getElementById('weekdayPrice').value;
     const fridayPrice = document.getElementById('fridayPrice').value;
@@ -261,7 +242,6 @@ async function handleSubmit(e) {
         dynamic_pricing: dynamicPricing
     };
     
-    // Add owner credentials if checkbox is checked
     const createOwnerAccountEl = document.getElementById('createOwnerAccount');
     if (createOwnerAccountEl && createOwnerAccountEl.checked) {
         const ownerNameEl = document.getElementById('ownerName');
@@ -311,20 +291,17 @@ async function handleSubmit(e) {
         if (response.ok) {
             let successMessage = editingId ? 'Resort updated successfully' : 'Resort added successfully';
             
-            // Create coupon if checkbox is checked
             const createCouponEl = document.getElementById('createCoupon');
             if (createCouponEl && createCouponEl.checked) {
                 const couponCodeEl = document.getElementById('couponCode');
                 const couponTypeEl = document.getElementById('couponType');
                 const couponDiscountEl = document.getElementById('couponDiscount');
                 const couponDayTypeEl = document.getElementById('couponDayType');
-                const selectedResortEl = document.getElementById('couponResort');
                 
                 const couponCode = couponCodeEl ? couponCodeEl.value.trim().toUpperCase() : '';
                 const couponType = couponTypeEl ? couponTypeEl.value : '';
                 const couponDiscount = couponDiscountEl ? parseInt(couponDiscountEl.value) : 0;
                 const couponDayType = couponDayTypeEl ? couponDayTypeEl.value : '';
-                const selectedResort = selectedResortEl ? selectedResortEl.value : '';
                 
                 if (couponCode && couponDiscount) {
                     try {
@@ -357,7 +334,7 @@ async function handleSubmit(e) {
             document.getElementById('resortForm').reset();
             cancelEdit();
             loadResorts();
-            loadOwners(); // Refresh owners list
+            loadOwners();
         } else {
             alert('Operation failed');
         }
@@ -387,7 +364,6 @@ function editResort(id) {
     document.getElementById('videos').value = resort.videos || '';
     document.getElementById('mapLink').value = resort.map_link || '';
     
-    // Load dynamic pricing
     document.getElementById('weekdayPrice').value = '';
     document.getElementById('fridayPrice').value = '';
     document.getElementById('weekendPrice').value = '';
@@ -448,7 +424,6 @@ async function deleteResort(id) {
     }
 }
 
-// Coupon Management Functions
 let coupons = [];
 
 async function loadCoupons() {
@@ -564,7 +539,6 @@ async function handleStandaloneCouponSubmit(e) {
     }
 }
 
-// Food Item Management Functions
 async function loadFoodItems() {
     try {
         const response = await fetch('/api/food-items');
@@ -686,7 +660,6 @@ async function deleteFoodItem(id) {
     }
 }
 
-// Travel Package Management Functions
 async function loadTravelPackages() {
     try {
         const response = await fetch('/api/travel-packages');
@@ -740,7 +713,6 @@ async function handleTravelSubmit(e) {
     submitBtn.disabled = true;
 
     const galleryValue = document.getElementById('travelGallery').value;
-    console.log('🖼️ Gallery field value:', galleryValue);
     
     const travelData = {
         name: document.getElementById('travelName').value,
@@ -757,9 +729,6 @@ async function handleTravelSubmit(e) {
             '14_seater': parseInt(document.getElementById('price14Seater').value) || parseInt(document.getElementById('travelPrice').value)
         }
     };
-
-    console.log('📤 Submitting travel package data:', travelData);
-    console.log('📤 Gallery in data:', travelData.gallery);
 
     try {
         let response;
@@ -808,7 +777,6 @@ function editTravelPackage(id) {
     document.getElementById('travelImage').value = pkg.image || '';
     document.getElementById('travelGallery').value = pkg.gallery || '';
     
-    // Load car pricing if available
     if (pkg.car_pricing) {
         document.getElementById('price5Seater').value = pkg.car_pricing['5_seater'] || '';
         document.getElementById('price7Seater').value = pkg.car_pricing['7_seater'] || '';
@@ -816,8 +784,6 @@ function editTravelPackage(id) {
         document.getElementById('price14Seater').value = pkg.car_pricing['14_seater'] || '';
     }
     document.getElementById('travelSites').value = pkg.sites || '';
-    
-
     
     document.getElementById('travelSubmitBtn').textContent = 'Update Travel Package';
     const cancelBtn = document.getElementById('travelCancelBtn');
@@ -857,7 +823,6 @@ async function deleteTravelPackage(id) {
     }
 }
 
-// Owner Management Functions
 let owners = [];
 
 async function loadOwners() {
@@ -918,7 +883,6 @@ async function deleteOwner(id) {
     }
 }
 
-// Resort ordering functionality
 function displaySortableResorts(resorts) {
     const container = document.getElementById('sortableResorts');
     if (!container) return;
@@ -935,13 +899,11 @@ function displaySortableResorts(resorts) {
         </div>
     `).join('');
     
-    // Add drag and drop functionality
     setupDragAndDrop();
     
-    // Add save order button event listener
     const saveOrderBtn = document.getElementById('saveOrderBtn');
     if (saveOrderBtn) {
-        saveOrderBtn.removeEventListener('click', saveResortOrder); // Remove existing listener
+        saveOrderBtn.removeEventListener('click', saveResortOrder);
         saveOrderBtn.addEventListener('click', saveResortOrder);
     }
 }
@@ -1025,7 +987,7 @@ async function saveResortOrder() {
             if (saveOrderBtn) {
                 saveOrderBtn.style.display = 'none';
             }
-            loadResorts(); // Reload to reflect changes
+            loadResorts();
         } else {
             alert('Failed to save resort order');
         }
