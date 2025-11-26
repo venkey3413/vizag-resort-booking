@@ -132,12 +132,6 @@ function setupEventListeners() {
     if (travelForm) {
         travelForm.addEventListener('submit', handleTravelSubmit);
     }
-    
-    // Add save order button event listener
-    const saveOrderBtn = document.getElementById('saveOrderBtn');
-    if (saveOrderBtn) {
-        saveOrderBtn.addEventListener('click', saveResortOrder);
-    }
 }
 
 async function loadResorts() {
@@ -936,6 +930,13 @@ function displaySortableResorts(resorts) {
     
     // Add drag and drop functionality
     setupDragAndDrop();
+    
+    // Add save order button event listener
+    const saveOrderBtn = document.getElementById('saveOrderBtn');
+    if (saveOrderBtn) {
+        saveOrderBtn.removeEventListener('click', saveResortOrder); // Remove existing listener
+        saveOrderBtn.addEventListener('click', saveResortOrder);
+    }
 }
 
 function setupDragAndDrop() {
