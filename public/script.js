@@ -817,44 +817,58 @@ function setupLogoRotation() {
 }
 
 function setupWebSocketSync() {
-    console.log('📡 Redis real-time sync enabled');
+    console.log('📡 Redis real-time sync enabled for main website');
     
-    try {
-        const eventSource = new EventSource(`${SERVER_URL}/api/events`);
-        
-        eventSource.onmessage = function(event) {
-            try {
-                const data = JSON.parse(event.data);
-                console.log('📡 Redis event received:', data);
-                
-                if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
-                    console.log('🏨 Resort update detected - refreshing resorts now!');
-                    loadResorts();
+    let eventSource;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    function connectEventSource() {
+        try {
+            eventSource = new EventSource(`${SERVER_URL}/api/events`);
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📡 Main website Redis event received:', data);
+                    
+                    if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
+                        console.log('🏨 Resort update detected - auto-refreshing resorts!');
+                        loadResorts();
+                        showNotification('Resort information updated automatically', 'success');
+                    }
+                    
+                    if (data.type === 'resort.availability.updated') {
+                        console.log('📅 Resort availability updated - refreshing resorts');
+                        loadResorts();
+                    }
+                } catch (error) {
+                    // Ignore ping messages
                 }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.log('⚠️ Main website Redis connection error, attempting reconnect...');
+                eventSource.close();
                 
-                if (data.type === 'resort.availability.updated') {
-                    console.log('📅 Resort availability updated - refreshing resorts');
-                    loadResorts();
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                } else {
+                    console.log('❌ Max reconnection attempts reached');
                 }
-                
-
-            } catch (error) {
-                console.log('📡 Redis ping or invalid data:', event.data);
-            }
-        };
-        
-        eventSource.onerror = function(error) {
-            console.log('⚠️ Redis connection error:', error);
-            console.log('EventSource readyState:', eventSource.readyState);
-        };
-        
-        eventSource.onopen = function() {
-            console.log('✅ Redis connected successfully');
-            console.log('EventSource readyState:', eventSource.readyState);
-        };
-    } catch (error) {
-        console.error('Redis setup failed:', error);
+            };
+            
+            eventSource.onopen = function() {
+                console.log('✅ Main website connected to Redis pub/sub');
+                reconnectAttempts = 0;
+            };
+        } catch (error) {
+            console.error('Main website Redis setup failed:', error);
+        }
     }
+    
+    connectEventSource();
 }
 
 let currentGalleryIndex = 0;
