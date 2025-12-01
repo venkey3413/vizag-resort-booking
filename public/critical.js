@@ -1360,6 +1360,70 @@ function setupLogoRotation(){
 }
 setupLogoRotation();
 
+// Setup Redis real-time sync for main website
+function setupMainWebsiteRedisSync() {
+    console.log('📡 Redis real-time sync enabled for main website');
+    
+    let eventSource;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    function connectEventSource() {
+        try {
+            eventSource = new EventSource('/api/events');
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📡 Main website Redis event received:', data);
+                    
+                    if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
+                        console.log('🏨 Resort update detected - auto-refreshing resorts!');
+                        // Reload resorts and re-render
+                        resortsPromise = fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}}).then(r=>{
+                            console.log('🏨 Resort API response status:', r.status);
+                            if(!r.ok) throw new Error(`HTTP ${r.status}`);
+                            return r.json();
+                        });
+                        resortsPromise.then(renderResorts).catch(e=>console.error('Resort reload failed:', e));
+                        showCriticalNotification('Resort information updated automatically', 'success');
+                    }
+                } catch (error) {
+                    // Ignore ping messages
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.log('⚠️ Main website Redis connection error, attempting reconnect...');
+                eventSource.close();
+                
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                } else {
+                    console.log('❌ Max reconnection attempts reached');
+                }
+            };
+            
+            eventSource.onopen = function() {
+                console.log('✅ Main website connected to Redis pub/sub');
+                reconnectAttempts = 0;
+            };
+        } catch (error) {
+            console.error('Main website Redis setup failed:', error);
+        }
+    }
+    
+    connectEventSource();
+}
+
+// Start Redis sync after DOM is ready
+if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', setupMainWebsiteRedisSync);
+}else{
+    setupMainWebsiteRedisSync();
+}
+
 // Load main script immediately
 const script=document.createElement('script');
 script.src='script.js?v=1.0.5';
