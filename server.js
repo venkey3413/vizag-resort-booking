@@ -3126,16 +3126,14 @@ app.get('/api/reviews/:resortId', async (req, res) => {
     }
 });
 
-// AI Chat service integration
-const AIChatService = require('./ai-chat-service');
-const aiChatService = new AIChatService();
+// AI Chat service integration - temporarily disabled
+// const AIChatService = require('./ai-chat-service');
+// const aiChatService = new AIChatService();
 
-// AI Chat endpoint
+// AI Chat endpoint - temporarily disabled
 app.post('/api/chat', async (req, res) => {
     try {
-        const { message, session_id } = req.body;
-        const response = await aiChatService.queryAI(message, session_id || 'default');
-        res.json(response);
+        res.json({ error: 'AI Chat service temporarily unavailable' });
     } catch (error) {
         res.status(500).json({ error: 'AI Chat service error' });
     }
@@ -3146,7 +3144,7 @@ app.use('/chat', express.static('chat-public'));
 
 // Cleanup on exit
 process.on('SIGINT', () => {
-    aiChatService.cleanup();
+    // aiChatService.cleanup();
     process.exit();
 });
 
