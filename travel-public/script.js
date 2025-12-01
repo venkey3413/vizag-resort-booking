@@ -6,7 +6,6 @@ let selectedPackages = [];
 document.addEventListener('DOMContentLoaded', function() {
     loadPackagesFromDatabase();
     initBannerRotation();
-    setupEventBridgeSync();
 });
 
 // Banner rotation functionality
@@ -683,48 +682,7 @@ function submitTravelBooking(bookingData) {
 //     }
 // }
 
-// EventBridge real-time sync
-function setupEventBridgeSync() {
-    console.log('📡 Travel EventBridge sync enabled');
-    
-    try {
-        const eventSource = new EventSource('/api/events');
-        
-        eventSource.onmessage = function(event) {
-            try {
-                const data = JSON.parse(event.data);
-                console.log('📡 Travel EventBridge event:', data);
-                
-                if (data.type === 'travel.booking.created' || data.type === 'travel.booking.updated') {
-                    console.log('🚗 Travel booking update detected');
-                    showNotification('New travel booking activity detected!', 'info');
-                }
-                
-                if (data.type === 'travel.package.created' || data.type === 'travel.package.updated' || data.type === 'travel.package.deleted') {
-                    console.log('📦 Travel package update detected - refreshing packages');
-                    loadPackagesFromDatabase();
-                }
-                
-                if (data.type === 'booking.created' || data.type === 'booking.updated') {
-                    console.log('🏨 Resort booking update detected');
-                }
-                
-            } catch (error) {
-                console.log('📡 EventBridge ping:', event.data);
-            }
-        };
-        
-        eventSource.onerror = function(error) {
-            console.log('⚠️ Travel EventBridge error:', error);
-        };
-        
-        eventSource.onopen = function() {
-            console.log('✅ Travel EventBridge connected');
-        };
-    } catch (error) {
-        console.error('Travel EventBridge setup failed:', error);
-    }
-}
+
 
 let currentTravelGalleryIndex = 0;
 let currentTravelGalleryImages = [];

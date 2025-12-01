@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadOwners();
     setupEventListeners();
     setupStandaloneCouponForm();
-    setTimeout(setupEventBridgeSync, 1000);
+    setTimeout(setupRedisSync, 1000);
     
     const createOwnerElement = document.getElementById('createOwnerAccount');
     if (createOwnerElement) {
@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function setupEventBridgeSync() {
-    console.log('📡 EventBridge real-time sync enabled for admin panel');
+function setupRedisSync() {
+    console.log('📡 Redis real-time sync enabled for admin panel');
     
     let eventSource;
     let reconnectAttempts = 0;
@@ -55,7 +55,7 @@ function setupEventBridgeSync() {
             eventSource.onmessage = function(event) {
                 try {
                     const data = JSON.parse(event.data);
-                    console.log('📡 Admin EventBridge event received:', data);
+                    console.log('📡 Admin Redis event received:', data);
                     
                     if (data.type === 'resort.updated' || data.type === 'resort.added' || data.type === 'resort.deleted') {
                         console.log('🏨 Resort update received - refreshing resorts');
@@ -78,7 +78,7 @@ function setupEventBridgeSync() {
             };
             
             eventSource.onerror = function(error) {
-                console.log('⚠️ Admin EventBridge connection error, attempting reconnect...');
+                console.log('⚠️ Admin Redis connection error, attempting reconnect...');
                 eventSource.close();
                 
                 if (reconnectAttempts < maxReconnectAttempts) {
@@ -90,11 +90,11 @@ function setupEventBridgeSync() {
             };
             
             eventSource.onopen = function() {
-                console.log('✅ EventBridge connected to admin panel');
+                console.log('✅ Redis connected to admin panel');
                 reconnectAttempts = 0;
             };
         } catch (error) {
-            console.error('Admin EventBridge setup failed:', error);
+            console.error('Admin Redis setup failed:', error);
         }
     }
     

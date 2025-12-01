@@ -335,42 +335,7 @@ if(document.readyState==='loading'){
 // Cache clearing
 if(!sessionStorage.getItem('cache_cleared_v7')){sessionStorage.setItem('cache_cleared_v7','true');window.location.reload(true)}
 
-// EventBridge real-time sync
-console.log('📡 EventBridge real-time sync enabled');
-try{
-    const eventSource=new EventSource('/api/events');
-    eventSource.onmessage=function(event){
-        try{
-            const data=JSON.parse(event.data);
-            console.log('📡 EventBridge event received:',data);
-            if(data.type==='resort.added'||data.type==='resort.updated'||data.type==='resort.deleted'||data.type==='resort.order.updated'){
-                console.log('🏨 Resort update detected - refreshing resorts now!');
-                location.reload();
-            }
-            if(data.type==='resort.availability.updated'){
-                console.log('📅 Resort availability updated - reloading blocked dates');
-                const resortIdInput=document.getElementById('resortId');
-                if(resortIdInput&&resortIdInput.value){
-                    const currentResortId=resortIdInput.value;
-                    fetch(`/api/blocked-dates/${currentResortId}`).then(r=>r.json()).then(blockedDates=>{
-                        window.currentResortBlockedDates=blockedDates;
-                        console.log('✅ Updated blocked dates:',blockedDates);
-                    }).catch(e=>console.log('Failed to reload blocked dates:',e));
-                }
-            }
-        }catch(error){
-            console.log('📡 EventBridge ping or invalid data:',event.data);
-        }
-    };
-    eventSource.onerror=function(error){
-        console.log('⚠️ EventBridge connection error:',error);
-    };
-    eventSource.onopen=function(){
-        console.log('✅ EventBridge connected successfully');
-    };
-}catch(error){
-    console.error('EventBridge setup failed:',error);
-}
+
 
 // Direct booking function
 window.bookNow=function(resortId,resortName){

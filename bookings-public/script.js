@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
     loadFoodOrders();
     loadTravelBookings();
-    setupEventBridgeSync();
 });
 
 function showTab(tabName) {
@@ -174,47 +173,7 @@ async function clearAllFoodOrders() {
     }
 }
 
-function setupEventBridgeSync() {
-    console.log('📡 EventBridge real-time sync enabled');
-    
-    try {
-        const eventSource = new EventSource('/api/events');
-        
-        eventSource.onmessage = function(event) {
-            try {
-                const data = JSON.parse(event.data);
-                console.log('📡 EventBridge event received:', data);
-                
-                if (data.type === 'booking.created' || data.type === 'booking.updated' || data.type === 'payment.updated') {
-                    console.log('📋 Booking update detected - refreshing bookings!');
-                    loadBookings();
-                }
-                
-                if (data.type === 'food.order.created' || data.type === 'food.order.updated') {
-                    console.log('🍽️ Food order update detected - refreshing food orders!');
-                    loadFoodOrders();
-                }
-                
-                if (data.type === 'travel.booking.created' || data.type === 'travel.booking.updated') {
-                    console.log('🚗 Travel booking update detected - refreshing travel bookings!');
-                    loadTravelBookings();
-                }
-            } catch (error) {
-                console.log('📡 EventBridge ping or invalid data');
-            }
-        };
-        
-        eventSource.onerror = function(error) {
-            console.log('⚠️ EventBridge connection error');
-        };
-        
-        eventSource.onopen = function() {
-            console.log('✅ EventBridge connected to booking management');
-        };
-    } catch (error) {
-        console.error('EventBridge setup failed:', error);
-    }
-}
+
 
 async function loadBookings() {
     try {
