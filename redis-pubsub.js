@@ -10,23 +10,20 @@ class RedisPubSub {
 
     async connect() {
         try {
-            // Connect to Redis (will use Kubernetes service name in production)
+            // Connect to Redis (Docker or local)
+            const redisUrl = process.env.REDIS_URL;
             const redisHost = process.env.REDIS_HOST || 'localhost';
             const redisPort = process.env.REDIS_PORT || 6379;
 
-            this.publisher = redis.createClient({
+            const clientConfig = redisUrl ? { url: redisUrl } : {
                 socket: {
                     host: redisHost,
                     port: redisPort
                 }
-            });
+            };
 
-            this.subscriber = redis.createClient({
-                socket: {
-                    host: redisHost,
-                    port: redisPort
-                }
-            });
+            this.publisher = redis.createClient(clientConfig);
+            this.subscriber = redis.createClient(clientConfig);
 
             await this.publisher.connect();
             await this.subscriber.connect();
