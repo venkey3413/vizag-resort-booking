@@ -1,26 +1,25 @@
 # Vizag Resort Booking System
 
-A complete resort booking management system with three separate services.
+A streamlined resort booking management system with integrated food and travel services.
 
-## Services
+## Core Services
 
 ### 1. Main Server (Port 3000)
-- Public website and booking system
-- Food ordering service
-- Travel packages
-- Owner dashboard
+- **Resort Booking System** - Complete resort reservation platform
+- **Food Ordering Service** - Pre-order meals for resort stays
+- **Travel Packages** - Local sightseeing and tour bookings
+- **Owner Dashboard** - Resort owner management interface
 
 ### 2. Admin Server (Port 3001) 
-- Admin panel for managing resorts
-- Food items management
-- Travel packages management
-- Real-time updates
+- Admin panel for managing all services
+- Resort, food items, and travel package management
+- Real-time updates and notifications
 
-### 3. Booking Server (Port 3002)
-- Booking management and verification
-- Payment processing
-- Email notifications
-- Database operations
+### 3. Booking Management Server (Port 3002)
+- Centralized booking verification and processing
+- Payment status management
+- Email notifications and invoicing
+- Database operations and backups
 
 ## Quick Start
 
