@@ -3,11 +3,9 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-service');
-const { publishEvent, EVENTS } = require('./eventbridge-service');
 const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
-// Use shared EventBridge listener instance
-const eventBridgeListener = require('./eventbridge-listener');
+const redisPubSub = require('./redis-pubsub');
 const fetch = require('node-fetch');
 
 const app = express();
@@ -36,27 +34,15 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/bookings-public/index.html');
 });
 
-// Real-time EventBridge listener endpoint
+// Real-time Redis pub/sub listener endpoint
 app.get('/api/events', (req, res) => {
     const clientId = `booking-${Date.now()}-${Math.random()}`;
-    eventBridgeListener.subscribe(clientId, res, 'booking');
+    redisPubSub.subscribe(clientId, res);
 });
 
 
 
-// EventBridge webhook endpoint for AWS EventBridge
-app.post('/webhook/eventbridge', (req, res) => {
-    console.log('📡 Booking server received EventBridge webhook:', req.body);
-    const event = req.body;
-    
-    // Handle different event types
-    if (event.source && event['detail-type']) {
-        console.log(`📡 Processing ${event['detail-type']} from ${event.source}`);
-        eventBridgeListener.handleEvent(event['detail-type'], event.source, event.detail);
-    }
-    
-    res.status(200).json({ success: true, message: 'Event received' });
-});
+
 
 let db;
 
@@ -231,47 +217,30 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
                 console.error('❌ Invoice/Backup error:', error);
             }
             
-            // Publish availability update to refresh blocked dates
+            // Publish availability update via Redis
             try {
-                await publishEvent('vizag.resort', EVENTS.RESORT_AVAILABILITY_UPDATED, {
+                await redisPubSub.publish('resort-events', {
+                    type: 'resort.availability.updated',
                     resortId: booking.resort_id,
                     date: booking.check_in,
                     action: 'booking_confirmed'
                 });
-                
-                // Notify main server directly
-                const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
-                await fetch(mainServerUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'resort.availability.updated',
-                        source: 'vizag.resort',
-                        data: { resortId: booking.resort_id, action: 'booking_confirmed' }
-                    })
-                }).catch(err => console.log('Main server availability notification failed:', err.message));
             } catch (eventError) {
-                console.error('Availability update event failed:', eventError);
+                console.error('Redis publish failed:', eventError);
             }
         }
         
-        // Publish payment updated event
+        // Publish payment updated event via Redis
         try {
-            await publishEvent('vizag.resort', EVENTS.PAYMENT_UPDATED, {
+            await redisPubSub.publish('booking-events', {
+                type: 'payment.updated',
                 bookingId: id,
                 paymentStatus: payment_status,
                 guestName: booking.guest_name,
                 resortName: booking.resort_name
             });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.PAYMENT_UPDATED, 'vizag.resort', {
-                bookingId: id,
-                paymentStatus: payment_status,
-                guestName: booking.guest_name
-            });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ message: 'Payment status updated successfully' });
@@ -318,20 +287,15 @@ app.delete('/api/bookings/:id', async (req, res) => {
     try {
         const id = req.params.id;
         await db.run('DELETE FROM bookings WHERE id = ?', [id]);
-        // Publish booking deleted event
+        // Publish booking deleted event via Redis
         try {
-            await publishEvent('vizag.resort', EVENTS.BOOKING_UPDATED, {
-                bookingId: id,
-                status: 'deleted'
-            });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.BOOKING_UPDATED, 'vizag.resort', {
+            await redisPubSub.publish('booking-events', {
+                type: 'booking.deleted',
                 bookingId: id,
                 status: 'deleted'
             });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ message: 'Booking deleted successfully' });
@@ -589,35 +553,14 @@ app.post('/api/resorts', async (req, res) => {
             }
         }
         
-        // Publish to EventBridge and notify all servers
+        // Publish resort added event via Redis
         try {
-            await publishEvent('vizag.admin', 'resort.added', { resortId });
-            
-            // Notify main server directly
-            const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
-            await fetch(mainServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'resort.added',
-                    source: 'vizag.admin',
-                    data: { resortId }
-                })
-            }).catch(err => console.log('Main server notification failed:', err.message));
-            
-            // Notify admin server directly
-            const adminServerUrl = 'http://localhost:3001/api/eventbridge-notify';
-            await fetch(adminServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'resort.added',
-                    source: 'vizag.admin',
-                    data: { resortId }
-                })
-            }).catch(err => console.log('Admin server notification failed:', err.message));
+            await redisPubSub.publish('resort-events', {
+                type: 'resort.added',
+                resortId: resortId
+            });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ message: 'Resort added successfully' });
@@ -719,35 +662,14 @@ app.put('/api/resorts/:id', async (req, res) => {
             }
         }
         
-        // Publish to EventBridge and notify all servers
+        // Publish resort updated event via Redis
         try {
-            await publishEvent('vizag.admin', 'resort.updated', { resortId });
-            
-            // Notify main server directly
-            const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
-            await fetch(mainServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'resort.updated',
-                    source: 'vizag.admin',
-                    data: { resortId }
-                })
-            }).catch(err => console.log('Main server notification failed:', err.message));
-            
-            // Notify admin server directly
-            const adminServerUrl = 'http://localhost:3001/api/eventbridge-notify';
-            await fetch(adminServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'resort.updated',
-                    source: 'vizag.admin',
-                    data: { resortId }
-                })
-            }).catch(err => console.log('Admin server notification failed:', err.message));
+            await redisPubSub.publish('resort-events', {
+                type: 'resort.updated',
+                resortId: resortId
+            });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ message: 'Resort updated successfully' });
@@ -836,35 +758,14 @@ app.delete('/api/resorts/:id', async (req, res) => {
         await db.run('DELETE FROM resorts WHERE id = ?', [resortId]);
         await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
         
-        // Publish to EventBridge and notify all servers
+        // Publish resort deleted event via Redis
         try {
-            await publishEvent('vizag.admin', 'resort.deleted', { resortId });
-            
-            // Notify main server directly
-            const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
-            await fetch(mainServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'resort.deleted',
-                    source: 'vizag.admin',
-                    data: { resortId }
-                })
-            }).catch(err => console.log('Main server notification failed:', err.message));
-            
-            // Notify admin server directly
-            const adminServerUrl = 'http://localhost:3001/api/eventbridge-notify';
-            await fetch(adminServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'resort.deleted',
-                    source: 'vizag.admin',
-                    data: { resortId }
-                })
-            }).catch(err => console.log('Admin server notification failed:', err.message));
+            await redisPubSub.publish('resort-events', {
+                type: 'resort.deleted',
+                resortId: resortId
+            });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ message: 'Resort deleted successfully' });
@@ -1001,23 +902,14 @@ app.post('/api/resorts/reorder', async (req, res) => {
             await db.run('UPDATE resorts SET sort_order = ? WHERE id = ?', [resort.sort_order, resort.id]);
         }
         
-        // Publish to EventBridge and notify all servers
+        // Publish resort order updated event via Redis
         try {
-            await publishEvent('vizag.admin', 'resort.order.updated', { resortOrders });
-            
-            // Notify main server directly
-            const mainServerUrl = 'http://localhost:3000/api/eventbridge-notify';
-            await fetch(mainServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'resort.order.updated',
-                    source: 'vizag.admin',
-                    data: { resortOrders }
-                })
-            }).catch(err => console.log('Main server notification failed:', err.message));
+            await redisPubSub.publish('resort-events', {
+                type: 'resort.order.updated',
+                resortOrders: resortOrders
+            });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ message: 'Resort order updated successfully' });
@@ -1070,9 +962,17 @@ app.delete('/api/owners/:id', async (req, res) => {
 
 
 
-initDB().then(() => {
+initDB().then(async () => {
     // Start automatic backups
     scheduleBackups();
+    
+    // Initialize Redis connection
+    try {
+        await redisPubSub.connect();
+        console.log('✅ Redis pub/sub connected successfully');
+    } catch (error) {
+        console.error('❌ Redis connection failed:', error);
+    }
     
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`📋 Booking Management running on http://0.0.0.0:${PORT}`);

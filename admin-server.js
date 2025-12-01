@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
-const eventBridgeListener = require('./eventbridge-listener');
+const redisPubSub = require('./redis-pubsub');
 
 const app = express();
 const PORT = 3001;
@@ -24,28 +24,16 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', port: PORT, timestamp: new Date().toISOString() });
 });
 
-// Real-time EventBridge listener endpoint
+// Real-time Redis pub/sub listener endpoint
 app.get('/api/events', (req, res) => {
     const clientId = `admin-${Date.now()}-${Math.random()}`;
-    eventBridgeListener.subscribe(clientId, res, 'admin');
-    console.log('📡 Admin panel connected to EventBridge');
+    redisPubSub.subscribe(clientId, res);
+    console.log('📡 Admin panel connected to Redis pub/sub');
 });
 
 
 
-// EventBridge webhook endpoint for AWS EventBridge
-app.post('/webhook/eventbridge', (req, res) => {
-    console.log('📡 Admin server received EventBridge webhook:', req.body);
-    const event = req.body;
-    
-    // Handle different event types
-    if (event.source && event['detail-type']) {
-        console.log(`📡 Processing ${event['detail-type']} from ${event.source}`);
-        eventBridgeListener.handleEvent(event['detail-type'], event.source, event.detail);
-    }
-    
-    res.status(200).json({ success: true, message: 'Event received' });
-});
+
 
 // Serve admin panel
 app.get('/', (req, res) => {
@@ -387,4 +375,17 @@ app.delete('/api/owners/:id', async (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`👨‍💼 Admin Panel running on http://0.0.0.0:${PORT}`);
+});
+
+initDB().then(async () => {
+    try {
+        await redisPubSub.connect();
+        console.log('✅ Redis pub/sub connected successfully');
+    } catch (error) {
+        console.error('❌ Redis connection failed:', error);
+    }
+    
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`👨💼 Admin Panel running on http://0.0.0.0:${PORT}`);
+    });
 });

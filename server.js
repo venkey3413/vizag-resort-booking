@@ -3,8 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
-const { publishEvent, EVENTS } = require('./eventbridge-service');
-const eventBridgeListener = require('./eventbridge-listener');
+const redisPubSub = require('./redis-pubsub');
 // UPI service removed - generate payment details inline
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
@@ -715,35 +714,17 @@ app.post('/api/bookings', async (req, res) => {
             paymentDetails: paymentDetails
         };
 
-        // Publish booking created event
+        // Publish booking created event via Redis
         try {
-            await publishEvent('vizag.resort', EVENTS.BOOKING_CREATED, {
+            await redisPubSub.publish('booking-events', {
+                type: 'booking.created',
                 bookingId: result.lastID,
                 resortId: resortId,
                 guestName: guestName,
                 totalPrice: totalPrice
             });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.BOOKING_CREATED, 'vizag.resort', {
-                bookingId: result.lastID,
-                resortId: resortId,
-                guestName: guestName
-            });
-            
-            // Notify booking server directly
-            const bookingServerUrl = 'http://localhost:3002/api/eventbridge-notify';
-            await fetch(bookingServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'booking.created',
-                    source: 'vizag.resort',
-                    data: { bookingId: result.lastID, guestName }
-                })
-            }).catch(err => console.log('Booking server notification failed:', err.message));
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         console.log('✅ Booking created successfully:', booking);
@@ -967,21 +948,16 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
             console.error('Telegram notification failed:', telegramError);
         }
         
-        // Publish payment submitted event
+        // Publish payment submitted event via Redis
         try {
-            await publishEvent('vizag.resort', EVENTS.PAYMENT_UPDATED, {
+            await redisPubSub.publish('booking-events', {
+                type: 'payment.updated',
                 bookingId: bookingId,
                 paymentStatus: 'pending',
                 transactionId: transactionId
             });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.PAYMENT_UPDATED, 'vizag.resort', {
-                bookingId: bookingId,
-                paymentStatus: 'pending'
-            });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ message: 'Payment submitted for verification', status: 'pending_verification' });
@@ -993,11 +969,11 @@ app.post('/api/bookings/:id/payment-proof', async (req, res) => {
 
 
 
-// Real-time EventBridge listener endpoint
+// Real-time Redis pub/sub listener endpoint
 app.get('/api/events', (req, res) => {
     const clientId = `main-${Date.now()}-${Math.random()}`;
-    eventBridgeListener.subscribe(clientId, res, 'main');
-    console.log('📡 Main website connected to EventBridge');
+    redisPubSub.subscribe(clientId, res);
+    console.log('📡 Main website connected to Redis pub/sub');
 });
 
 
@@ -1544,33 +1520,16 @@ app.post('/api/food-orders', async (req, res) => {
             console.error('Telegram notification failed:', telegramError);
         }
         
-        // Publish food order created event
+        // Publish food order created event via Redis
         try {
-            await publishEvent('vizag.food', EVENTS.FOOD_ORDER_CREATED, {
+            await redisPubSub.publish('food-events', {
+                type: 'food.order.created',
                 orderId: orderId,
                 bookingId: bookingId,
                 total: total
             });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.FOOD_ORDER_CREATED, 'vizag.food', {
-                orderId: orderId,
-                bookingId: bookingId
-            });
-            
-            // Notify booking server directly
-            const bookingServerUrl = 'http://localhost:3002/api/eventbridge-notify';
-            await fetch(bookingServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'food.order.created',
-                    source: 'vizag.food',
-                    data: { orderId, bookingId, total }
-                })
-            }).catch(err => console.log('Booking server notification failed:', err.message));
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ 
@@ -1630,33 +1589,16 @@ ${paymentId ? `🔢 Payment ID: ${paymentId}` : ''}
             console.error('Telegram notification failed:', telegramError);
         }
         
-        // Publish food payment updated event
+        // Publish food payment updated event via Redis
         try {
-            await publishEvent('vizag.food', EVENTS.FOOD_ORDER_UPDATED, {
+            await redisPubSub.publish('food-events', {
+                type: 'food.order.updated',
                 orderId: orderId,
                 paymentMethod: paymentMethod,
                 status: 'pending_verification'
             });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.FOOD_ORDER_UPDATED, 'vizag.food', {
-                orderId: orderId,
-                status: 'pending_verification'
-            });
-            
-            // Notify booking server directly
-            const bookingServerUrl = 'http://localhost:3002/api/eventbridge-notify';
-            await fetch(bookingServerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'food.order.updated',
-                    source: 'vizag.food',
-                    data: { orderId, status: 'pending_verification' }
-                })
-            }).catch(err => console.log('Booking server notification failed:', err.message));
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ 
@@ -1713,14 +1655,15 @@ app.post('/api/food-orders/:orderId/confirm', async (req, res) => {
             console.error('Failed to send food order invoice:', emailError);
         }
         
-        // Publish food order confirmed event
+        // Publish food order confirmed event via Redis
         try {
-            await publishEvent('vizag.food', EVENTS.FOOD_ORDER_UPDATED, {
+            await redisPubSub.publish('food-events', {
+                type: 'food.order.confirmed',
                 orderId: orderId,
                 status: 'confirmed'
             });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ 
@@ -2062,20 +2005,15 @@ app.post('/api/food-items', async (req, res) => {
         
         const newItem = { id: result.lastID, name, description, price: parseInt(price), category, image };
         
-        // Publish EventBridge event
+        // Publish food item created event via Redis
         try {
-            await publishEvent('vizag.food', EVENTS.FOOD_ITEM_CREATED, {
-                itemId: newItem.id,
-                name: name
-            });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.FOOD_ITEM_CREATED, 'vizag.food', {
+            await redisPubSub.publish('food-events', {
+                type: 'food.item.created',
                 itemId: newItem.id,
                 name: name
             });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ success: true, item: newItem });
@@ -2100,20 +2038,15 @@ app.put('/api/food-items/:id', async (req, res) => {
         
         const updatedItem = { id, name, description, price: parseInt(price), category, image };
         
-        // Publish EventBridge event
+        // Publish food item updated event via Redis
         try {
-            await publishEvent('vizag.food', EVENTS.FOOD_ITEM_UPDATED, {
-                itemId: id,
-                name: name
-            });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.FOOD_ITEM_UPDATED, 'vizag.food', {
+            await redisPubSub.publish('food-events', {
+                type: 'food.item.updated',
                 itemId: id,
                 name: name
             });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ success: true, item: updatedItem });
@@ -2133,20 +2066,15 @@ app.delete('/api/food-items/:id', async (req, res) => {
         
         await db.run('DELETE FROM food_items WHERE id = ?', [id]);
         
-        // Publish EventBridge event
+        // Publish food item deleted event via Redis
         try {
-            await publishEvent('vizag.food', EVENTS.FOOD_ITEM_DELETED, {
-                itemId: id,
-                name: item.name
-            });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.FOOD_ITEM_DELETED, 'vizag.food', {
+            await redisPubSub.publish('food-events', {
+                type: 'food.item.deleted',
                 itemId: id,
                 name: item.name
             });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ success: true, message: 'Food item deleted' });
@@ -2189,20 +2117,15 @@ app.post('/api/travel-packages', async (req, res) => {
         
         const newPackage = { id: result.lastID, name, description, price: parseInt(price), duration, image, gallery, sites, car_pricing };
         
-        // Publish EventBridge event
+        // Publish travel package created event via Redis
         try {
-            await publishEvent('vizag.travel', EVENTS.TRAVEL_PACKAGE_CREATED, {
-                packageId: newPackage.id,
-                name: name
-            });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.TRAVEL_PACKAGE_CREATED, 'vizag.travel', {
+            await redisPubSub.publish('travel-events', {
+                type: 'travel.package.created',
                 packageId: newPackage.id,
                 name: name
             });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ success: true, package: newPackage });
@@ -2228,20 +2151,15 @@ app.put('/api/travel-packages/:id', async (req, res) => {
         
         const updatedPackage = { id, name, description, price: parseInt(price), duration, image, gallery, sites, car_pricing };
         
-        // Publish EventBridge event
+        // Publish travel package updated event via Redis
         try {
-            await publishEvent('vizag.travel', EVENTS.TRAVEL_PACKAGE_UPDATED, {
-                packageId: id,
-                name: name
-            });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.TRAVEL_PACKAGE_UPDATED, 'vizag.travel', {
+            await redisPubSub.publish('travel-events', {
+                type: 'travel.package.updated',
                 packageId: id,
                 name: name
             });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ success: true, package: updatedPackage });
@@ -2261,20 +2179,15 @@ app.delete('/api/travel-packages/:id', async (req, res) => {
         
         await db.run('DELETE FROM travel_packages WHERE id = ?', [id]);
         
-        // Publish EventBridge event
+        // Publish travel package deleted event via Redis
         try {
-            await publishEvent('vizag.travel', EVENTS.TRAVEL_PACKAGE_DELETED, {
-                packageId: id,
-                name: pkg.name
-            });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.TRAVEL_PACKAGE_DELETED, 'vizag.travel', {
+            await redisPubSub.publish('travel-events', {
+                type: 'travel.package.deleted',
                 packageId: id,
                 name: pkg.name
             });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ success: true, message: 'Travel package deleted' });
@@ -2488,22 +2401,17 @@ app.post('/api/owner/block-date', verifyOwnerToken, async (req, res) => {
             console.error('Telegram notification failed:', telegramError);
         }
         
-        // Publish EventBridge event
+        // Publish resort availability updated event via Redis
         try {
-            await publishEvent('vizag.resort', EVENTS.RESORT_AVAILABILITY_UPDATED, {
+            await redisPubSub.publish('resort-events', {
+                type: 'resort.availability.updated',
                 resortId: resortId,
                 date: date,
                 action: 'blocked',
                 reason: reason
             });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.RESORT_AVAILABILITY_UPDATED, 'vizag.resort', {
-                resortId: resortId,
-                action: 'blocked'
-            });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ success: true, message: 'Date blocked successfully' });
@@ -2555,21 +2463,16 @@ app.delete('/api/owner/unblock-date/:id', verifyOwnerToken, async (req, res) => 
             console.error('Telegram notification failed:', telegramError);
         }
         
-        // Publish EventBridge event
+        // Publish resort availability updated event via Redis
         try {
-            await publishEvent('vizag.resort', EVENTS.RESORT_AVAILABILITY_UPDATED, {
+            await redisPubSub.publish('resort-events', {
+                type: 'resort.availability.updated',
                 resortId: block.resort_id,
                 date: block.blocked_date,
                 action: 'unblocked'
             });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.RESORT_AVAILABILITY_UPDATED, 'vizag.resort', {
-                resortId: block.resort_id,
-                action: 'unblocked'
-            });
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ success: true, message: 'Date unblocked successfully' });
@@ -2712,24 +2615,17 @@ app.post('/api/travel-bookings', async (req, res) => {
             console.error('Telegram notification failed:', telegramError);
         }
         
-        // Publish travel booking created event
+        // Publish travel booking created event via Redis
         try {
-            await publishEvent('vizag.travel', EVENTS.TRAVEL_BOOKING_CREATED, {
+            await redisPubSub.publish('travel-events', {
+                type: 'travel.booking.created',
                 bookingId: result.lastID,
                 bookingReference: booking_reference,
                 customerName: customer_name,
                 totalAmount: total_amount
             });
-            
-            // Notify EventBridge listener
-            eventBridgeListener.handleEvent(EVENTS.TRAVEL_BOOKING_CREATED, 'vizag.travel', {
-                bookingId: result.lastID,
-                bookingReference: booking_reference
-            });
-            
-            // Real-time sync via EventBridge only
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ 
@@ -2850,17 +2746,16 @@ app.post('/api/travel-bookings/:id/confirm', async (req, res) => {
             console.error('Failed to send travel confirmation:', emailError);
         }
         
-        // Publish travel booking confirmed event
+        // Publish travel booking confirmed event via Redis
         try {
-            await publishEvent('vizag.travel', EVENTS.TRAVEL_BOOKING_UPDATED, {
+            await redisPubSub.publish('travel-events', {
+                type: 'travel.booking.confirmed',
                 bookingId: id,
                 bookingReference: booking.booking_reference,
                 status: 'confirmed'
             });
-            
-            // Real-time sync via EventBridge only
         } catch (eventError) {
-            console.error('EventBridge publish failed:', eventError);
+            console.error('Redis publish failed:', eventError);
         }
         
         res.json({ 
@@ -3149,10 +3044,16 @@ process.on('SIGINT', () => {
 });
 
 // Initialize and start server
-initDB().then(() => {
+initDB().then(async () => {
     console.log('✅ Database initialization completed successfully');
     
-
+    // Initialize Redis connection
+    try {
+        await redisPubSub.connect();
+        console.log('✅ Redis pub/sub connected successfully');
+    } catch (error) {
+        console.error('❌ Redis connection failed:', error);
+    }
     
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Resort Booking Server running on http://0.0.0.0:${PORT}`);
