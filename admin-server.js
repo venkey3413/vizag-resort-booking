@@ -52,12 +52,23 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/admin-public/index.html');
 });
 
-// Forward resort requests to booking-server
+// Direct database access for resorts
+const sqlite3 = require('sqlite3').verbose();
+const { open } = require('sqlite');
+
+let db;
+
+async function initDB() {
+    db = await open({
+        filename: './resort_booking.db',
+        driver: sqlite3.Database
+    });
+}
+
 app.get('/api/resorts', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3002/api/resorts');
-        const data = await response.json();
-        res.json(data);
+        const resorts = await db.all('SELECT * FROM resorts ORDER BY sort_order ASC, id ASC');
+        res.json(resorts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch resorts' });
     }

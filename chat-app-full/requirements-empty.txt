@@ -1,2 +1,0 @@
-# All dependencies provided by base Docker images
-# No local installation needed on EC2

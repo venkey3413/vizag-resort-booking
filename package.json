@@ -1,34 +1,39 @@
 {
   "name": "vizag-resort-booking",
   "version": "1.0.0",
-  "description": "Resort booking system",
+  "description": "Complete resort booking management system",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "pm2 start ecosystem.config.js",
+    "dev": "nodemon server.js",
+    "stop": "pm2 stop all",
+    "restart": "pm2 restart all",
+    "logs": "pm2 logs",
     "admin": "node admin-server.js",
-    "bookings": "node booking-server.js",
-    "websocket": "node websocket-server.js",
-    "dev": "concurrently \"npm start\" \"npm run admin\" \"npm run bookings\" \"npm run websocket\"",
-    "start-all": "node start-all.js",
-    "test-sse": "node test-sse.js",
-    "test-eventbridge": "node test-eventbridge-only.js",
-    "setup": "node setup.js"
+    "booking": "node booking-server.js"
   },
   "dependencies": {
-    "aws-sdk": "^2.1490.0",
-    "bcrypt": "^5.1.1",
-    "concurrently": "^8.2.0",
+    "express": "^4.18.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.1.5",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "node-fetch": "^3.3.2",
-    "nodemailer": "^7.0.9",
-    "socket.io": "^4.7.4",
-    "sqlite": "^5.1.1",
     "sqlite3": "^5.1.6",
-    "validator": "^13.11.0"
-  }
+    "sqlite": "^5.0.1",
+    "nodemailer": "^6.9.7",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^2.7.0",
+    "aws-sdk": "^2.1691.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "resort",
+    "booking",
+    "nodejs",
+    "express",
+    "sqlite"
+  ],
+  "author": "Vizag Resort Booking",
+  "license": "MIT"
 }
