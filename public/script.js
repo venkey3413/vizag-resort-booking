@@ -825,7 +825,12 @@ function setupWebSocketSync() {
     
     function connectEventSource() {
         try {
-            eventSource = new EventSource(`${SERVER_URL}/api/events`);
+            // Connect directly to main service for Redis events
+            const eventSourceUrl = window.location.hostname === 'vizagresortbooking.in' 
+                ? `http://${window.location.hostname}:3000/api/events`
+                : `${SERVER_URL}/api/events`;
+            eventSource = new EventSource(eventSourceUrl);
+            console.log('📡 Connecting to Redis events at:', eventSourceUrl);
             
             eventSource.onmessage = function(event) {
                 try {
