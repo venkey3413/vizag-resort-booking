@@ -131,24 +131,21 @@ function updateTotalPrice() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Use resorts loaded by critical.js or load them
-    if (window.resorts && window.resorts.length > 0) {
-        resorts = window.resorts;
-        displayResorts();
-    } else {
+    // Wait a bit for critical.js to finish loading resorts
+    setTimeout(() => {
         loadResorts();
-    }
-    loadCoupons();
-    setupEventListeners();
-    setMinDate();
-    setupLogoRotation();
-    setupWebSocketSync();
-    preloadQRCode();
-    
-    // Set fallback gallery function if critical.js didn't load
-    if (!window.openGallery) {
-        window.openGallery = openGalleryFallback;
-    }
+        loadCoupons();
+        setupEventListeners();
+        setMinDate();
+        setupLogoRotation();
+        setupWebSocketSync();
+        preloadQRCode();
+        
+        // Set fallback gallery function if critical.js didn't load
+        if (!window.openGallery) {
+            window.openGallery = openGalleryFallback;
+        }
+    }, 100);
 });
 
 
@@ -303,6 +300,15 @@ function sanitizeInput(input) {
 }
 
 async function loadResorts() {
+    // Check if critical.js already loaded resorts
+    if (window.resorts && window.resorts.length > 0) {
+        console.log('✅ Resorts already loaded by critical.js:', window.resorts.length, 'resorts');
+        resorts = window.resorts;
+        displayResorts();
+        return;
+    }
+    
+    // Fallback: load from API if critical.js didn't load them
     try {
         const url = `${SERVER_URL}/api/resorts`;
         console.log('🏝️ Fetching resorts from:', url);
@@ -323,23 +329,8 @@ async function loadResorts() {
         
         const data = await response.json();
         resorts = data;
+        window.resorts = data; // Make available globally
         console.log('✅ Resorts loaded:', resorts.length, 'resorts');
-        console.log('🏷️ Resort dynamic pricing data:', resorts.map(r => ({
-            id: r.id, 
-            name: r.name, 
-            basePrice: r.price,
-            dynamic_pricing: r.dynamic_pricing,
-            hasDynamicPricing: !!(r.dynamic_pricing && r.dynamic_pricing.length > 0)
-        })));
-        
-        // Validate dynamic pricing data
-        resorts.forEach(resort => {
-            if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-                console.log(`📊 Resort ${resort.name} pricing:`, resort.dynamic_pricing);
-            } else {
-                console.log(`⚠️ Resort ${resort.name} has no dynamic pricing, using base price: ₹${resort.price}`);
-            }
-        });
         
         displayResorts();
         
@@ -350,13 +341,17 @@ async function loadResorts() {
 }
 
 function displayResorts() {
-    // Skip if critical.js already loaded resorts
-    if (window.resorts && document.getElementById('resortsGrid').innerHTML.trim()) {
-        console.log('✅ Resorts already loaded by critical.js');
+    const grid = document.getElementById('resortsGrid');
+    if (!grid) {
+        console.error('❌ Resort grid element not found');
         return;
     }
     
-    const grid = document.getElementById('resortsGrid');
+    // Skip if critical.js already populated the grid
+    if (grid.innerHTML.trim() && grid.children.length > 0) {
+        console.log('✅ Resorts already displayed by critical.js');
+        return;
+    }
     grid.innerHTML = resorts.map(resort => {
         let pricingDisplay = `₹${resort.price.toLocaleString()}/night`;
         
