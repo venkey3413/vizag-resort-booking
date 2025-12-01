@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+  namespace: vizag-resort
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: booking-service
+  template:
+    metadata:
+      labels:
+        app: booking-service
+    spec:
+      containers:
+      - name: booking-service
+        image: your-dockerhub-username/vizag-resort-booking:latest
+        ports:
+        - containerPort: 3002
+        envFrom:
+        - configMapRef:
+            name: resort-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-service
+  namespace: vizag-resort
+spec:
+  selector:
+    app: booking-service
+  ports:
+  - port: 80
+    targetPort: 3002
+  type: ClusterIP

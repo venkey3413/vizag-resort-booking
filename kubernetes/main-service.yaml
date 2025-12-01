@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-service
+  namespace: vizag-resort
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: main-service
+  template:
+    metadata:
+      labels:
+        app: main-service
+    spec:
+      containers:
+      - name: main-service
+        image: your-dockerhub-username/vizag-resort-main:latest
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: resort-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-service
+  namespace: vizag-resort
+spec:
+  selector:
+    app: main-service
+  ports:
+  - port: 80
+    targetPort: 3000
+  type: LoadBalancer
