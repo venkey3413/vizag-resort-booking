@@ -53,5 +53,18 @@ services:
     depends_on:
       - redis
 
+  database-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.database
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - DB_API_PORT=3003
+    volumes:
+      - .:/app
+      - /app/node_modules
+
 volumes:
   redis-data:

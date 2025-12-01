@@ -429,11 +429,14 @@ let coupons = [];
 async function loadCoupons() {
     try {
         const response = await fetch('/api/coupons');
-        coupons = await response.json();
+        const data = await response.json();
+        coupons = Array.isArray(data) ? data : [];
         displayCoupons();
         console.log('Loaded coupons:', coupons);
     } catch (error) {
         console.error('Error loading coupons:', error);
+        coupons = [];
+        displayCoupons();
     }
 }
 
@@ -542,10 +545,13 @@ async function handleStandaloneCouponSubmit(e) {
 async function loadFoodItems() {
     try {
         const response = await fetch('/api/food-items');
-        foodItems = await response.json();
+        const data = await response.json();
+        foodItems = Array.isArray(data) ? data : [];
         displayFoodItems();
     } catch (error) {
         console.error('Error loading food items:', error);
+        foodItems = [];
+        displayFoodItems();
     }
 }
 
@@ -663,10 +669,13 @@ async function deleteFoodItem(id) {
 async function loadTravelPackages() {
     try {
         const response = await fetch('/api/travel-packages');
-        travelPackages = await response.json();
+        const data = await response.json();
+        travelPackages = Array.isArray(data) ? data : [];
         displayTravelPackages();
     } catch (error) {
         console.error('Error loading travel packages:', error);
+        travelPackages = [];
+        displayTravelPackages();
     }
 }
 
@@ -828,11 +837,14 @@ let owners = [];
 async function loadOwners() {
     try {
         const response = await fetch('/api/owners');
-        owners = await response.json();
+        const data = await response.json();
+        owners = Array.isArray(data) ? data : [];
         displayOwners();
         console.log('Loaded owners:', owners);
     } catch (error) {
         console.error('Error loading owners:', error);
+        owners = [];
+        displayOwners();
     }
 }
 
