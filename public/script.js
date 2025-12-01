@@ -817,7 +817,7 @@ function setupLogoRotation() {
 }
 
 function setupWebSocketSync() {
-    console.log('📡 EventBridge real-time sync enabled');
+    console.log('📡 Redis real-time sync enabled');
     
     try {
         const eventSource = new EventSource(`${SERVER_URL}/api/events`);
@@ -825,7 +825,7 @@ function setupWebSocketSync() {
         eventSource.onmessage = function(event) {
             try {
                 const data = JSON.parse(event.data);
-                console.log('📡 EventBridge event received:', data);
+                console.log('📡 Redis event received:', data);
                 
                 if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
                     console.log('🏨 Resort update detected - refreshing resorts now!');
@@ -839,21 +839,21 @@ function setupWebSocketSync() {
                 
 
             } catch (error) {
-                console.log('📡 EventBridge ping or invalid data:', event.data);
+                console.log('📡 Redis ping or invalid data:', event.data);
             }
         };
         
         eventSource.onerror = function(error) {
-            console.log('⚠️ EventBridge connection error:', error);
+            console.log('⚠️ Redis connection error:', error);
             console.log('EventSource readyState:', eventSource.readyState);
         };
         
         eventSource.onopen = function() {
-            console.log('✅ EventBridge connected successfully');
+            console.log('✅ Redis connected successfully');
             console.log('EventSource readyState:', eventSource.readyState);
         };
     } catch (error) {
-        console.error('EventBridge setup failed:', error);
+        console.error('Redis setup failed:', error);
     }
 }
 
