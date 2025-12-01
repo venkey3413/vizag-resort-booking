@@ -12,8 +12,13 @@ class RedisPubSub {
         try {
             // Connect to Redis (Docker or local)
             const redisUrl = process.env.REDIS_URL;
-            const redisHost = process.env.REDIS_HOST || 'localhost';
+            let redisHost = process.env.REDIS_HOST || 'localhost';
             const redisPort = process.env.REDIS_PORT || 6379;
+            
+            // Use Docker service name if in container
+            if (process.env.NODE_ENV === 'development' || process.env.REDIS_URL) {
+                redisHost = 'redis';
+            }
 
             const clientConfig = redisUrl ? { url: redisUrl } : {
                 socket: {
