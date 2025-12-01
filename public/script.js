@@ -300,24 +300,18 @@ function sanitizeInput(input) {
 }
 
 async function loadResorts() {
-    // Check if critical.js already loaded resorts
-    if (window.resorts && window.resorts.length > 0) {
-        console.log('✅ Resorts already loaded by critical.js:', window.resorts.length, 'resorts');
-        resorts = window.resorts;
-        displayResorts();
-        return;
-    }
-    
-    // Fallback: load from API if critical.js didn't load them
     try {
-        const url = `${SERVER_URL}/api/resorts`;
+        // Add cache busting parameter to force fresh data
+        const cacheBuster = Date.now();
+        const url = `${SERVER_URL}/api/resorts?_cb=${cacheBuster}`;
         console.log('🏝️ Fetching resorts from:', url);
         
         const response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Cache-Control': 'no-cache'
             }
         });
         
@@ -812,15 +806,15 @@ function setupLogoRotation() {
 }
 
 function setupWebSocketSync() {
-    console.log('📡 Redis real-time sync enabled for main website');
+    console.log('📡 Enhanced Redis real-time sync enabled for main website');
     
     let eventSource;
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 5;
+    let fallbackPollingInterval;
     
     function connectEventSource() {
         try {
-            // Use current domain for EventSource (nginx will proxy to main service)
             const eventSourceUrl = `${SERVER_URL}/api/events`;
             eventSource = new EventSource(eventSourceUrl);
             console.log('📡 Connecting to Redis events at:', eventSourceUrl);
@@ -830,18 +824,34 @@ function setupWebSocketSync() {
                     const data = JSON.parse(event.data);
                     console.log('📡 Main website Redis event received:', data);
                     
-                    if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
+                    // Handle resort events with immediate refresh
+                    if (data.type === 'resort.added' || data.type === 'resort.updated' || 
+                        data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
                         console.log('🏨 Resort update detected - auto-refreshing resorts!');
-                        loadResorts();
+                        
+                        // Force reload resorts immediately
+                        setTimeout(() => {
+                            loadResorts();
+                        }, 100);
+                        
+                        // Show notification
                         showNotification('Resort information updated automatically', 'success');
+                        
+                        // Clear any cached data
+                        if (window.resorts) {
+                            window.resorts = null;
+                        }
                     }
                     
                     if (data.type === 'resort.availability.updated') {
                         console.log('📅 Resort availability updated - refreshing resorts');
-                        loadResorts();
+                        setTimeout(() => {
+                            loadResorts();
+                        }, 100);
                     }
                 } catch (error) {
-                    // Ignore ping messages
+                    // Ignore ping messages and parsing errors
+                    console.log('📡 Non-JSON message received (likely ping)');
                 }
             };
             
@@ -849,21 +859,62 @@ function setupWebSocketSync() {
                 console.log('⚠️ Main website Redis connection error, attempting reconnect...');
                 eventSource.close();
                 
+                // Start fallback polling if Redis fails
+                startFallbackPolling();
+                
                 if (reconnectAttempts < maxReconnectAttempts) {
                     reconnectAttempts++;
                     setTimeout(connectEventSource, 2000 * reconnectAttempts);
                 } else {
-                    console.log('❌ Max reconnection attempts reached');
+                    console.log('❌ Max reconnection attempts reached, using fallback polling');
                 }
             };
             
             eventSource.onopen = function() {
                 console.log('✅ Main website connected to Redis pub/sub');
                 reconnectAttempts = 0;
+                
+                // Stop fallback polling when Redis is working
+                if (fallbackPollingInterval) {
+                    clearInterval(fallbackPollingInterval);
+                    fallbackPollingInterval = null;
+                }
             };
         } catch (error) {
             console.error('Main website Redis setup failed:', error);
+            startFallbackPolling();
         }
+    }
+    
+    // Fallback polling mechanism
+    function startFallbackPolling() {
+        if (fallbackPollingInterval) return; // Already running
+        
+        console.log('🔄 Starting fallback polling for resort updates');
+        let lastResortCount = resorts.length;
+        
+        fallbackPollingInterval = setInterval(async () => {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/resorts`);
+                if (response.ok) {
+                    const newResorts = await response.json();
+                    
+                    // Check if resorts changed
+                    if (newResorts.length !== lastResortCount || 
+                        JSON.stringify(newResorts) !== JSON.stringify(resorts)) {
+                        
+                        console.log('🔄 Fallback polling detected resort changes');
+                        resorts = newResorts;
+                        window.resorts = newResorts;
+                        displayResorts();
+                        showNotification('Resort information updated', 'success');
+                        lastResortCount = newResorts.length;
+                    }
+                }
+            } catch (error) {
+                console.log('🔄 Fallback polling error:', error);
+            }
+        }, 5000); // Poll every 5 seconds
     }
     
     connectEventSource();
