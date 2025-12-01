@@ -31,10 +31,6 @@ app.get('/api/events', (req, res) => {
     console.log('📡 Admin panel connected to Redis pub/sub');
 });
 
-
-
-
-
 // Serve admin panel
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/admin-public/index.html');
@@ -64,7 +60,7 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3002/api/resorts', {
+        const response = await fetch('http://booking-service:3002/api/resorts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -78,7 +74,7 @@ app.post('/api/resorts', async (req, res) => {
 
 app.put('/api/resorts/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3002/api/resorts/${req.params.id}`, {
+        const response = await fetch(`http://booking-service:3002/api/resorts/${req.params.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -92,7 +88,7 @@ app.put('/api/resorts/:id', async (req, res) => {
 
 app.get('/api/dynamic-pricing/:resortId', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3002/api/dynamic-pricing/${req.params.resortId}`);
+        const response = await fetch(`http://booking-service:3002/api/dynamic-pricing/${req.params.resortId}`);
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -102,7 +98,7 @@ app.get('/api/dynamic-pricing/:resortId', async (req, res) => {
 
 app.post('/api/dynamic-pricing', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3002/api/dynamic-pricing', {
+        const response = await fetch('http://booking-service:3002/api/dynamic-pricing', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -116,7 +112,7 @@ app.post('/api/dynamic-pricing', async (req, res) => {
 
 app.delete('/api/resorts/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3002/api/resorts/${req.params.id}`, {
+        const response = await fetch(`http://booking-service:3002/api/resorts/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -128,7 +124,7 @@ app.delete('/api/resorts/:id', async (req, res) => {
 
 app.post('/api/resorts/reorder', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3002/api/resorts/reorder', {
+        const response = await fetch('http://booking-service:3002/api/resorts/reorder', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -143,7 +139,7 @@ app.post('/api/resorts/reorder', async (req, res) => {
 // Food item management endpoints
 app.get('/api/food-items', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3000/api/food-items');
+        const response = await fetch('http://main-service:3000/api/food-items');
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -153,7 +149,7 @@ app.get('/api/food-items', async (req, res) => {
 
 app.post('/api/food-items', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3000/api/food-items', {
+        const response = await fetch('http://main-service:3000/api/food-items', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -167,7 +163,7 @@ app.post('/api/food-items', async (req, res) => {
 
 app.put('/api/food-items/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3000/api/food-items/${req.params.id}`, {
+        const response = await fetch(`http://main-service:3000/api/food-items/${req.params.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -181,7 +177,7 @@ app.put('/api/food-items/:id', async (req, res) => {
 
 app.delete('/api/food-items/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3000/api/food-items/${req.params.id}`, {
+        const response = await fetch(`http://main-service:3000/api/food-items/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -194,64 +190,45 @@ app.delete('/api/food-items/:id', async (req, res) => {
 // Travel packages management endpoints
 app.get('/api/travel-packages', async (req, res) => {
     try {
-        console.log('🔄 Admin server forwarding GET request to main server for travel packages');
-        const response = await fetch('http://localhost:3000/api/travel-packages');
+        const response = await fetch('http://main-service:3000/api/travel-packages');
         const data = await response.json();
-        console.log(`📥 Retrieved ${data.length} travel packages from main server`);
         res.json(data);
     } catch (error) {
-        console.error('❌ Admin server error fetching travel packages:', error);
-        res.status(500).json({ error: `Failed to fetch travel packages: ${error.message}` });
+        res.status(500).json({ error: 'Failed to fetch travel packages' });
     }
 });
 
 app.post('/api/travel-packages', async (req, res) => {
     try {
-        console.log('🔄 Admin server forwarding POST request to main server for new travel package');
-        console.log('📤 Request body:', req.body);
-        
-        const response = await fetch('http://localhost:3000/api/travel-packages', {
+        const response = await fetch('http://main-service:3000/api/travel-packages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
         });
-        
-        console.log(`📥 Main server response status: ${response.status}`);
         const data = await response.json();
-        console.log('📥 Main server response data:', data);
-        
         res.status(response.status).json(data);
     } catch (error) {
-        console.error('❌ Admin server error forwarding travel package creation:', error);
-        res.status(500).json({ error: `Failed to add travel package: ${error.message}` });
+        res.status(500).json({ error: 'Failed to add travel package' });
     }
 });
 
 app.put('/api/travel-packages/:id', async (req, res) => {
     try {
-        console.log(`🔄 Admin server forwarding PUT request to main server for travel package ${req.params.id}`);
-        console.log('📤 Request body:', req.body);
-        
-        const response = await fetch(`http://localhost:3000/api/travel-packages/${req.params.id}`, {
+        const response = await fetch(`http://main-service:3000/api/travel-packages/${req.params.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
         });
-        
-        console.log(`📥 Main server response status: ${response.status}`);
         const data = await response.json();
-        console.log('📥 Main server response data:', data);
-        
         res.status(response.status).json(data);
     } catch (error) {
-        console.error('❌ Admin server error forwarding travel package update:', error);
-        res.status(500).json({ error: `Failed to update travel package: ${error.message}` });
+        res.status(500).json({ error: 'Failed to update travel package' });
     }
 });
 
 app.delete('/api/travel-packages/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3000/api/travel-packages/${req.params.id}`, {
+        const response = await fetch(`http://main-service:3000/api/travel-packages/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -264,7 +241,7 @@ app.delete('/api/travel-packages/:id', async (req, res) => {
 // Forward booking requests to booking-server
 app.get('/api/bookings', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3002/api/bookings');
+        const response = await fetch('http://booking-service:3002/api/bookings');
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -274,7 +251,7 @@ app.get('/api/bookings', async (req, res) => {
 
 app.post('/api/bookings/:id/cancel', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3002/api/bookings/${req.params.id}/cancel`, {
+        const response = await fetch(`http://booking-service:3002/api/bookings/${req.params.id}/cancel`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -288,7 +265,7 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
 
 app.put('/api/bookings/:id/payment', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3002/api/bookings/${req.params.id}/payment`, {
+        const response = await fetch(`http://booking-service:3002/api/bookings/${req.params.id}/payment`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -302,7 +279,7 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
 
 app.post('/api/bookings/:id/send-email', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3002/api/bookings/${req.params.id}/send-email`, {
+        const response = await fetch(`http://booking-service:3002/api/bookings/${req.params.id}/send-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -316,7 +293,7 @@ app.post('/api/bookings/:id/send-email', async (req, res) => {
 // Coupon management endpoints
 app.get('/api/coupons', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3002/api/coupons');
+        const response = await fetch('http://booking-service:3002/api/coupons');
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -326,7 +303,7 @@ app.get('/api/coupons', async (req, res) => {
 
 app.post('/api/coupons', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3002/api/coupons', {
+        const response = await fetch('http://booking-service:3002/api/coupons', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -340,7 +317,7 @@ app.post('/api/coupons', async (req, res) => {
 
 app.delete('/api/coupons/:code', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3002/api/coupons/${req.params.code}`, {
+        const response = await fetch(`http://booking-service:3002/api/coupons/${req.params.code}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -353,7 +330,7 @@ app.delete('/api/coupons/:code', async (req, res) => {
 // Owner management endpoints
 app.get('/api/owners', async (req, res) => {
     try {
-        const response = await fetch('http://localhost:3002/api/owners');
+        const response = await fetch('http://booking-service:3002/api/owners');
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -363,7 +340,7 @@ app.get('/api/owners', async (req, res) => {
 
 app.delete('/api/owners/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://localhost:3002/api/owners/${req.params.id}`, {
+        const response = await fetch(`http://booking-service:3002/api/owners/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -371,10 +348,6 @@ app.delete('/api/owners/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete owner' });
     }
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`👨‍💼 Admin Panel running on http://0.0.0.0:${PORT}`);
 });
 
 initDB().then(async () => {
