@@ -7,6 +7,7 @@ const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const redisPubSub = require('./redis-pubsub');
 const fetch = require('node-fetch');
+const { checkAvailability } = require('./availability-service');
 
 const app = express();
 const PORT = 3002;
@@ -38,6 +39,40 @@ app.get('/', (req, res) => {
 app.get('/api/events', (req, res) => {
     const clientId = `booking-${Date.now()}-${Math.random()}`;
     redisPubSub.subscribe(clientId, res);
+});
+
+// Availability check endpoint
+app.post('/api/check-availability', async (req, res) => {
+    try {
+        const { resortId, checkIn, checkOut } = req.body;
+        const result = await checkAvailability(resortId, checkIn, checkOut);
+        
+        if (result.available) {
+            res.json({ available: true });
+        } else {
+            res.status(400).json({ error: result.error });
+        }
+    } catch (error) {
+        console.error('Availability check error:', error);
+        res.status(500).json({ error: 'Failed to check availability' });
+    }
+});
+
+// Payment proof endpoint
+app.post('/api/payment-proofs', async (req, res) => {
+    try {
+        const { bookingId, transactionId } = req.body;
+        
+        await db.run(
+            'INSERT INTO payment_proofs (booking_id, transaction_id, created_at) VALUES (?, ?, datetime("now"))',
+            [bookingId, transactionId]
+        );
+        
+        res.json({ message: 'Payment proof stored successfully' });
+    } catch (error) {
+        console.error('Payment proof storage error:', error);
+        res.status(500).json({ error: 'Failed to store payment proof' });
+    }
 });
 
 
@@ -963,6 +998,10 @@ app.delete('/api/owners/:id', async (req, res) => {
 
 
 initDB().then(async () => {
+    // Initialize availability service
+    const availabilityService = require('./availability-service');
+    await availabilityService.initDB();
+    
     // Start automatic backups
     scheduleBackups();
     
