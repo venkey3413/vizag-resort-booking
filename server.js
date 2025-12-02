@@ -1,8 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
+// Use centralized database API
+const DB_API_URL = 'http://centralized-db-api:3003';
 const redisPubSub = require('./redis-pubsub');
 // UPI service removed - generate payment details inline
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
@@ -92,9 +92,7 @@ app.use(express.static('public'));
 app.use('/static', express.static('chat-app-full/static'));
 
 
-// Database
-let db;
-
+// Database initialization (schema only, data operations via centralized API)
 async function initDB() {
     db = await open({
         filename: './resort_booking.db',
@@ -367,26 +365,9 @@ async function initDB() {
 // Routes
 app.get('/api/resorts', async (req, res) => {
     try {
-        const resorts = await db.all('SELECT id, name, location, price, description, image, gallery, videos, map_link, amenities, note, max_guests, available, sort_order FROM resorts WHERE available = 1 ORDER BY sort_order ASC, id ASC');
+        const response = await fetch(`${DB_API_URL}/api/resorts`);
+        const resorts = await response.json();
         console.log('🏨 Fetching resorts:', resorts.length, 'found');
-        
-        // Add dynamic pricing to each resort
-        for (let resort of resorts) {
-            try {
-                const pricing = await db.all(
-                    'SELECT day_type, price FROM dynamic_pricing WHERE resort_id = ?',
-                    [resort.id]
-                );
-                resort.dynamic_pricing = pricing;
-                console.log(`💰 Resort ${resort.id} (${resort.name}) pricing:`, pricing);
-            } catch (error) {
-                // Dynamic pricing table might not exist yet
-                console.log(`⚠️ No dynamic pricing for resort ${resort.id}:`, error.message);
-                resort.dynamic_pricing = [];
-            }
-        }
-        
-        console.log('📤 Sending resorts with dynamic pricing to frontend');
         res.json(resorts);
     } catch (error) {
         console.error('❌ Resort fetch error:', error);
@@ -649,11 +630,27 @@ app.post('/api/bookings', async (req, res) => {
         const initialStatus = transactionId ? 'pending_verification' : 'pending_payment';
         const paymentStatus = transactionId ? 'pending' : 'pending';
         
-        // Create booking with sanitized data (email is verified via OTP)
-        const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, base_price, platform_fee, total_price, booking_reference, coupon_code, discount_amount, status, payment_status, transaction_id, email_verified)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [sanitizedData.resortId, sanitizedData.guestName, sanitizedData.email, sanitizedData.phone, sanitizedData.checkIn, sanitizedData.checkOut, sanitizedData.guests, basePrice, platformFee, totalPrice, bookingReference, couponCode, discount, initialStatus, paymentStatus, sanitizedData.transactionId, 1]);
+        // Create booking via centralized API
+        const bookingResponse = await fetch(`${DB_API_URL}/api/bookings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                resortId: sanitizedData.resortId,
+                guestName: sanitizedData.guestName,
+                email: sanitizedData.email,
+                phone: sanitizedData.phone,
+                checkIn: sanitizedData.checkIn,
+                checkOut: sanitizedData.checkOut,
+                guests: sanitizedData.guests,
+                totalPrice: totalPrice,
+                transactionId: sanitizedData.transactionId,
+                bookingReference: bookingReference,
+                couponCode: couponCode,
+                discountAmount: discount
+            })
+        });
+        
+        const result = await bookingResponse.json();
         
         // Store payment proof if transactionId provided
         if (transactionId) {

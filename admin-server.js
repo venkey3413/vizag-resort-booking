@@ -36,22 +36,13 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/admin-public/index.html');
 });
 
-// Direct database access for resorts
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
-
-let db;
-
-async function initDB() {
-    db = await open({
-        filename: './resort_booking.db',
-        driver: sqlite3.Database
-    });
-}
+// Use centralized database API
+const DB_API_URL = 'http://centralized-db-api:3003';
 
 app.get('/api/resorts', async (req, res) => {
     try {
-        const resorts = await db.all('SELECT * FROM resorts ORDER BY sort_order ASC, id ASC');
+        const response = await fetch(`${DB_API_URL}/api/resorts`);
+        const resorts = await response.json();
         res.json(resorts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch resorts' });
@@ -60,7 +51,7 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/resorts', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/resorts', {
+        const response = await fetch(`${DB_API_URL}/api/resorts`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -74,7 +65,7 @@ app.post('/api/resorts', async (req, res) => {
 
 app.put('/api/resorts/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://booking-service:3002/api/resorts/${req.params.id}`, {
+        const response = await fetch(`${DB_API_URL}/api/resorts/${req.params.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -112,7 +103,7 @@ app.post('/api/dynamic-pricing', async (req, res) => {
 
 app.delete('/api/resorts/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://booking-service:3002/api/resorts/${req.params.id}`, {
+        const response = await fetch(`${DB_API_URL}/api/resorts/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -238,10 +229,10 @@ app.delete('/api/travel-packages/:id', async (req, res) => {
     }
 });
 
-// Forward booking requests to booking-server
+// Forward booking requests to centralized database API
 app.get('/api/bookings', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/bookings');
+        const response = await fetch(`${DB_API_URL}/api/bookings`);
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -293,7 +284,7 @@ app.post('/api/bookings/:id/send-email', async (req, res) => {
 // Coupon management endpoints
 app.get('/api/coupons', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/coupons');
+        const response = await fetch(`${DB_API_URL}/api/coupons`);
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -303,7 +294,7 @@ app.get('/api/coupons', async (req, res) => {
 
 app.post('/api/coupons', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/coupons', {
+        const response = await fetch(`${DB_API_URL}/api/coupons`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -350,7 +341,7 @@ app.delete('/api/owners/:id', async (req, res) => {
     }
 });
 
-initDB().then(async () => {
+(async () => {
     try {
         await redisPubSub.connect();
         console.log('✅ Redis pub/sub connected successfully');
@@ -361,4 +352,4 @@ initDB().then(async () => {
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`👨💼 Admin Panel running on http://0.0.0.0:${PORT}`);
     });
-});
+})();
