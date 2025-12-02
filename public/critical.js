@@ -400,15 +400,25 @@ window.bookNow=function(resortId,resortName){
                 nextDay.setDate(nextDay.getDate() + 1);
                 document.getElementById('checkOut').value = nextDay.toISOString().split('T')[0];
                 document.getElementById('checkOut').min = nextDay.toISOString().split('T')[0];
-                updatePricing();
-                loadBookingModalCoupons();
-                showAvailableCouponsForDate();
+                
+                // Show dynamic pricing for selected date
+                showDynamicPriceForDate(selectedDate);
+                
+                // Update pricing immediately
+                setTimeout(() => {
+                    updatePricing();
+                    loadBookingModalCoupons();
+                    showAvailableCouponsForDate();
+                }, 100);
             });
             
             checkOutInput.addEventListener('change', function(){
-                updatePricing();
-                loadBookingModalCoupons();
-                showAvailableCouponsForDate();
+                // Update pricing immediately
+                setTimeout(() => {
+                    updatePricing();
+                    loadBookingModalCoupons();
+                    showAvailableCouponsForDate();
+                }, 100);
             });
             
             // Update guests label to show max guests
@@ -629,8 +639,64 @@ window.bookNow=function(resortId,resortName){
                 }
             }
             
-            // Initial pricing calculation
-            updatePricing();
+            // Initial pricing calculation with delay
+            setTimeout(() => {
+                updatePricing();
+            }, 200);
+            
+            // Function to show dynamic pricing for selected date
+            window.showDynamicPriceForDate = function(selectedDate) {
+                const checkInDate = new Date(selectedDate);
+                const dayOfWeek = checkInDate.getDay();
+                let nightlyRate = resort.price;
+                let dayTypeText = 'Regular';
+                
+                if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+                    if (dayOfWeek === 5) {
+                        // Friday
+                        const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
+                        if (fridayPrice) {
+                            nightlyRate = fridayPrice.price;
+                            dayTypeText = 'Friday';
+                        }
+                    } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                        // Weekend
+                        const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
+                        if (weekendPrice) {
+                            nightlyRate = weekendPrice.price;
+                            dayTypeText = 'Weekend';
+                        }
+                    } else {
+                        // Weekday
+                        const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+                        if (weekdayPrice) {
+                            nightlyRate = weekdayPrice.price;
+                            dayTypeText = 'Weekday';
+                        }
+                    }
+                }
+                
+                // Show pricing info near calendar
+                let priceInfo = document.getElementById('dynamicPriceInfo');
+                if (!priceInfo) {
+                    priceInfo = document.createElement('div');
+                    priceInfo.id = 'dynamicPriceInfo';
+                    priceInfo.style.cssText = 'margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #007bff;';
+                    document.getElementById('checkIn').parentNode.appendChild(priceInfo);
+                }
+                
+                const dateStr = checkInDate.toLocaleDateString('en-IN', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                priceInfo.innerHTML = `
+                    <strong>📅 ${dateStr}</strong><br>
+                    <span style="color: #007bff;">💰 ${dayTypeText} Rate: ₹${nightlyRate.toLocaleString()}/night</span>
+                `;
+            }
             
             // Setup global coupon functions
             window.showAvailableCoupons = function(){
