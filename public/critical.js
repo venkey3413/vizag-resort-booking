@@ -35,20 +35,11 @@ function setupModalEvents(){
         const form=document.getElementById('bookingForm');
         if(form)form.onsubmit=window.handleBookingSubmit;
         
-        // Email input and OTP setup
+        // Email input (OTP verification disabled)
         const emailInput=document.getElementById('email');
         if(emailInput){
             emailInput.addEventListener('input',function(){
-                const email = this.value;
-                const sendEmailOtpBtn=document.getElementById('sendEmailOtpBtn');
-                if(sendEmailOtpBtn){
-                    if(email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-                        sendEmailOtpBtn.style.display='inline-block';
-                    }else{
-                        sendEmailOtpBtn.style.display='none';
-                        document.getElementById('emailOtpGroup').style.display='none';
-                    }
-                }
+                // OTP verification disabled - no action needed
             });
         }
         
@@ -347,23 +338,12 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('resortPrice').value=resort.price;
             document.getElementById('modalResortName').textContent=`Book ${resortName}`;
             
-            // Reset email verification state
-            window.emailVerified = false;
-            window.emailOtpCode = null;
-            
             // Reset coupon data
             window.appliedCouponCode = null;
             window.appliedDiscountAmount = 0;
             document.getElementById('couponCode').value = '';
             document.getElementById('couponMessage').innerHTML = '';
             document.getElementById('discountRow').style.display = 'none';
-            
-            // Reset email input
-            const emailInput=document.getElementById('email');
-            if(emailInput){
-                emailInput.classList.remove('email-verified');
-                emailInput.readOnly = false;
-            }
             
             // Set default +91 for phone
             const phoneInput=document.getElementById('phone');
@@ -373,16 +353,15 @@ window.bookNow=function(resortId,resortName){
                 phoneInput.blur();
             }
             
-            // Reset OTP elements
+            // Hide OTP elements
             document.getElementById('sendEmailOtpBtn').style.display = 'none';
             document.getElementById('emailOtpGroup').style.display = 'none';
-            document.getElementById('emailOtpCode').value = '';
             
-            // Disable booking button initially
+            // Enable booking button by default
             const bookBtn = document.querySelector('#bookingModal .book-btn');
             if (bookBtn) {
-                bookBtn.disabled = true;
-                bookBtn.textContent = 'Verify Email First';
+                bookBtn.disabled = false;
+                bookBtn.textContent = 'Confirm Booking';
             }
             
             const today=new Date().toISOString().split('T')[0];
@@ -887,13 +866,8 @@ window.handleBookingSubmit=async function(e){
     e.preventDefault();
     console.log('🎯 Booking form submitted');
     
-    // Check email verification first
-    if (!window.emailVerified) {
-        console.log('❌ Email not verified');
-        showCriticalNotification('Please verify your email address with OTP first', 'error');
-        return;
-    }
-    console.log('✅ Email verified, proceeding with booking');
+    // Email verification removed - proceed directly
+    console.log('✅ Proceeding with booking (email verification disabled)');
     
     const formData={
         resortId:document.getElementById('resortId').value,
