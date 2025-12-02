@@ -1377,8 +1377,9 @@ function setupMainWebsiteRedisSync() {
                     const data = JSON.parse(event.data);
                     console.log('📡 Main website Redis event received:', data);
                     
-                    if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
-                        console.log('🏨 Resort change detected - reloading resorts!');
+                    // Handle all resort-related events
+                    if (data.type && data.type.startsWith('resort.')) {
+                        console.log('🏨 Resort event detected:', data.type, '- reloading resorts!');
                         // Force reload resorts with cache-busting
                         fetch('/api/resorts?' + Date.now(), {
                             headers: {
@@ -1395,7 +1396,7 @@ function setupMainWebsiteRedisSync() {
                             return r.json();
                         })
                         .then(resorts => {
-                            console.log('✅ Resorts reloaded, updating display');
+                            console.log('✅ Resorts reloaded, updating display with', resorts.length, 'resorts');
                             window.resorts = resorts;
                             renderResorts(resorts);
                         })

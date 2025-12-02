@@ -274,6 +274,18 @@ app.get('/api/events', (req, res) => {
     console.log('📡 Main website connected to Redis pub/sub');
 });
 
+// Blocked dates endpoint
+app.get('/api/blocked-dates/:resortId', async (req, res) => {
+    try {
+        const response = await fetch('http://booking-service:3002/api/blocked-dates/' + req.params.resortId);
+        const blockedDates = await response.json();
+        res.json(blockedDates);
+    } catch (error) {
+        console.error('Blocked dates fetch error:', error);
+        res.json([]);
+    }
+});
+
 // Razorpay key endpoint
 app.get('/api/razorpay-key', (req, res) => {
     const key = process.env.RAZORPAY_KEY_ID;
@@ -295,6 +307,41 @@ app.get('/api/coupons', async (req, res) => {
     } catch (error) {
         console.error('❌ Coupon fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch coupons' });
+    }
+});
+
+// Email OTP endpoint
+app.post('/api/send-email-otp', async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        
+        if (!email || !otp) {
+            return res.status(400).json({ success: false, error: 'Email and OTP are required' });
+        }
+        
+        // Send OTP via email service
+        await sendInvoiceEmail({
+            to: email,
+            subject: 'Email Verification OTP - Vizag Resorts',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #007bff;">Email Verification</h2>
+                    <p>Your OTP for email verification is:</p>
+                    <div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; color: #007bff; border-radius: 8px; margin: 20px 0;">
+                        ${otp}
+                    </div>
+                    <p>This OTP is valid for 10 minutes. Please do not share this code with anyone.</p>
+                    <p>If you didn't request this verification, please ignore this email.</p>
+                    <hr style="margin: 30px 0;">
+                    <p style="color: #666; font-size: 12px;">Vizag Resort Booking System</p>
+                </div>
+            `
+        });
+        
+        res.json({ success: true, message: 'OTP sent successfully' });
+    } catch (error) {
+        console.error('❌ Email OTP send error:', error);
+        res.status(500).json({ success: false, error: 'Failed to send OTP' });
     }
 });
 
