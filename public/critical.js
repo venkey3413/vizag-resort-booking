@@ -1378,16 +1378,28 @@ function setupMainWebsiteRedisSync() {
                     console.log('📡 Main website Redis event received:', data);
                     
                     if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
-                        console.log('🏨 Resort update detected - auto-refreshing resorts!');
-                        // Reload resorts and re-render immediately
-                        fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}})
-                        .then(r=>{
+                        console.log('🏨 Resort change detected - reloading resorts!');
+                        // Force reload resorts with cache-busting
+                        fetch('/api/resorts?' + Date.now(), {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/json',
+                                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                'Pragma': 'no-cache',
+                                'Expires': '0'
+                            }
+                        })
+                        .then(r => {
                             console.log('🏨 Resort API response status:', r.status);
-                            if(!r.ok) throw new Error(`HTTP ${r.status}`);
+                            if (!r.ok) throw new Error(`HTTP ${r.status}`);
                             return r.json();
                         })
-                        .then(renderResorts)
-                        .catch(e=>console.error('Resort reload failed:', e));
+                        .then(resorts => {
+                            console.log('✅ Resorts reloaded, updating display');
+                            window.resorts = resorts;
+                            renderResorts(resorts);
+                        })
+                        .catch(e => console.error('❌ Resort reload failed:', e));
                     }
                 } catch (error) {
                     // Ignore ping messages
