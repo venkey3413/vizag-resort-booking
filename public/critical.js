@@ -1379,14 +1379,15 @@ function setupMainWebsiteRedisSync() {
                     
                     if (data.type === 'resort.added' || data.type === 'resort.updated' || data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
                         console.log('🏨 Resort update detected - auto-refreshing resorts!');
-                        // Reload resorts and re-render
-                        resortsPromise = fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}}).then(r=>{
+                        // Reload resorts and re-render immediately
+                        fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}})
+                        .then(r=>{
                             console.log('🏨 Resort API response status:', r.status);
                             if(!r.ok) throw new Error(`HTTP ${r.status}`);
                             return r.json();
-                        });
-                        resortsPromise.then(renderResorts).catch(e=>console.error('Resort reload failed:', e));
-                        showCriticalNotification('Resort information updated automatically', 'success');
+                        })
+                        .then(renderResorts)
+                        .catch(e=>console.error('Resort reload failed:', e));
                     }
                 } catch (error) {
                     // Ignore ping messages
@@ -1417,12 +1418,8 @@ function setupMainWebsiteRedisSync() {
     connectEventSource();
 }
 
-// Start Redis sync after DOM is ready
-if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded', setupMainWebsiteRedisSync);
-}else{
-    setupMainWebsiteRedisSync();
-}
+// Start Redis sync immediately
+setupMainWebsiteRedisSync();
 
 // Load main script immediately
 const script=document.createElement('script');
