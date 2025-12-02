@@ -43,6 +43,36 @@ function publishEvent(type, data) {
 }
 
 // RESORTS API
+app.get('/api/resorts/:id', async (req, res) => {
+    try {
+        const resort = await db.get(`
+            SELECT r.*, 
+                   GROUP_CONCAT(dp.day_type || ':' || dp.price) as dynamic_pricing_raw
+            FROM resorts r
+            LEFT JOIN dynamic_pricing dp ON r.id = dp.resort_id
+            WHERE r.id = ?
+            GROUP BY r.id
+        `, [req.params.id]);
+        
+        if (!resort) {
+            return res.status(404).json({ error: 'Resort not found' });
+        }
+        
+        const resortWithPricing = {
+            ...resort,
+            dynamic_pricing: resort.dynamic_pricing_raw ? 
+                resort.dynamic_pricing_raw.split(',').map(item => {
+                    const [day_type, price] = item.split(':');
+                    return { day_type, price: parseInt(price) };
+                }) : []
+        };
+        
+        res.json(resortWithPricing);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch resort' });
+    }
+});
+
 app.get('/api/resorts', async (req, res) => {
     try {
         const resorts = await db.all(`
@@ -236,6 +266,39 @@ app.post('/api/travel-bookings', async (req, res) => {
         res.json({ id: result.lastID, message: 'Travel booking created successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to create travel booking' });
+    }
+});
+
+// BLOCKED DATES API
+app.get('/api/blocked-dates/:resortId', async (req, res) => {
+    try {
+        const blockedDates = [];
+        
+        // Check resort_blocks table
+        try {
+            const blocks = await db.all(
+                'SELECT block_date FROM resort_blocks WHERE resort_id = ?',
+                [req.params.resortId]
+            );
+            blockedDates.push(...blocks);
+        } catch (error) {
+            console.log('Resort blocks table not found');
+        }
+        
+        // Check resort_availability table
+        try {
+            const availability = await db.all(
+                'SELECT blocked_date FROM resort_availability WHERE resort_id = ?',
+                [req.params.resortId]
+            );
+            blockedDates.push(...availability);
+        } catch (error) {
+            console.log('Resort availability table not found');
+        }
+        
+        res.json(blockedDates);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch blocked dates' });
     }
 });
 

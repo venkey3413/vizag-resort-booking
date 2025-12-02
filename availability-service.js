@@ -1,27 +1,17 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
+const axios = require('axios');
 
-let db;
+const DB_API_URL = process.env.DB_API_URL || 'http://localhost:3003';
 
 async function initDB() {
-    db = await open({
-        filename: './resort_booking.db',
-        driver: sqlite3.Database
-    });
+    // No database initialization needed - using API
 }
 
 // Check availability for a resort on specific dates with pricing validation
 async function checkAvailability(resortId, checkIn, checkOut, expectedPrice) {
     try {
-        // Get resort details with dynamic pricing
-        const resort = await db.get(`
-            SELECT r.*, 
-                   GROUP_CONCAT(dp.day_type || ':' || dp.price) as dynamic_pricing_raw
-            FROM resorts r
-            LEFT JOIN dynamic_pricing dp ON r.id = dp.resort_id
-            WHERE r.id = ?
-            GROUP BY r.id
-        `, [resortId]);
+        // Get resort details from API
+        const resortResponse = await axios.get(`${DB_API_URL}/api/resorts/${resortId}`);
+        const resort = resortResponse.data;
         
         if (!resort) {
             return { available: false, error: 'Resort not found' };
@@ -35,11 +25,8 @@ async function checkAvailability(resortId, checkIn, checkOut, expectedPrice) {
         let nightlyRate = resort.price;
         
         // Apply dynamic pricing
-        if (resort.dynamic_pricing_raw) {
-            const dynamicPricing = resort.dynamic_pricing_raw.split(',').map(item => {
-                const [day_type, price] = item.split(':');
-                return { day_type, price: parseInt(price) };
-            });
+        if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+            const dynamicPricing = resort.dynamic_pricing;
             
             if (checkInDayOfWeek === 5) {
                 const fridayPrice = dynamicPricing.find(p => p.day_type === 'friday');
@@ -66,66 +53,46 @@ async function checkAvailability(resortId, checkIn, checkOut, expectedPrice) {
             };
         }
         
-        // Check for blocked dates (only check-in date)
+        // Check for blocked dates via API
         try {
-            const blockedCheckIn = await db.get(
-                'SELECT block_date FROM resort_blocks WHERE resort_id = ? AND block_date = ?',
-                [resortId, checkIn]
+            const blockedResponse = await axios.get(`${DB_API_URL}/api/blocked-dates/${resortId}`);
+            const blockedDates = blockedResponse.data;
+            
+            const isBlocked = blockedDates.some(blocked => 
+                blocked.block_date === checkIn || blocked.blocked_date === checkIn
             );
             
-            if (blockedCheckIn) {
+            if (isBlocked) {
                 return { 
                     available: false,
-                    error: `Resort is not available for check-in on ${new Date(checkIn).toLocaleDateString()}` 
+                    error: `🚫 This date is blocked. Please choose another date.`
                 };
             }
         } catch (error) {
-            console.log('Resort blocks table not found, skipping blocked date check');
+            console.log('No blocked dates found or API error:', error.message);
         }
         
-        // Check for owner-blocked dates
-        try {
-            const ownerBlockedCheckIn = await db.get(
-                'SELECT blocked_date FROM resort_availability WHERE resort_id = ? AND blocked_date = ?',
-                [resortId, checkIn]
-            );
-            
-            if (ownerBlockedCheckIn) {
-                return { 
-                    available: false,
-                    error: `🚫 This date is blocked by the resort owner. Please choose another date.`
-                };
-            }
-        } catch (error) {
-            console.log('Resort availability table not found, skipping owner blocked date check');
-        }
+        // Check bookings via API
+        const bookingsResponse = await axios.get(`${DB_API_URL}/api/bookings`);
+        const allBookings = bookingsResponse.data;
         
-        // Check if resort is already booked for the requested check-in date
-        const paidBookingForDate = await db.get(`
-            SELECT COUNT(*) as count 
-            FROM bookings 
-            WHERE resort_id = ? 
-            AND payment_status = 'paid'
-            AND check_in <= ? AND check_out > ?
-        `, [resortId, checkIn, checkIn]);
+        // Filter bookings for this resort and date
+        const resortBookings = allBookings.filter(booking => 
+            booking.resort_id == resortId &&
+            booking.check_in <= checkIn && booking.check_out > checkIn
+        );
         
-        if (paidBookingForDate.count > 0) {
+        const paidBookings = resortBookings.filter(b => b.payment_status === 'paid');
+        const unpaidBookings = resortBookings.filter(b => b.payment_status !== 'paid');
+        
+        if (paidBookings.length > 0) {
             return { 
                 available: false,
                 error: `This resort is already booked for ${new Date(checkIn).toLocaleDateString()}. Please choose a different date.` 
             };
         }
         
-        // Check unpaid bookings limit
-        const unpaidBookingsForDate = await db.get(`
-            SELECT COUNT(*) as count 
-            FROM bookings 
-            WHERE resort_id = ? 
-            AND check_in <= ? AND check_out > ?
-            AND payment_status != 'paid'
-        `, [resortId, checkIn, checkIn]);
-        
-        if (unpaidBookingsForDate.count >= 2) {
+        if (unpaidBookings.length >= 2) {
             return { 
                 available: false,
                 error: `Maximum 2 pending bookings allowed for ${new Date(checkIn).toLocaleDateString()}. Please wait for verification or choose another date.` 
