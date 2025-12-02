@@ -22,7 +22,8 @@ function showTab(tabName) {
 async function loadFoodOrders() {
     try {
         const response = await fetch('/api/food-orders');
-        const orders = await response.json();
+        const data = await response.json();
+        const orders = Array.isArray(data) ? data : [];
         window.currentFoodOrders = orders;
         displayFoodOrders(orders);
     } catch (error) {
