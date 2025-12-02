@@ -2,6 +2,7 @@ let resorts = [];
 let appliedCoupon = null;
 let discountAmount = 0;
 let coupons = {};
+let isLoadingResorts = false;
 
 const SERVER_URL = '';
 
@@ -160,8 +161,6 @@ async function loadCoupons(checkIn = null, resortId = null) {
         if (resortId) params.append('resortId', resortId);
         if (params.toString()) url += '?' + params.toString();
         
-        console.log('🎫 Loading coupons from:', url);
-        
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -177,28 +176,8 @@ async function loadCoupons(checkIn = null, resortId = null) {
             };
         });
         
-        console.log('✅ Loaded coupons:', {
-            count: couponList.length,
-            coupons: coupons,
-            checkInFilter: checkIn
-        });
+        console.log('✅ Loaded coupons:', couponList.length);
         
-        if (checkIn) {
-            const checkInDate = new Date(checkIn);
-            const dayOfWeek = checkInDate.getDay();
-            let dayType = 'weekday';
-            if (dayOfWeek === 5) {
-                dayType = 'friday';
-            } else if (dayOfWeek === 0 || dayOfWeek === 6) {
-                dayType = 'weekend';
-            }
-            console.log('📅 Coupon date filter:', {
-                checkIn: checkIn,
-                dayOfWeek: dayOfWeek,
-                dayType: dayType,
-                availableCoupons: Object.keys(coupons)
-            });
-        }
     } catch (error) {
         console.error('❌ Error loading coupons:', error);
         coupons = {};
@@ -300,11 +279,18 @@ function sanitizeInput(input) {
 }
 
 async function loadResorts() {
+    // Prevent duplicate calls
+    if (isLoadingResorts) {
+        console.log('⏳ Resort loading already in progress, skipping...');
+        return;
+    }
+    
     try {
+        isLoadingResorts = true;
         // Add cache busting parameter to force fresh data
         const cacheBuster = Date.now();
         const url = `${SERVER_URL}/api/resorts?_cb=${cacheBuster}`;
-        console.log('🏝️ Fetching resorts from:', url);
+        console.log('🏝️ Loading resorts from admin server...');
         
         const response = await fetch(url, {
             method: 'GET',
@@ -324,13 +310,15 @@ async function loadResorts() {
         const data = await response.json();
         resorts = data;
         window.resorts = data; // Make available globally
-        console.log('✅ Resorts loaded:', resorts.length, 'resorts');
+        console.log('✅ Loaded resorts:', resorts.length);
         
         displayResorts();
         
     } catch (error) {
         console.error('❌ Error loading resorts:', error);
         showNotification(`Failed to load resorts: ${error.message}`, 'error');
+    } finally {
+        isLoadingResorts = false;
     }
 }
 
@@ -827,15 +815,14 @@ function setupWebSocketSync() {
                     // Handle resort events with immediate refresh
                     if (data.type === 'resort.added' || data.type === 'resort.updated' || 
                         data.type === 'resort.deleted' || data.type === 'resort.order.updated') {
-                        console.log('🏨 Resort update detected - auto-refreshing resorts!');
+                        console.log('🏨 Resort update received - refreshing resorts');
                         
-                        // Force reload resorts immediately
-                        setTimeout(() => {
-                            loadResorts();
-                        }, 100);
-                        
-                        // Show notification
-                        showNotification('Resort information updated automatically', 'success');
+                        // Debounced reload to prevent multiple calls
+                        if (!isLoadingResorts) {
+                            setTimeout(() => {
+                                loadResorts();
+                            }, 200);
+                        }
                         
                         // Clear any cached data
                         if (window.resorts) {
@@ -845,9 +832,11 @@ function setupWebSocketSync() {
                     
                     if (data.type === 'resort.availability.updated') {
                         console.log('📅 Resort availability updated - refreshing resorts');
-                        setTimeout(() => {
-                            loadResorts();
-                        }, 100);
+                        if (!isLoadingResorts) {
+                            setTimeout(() => {
+                                loadResorts();
+                            }, 200);
+                        }
                     }
                 } catch (error) {
                     // Ignore ping messages and parsing errors
@@ -907,7 +896,6 @@ function setupWebSocketSync() {
                         resorts = newResorts;
                         window.resorts = newResorts;
                         displayResorts();
-                        showNotification('Resort information updated', 'success');
                         lastResortCount = newResorts.length;
                     }
                 }
