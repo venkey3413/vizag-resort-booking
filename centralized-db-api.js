@@ -24,9 +24,22 @@ async function initDB() {
     console.log('✅ Database API connected to Redis');
 }
 
-// Publish real-time events
+// Publish real-time events to correct channels
 function publishEvent(type, data) {
-    redisPubSub.publish('data-updates', { type, data, timestamp: Date.now() });
+    let channel = 'resort-events'; // default
+    
+    if (type.startsWith('resort.')) {
+        channel = 'resort-events';
+    } else if (type.startsWith('booking.')) {
+        channel = 'booking-events';
+    } else if (type.startsWith('food.')) {
+        channel = 'food-events';
+    } else if (type.startsWith('travel.')) {
+        channel = 'travel-events';
+    }
+    
+    redisPubSub.publish(channel, { type, data, timestamp: Date.now() });
+    console.log(`📡 Published ${type} to ${channel}`);
 }
 
 // RESORTS API
