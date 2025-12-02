@@ -4,7 +4,69 @@ document.addEventListener('DOMContentLoaded', function() {
     loadBookings();
     loadFoodOrders();
     loadTravelBookings();
+    setupRedisSync();
 });
+
+// Redis real-time sync for booking service
+function setupRedisSync() {
+    console.log('📡 Redis real-time sync enabled for booking service');
+    
+    let eventSource;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    function connectEventSource() {
+        try {
+            eventSource = new EventSource('/api/events');
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📡 Booking service Redis event received:', data);
+                    
+                    // Auto-refresh data when events occur
+                    if (data.type === 'booking.added' || data.type === 'booking.updated' || data.type === 'booking.cancelled') {
+                        console.log('🏨 Booking update detected - refreshing bookings');
+                        loadBookings();
+                    }
+                    
+                    if (data.type === 'food.order.added' || data.type === 'food.order.updated' || data.type === 'food.order.cancelled') {
+                        console.log('🍽️ Food order update detected - refreshing food orders');
+                        loadFoodOrders();
+                    }
+                    
+                    if (data.type === 'travel.booking.added' || data.type === 'travel.booking.updated' || data.type === 'travel.booking.cancelled') {
+                        console.log('🚗 Travel booking update detected - refreshing travel bookings');
+                        loadTravelBookings();
+                    }
+                } catch (error) {
+                    // Ignore ping messages
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.log('⚠️ Booking service Redis connection error, attempting reconnect...');
+                eventSource.close();
+                
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                } else {
+                    console.log('❌ Max reconnection attempts reached');
+                }
+            };
+            
+            eventSource.onopen = function() {
+                console.log('✅ Booking service connected to Redis pub/sub');
+                reconnectAttempts = 0;
+            };
+        } catch (error) {
+            console.error('Booking service Redis setup failed:', error);
+        }
+    }
+    
+    connectEventSource();
+}
 
 function showTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => {
