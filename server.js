@@ -58,19 +58,81 @@ app.get('/api/resorts', async (req, res) => {
 
 app.post('/api/check-availability', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/check-availability', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(req.body)
-        });
+        const { resortId, checkIn, checkOut, expectedPrice } = req.body;
         
-        if (response.ok) {
-            const data = await response.json();
-            res.json(data);
-        } else {
-            const errorData = await response.json();
-            res.status(response.status).json(errorData);
+        // Get resort details from centralized API
+        const resortResponse = await fetch(`${DB_API_URL}/api/resorts`);
+        const resorts = await resortResponse.json();
+        const resort = resorts.find(r => r.id === parseInt(resortId));
+        
+        if (!resort) {
+            return res.status(400).json({ error: 'Resort not found' });
         }
+        
+        // Calculate correct pricing
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+        const checkInDayOfWeek = checkInDate.getDay();
+        let nightlyRate = resort.price;
+        
+        // Apply dynamic pricing
+        if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+            if (checkInDayOfWeek === 5) {
+                const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
+                if (fridayPrice) nightlyRate = fridayPrice.price;
+            } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+                const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
+                if (weekendPrice) nightlyRate = weekendPrice.price;
+            } else {
+                const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+                if (weekdayPrice) nightlyRate = weekdayPrice.price;
+            }
+        }
+        
+        const basePrice = nightlyRate * nights;
+        const platformFee = Math.round(basePrice * 0.015);
+        const correctTotalPrice = basePrice + platformFee;
+        
+        // Validate pricing if expectedPrice is provided
+        if (expectedPrice && Math.abs(expectedPrice - correctTotalPrice) > 1) {
+            return res.status(400).json({
+                error: `Price mismatch. Expected: ₹${correctTotalPrice.toLocaleString()}, Got: ₹${expectedPrice.toLocaleString()}. Please refresh and try again.`,
+                correctPrice: correctTotalPrice
+            });
+        }
+        
+        // Get bookings from centralized API to check availability
+        const bookingsResponse = await fetch(`${DB_API_URL}/api/bookings`);
+        const bookings = await bookingsResponse.json();
+        
+        // Check if resort is already booked for the requested check-in date
+        const paidBookingForDate = bookings.filter(b => 
+            b.resort_id === parseInt(resortId) &&
+            b.payment_status === 'paid' &&
+            b.check_in <= checkIn && b.check_out > checkIn
+        );
+        
+        if (paidBookingForDate.length > 0) {
+            return res.status(400).json({ 
+                error: `This resort is already booked for ${new Date(checkIn).toLocaleDateString()}. Please choose a different date.` 
+            });
+        }
+        
+        // Check unpaid bookings limit
+        const unpaidBookingsForDate = bookings.filter(b => 
+            b.resort_id === parseInt(resortId) &&
+            b.check_in <= checkIn && b.check_out > checkIn &&
+            b.payment_status !== 'paid'
+        );
+        
+        if (unpaidBookingsForDate.length >= 2) {
+            return res.status(400).json({ 
+                error: `Maximum 2 pending bookings allowed for ${new Date(checkIn).toLocaleDateString()}. Please wait for verification or choose another date.` 
+            });
+        }
+        
+        res.json({ available: true });
     } catch (error) {
         console.error('Availability check error:', error);
         res.status(500).json({ error: 'Failed to check availability' });
