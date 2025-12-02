@@ -61,10 +61,37 @@ app.post('/api/check-availability', async (req, res) => {
     }
 });
 
+// Blocked dates endpoint
+app.get('/api/blocked-dates/:resortId', async (req, res) => {
+    try {
+        const resortId = req.params.resortId;
+        const blockedDates = await db.all(
+            'SELECT block_date FROM resort_blocks WHERE resort_id = ?',
+            [resortId]
+        );
+        const dates = blockedDates.map(row => row.block_date);
+        res.json(dates);
+    } catch (error) {
+        console.error('Blocked dates fetch error:', error);
+        res.json([]);
+    }
+});
+
 // Payment proof endpoint
 app.post('/api/payment-proofs', async (req, res) => {
     try {
         const { bookingId, transactionId } = req.body;
+        
+        // Create payment_proofs table if it doesn't exist
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS payment_proofs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                booking_id INTEGER NOT NULL,
+                transaction_id TEXT NOT NULL,
+                card_last_four TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
         
         await db.run(
             'INSERT INTO payment_proofs (booking_id, transaction_id, created_at) VALUES (?, ?, datetime("now"))',
