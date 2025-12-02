@@ -41,16 +41,19 @@ app.get('/api/events', (req, res) => {
     redisPubSub.subscribe(clientId, res);
 });
 
-// Availability check endpoint
+// Availability check endpoint with pricing validation
 app.post('/api/check-availability', async (req, res) => {
     try {
-        const { resortId, checkIn, checkOut } = req.body;
-        const result = await checkAvailability(resortId, checkIn, checkOut);
+        const { resortId, checkIn, checkOut, expectedPrice } = req.body;
+        const result = await checkAvailability(resortId, checkIn, checkOut, expectedPrice);
         
         if (result.available) {
             res.json({ available: true });
         } else {
-            res.status(400).json({ error: result.error });
+            res.status(400).json({ 
+                error: result.error,
+                correctPrice: result.correctPrice 
+            });
         }
     } catch (error) {
         console.error('Availability check error:', error);

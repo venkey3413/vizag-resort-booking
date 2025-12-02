@@ -939,7 +939,7 @@ window.handleBookingSubmit=async function(e){
         return;
     }
     
-    // Check availability before proceeding to payment
+    // Check availability with pricing validation before proceeding to payment
     try {
         const availabilityResponse = await fetch('/api/check-availability', {
             method: 'POST',
@@ -947,13 +947,18 @@ window.handleBookingSubmit=async function(e){
             body: JSON.stringify({
                 resortId: formData.resortId,
                 checkIn: formData.checkIn,
-                checkOut: formData.checkOut
+                checkOut: formData.checkOut,
+                expectedPrice: total
             })
         });
         
         if (!availabilityResponse.ok) {
             const error = await availabilityResponse.json();
-            showCriticalNotification(error.error || 'Resort not available for selected dates', 'error');
+            if (error.correctPrice) {
+                showCriticalNotification(`Price has changed. Expected: ₹${error.correctPrice.toLocaleString()}. Please refresh and try again.`, 'error');
+            } else {
+                showCriticalNotification(error.error || 'Resort not available for selected dates', 'error');
+            }
             return;
         }
     } catch (error) {

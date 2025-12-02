@@ -10,9 +10,62 @@ async function initDB() {
     });
 }
 
-// Check availability for a resort on specific dates
-async function checkAvailability(resortId, checkIn, checkOut) {
+// Check availability for a resort on specific dates with pricing validation
+async function checkAvailability(resortId, checkIn, checkOut, expectedPrice) {
     try {
+        // Get resort details with dynamic pricing
+        const resort = await db.get(`
+            SELECT r.*, 
+                   GROUP_CONCAT(dp.day_type || ':' || dp.price) as dynamic_pricing_raw
+            FROM resorts r
+            LEFT JOIN dynamic_pricing dp ON r.id = dp.resort_id
+            WHERE r.id = ?
+            GROUP BY r.id
+        `, [resortId]);
+        
+        if (!resort) {
+            return { available: false, error: 'Resort not found' };
+        }
+        
+        // Calculate correct pricing
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+        const checkInDayOfWeek = checkInDate.getDay();
+        let nightlyRate = resort.price;
+        
+        // Apply dynamic pricing
+        if (resort.dynamic_pricing_raw) {
+            const dynamicPricing = resort.dynamic_pricing_raw.split(',').map(item => {
+                const [day_type, price] = item.split(':');
+                return { day_type, price: parseInt(price) };
+            });
+            
+            if (checkInDayOfWeek === 5) {
+                const fridayPrice = dynamicPricing.find(p => p.day_type === 'friday');
+                if (fridayPrice) nightlyRate = fridayPrice.price;
+            } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+                const weekendPrice = dynamicPricing.find(p => p.day_type === 'weekend');
+                if (weekendPrice) nightlyRate = weekendPrice.price;
+            } else {
+                const weekdayPrice = dynamicPricing.find(p => p.day_type === 'weekday');
+                if (weekdayPrice) nightlyRate = weekdayPrice.price;
+            }
+        }
+        
+        const basePrice = nightlyRate * nights;
+        const platformFee = Math.round(basePrice * 0.015);
+        const correctTotalPrice = basePrice + platformFee;
+        
+        // Validate pricing if expectedPrice is provided
+        if (expectedPrice && Math.abs(expectedPrice - correctTotalPrice) > 1) {
+            return {
+                available: false,
+                error: `Price mismatch. Expected: ₹${correctTotalPrice.toLocaleString()}, Got: ₹${expectedPrice.toLocaleString()}. Please refresh and try again.`,
+                correctPrice: correctTotalPrice
+            };
+        }
+        
         // Check for blocked dates (only check-in date)
         try {
             const blockedCheckIn = await db.get(
