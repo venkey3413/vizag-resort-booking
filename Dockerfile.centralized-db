@@ -1,0 +1,23 @@
+FROM node:16-bullseye-slim
+
+# Install build dependencies for sqlite3
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install --production && npm cache clean --force
+
+# Copy application files
+COPY centralized-db-api.js ./
+COPY redis-pubsub.js ./
+COPY resort_booking.db ./
+
+# Expose port
+EXPOSE 3003
+
+# Start the application
+CMD ["node", "centralized-db-api.js"]
