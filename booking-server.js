@@ -10,8 +10,9 @@ const { checkAvailability } = require('./availability-service');
 const app = express();
 const PORT = 3002;
 
-// Use centralized database API
+// Use centralized database API - EC2 Docker service name
 const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
+console.log('🔗 Booking server using DB API URL:', DB_API_URL);
 
 app.use(cors());
 app.use(express.json());

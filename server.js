@@ -2,8 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
-// Use centralized database API
+// Use centralized database API - EC2 Docker service name
 const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
+console.log('🔗 Main server using DB API URL:', DB_API_URL);
 const redisPubSub = require('./redis-pubsub');
 const { sendTelegramNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
