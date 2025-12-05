@@ -308,15 +308,16 @@ app.post('/api/bookings', async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [req.body.resortId, req.body.guestName, req.body.email, req.body.phone,
             req.body.checkIn, req.body.checkOut, req.body.guests, req.body.totalPrice,
-            req.body.transactionId, req.body.bookingReference, req.body.couponCode, req.body.discountAmount]);
+            req.body.transactionId || null, req.body.bookingReference, req.body.couponCode || null, req.body.discountAmount || 0]);
         
         console.log('✅ EC2 Booking created with ID:', result.lastID);
         
         publishEvent('booking.added', { bookingId: result.lastID, ...req.body });
         res.json({ id: result.lastID, message: 'Booking created successfully' });
     } catch (error) {
-        console.error('❌ EC2 Booking creation failed:', error);
-        res.status(500).json({ error: 'Failed to create booking' });
+        console.error('❌ EC2 Booking creation failed:', error.message);
+        console.error('❌ Full error:', error);
+        res.status(500).json({ error: 'Failed to create booking', details: error.message });
     }
 });
 
