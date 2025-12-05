@@ -269,6 +269,58 @@ app.post('/api/travel-bookings', async (req, res) => {
     }
 });
 
+// DYNAMIC PRICING API
+app.get('/api/dynamic-pricing/:resortId', async (req, res) => {
+    try {
+        const pricing = await db.all(
+            'SELECT * FROM dynamic_pricing WHERE resort_id = ?',
+            [req.params.resortId]
+        );
+        res.json(pricing);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch dynamic pricing' });
+    }
+});
+
+app.post('/api/dynamic-pricing', async (req, res) => {
+    try {
+        const { resortId, weekdayPrice, fridayPrice, weekendPrice } = req.body;
+        
+        // Delete existing pricing for this resort
+        await db.run('DELETE FROM dynamic_pricing WHERE resort_id = ?', [resortId]);
+        
+        // Insert new pricing
+        const pricing = [];
+        if (weekdayPrice) {
+            await db.run(
+                'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                [resortId, 'weekday', weekdayPrice]
+            );
+            pricing.push({ day_type: 'weekday', price: weekdayPrice });
+        }
+        if (fridayPrice) {
+            await db.run(
+                'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                [resortId, 'friday', fridayPrice]
+            );
+            pricing.push({ day_type: 'friday', price: fridayPrice });
+        }
+        if (weekendPrice) {
+            await db.run(
+                'INSERT INTO dynamic_pricing (resort_id, day_type, price) VALUES (?, ?, ?)',
+                [resortId, 'weekend', weekendPrice]
+            );
+            pricing.push({ day_type: 'weekend', price: weekendPrice });
+        }
+        
+        publishEvent('resort.pricing.updated', { resortId, pricing });
+        res.json({ message: 'Dynamic pricing updated successfully', pricing });
+    } catch (error) {
+        console.error('Dynamic pricing update error:', error);
+        res.status(500).json({ error: 'Failed to update dynamic pricing' });
+    }
+});
+
 // BLOCKED DATES API
 app.get('/api/blocked-dates/:resortId', async (req, res) => {
     try {

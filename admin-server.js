@@ -79,7 +79,7 @@ app.put('/api/resorts/:id', async (req, res) => {
 
 app.get('/api/dynamic-pricing/:resortId', async (req, res) => {
     try {
-        const response = await fetch(`http://booking-service:3002/api/dynamic-pricing/${req.params.resortId}`);
+        const response = await fetch(`${DB_API_URL}/api/dynamic-pricing/${req.params.resortId}`);
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -89,7 +89,7 @@ app.get('/api/dynamic-pricing/:resortId', async (req, res) => {
 
 app.post('/api/dynamic-pricing', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/dynamic-pricing', {
+        const response = await fetch(`${DB_API_URL}/api/dynamic-pricing`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
