@@ -17,11 +17,14 @@ services:
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
+      - DB_API_URL=http://centralized-db-api:3003
+      - BOOKING_API_URL=http://booking-service:3002
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
       - redis
+      - centralized-db-api
 
   admin-service:
     build:
@@ -32,11 +35,13 @@ services:
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
+      - DB_API_URL=http://centralized-db-api:3003
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
       - redis
+      - centralized-db-api
 
   booking-service:
     build:
@@ -47,11 +52,13 @@ services:
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
+      - DB_API_URL=http://centralized-db-api:3003
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
       - redis
+      - centralized-db-api
 
   centralized-db-api:
     build:

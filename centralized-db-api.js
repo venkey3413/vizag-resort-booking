@@ -183,6 +183,16 @@ app.put('/api/bookings/:id', async (req, res) => {
     }
 });
 
+app.delete('/api/bookings/:id', async (req, res) => {
+    try {
+        await db.run('DELETE FROM bookings WHERE id = ?', [req.params.id]);
+        publishEvent('booking.deleted', { bookingId: req.params.id });
+        res.json({ message: 'Booking deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete booking' });
+    }
+});
+
 // COUPONS API
 app.get('/api/coupons', async (req, res) => {
     try {
