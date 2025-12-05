@@ -449,21 +449,36 @@ window.bookNow=function(resortId,resortName){
                 const checkIn = document.getElementById('checkIn').value;
                 let url = '/api/coupons';
                 const params = new URLSearchParams();
-                if (checkIn) params.append('checkIn', checkIn);
                 if (resortId) params.append('resortId', resortId);
                 if (params.toString()) url += '?' + params.toString();
                 
+                console.log('🎫 Loading coupons for resort', resortId, 'URL:', url);
+                
                 fetch(url).then(r=>r.json()).then(coupons=>{
+                    console.log('🎫 Raw coupons received:', coupons);
                     window.bookingModalCoupons = {};
                     window.allCoupons = coupons;
-                    // Filter coupons for this specific resort
+                    
+                    // Filter coupons for this specific resort (null resort_id means global)
                     const filteredCoupons = coupons.filter(c => 
-                        !c.resort_id || c.resort_id == resortId
+                        c.resort_id === null || c.resort_id == resortId
                     );
+                    
+                    console.log('🎫 Filtered coupons for resort', resortId, ':', filteredCoupons);
+                    
                     filteredCoupons.forEach(c => {
-                        window.bookingModalCoupons[c.code] = {discount: c.discount, type: c.type, day_type: c.day_type, resort_id: c.resort_id};
+                        window.bookingModalCoupons[c.code] = {
+                            discount: c.discount, 
+                            type: c.type, 
+                            day_type: c.day_type, 
+                            resort_id: c.resort_id
+                        };
                     });
-                    console.log('✅ Booking modal coupons loaded for resort', resortId, ':', window.bookingModalCoupons);
+                    
+                    console.log('✅ Booking modal coupons loaded:', window.bookingModalCoupons);
+                    
+                    // Auto-show available coupons
+                    showAvailableCouponsForDate();
                 }).catch(e=>console.log('❌ Booking modal coupon load failed:', e));
             };
             
@@ -511,6 +526,8 @@ window.bookNow=function(resortId,resortName){
                     } else if (dayOfWeek === 0 || dayOfWeek === 6) {
                         dayType = 'weekend';
                     }
+                    
+                    console.log('🎫 Applying coupon - Day type:', dayType, 'Coupon day type:', coupon.day_type);
                     
                     if (coupon.day_type && coupon.day_type !== 'all' && coupon.day_type !== dayType) {
                         let validDays;
@@ -713,79 +730,46 @@ window.bookNow=function(resortId,resortName){
             
             // Setup global coupon functions
             window.showAvailableCoupons = function(){
-                const checkIn = document.getElementById('checkIn').value;
-                const couponsDiv = document.getElementById('availableCoupons');
-                
-                if (!window.allCoupons || window.allCoupons.length === 0) {
-                    couponsDiv.innerHTML = '<p style="color:#666;padding:10px;">No coupons available</p>';
-                    couponsDiv.style.display = 'block';
-                    return;
-                }
-                
-                let validCoupons = window.allCoupons.filter(c => 
-                    !c.resort_id || c.resort_id == resortId
-                );
-                
-                if (checkIn) {
-                    const checkInDate = new Date(checkIn);
-                    const dayOfWeek = checkInDate.getDay();
-                    let dayType = 'weekday';
-                    if (dayOfWeek === 5) {
-                        dayType = 'friday';
-                    } else if (dayOfWeek === 0 || dayOfWeek === 6) {
-                        dayType = 'weekend';
-                    }
-                    
-                    validCoupons = validCoupons.filter(c => 
-                        c.day_type === 'all' || c.day_type === dayType
-                    );
-                }
-                
-                if (validCoupons.length === 0) {
-                    couponsDiv.innerHTML = '<p style="color:#666;padding:10px;">No coupons available for selected date</p>';
-                } else {
-                    couponsDiv.innerHTML = validCoupons.map(coupon => {
-                        const discountText = coupon.type === 'percentage' ? `${coupon.discount}% OFF` : `₹${coupon.discount} OFF`;
-                        const dayText = coupon.day_type === 'weekday' ? ' (Weekdays)' : 
-                                      coupon.day_type === 'weekend' ? ' (Weekends)' : '';
-                        return `
-                            <div class="coupon-option" onclick="selectCoupon('${coupon.code}')" style="
-                                padding:8px 12px;
-                                border:1px solid #ddd;
-                                margin:5px 0;
-                                cursor:pointer;
-                                border-radius:5px;
-                                background:#f8f9fa;
-                                transition:background 0.2s;
-                            " onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
-                                <strong>${coupon.code}</strong> - ${discountText}${dayText}
-                            </div>
-                        `;
-                    }).join('');
-                }
-                
-                couponsDiv.style.display = couponsDiv.style.display === 'none' ? 'block' : 'none';
+                showAvailableCouponsForDate();
             }
             
             window.selectCoupon = function(code){
+                console.log('🎫 Selecting coupon:', code);
                 document.getElementById('couponCode').value = code;
                 document.getElementById('availableCoupons').style.display = 'none';
-                document.getElementById('applyCouponBtn').click();
+                // Trigger coupon application
+                setTimeout(() => {
+                    document.getElementById('applyCouponBtn').click();
+                }, 100);
             }
             
             window.showAvailableCouponsForDate = function(){
                 const checkIn = document.getElementById('checkIn').value;
-                if (!checkIn || !window.allCoupons) return;
+                if (!checkIn || !window.allCoupons) {
+                    console.log('🎫 No check-in date or coupons available');
+                    return;
+                }
                 
                 const checkInDate = new Date(checkIn);
                 const dayOfWeek = checkInDate.getDay();
-                const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
-                const dayType = isWeekend ? 'weekend' : 'weekday';
+                // Friday=5, Saturday=6, Sunday=0
+                let dayType = 'weekday';
+                if (dayOfWeek === 5) {
+                    dayType = 'friday';
+                } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    dayType = 'weekend';
+                }
                 
-                const validCoupons = window.allCoupons.filter(c => 
-                    (!c.resort_id || c.resort_id == resortId) &&
-                    (c.day_type === 'all' || c.day_type === dayType)
-                );
+                console.log('🎫 Check-in date:', checkIn, 'Day type:', dayType, 'Day of week:', dayOfWeek);
+                
+                const validCoupons = window.allCoupons.filter(c => {
+                    const resortMatch = c.resort_id === null || c.resort_id == resortId;
+                    const dayMatch = c.day_type === 'all' || c.day_type === dayType;
+                    console.log('🎫 Coupon', c.code, '- Resort match:', resortMatch, 'Day match:', dayMatch, 'Resort ID:', c.resort_id, 'Day type:', c.day_type);
+                    return resortMatch && dayMatch;
+                });
+                
+                console.log('🎫 Valid coupons for', dayType, ':', validCoupons);
                 
                 const couponInput = document.getElementById('couponCode');
                 const couponsDiv = document.getElementById('availableCoupons');
@@ -793,28 +777,45 @@ window.bookNow=function(resortId,resortName){
                 if (validCoupons.length > 0) {
                     const bestCoupon = validCoupons[0];
                     couponInput.placeholder = `Available: ${bestCoupon.code} - ${bestCoupon.type === 'percentage' ? bestCoupon.discount + '% OFF' : '₹' + bestCoupon.discount + ' OFF'}`;
+                    
+                    // Auto-show available coupons
                     couponsDiv.style.display = 'block';
-                    couponsDiv.innerHTML = validCoupons.map(coupon => {
+                    couponsDiv.innerHTML = `
+                        <div style="background:#e8f5e8;padding:8px;border-radius:5px;margin-bottom:10px;">
+                            <strong>🎫 Available Coupons for ${dayType.charAt(0).toUpperCase() + dayType.slice(1)}:</strong>
+                        </div>
+                    ` + validCoupons.map(coupon => {
                         const discountText = coupon.type === 'percentage' ? `${coupon.discount}% OFF` : `₹${coupon.discount} OFF`;
-                        const dayText = coupon.day_type === 'weekday' ? ' (Weekdays)' : 
-                                      coupon.day_type === 'weekend' ? ' (Weekends)' : '';
+                        const dayText = coupon.day_type === 'weekday' ? ' (Mon-Thu)' : 
+                                      coupon.day_type === 'friday' ? ' (Friday)' :
+                                      coupon.day_type === 'weekend' ? ' (Sat-Sun)' : ' (All Days)';
                         return `
                             <div class="coupon-option" onclick="selectCoupon('${coupon.code}')" style="
-                                padding:8px 12px;
-                                border:1px solid #ddd;
+                                padding:10px 12px;
+                                border:2px solid #28a745;
                                 margin:5px 0;
                                 cursor:pointer;
-                                border-radius:5px;
-                                background:#f8f9fa;
-                                transition:background 0.2s;
-                            " onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
-                                <strong>${coupon.code}</strong> - ${discountText}${dayText}
+                                border-radius:8px;
+                                background:#f8fff8;
+                                transition:all 0.2s;
+                                font-weight:500;
+                            " onmouseover="this.style.background='#e8f5e8';this.style.transform='scale(1.02)'" onmouseout="this.style.background='#f8fff8';this.style.transform='scale(1)'">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <span><strong>${coupon.code}</strong> - ${discountText}</span>
+                                    <span style="color:#666;font-size:0.9rem;">${dayText}</span>
+                                </div>
                             </div>
                         `;
                     }).join('');
                 } else {
-                    couponInput.placeholder = 'No coupons available for this resort/date';
-                    couponsDiv.style.display = 'none';
+                    couponInput.placeholder = `No coupons available for ${dayType}`;
+                    couponsDiv.style.display = 'block';
+                    couponsDiv.innerHTML = `
+                        <div style="background:#fff3cd;padding:10px;border-radius:5px;text-align:center;color:#856404;">
+                            <strong>🎫 No coupons available for ${dayType.charAt(0).toUpperCase() + dayType.slice(1)}</strong><br>
+                            <small>Try selecting a different date</small>
+                        </div>
+                    `;
                 }
             }
             
