@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 // Use centralized database API
-const DB_API_URL = 'http://centralized-db-api:3003';
+const DB_API_URL = process.env.DB_API_URL || 'http://localhost:3003';
 const redisPubSub = require('./redis-pubsub');
 const { sendTelegramNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
@@ -245,14 +245,18 @@ app.post('/api/bookings', async (req, res) => {
         
         // Store payment proof if transactionId provided
         if (transactionId) {
-            await fetch('http://booking-service:3002/api/payment-proofs', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    bookingId: result.id,
-                    transactionId: transactionId
-                })
-            });
+            try {
+                await fetch(`${process.env.BOOKING_API_URL || 'http://localhost:3002'}/api/payment-proofs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bookingId: result.id,
+                        transactionId: transactionId
+                    })
+                });
+            } catch (error) {
+                console.log('Payment proof storage failed:', error.message);
+            }
             
             // Send Telegram notification
             try {
@@ -339,7 +343,7 @@ app.get('/api/events', (req, res) => {
 // Blocked dates endpoint
 app.get('/api/blocked-dates/:resortId', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/blocked-dates/' + req.params.resortId);
+        const response = await fetch(`${DB_API_URL}/api/blocked-dates/${req.params.resortId}`);
         const blockedDates = await response.json();
         res.json(blockedDates);
     } catch (error) {

@@ -979,6 +979,39 @@ window.handleBookingSubmit=async function(e){
         return;
     }
     
+    // Calculate total price for availability check
+    const resort=window.resorts.find(r=>r.id==formData.resortId);
+    if(!resort){
+        console.log('❌ Resort not found for ID:', formData.resortId);
+        showCriticalNotification('Resort not found', 'error');
+        return;
+    }
+    
+    const checkInDate=new Date(formData.checkIn);
+    const checkOutDate=new Date(formData.checkOut);
+    const nights=Math.max(1,Math.ceil((checkOutDate-checkInDate)/(1000*60*60*24)));
+    
+    // Apply dynamic pricing based on check-in date
+    const checkInDayOfWeek = checkInDate.getDay();
+    let nightlyRate = resort.price;
+    
+    if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+        if (checkInDayOfWeek === 5) {
+            const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
+            if (fridayPrice) nightlyRate = fridayPrice.price;
+        } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+            const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
+            if (weekendPrice) nightlyRate = weekendPrice.price;
+        } else {
+            const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+            if (weekdayPrice) nightlyRate = weekdayPrice.price;
+        }
+    }
+    
+    const basePrice=nightlyRate*nights;
+    const platformFee=Math.round(basePrice*0.015);
+    const total=basePrice+platformFee;
+    
     // Check availability with pricing validation before proceeding to payment
     try {
         const availabilityResponse = await fetch('/api/check-availability', {
@@ -1007,42 +1040,7 @@ window.handleBookingSubmit=async function(e){
     }
     
     // Create booking data for payment
-    const resort=window.resorts.find(r=>r.id==formData.resortId);
-    if(!resort){
-        console.log('❌ Resort not found for ID:', formData.resortId);
-        showCriticalNotification('Resort not found', 'error');
-        return;
-    }
     console.log('✅ Resort found:', resort.name);
-    
-    const checkInDate=new Date(formData.checkIn);
-    const checkOutDate=new Date(formData.checkOut);
-    const nights=Math.max(1,Math.ceil((checkOutDate-checkInDate)/(1000*60*60*24)));
-    
-    // Apply dynamic pricing based on check-in date
-    const checkInDayOfWeek = checkInDate.getDay();
-    let nightlyRate = resort.price;
-    
-    if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-        // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
-        if (checkInDayOfWeek === 5) {
-            // Friday
-            const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
-            if (fridayPrice) nightlyRate = fridayPrice.price;
-        } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
-            // Weekend (Saturday=6, Sunday=0)
-            const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
-            if (weekendPrice) nightlyRate = weekendPrice.price;
-        } else {
-            // Weekday (Monday=1 to Thursday=4)
-            const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
-            if (weekdayPrice) nightlyRate = weekdayPrice.price;
-        }
-    }
-    
-    const basePrice=nightlyRate*nights;
-    const platformFee=Math.round(basePrice*0.015);
-    const total=basePrice+platformFee;
     
     const bookingData = {
         ...formData,
@@ -1050,7 +1048,7 @@ window.handleBookingSubmit=async function(e){
         resortNote: resort.note,
         basePrice: basePrice,
         platformFee: platformFee,
-        totalPrice: total,
+        totalPrice: total - (window.appliedDiscountAmount || 0),
         bookingReference: `VE${String(Date.now()).padStart(12, '0')}`,
         couponCode: window.appliedCouponCode || null,
         discountAmount: window.appliedDiscountAmount || 0
