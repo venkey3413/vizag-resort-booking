@@ -650,8 +650,10 @@ window.bookNow=function(resortId,resortName){
                 const dayOfWeek = checkInDate.getDay();
                 let nightlyRate = resort.price;
                 let dayTypeText = 'Regular';
+                let hasDynamicPricing = false;
                 
                 if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
+                    hasDynamicPricing = true;
                     if (dayOfWeek === 5) {
                         // Friday
                         const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
@@ -674,6 +676,15 @@ window.bookNow=function(resortId,resortName){
                             dayTypeText = 'Weekday';
                         }
                     }
+                } else {
+                    // No dynamic pricing configured - show day type but same price
+                    if (dayOfWeek === 5) {
+                        dayTypeText = 'Friday';
+                    } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                        dayTypeText = 'Weekend';
+                    } else {
+                        dayTypeText = 'Weekday';
+                    }
                 }
                 
                 // Show pricing info near calendar
@@ -692,9 +703,11 @@ window.bookNow=function(resortId,resortName){
                     day: 'numeric' 
                 });
                 
+                const pricingNote = hasDynamicPricing ? '' : '<br><small style="color:#666;">💡 Dynamic pricing not configured - same rate for all days</small>';
+                
                 priceInfo.innerHTML = `
                     <strong>📅 ${dateStr}</strong><br>
-                    <span style="color: #007bff;">💰 ${dayTypeText} Rate: ₹${nightlyRate.toLocaleString()}/night</span>
+                    <span style="color: #007bff;">💰 ${dayTypeText} Rate: ₹${nightlyRate.toLocaleString()}/night</span>${pricingNote}
                 `;
             }
             
