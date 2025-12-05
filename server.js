@@ -246,7 +246,7 @@ app.post('/api/bookings', async (req, res) => {
         // Store payment proof if transactionId provided
         if (transactionId) {
             try {
-                await fetch(`${process.env.BOOKING_API_URL || 'http://localhost:3002'}/api/payment-proofs`, {
+                await fetch(`${process.env.BOOKING_API_URL || 'http://booking-service:3002'}/api/payment-proofs`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

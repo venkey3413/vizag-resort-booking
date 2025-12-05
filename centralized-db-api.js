@@ -145,6 +145,17 @@ async function initDB() {
     
     console.log('✅ Database tables initialized');
     
+    // Add sample resort if none exist (for EC2 deployment)
+    const existingResorts = await db.all('SELECT COUNT(*) as count FROM resorts');
+    if (existingResorts[0].count === 0) {
+        console.log('🏨 Adding sample resort for EC2 deployment...');
+        await db.run(`
+            INSERT INTO resorts (name, location, price, description, image, available)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, ['Sample Resort', 'Vizag Beach', 2500, 'Beautiful beachfront resort', '/images/sample.jpg', 1]);
+        console.log('✅ Sample resort added');
+    }
+    
     // Connect to Redis for real-time events
     await redisPubSub.connect();
     console.log('✅ Database API connected to Redis');
@@ -274,14 +285,23 @@ app.get('/api/bookings', async (req, res) => {
             LEFT JOIN resorts r ON b.resort_id = r.id 
             ORDER BY b.booking_date DESC
         `);
+        console.log('📊 EC2 Bookings fetch:', bookings.length, 'bookings found');
         res.json(bookings);
     } catch (error) {
+        console.error('❌ EC2 Bookings fetch failed:', error);
         res.status(500).json({ error: 'Failed to fetch bookings' });
     }
 });
 
 app.post('/api/bookings', async (req, res) => {
     try {
+        console.log('📝 EC2 Booking creation request:', {
+            resortId: req.body.resortId,
+            guestName: req.body.guestName,
+            email: req.body.email,
+            bookingReference: req.body.bookingReference
+        });
+        
         const result = await db.run(`
             INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, 
                                 total_price, transaction_id, booking_reference, coupon_code, discount_amount)
@@ -290,9 +310,12 @@ app.post('/api/bookings', async (req, res) => {
             req.body.checkIn, req.body.checkOut, req.body.guests, req.body.totalPrice,
             req.body.transactionId, req.body.bookingReference, req.body.couponCode, req.body.discountAmount]);
         
+        console.log('✅ EC2 Booking created with ID:', result.lastID);
+        
         publishEvent('booking.added', { bookingId: result.lastID, ...req.body });
         res.json({ id: result.lastID, message: 'Booking created successfully' });
     } catch (error) {
+        console.error('❌ EC2 Booking creation failed:', error);
         res.status(500).json({ error: 'Failed to create booking' });
     }
 });
