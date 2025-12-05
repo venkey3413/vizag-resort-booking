@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 // Use centralized database API
-const DB_API_URL = 'http://centralized-db-api:3003';
+const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
 
 app.get('/api/resorts', async (req, res) => {
     try {

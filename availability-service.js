@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const DB_API_URL = process.env.DB_API_URL || 'http://localhost:3003';
+const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
 
 async function initDB() {
     // No database initialization needed - using API

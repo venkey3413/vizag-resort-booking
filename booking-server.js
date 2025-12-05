@@ -11,7 +11,7 @@ const app = express();
 const PORT = 3002;
 
 // Use centralized database API
-const DB_API_URL = process.env.DB_API_URL || 'http://localhost:3003';
+const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
 
 app.use(cors());
 app.use(express.json());
