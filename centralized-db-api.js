@@ -145,6 +145,21 @@ async function initDB() {
     
     console.log('✅ Database tables initialized');
     
+    // Add missing columns to existing bookings table
+    try {
+        await db.exec('ALTER TABLE bookings ADD COLUMN coupon_code TEXT');
+        console.log('✅ Added coupon_code column');
+    } catch (error) {
+        // Column already exists
+    }
+    
+    try {
+        await db.exec('ALTER TABLE bookings ADD COLUMN discount_amount INTEGER DEFAULT 0');
+        console.log('✅ Added discount_amount column');
+    } catch (error) {
+        // Column already exists
+    }
+    
     // Add sample resort if none exist (for EC2 deployment)
     const existingResorts = await db.all('SELECT COUNT(*) as count FROM resorts');
     if (existingResorts[0].count === 0) {
