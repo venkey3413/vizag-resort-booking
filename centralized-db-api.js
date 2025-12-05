@@ -19,6 +19,132 @@ async function initDB() {
         driver: sqlite3.Database
     });
     
+    // Create all necessary tables
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS resorts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            location TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            description TEXT,
+            image TEXT,
+            gallery TEXT,
+            videos TEXT,
+            map_link TEXT,
+            amenities TEXT,
+            note TEXT,
+            max_guests INTEGER,
+            sort_order INTEGER DEFAULT 0,
+            available INTEGER DEFAULT 1
+        )
+    `);
+    
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resort_id INTEGER,
+            guest_name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            check_in DATE NOT NULL,
+            check_out DATE NOT NULL,
+            guests INTEGER NOT NULL,
+            total_price INTEGER NOT NULL,
+            base_price INTEGER,
+            platform_fee INTEGER,
+            transaction_fee INTEGER DEFAULT 0,
+            booking_reference TEXT,
+            transaction_id TEXT,
+            coupon_code TEXT,
+            discount_amount INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'pending_payment',
+            payment_status TEXT DEFAULT 'pending',
+            email_verified INTEGER DEFAULT 0,
+            booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts (id)
+        )
+    `);
+    
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS coupons (
+            code TEXT PRIMARY KEY,
+            type TEXT NOT NULL,
+            discount INTEGER NOT NULL,
+            day_type TEXT DEFAULT 'all',
+            resort_id INTEGER,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS dynamic_pricing (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resort_id INTEGER NOT NULL,
+            day_type TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts (id)
+        )
+    `);
+    
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS food_orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT UNIQUE NOT NULL,
+            booking_id TEXT NOT NULL,
+            resort_name TEXT NOT NULL,
+            guest_name TEXT NOT NULL,
+            phone_number TEXT NOT NULL,
+            customer_email TEXT NOT NULL,
+            delivery_time TEXT,
+            items TEXT NOT NULL,
+            subtotal INTEGER NOT NULL,
+            delivery_fee INTEGER NOT NULL,
+            total INTEGER NOT NULL,
+            status TEXT DEFAULT 'pending_payment',
+            payment_method TEXT,
+            transaction_id TEXT,
+            payment_id TEXT,
+            order_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+            confirmed_at DATETIME,
+            cancelled_at DATETIME
+        )
+    `);
+    
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS travel_bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            booking_reference TEXT UNIQUE NOT NULL,
+            customer_name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            email TEXT NOT NULL,
+            travel_date TEXT NOT NULL,
+            pickup_location TEXT NOT NULL,
+            car_type TEXT NOT NULL,
+            packages TEXT NOT NULL,
+            base_amount INTEGER,
+            car_multiplier REAL,
+            total_amount INTEGER NOT NULL,
+            status TEXT DEFAULT 'pending_payment',
+            payment_method TEXT,
+            transaction_id TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS resort_blocks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resort_id INTEGER NOT NULL,
+            block_date DATE NOT NULL,
+            reason TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resort_id) REFERENCES resorts (id)
+        )
+    `);
+    
+    console.log('✅ Database tables initialized');
+    
     // Connect to Redis for real-time events
     await redisPubSub.connect();
     console.log('✅ Database API connected to Redis');
@@ -222,6 +348,16 @@ app.post('/api/coupons', async (req, res) => {
         res.json({ message: 'Coupon created successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to create coupon' });
+    }
+});
+
+app.delete('/api/coupons/:code', async (req, res) => {
+    try {
+        await db.run('DELETE FROM coupons WHERE code = ?', [req.params.code]);
+        publishEvent('coupon.deleted', { code: req.params.code });
+        res.json({ message: 'Coupon deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete coupon' });
     }
 });
 
