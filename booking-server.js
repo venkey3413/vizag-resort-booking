@@ -90,13 +90,17 @@ app.post('/api/payment-proofs', async (req, res) => {
 // Booking API Routes - Admin only, no public access
 app.get('/api/bookings', async (req, res) => {
     try {
+        console.log('📋 EC2 Booking service: Fetching from', DB_API_URL);
         const response = await fetch(`${DB_API_URL}/api/bookings`);
+        console.log('📡 EC2 Booking service: Response status', response.status);
         const bookings = await response.json();
+        console.log('📊 EC2 Booking service: Got', bookings.length, 'bookings');
         // Filter out cancelled bookings
         const activeBookings = bookings.filter(b => b.status !== 'cancelled');
+        console.log('📊 EC2 Booking service: Returning', activeBookings.length, 'active bookings');
         res.json(activeBookings);
     } catch (error) {
-        console.error('Booking fetch error:', error);
+        console.error('❌ EC2 Booking service fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch bookings' });
     }
 });
