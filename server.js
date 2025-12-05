@@ -223,6 +223,7 @@ app.post('/api/bookings', async (req, res) => {
         const bookingReference = `VE${String(Date.now()).padStart(12, '0')}`;
         
         // Create booking via centralized API
+        console.log('🎯 EC2 Main: Creating booking via', DB_API_URL);
         const bookingResponse = await fetch(`${DB_API_URL}/api/bookings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -242,7 +243,9 @@ app.post('/api/bookings', async (req, res) => {
             })
         });
         
+        console.log('📡 EC2 Main: Booking API response status:', bookingResponse.status);
         const result = await bookingResponse.json();
+        console.log('📋 EC2 Main: Booking result:', result);
         
         // Store payment proof if transactionId provided
         if (transactionId) {
