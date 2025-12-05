@@ -273,22 +273,51 @@ async function handleSubmit(e) {
     }
 
     try {
+        // Remove dynamic_pricing from resort data for now
+        const { dynamic_pricing, ...resortDataWithoutPricing } = resortData;
+        
         let response;
         if (editingId) {
             response = await fetch(`/api/resorts/${editingId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(resortData)
+                body: JSON.stringify(resortDataWithoutPricing)
             });
         } else {
             response = await fetch('/api/resorts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(resortData)
+                body: JSON.stringify(resortDataWithoutPricing)
             });
         }
 
         if (response.ok) {
+            const result = await response.json();
+            const resortId = editingId || result.id;
+            
+            // Save dynamic pricing separately if provided
+            if (dynamicPricing.length > 0) {
+                const pricingData = {
+                    resortId: resortId,
+                    weekdayPrice: weekdayPrice ? parseInt(weekdayPrice) : null,
+                    fridayPrice: fridayPrice ? parseInt(fridayPrice) : null,
+                    weekendPrice: weekendPrice ? parseInt(weekendPrice) : null
+                };
+                
+                try {
+                    const pricingResponse = await fetch('/api/dynamic-pricing', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(pricingData)
+                    });
+                    
+                    if (!pricingResponse.ok) {
+                        console.error('Failed to save dynamic pricing');
+                    }
+                } catch (pricingError) {
+                    console.error('Dynamic pricing save error:', pricingError);
+                }
+            }
             let successMessage = editingId ? 'Resort updated successfully' : 'Resort added successfully';
             
             const createCouponEl = document.getElementById('createCoupon');
