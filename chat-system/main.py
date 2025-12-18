@@ -34,10 +34,10 @@ async def chat(req: ChatRequest):
     
     # Try MCP server first for all queries
     try:
-        mcp_response = requests.post("http://localhost:3004/chat", json={
+        mcp_response = requests.post("http://127.0.0.1:3004/chat", json={
             "message": req.message,
             "session_id": req.session_id
-        }, timeout=10)
+        }, timeout=5)
         
         if mcp_response.status_code == 200:
             result = mcp_response.json()

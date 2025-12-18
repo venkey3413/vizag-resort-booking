@@ -8,6 +8,9 @@ async def run_servers():
     # Start MCP server
     subprocess.Popen(["python", "mcp_server/server.py"])
     
+    # Wait for MCP server to start
+    await asyncio.sleep(3)
+    
     # Run chat API on port 8000
     chat_config = uvicorn.Config(app, host="0.0.0.0", port=8000)
     chat_server = uvicorn.Server(chat_config)
