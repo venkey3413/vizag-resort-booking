@@ -216,26 +216,40 @@ async def show_available_resorts(session_id: str):
         }
 
 async def handle_resort_selection(message: str, session_id: str):
+    print(f"DEBUG: Resort selection - session_id: {session_id}, message: {message}")
+    print(f"DEBUG: Session data keys: {list(session_data.keys()) if session_data else 'No session data'}")
+    
     # Extract option number
-    option_match = re.search(r'\b(option|select|choose)\s*(\d+)\b', message.lower()) or re.search(r'^\s*(\d+)\s*$', message)
+    option_match = re.search(r'^\s*(\d+)\s*$', message.strip())
     if not option_match:
         return {
             "response": "Please select a resort by typing the option number (1, 2, 3, etc.)",
             "handover": False
         }
     
-    option_num = int(option_match.group(2) if option_match.group(1) else option_match.group(1))
+    option_num = int(option_match.group(1))
+    print(f"DEBUG: Selected option: {option_num}")
     
     # Get stored session data
-    if session_id not in session_data or 'available_resorts' not in session_data[session_id]:
+    if session_id not in session_data:
+        print(f"DEBUG: Session {session_id} not found in session_data")
         return {
-            "response": "Please first check availability by providing your check-in and check-out dates.",
+            "response": "Session expired. Please start over by selecting option A for resort availability.",
+            "handover": False
+        }
+    
+    if 'available_resorts' not in session_data[session_id]:
+        print(f"DEBUG: No available_resorts in session {session_id}")
+        return {
+            "response": "No resorts found. Please start over by selecting option A for resort availability.",
             "handover": False
         }
     
     available_resorts = session_data[session_id]['available_resorts']
     check_in = session_data[session_id]['check_in']
     check_out = session_data[session_id]['check_out']
+    
+    print(f"DEBUG: Available resorts count: {len(available_resorts)}")
     
     if option_num < 1 or option_num > len(available_resorts):
         return {
@@ -244,6 +258,7 @@ async def handle_resort_selection(message: str, session_id: str):
         }
     
     selected_resort = available_resorts[option_num - 1]
+    print(f"DEBUG: Selected resort: {selected_resort['name']}")
     
     # Calculate nights and total price
     from datetime import datetime
@@ -253,7 +268,7 @@ async def handle_resort_selection(message: str, session_id: str):
     total_price = selected_resort['price'] * nights
     
     return {
-        "response": f"✅ **{selected_resort['name']} - SELECTED**\n\n📍 **Location:** {selected_resort['location']}\n💰 **Price:** ₹{selected_resort['price']}/night\n📅 **Dates:** {check_in} to {check_out}\n🌙 **Nights:** {nights}\n💵 **Total Cost:** ₹{total_price:,}\n\n🔗 **[Book Now](/?resort={selected_resort['id']}&checkin={check_in}&checkout={check_out})**\n\nClick 'Book Now' to proceed with your reservation!",
+        "response": f"✅ **{selected_resort['name']} - SELECTED**\n\n📍 **Location:** {selected_resort['location']}\n💰 **Price:** ₹{selected_resort['price']}/night\n📅 **Dates:** {check_in} to {check_out}\n🌙 **Nights:** {nights}\n💵 **Total Cost:** ₹{total_price:,}\n\n🔗 **[Book Now](/?resort={selected_resort['id']}&checkin={check_in}&checkout={check_out})**\n\nClick 'Book Now' to proceed with your reservation!\n\n👥 **Need help? Type 'human' to connect with support**",
         "handover": False
     }
 
