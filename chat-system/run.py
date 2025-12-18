@@ -3,22 +3,10 @@ from main import app
 from dashboard import dashboard_app
 import asyncio
 import subprocess
-import os
-
-async def start_mcp_server():
-    """Start MCP server in background"""
-    try:
-        mcp_process = subprocess.Popen(
-            ["python", "mcp_server/server.py"],
-            cwd="/app"
-        )
-        print(f"🤖 MCP Server started with PID: {mcp_process.pid}")
-    except Exception as e:
-        print(f"❌ Failed to start MCP server: {e}")
 
 async def run_servers():
-    # Start MCP server first
-    await start_mcp_server()
+    # Start MCP server
+    subprocess.Popen(["python", "mcp_server/server.py"])
     
     # Run chat API on port 8000
     chat_config = uvicorn.Config(app, host="0.0.0.0", port=8000)

@@ -1,127 +1,122 @@
-
 from mcp.server import Server
-from mcp.server.types import TextContent
+from mcp.types import Tool, TextContent
 import requests
+import re
+import asyncio
+import json
 
-BASE_URL = "http://centralized-db-api:3003"
-server = Server("vizag-mcp-server")
+# Resort API configuration
+RESORT_API_URL = "http://centralized-db-api:3003/api"
 
-@server.tool(name="get_refund_policy", description="Refund policy")
-def get_refund_policy():
-    return TextContent(type="text", text="Refunds allowed based on cancellation window.")
+# Create MCP server
+server = Server("resort-assistant")
 
-@server.tool(name="get_checkin_checkout_policy", description="Check-in/out timings")
-def get_checkin_checkout_policy():
-    return TextContent(type="text", text="Check-in 11 AM, Check-out 9 AM.")
+@server.list_tools()
+async def list_tools():
+    return [
+        Tool(
+            name="check_resort_availability",
+            description="Check if a resort is available on a specific date",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "date": {"type": "string", "description": "Check-in date (YYYY-MM-DD)"},
+                    "resort_name": {"type": "string", "description": "Name of the resort"}
+                },
+                "required": ["date", "resort_name"]
+            }
+        ),
+        Tool(
+            name="get_resort_list",
+            description="Get list of all available resorts",
+            inputSchema={"type": "object", "properties": {}}
+        ),
+        Tool(
+            name="get_booking_info",
+            description="Get booking information by booking ID",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "booking_id": {"type": "string", "description": "Booking ID to lookup"}
+                },
+                "required": ["booking_id"]
+            }
+        )
+    ]
 
-@server.tool(name="get_terms_conditions", description="Full T&C")
-def get_terms_conditions():
-    return TextContent(type="text", text="Guests must follow all property rules.")
+@server.call_tool()
+async def call_tool(name: str, arguments: dict):
+    if name == "check_resort_availability":
+        return await check_resort_availability(arguments["date"], arguments["resort_name"])
+    elif name == "get_resort_list":
+        return await get_resort_list()
+    elif name == "get_booking_info":
+        return await get_booking_info(arguments["booking_id"])
+    else:
+        raise ValueError(f"Unknown tool: {name}")
 
-@server.tool(name="get_resort_rules", description="General resort rules")
-def get_resort_rules():
-    return TextContent(type="text", text="Music allowed until 10 PM, outside food not allowed.")
+async def check_resort_availability(date: str, resort_name: str):
+    try:
+        # Get resorts and bookings
+        resorts_response = requests.get(f"{RESORT_API_URL}/resorts")
+        bookings_response = requests.get(f"{RESORT_API_URL}/bookings")
+        
+        if resorts_response.status_code == 200 and bookings_response.status_code == 200:
+            resorts = resorts_response.json()
+            bookings = bookings_response.json()
+            
+            # Find matching resort
+            selected_resort = None
+            for resort in resorts:
+                if resort_name.lower() in resort['name'].lower():
+                    selected_resort = resort
+                    break
+            
+            if not selected_resort:
+                return [TextContent(type="text", text=f"Resort '{resort_name}' not found. Available resorts: {', '.join([r['name'] for r in resorts[:3]])}")]
+            
+            # Check if resort is booked on that date
+            is_booked = False
+            for booking in bookings:
+                if (booking.get('resort_id') == selected_resort['id'] and 
+                    booking.get('check_in') <= date <= booking.get('check_out', date)):
+                    is_booked = True
+                    break
+            
+            if is_booked:
+                return [TextContent(type="text", text=f"❌ {selected_resort['name']} is already booked on {date}. Please try a different date.")]
+            else:
+                return [TextContent(type="text", text=f"✅ {selected_resort['name']} is available on {date}! Price: ₹{selected_resort['price']}/night at {selected_resort['location']}")]
+    except Exception as e:
+        return [TextContent(type="text", text=f"Error checking availability: {str(e)}")]
 
-@server.tool(name="get_free_cancellation_policy", description="Free cancellation rules")
-def get_free_cancellation_policy():
-    return TextContent(type="text", text="Full refund if cancelled 3 days before check-in.")
+async def get_resort_list():
+    try:
+        response = requests.get(f"{RESORT_API_URL}/resorts")
+        if response.status_code == 200:
+            resorts = response.json()
+            resort_list = "\n".join([f"• {r['name']} - ₹{r['price']}/night at {r['location']}" for r in resorts])
+            return [TextContent(type="text", text=f"Available resorts:\n{resort_list}")]
+    except Exception as e:
+        return [TextContent(type="text", text=f"Error fetching resorts: {str(e)}")]
 
-@server.tool(name="get_mid_window_cancellation_policy", description="Mid-window cancellation")
-def get_mid_window_cancellation_policy():
-    return TextContent(type="text", text="75% refund between 3 days and 24 hours.")
+async def get_booking_info(booking_id: str):
+    try:
+        response = requests.get(f"{RESORT_API_URL}/bookings")
+        if response.status_code == 200:
+            bookings = response.json()
+            booking = next((b for b in bookings if str(b['id']) == booking_id), None)
+            if booking:
+                return [TextContent(type="text", text=f"Booking {booking_id}:\nGuest: {booking['guest_name']}\nResort: {booking.get('resort_name', 'N/A')}\nDates: {booking['check_in']} to {booking['check_out']}\nStatus: {booking.get('payment_status', 'pending')}")]
+            else:
+                return [TextContent(type="text", text=f"Booking {booking_id} not found")]
+    except Exception as e:
+        return [TextContent(type="text", text=f"Error fetching booking: {str(e)}")]
 
-@server.tool(name="get_last_24h_cancellation_policy", description="Last 24 hours cancellation")
-def get_last_24h_cancellation_policy():
-    return TextContent(type="text", text="No refund within 24 hours.")
-
-@server.tool(name="get_price_difference_policy", description="Price difference rule")
-def get_price_difference_policy():
-    return TextContent(type="text", text="Customer must pay tariff difference when rescheduling.")
-
-@server.tool(name="get_general_refund_terms", description="General refund info")
-def get_general_refund_terms():
-    return TextContent(type="text", text="Refunds processed in 3-5 business days.")
-
-# ===========================
-# REAL-TIME API TOOLS
-# ===========================
-
-@server.tool(name="list_resorts")
-def list_resorts():
-    r = requests.get(f"{BASE_URL}/api/resorts")
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="get_resort_by_id")
-def get_resort_by_id(resort_id: str):
-    r = requests.get(f"{BASE_URL}/api/resorts/{resort_id}")
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="list_bookings")
-def list_bookings():
-    r = requests.get(f"{BASE_URL}/api/bookings")
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="get_booking_status")
-def get_booking_status(booking_id: str):
-    r = requests.get(f"{BASE_URL}/api/bookings")
-    bookings = r.json()
-    for b in bookings:
-        if str(b.get("id")) == str(booking_id):
-            return TextContent(type="text", text=str(b))
-    return TextContent(type="text", text="Booking not found.")
-
-@server.tool(name="create_booking")
-def create_booking(data: dict):
-    r = requests.post(f"{BASE_URL}/api/bookings", json=data)
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="update_booking")
-def update_booking(booking_id: str, data: dict):
-    r = requests.put(f"{BASE_URL}/api/bookings/{booking_id}", json=data)
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="create_food_order")
-def create_food_order(data: dict):
-    r = requests.post(f"{BASE_URL}/api/food-orders", json=data)
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="create_travel_booking")
-def create_travel_booking(data: dict):
-    r = requests.post(f"{BASE_URL}/api/travel-bookings", json=data)
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="get_blocked_dates_for_resort")
-def get_blocked_dates_for_resort(resort_id: str):
-    r = requests.get(f"{BASE_URL}/api/blocked-dates/{resort_id}")
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="central_api_health")
-def central_api_health():
-    r = requests.get(f"{BASE_URL}/health")
-    return TextContent(type="text", text=r.text)
-
-@server.tool(name="get_full_booking_summary")
-def get_full_booking_summary(booking_id: str):
-    r = requests.get(f"{BASE_URL}/api/bookings")
-    bookings = r.json()
-    booking = next((b for b in bookings if str(b.get("id")) == str(booking_id)), None)
-    if not booking:
-        return TextContent(type="text", text="No booking found.")
-    summary = f"""
-Booking Summary:
-Name: {booking.get('name')}
-Resort ID: {booking.get('resortId')}
-Check-in: {booking.get('checkIn')}
-Check-out: {booking.get('checkOut')}
-Guests: {booking.get('guests')}
-Payment Status: {booking.get('paymentStatus')}
-Amount Paid: {booking.get('amountPaid')}
-Status: {booking.get('status')}
-"""
-    return TextContent(type="text", text=summary)
-
-def main():
-    server.run()
+async def main():
+    from mcp.server.stdio import stdio_server
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(read_stream, write_stream, server.create_initialization_options())
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

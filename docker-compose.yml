@@ -81,6 +81,7 @@ services:
     ports:
       - "8000:8000"
       - "8001:8001"
+      - "3004:3004"
     environment:
       - RESORT_API_URL=http://centralized-db-api:3003/api
     depends_on:
