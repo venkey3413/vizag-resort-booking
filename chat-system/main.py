@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import requests
@@ -73,10 +73,12 @@ async def chat(req: ChatRequest):
 @app.websocket("/ws/chat/{session_id}")
 async def chat_websocket(websocket: WebSocket, session_id: str):
     await websocket.accept()
+    chat_manager.user_connections[session_id] = websocket
     try:
         while True:
             data = await websocket.receive_text()
             message_data = json.loads(data)
             await chat_manager.add_message(session_id, message_data["message"], "user")
-    except:
-        pass
+    except WebSocketDisconnect:
+        if session_id in chat_manager.user_connections:
+            del chat_manager.user_connections[session_id]

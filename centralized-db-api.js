@@ -139,6 +139,26 @@ async function initDB() {
         )
     `);
     
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS chat_sessions (
+            session_id TEXT PRIMARY KEY,
+            status TEXT DEFAULT 'pending',
+            agent_id TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            message TEXT NOT NULL,
+            sender_type TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (session_id) REFERENCES chat_sessions(session_id)
+        )
+    `);
+    
     console.log('✅ Database tables initialized');
     
     // Add sample resort if none exist (for EC2 deployment)
@@ -531,6 +551,87 @@ app.get('/api/events', (req, res) => {
     const clientId = `db-client-${Date.now()}-${Math.random()}`;
     redisPubSub.subscribe(clientId, res);
     console.log('📡 Database API client connected to real-time events');
+});
+
+// CHAT API
+app.get('/api/chat-sessions', async (req, res) => {
+    try {
+        const sessions = await db.all('SELECT * FROM chat_sessions ORDER BY created_at DESC');
+        res.json(sessions);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch chat sessions' });
+    }
+});
+
+app.get('/api/chat-sessions/:sessionId', async (req, res) => {
+    try {
+        const session = await db.get('SELECT * FROM chat_sessions WHERE session_id = ?', [req.params.sessionId]);
+        res.json(session || {});
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch chat session' });
+    }
+});
+
+app.post('/api/chat-sessions', async (req, res) => {
+    try {
+        await db.run(`
+            INSERT INTO chat_sessions (session_id, status, created_at)
+            VALUES (?, ?, ?)
+        `, [req.body.session_id, req.body.status, req.body.created_at]);
+        
+        res.json({ message: 'Chat session created successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create chat session' });
+    }
+});
+
+app.put('/api/chat-sessions/:sessionId', async (req, res) => {
+    try {
+        await db.run(`
+            UPDATE chat_sessions SET status = ?, agent_id = ? WHERE session_id = ?
+        `, [req.body.status, req.body.agent_id, req.params.sessionId]);
+        
+        res.json({ message: 'Chat session updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update chat session' });
+    }
+});
+
+app.get('/api/chat-messages/:sessionId', async (req, res) => {
+    try {
+        const messages = await db.all(
+            'SELECT * FROM chat_messages WHERE session_id = ? ORDER BY timestamp ASC',
+            [req.params.sessionId]
+        );
+        res.json(messages);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch chat messages' });
+    }
+});
+
+app.get('/api/chat-messages/:sessionId/latest', async (req, res) => {
+    try {
+        const message = await db.get(
+            'SELECT * FROM chat_messages WHERE session_id = ? ORDER BY timestamp DESC LIMIT 1',
+            [req.params.sessionId]
+        );
+        res.json(message || {});
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch latest message' });
+    }
+});
+
+app.post('/api/chat-messages', async (req, res) => {
+    try {
+        const result = await db.run(`
+            INSERT INTO chat_messages (session_id, message, sender_type, timestamp)
+            VALUES (?, ?, ?, ?)
+        `, [req.body.session_id, req.body.message, req.body.sender_type, req.body.timestamp]);
+        
+        res.json({ id: result.lastID, message: 'Chat message created successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create chat message' });
+    }
 });
 
 // Health check
