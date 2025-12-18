@@ -29,13 +29,13 @@ class ResortChatWidget {
                     <div class="chat-header">
                         <div class="header-content">
                             <img src="/logo.png" alt="Keey" class="header-logo">
-                            <span>Ask Keey For help</span>
+                            <span>Ask Keey 😊</span>
                         </div>
                         <button id="chat-close">×</button>
                     </div>
                     <div id="chat-messages" class="chat-messages">
                         <div class="bot-message">
-                            HI, I am Keey vizag resort chat bot, How may assist you today
+                            HI, I am Keey vizag resort chat bot, How may assist you today?
                         </div>
                     </div>
                     <div class="chat-input">
