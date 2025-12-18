@@ -28,8 +28,12 @@ async def handle_chat(request: dict):
     if any(word in text for word in ["booking", "reservation"]) and any(char.isdigit() for char in text):
         return await get_booking_info(message)
     
-    # 4. Check for resort selection (option 1, 2, 3, etc.)
-    if re.search(r'\b(option|select|choose)\s*(\d+)\b', text) or re.search(r'^\s*(\d+)\s*$', text):
+    # 4. Check for main menu selection (1, 2, 3)
+    if re.search(r'^\s*[123]\s*$', text):
+        return await handle_main_menu_selection(message, session_id)
+    
+    # 5. Check for resort selection (option 1, 2, 3, etc.) - only if in resort selection mode
+    if session_id in session_data and 'available_resorts' in session_data[session_id] and re.search(r'^\s*(\d+)\s*$', text):
         return await handle_resort_selection(message, session_id)
     
     # 5. Check for single date input (check-in date)
@@ -40,7 +44,7 @@ async def handle_chat(request: dict):
     # if any(word in text for word in ["available", "availability", "resort", "check"]) and any(char.isdigit() for char in text):
     #     return await check_availability(message, session_id)
     
-    # 6. Check for general resort availability request (no dates) - PRIORITY
+    # 6. Check for general resort availability request (no dates)
     if any(word in text for word in ["available", "availability", "check", "book"]) and not any(char.isdigit() for char in text):
         return await ask_for_dates()
     
@@ -59,9 +63,9 @@ async def handle_chat(request: dict):
             "handover": False
         }
     
-    # Default response
+    # Default response with menu options
     return {
-        "response": "I can help you with resort availability, booking information, and refund policies. How can I assist you?",
+        "response": "🏨 **Welcome! I can help you with:**\n\n**1.** 🏖️ Resort Availability\n**2.** 📋 Booking Information\n**3.** 💰 Refund Policies\n\n**Please select an option by typing the number (1, 2, or 3)**",
         "handover": False
     }
 
@@ -73,6 +77,24 @@ async def ask_for_dates():
         "response": "📅 **Step 1: Check-in Date**\n\nPlease type your check-in date in format: **YYYY-MM-DD**\n\n**Example:** 2024-12-25\n\n📅 After you provide check-in date, I'll ask for check-out date.",
         "handover": False
     }
+
+async def handle_main_menu_selection(message: str, session_id: str):
+    option = message.strip()
+    
+    if option == "1":
+        return await ask_for_dates()
+    elif option == "2":
+        return {
+            "response": "📋 **Booking Information**\n\nPlease provide your booking ID to get details.\n\n**Example:** Enter your booking reference like 'VE123456789'",
+            "handover": False
+        }
+    elif option == "3":
+        return await handle_refund_policy("")
+    else:
+        return {
+            "response": "Please select a valid option (1, 2, or 3):\n\n**1.** Resort Availability\n**2.** Booking Information\n**3.** Refund Policies",
+            "handover": False
+        }
 
 async def handle_single_date(message: str, session_id: str):
     date_match = re.search(r'(\d{4}-\d{2}-\d{2})', message)
