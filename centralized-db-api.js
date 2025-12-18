@@ -39,8 +39,10 @@ async function initDB() {
         )
     `);
     
+    // Drop and recreate bookings table with correct schema
+    await db.exec('DROP TABLE IF EXISTS bookings');
     await db.exec(`
-        CREATE TABLE IF NOT EXISTS bookings (
+        CREATE TABLE bookings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             resort_id INTEGER,
             guest_name TEXT NOT NULL,
@@ -50,16 +52,10 @@ async function initDB() {
             check_out DATE NOT NULL,
             guests INTEGER NOT NULL,
             total_price INTEGER NOT NULL,
-            base_price INTEGER,
-            platform_fee INTEGER,
-            transaction_fee INTEGER DEFAULT 0,
             booking_reference TEXT,
             transaction_id TEXT,
-            coupon_code TEXT,
-            discount_amount INTEGER DEFAULT 0,
             status TEXT DEFAULT 'pending_payment',
             payment_status TEXT DEFAULT 'pending',
-            email_verified INTEGER DEFAULT 0,
             booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (resort_id) REFERENCES resorts (id)
         )
