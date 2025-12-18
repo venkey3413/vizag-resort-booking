@@ -13,8 +13,15 @@ async def handle_chat(request: dict):
     session_id = request.get("session_id", "")
     text = message.lower()
     
+    # Check for booking confirmation
+    if any(word in text for word in ["yes", "book", "proceed", "confirm"]):
+        return {
+            "response": "🎉 **Great! Let's proceed with your booking.**\n\nPlease click the link below to complete your reservation:\n\n🔗 **[Complete Booking](/)** \n\nYou'll be redirected to our booking page where you can:\n• Enter your guest details\n• Confirm dates and resort\n• Make secure payment\n• Receive instant confirmation",
+            "handover": False
+        }
+    
     # Check for resort availability queries
-    if any(word in text for word in ["available", "availability", "book", "resort"]):
+    if any(word in text for word in ["available", "availability", "resort"]) and not any(word in text for word in ["yes", "book", "proceed"]):
         return await check_availability(message)
     
     # Check for booking queries
@@ -59,11 +66,27 @@ async def check_availability(message: str):
             resorts = resorts_response.json()
             bookings = bookings_response.json()
             
-            # Find matching resort
+            # Find matching resort with flexible matching
             selected_resort = None
             for resort in resorts:
-                if resort['name'].lower() in text:
+                resort_name_words = resort['name'].lower().split()
+                text_words = text.split()
+                
+                # Check if any word from resort name is in the message
+                if any(word in text for word in resort_name_words) or resort['name'].lower() in text:
                     selected_resort = resort
+                    break
+                
+                # Check for partial matches (e.g., "royal" matches "Royal Orchid")
+                for text_word in text_words:
+                    if len(text_word) > 3:  # Only check words longer than 3 characters
+                        for resort_word in resort_name_words:
+                            if text_word in resort_word or resort_word in text_word:
+                                selected_resort = resort
+                                break
+                    if selected_resort:
+                        break
+                if selected_resort:
                     break
             
             if not selected_resort:
