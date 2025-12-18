@@ -3,4 +3,5 @@ uvicorn
 requests
 websockets
 pydantic
+git+https://github.com/modelcontextprotocol/python-sdk.git
 model-context-protocol
