@@ -32,8 +32,8 @@ async def handle_chat(request: dict):
     if session_id in session_data and 'available_resorts' in session_data[session_id] and re.search(r'^\s*(\d+)\s*$', text):
         return await handle_resort_selection(message, session_id)
     
-    # 5. Check for main menu selection (1, 2, 3, 4) - only if NOT in resort selection mode
-    if re.search(r'^\s*[1234]\s*$', text) and (session_id not in session_data or 'available_resorts' not in session_data[session_id]):
+    # 5. Check for main menu selection (A, B, C, D) - only if NOT in resort selection mode
+    if re.search(r'^\s*[ABCDabcd]\s*$', text) and (session_id not in session_data or 'available_resorts' not in session_data[session_id]):
         return await handle_main_menu_selection(message, session_id)
     
     # 5. Check for single date input (check-in date)
@@ -59,13 +59,13 @@ async def handle_chat(request: dict):
     # 7. Check for greeting
     if any(word in text for word in ["hi", "hello", "hey", "good"]):
         return {
-            "response": "Hi! I'm Keey, your resort booking assistant. \n\n🏨 **Please select an option:**\n\n**1.** 🏖️ Resort Availability\n**2.** 📋 Booking Information\n**3.** 💰 Refund Policies\n**4.** 📞 Contact Details\n\n**Type the number (1, 2, 3, or 4) to continue**",
+            "response": "Hi! I'm Keey, your resort booking assistant. \n\n🏨 **Please select an option:**\n\n**A.** 🏖️ Resort Availability\n**B.** 📋 Booking Information\n**C.** 💰 Refund Policies\n**D.** 📞 Contact Details\n\n**Type the letter (A, B, C, or D) to continue**",
             "handover": False
         }
     
     # Default response with menu options
     return {
-        "response": "🏨 **Welcome! I can help you with:**\n\n**1.** 🏖️ Resort Availability\n**2.** 📋 Booking Information\n**3.** 💰 Refund Policies\n**4.** 📞 Contact Details\n\n**Please select an option by typing the number (1, 2, 3, or 4)**",
+        "response": "🏨 **Welcome! I can help you with:**\n\n**A.** 🏖️ Resort Availability\n**B.** 📋 Booking Information\n**C.** 💰 Refund Policies\n**D.** 📞 Contact Details\n\n**Please select an option by typing the letter (A, B, C, or D)**",
         "handover": False
     }
 
@@ -79,22 +79,22 @@ async def ask_for_dates():
     }
 
 async def handle_main_menu_selection(message: str, session_id: str):
-    option = message.strip()
+    option = message.strip().upper()
     
-    if option == "1":
+    if option == "A":
         return await ask_for_dates()
-    elif option == "2":
+    elif option == "B":
         return {
             "response": "📋 **Booking Information**\n\nPlease provide your booking ID to get details.\n\n**Example:** Enter your booking reference like 'VE123456789'",
             "handover": False
         }
-    elif option == "3":
+    elif option == "C":
         return await handle_refund_policy("")
-    elif option == "4":
+    elif option == "D":
         return await get_contact_info()
     else:
         return {
-            "response": "Please select a valid option (1, 2, 3, or 4):\n\n**1.** Resort Availability\n**2.** Booking Information\n**3.** Refund Policies\n**4.** Contact Details",
+            "response": "Please select a valid option (A, B, C, or D):\n\n**A.** Resort Availability\n**B.** Booking Information\n**C.** Refund Policies\n**D.** Contact Details",
             "handover": False
         }
 
@@ -415,7 +415,7 @@ async def get_booking_info(message: str):
 
 async def handle_refund_policy(message: str):
     return {
-        "response": "🔄 **Refund Policy:**\n\n✅ **Full refund** if cancelled 24+ hours before check-in\n🟡 **50% refund** if cancelled within 24 hours\n❌ **No refund** for no-shows\n\n📞 Need help with cancellation? Contact us:\n• Phone: +91 9876543210\n• Email: support@vizagresorts.com\n\nWould you like me to connect you to our support team?",
+        "response": "🔄 **Refund Policy:**\n\n✅ **Full refund** if cancelled 24+ hours before check-in\n🟡 **50% refund** if cancelled within 24 hours\n❌ **No refund** for no-shows\n\n📞 Need help with cancellation? Contact us:\n• Phone: +91 8341674465\n• Email: vizagresortbooking.com\n\nWould you like me to connect you to our support team?",
         "handover": False
     }
 
@@ -442,7 +442,7 @@ async def get_resort_list():
 
 async def get_contact_info():
     return {
-        "response": "📞 **Contact Information:**\n\n📱 **Phone:** +91 9876543210\n📧 **Email:** support@vizagresorts.com\n🌐 **Website:** vizagresortbooking.in\n\n🕰️ **Business Hours:**\nMon-Sun: 9:00 AM - 9:00 PM\n\n💬 **Live Chat:** Available 24/7 (you're using it now!)\n\nHow else can I help you?",
+        "response": "📞 **Contact Information:**\n\n📱 **Phone:** +91 8341674465\n📧 **Email:** vizagresortbooking.com\n🌐 **Website:** vizagresortbooking.in\n\n🕰️ **Business Hours:**\nMon-Sun: 9:00 AM - 9:00 PM\n\n💬 **Live Chat:** Available 24/7 (you're using it now!)\n\nHow else can I help you?",
         "handover": False
     }
 
