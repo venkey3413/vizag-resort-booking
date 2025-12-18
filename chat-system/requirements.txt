@@ -3,4 +3,3 @@ uvicorn
 requests
 websockets
 pydantic
-model-context-protocol
