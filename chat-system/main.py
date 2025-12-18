@@ -2,9 +2,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import json
-import asyncio
-import subprocess
 from dashboard import chat_manager
+from mcp_client import call_mcp_tool
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -24,42 +23,20 @@ class ChatRequest(BaseModel):
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
-    # Call MCP server for all responses
+    # Call MCP server using the client
     try:
-        mcp_request = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "tools/call",
-            "params": {
-                "name": "handle_chat",
-                "arguments": {
-                    "message": req.message,
-                    "session_id": req.session_id
-                }
-            }
-        }
+        result_text = await call_mcp_tool("handle_chat", {
+            "message": req.message,
+            "session_id": req.session_id
+        })
         
-        process = await asyncio.create_subprocess_exec(
-            "python", "/app/mcp_server/server.py",
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        
-        stdout, stderr = await process.communicate(
-            input=json.dumps(mcp_request).encode() + b'\n'
-        )
-        
-        if process.returncode == 0:
-            response = json.loads(stdout.decode())
-            if "result" in response and "content" in response["result"]:
-                result_text = response["result"]["content"][0]["text"]
-                handover = "handover" in result_text.lower() or "support team" in result_text.lower()
-                
-                if handover:
-                    await chat_manager.add_chat(req.session_id, req.message)
-                
-                return {"answer": result_text, "handover": handover}
+        if result_text and "MCP server error" not in result_text:
+            handover = "handover" in result_text.lower() or "support team" in result_text.lower()
+            
+            if handover:
+                await chat_manager.add_chat(req.session_id, req.message)
+            
+            return {"answer": result_text, "handover": handover}
         
         # Fallback to human support
         await chat_manager.add_chat(req.session_id, req.message)
