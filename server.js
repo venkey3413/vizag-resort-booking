@@ -237,9 +237,7 @@ app.post('/api/bookings', async (req, res) => {
                 guests: sanitizedData.guests,
                 totalPrice: totalPrice,
                 transactionId: sanitizedData.transactionId,
-                bookingReference: bookingReference,
-                couponCode: couponCode,
-                discountAmount: discount
+                bookingReference: bookingReference
             })
         });
         
