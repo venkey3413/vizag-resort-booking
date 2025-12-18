@@ -90,10 +90,7 @@ async def check_availability(message: str):
                 resort_options = []
                 for i, resort in enumerate(available_resorts[:5]):
                     resort_options.append(
-                        f"**{i+1}. {resort['name']}**\n"
-                        f"📍 Location: {resort['location']}\n"
-                        f"💰 Price: ₹{resort['price']}/night\n"
-                        f"🔗 [Book Now](/?resort={resort['id']}&date={found_date})\n"
+                        f"**{i+1}. {resort['name']}** - 📍 {resort['location']} - 💰 ₹{resort['price']}/night - 🔗 [Book Now](/?resort={resort['id']}&date={found_date})"
                     )
                 
                 return {

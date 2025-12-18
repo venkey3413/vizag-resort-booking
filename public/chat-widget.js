@@ -27,17 +27,15 @@ class ResortChatWidget {
                 </div>
                 <div id="chat-window" class="chat-window">
                     <div class="chat-header">
-                        <span>Resort Support</span>
+                        <div class="header-content">
+                            <img src="/logo.png" alt="Keey" class="header-logo">
+                            <span>Ask Keey For help</span>
+                        </div>
                         <button id="chat-close">×</button>
                     </div>
                     <div id="chat-messages" class="chat-messages">
                         <div class="bot-message">
-                            Hi! I can help you with:
-                            • Resort availability
-                            • Booking information
-                            • Refund policies
-                            
-                            How can I assist you today?
+                            HI, I am Keey vizag resort chat bot, How may assist you today
                         </div>
                     </div>
                     <div class="chat-input">
@@ -126,6 +124,19 @@ class ResortChatWidget {
                 box-shadow: 0 2px 10px rgba(50, 205, 50, 0.2);
             }
             
+            .header-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .header-logo {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                border: 2px solid #2d3748;
+            }
+            
             .chat-messages {
                 flex: 1;
                 padding: 20px;
@@ -156,7 +167,7 @@ class ResortChatWidget {
                 word-wrap: break-word;
                 font-size: 14px;
                 line-height: 1.4;
-                font-weight: 400;
+                font-weight: 700;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             }
             
@@ -199,7 +210,7 @@ class ResortChatWidget {
                 color: #2d3748;
                 align-self: flex-end;
                 border-bottom-right-radius: 6px;
-                font-weight: 500;
+                font-weight: 700;
             }
             
             .chat-input {
