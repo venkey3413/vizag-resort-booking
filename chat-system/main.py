@@ -34,19 +34,68 @@ async def chat(req: ChatRequest):
     
     # Check for resort availability queries
     if any(word in text for word in ["available", "availability", "book", "resort"]):
+        # Check if user provided date and resort name
+        import re
+        from datetime import datetime
+        
+        # Look for date patterns (YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY)
+        date_patterns = [
+            r'(\d{4}-\d{2}-\d{2})',
+            r'(\d{1,2}[/-]\d{1,2}[/-]\d{4})',
+            r'(\d{1,2}[/-]\d{1,2}[/-]\d{2})'
+        ]
+        
+        found_date = None
+        for pattern in date_patterns:
+            match = re.search(pattern, req.message)
+            if match:
+                found_date = match.group(1)
+                break
+        
+        if not found_date:
+            try:
+                response = requests.get(f"{RESORT_API_URL}/resorts")
+                if response.status_code == 200:
+                    resorts = response.json()
+                    resort_list = "\n".join([f"{i+1}. {r['name']} - {r['location']}" for i, r in enumerate(resorts[:5])])
+                    return {"answer": f"To check availability, please provide:\n\n📅 **Check-in Date** (YYYY-MM-DD format)\n🏨 **Resort Name**\n\nAvailable resorts:\n{resort_list}\n\nExample: 'Check availability for Resort Paradise on 2024-12-25'", "handover": False}
+            except:
+                return {"answer": "Please provide the check-in date (YYYY-MM-DD) and resort name to check availability.", "handover": False}
+        
+        # If date is provided, check for resort name and availability
         try:
-            response = requests.get(f"{RESORT_API_URL}/resorts")
-            if response.status_code == 200:
-                resorts = response.json()
-                available_resorts = [r for r in resorts if r.get('available', True)]
+            resorts_response = requests.get(f"{RESORT_API_URL}/resorts")
+            bookings_response = requests.get(f"{RESORT_API_URL}/bookings")
+            
+            if resorts_response.status_code == 200 and bookings_response.status_code == 200:
+                resorts = resorts_response.json()
+                bookings = bookings_response.json()
                 
-                if available_resorts:
-                    resort_list = "\n".join([f"• {r['name']} - ₹{r['price']}/night at {r['location']}" for r in available_resorts[:3]])
-                    return {"answer": f"Available resorts:\n{resort_list}\n\nWould you like to make a booking?", "handover": False}
+                # Find matching resort
+                selected_resort = None
+                for resort in resorts:
+                    if resort['name'].lower() in text:
+                        selected_resort = resort
+                        break
+                
+                if not selected_resort:
+                    resort_list = "\n".join([f"{i+1}. {r['name']} - {r['location']}" for i, r in enumerate(resorts[:5])])
+                    return {"answer": f"Please specify which resort you'd like to check for {found_date}:\n\n{resort_list}", "handover": False}
+                
+                # Check if resort is booked on that date
+                is_booked = False
+                for booking in bookings:
+                    if (booking.get('resort_id') == selected_resort['id'] and 
+                        booking.get('check_in') <= found_date <= booking.get('check_out', found_date)):
+                        is_booked = True
+                        break
+                
+                if is_booked:
+                    return {"answer": f"❌ **{selected_resort['name']}** is already booked on {found_date}.\n\nPlease try a different date or resort.", "handover": False}
                 else:
-                    return {"answer": "No resorts are currently available. Please try again later.", "handover": False}
-        except:
-            pass
+                    return {"answer": f"✅ **{selected_resort['name']}** is available on {found_date}!\n\n💰 **Price:** ₹{selected_resort['price']}/night\n📍 **Location:** {selected_resort['location']}\n\nWould you like to proceed with booking?", "handover": False}
+        except Exception as e:
+            return {"answer": "Sorry, I couldn't check availability right now. Please try again later.", "handover": False}
     
     # Check for booking ID queries
     match = re.search(r"(\d{3,10})", text)
