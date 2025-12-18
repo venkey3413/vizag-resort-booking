@@ -1,16 +1,14 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-import requests
-import re
 import json
-from datetime import datetime
+import asyncio
+import subprocess
 from dashboard import chat_manager
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Add CORS middleware
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
@@ -20,32 +18,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Resort API base URL
-RESORT_API_URL = "http://centralized-db-api:3003/api"
-
 class ChatRequest(BaseModel):
     session_id: str
     message: str
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
-    # Always try MCP server first
+    # Call MCP server for all responses
     try:
-        mcp_response = requests.post("http://127.0.0.1:3004/chat", json={
-            "message": req.message,
-            "session_id": req.session_id
-        }, timeout=3)
+        mcp_request = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {
+                "name": "handle_chat",
+                "arguments": {
+                    "message": req.message,
+                    "session_id": req.session_id
+                }
+            }
+        }
         
-        if mcp_response.status_code == 200:
-            result = mcp_response.json()
-            if result.get("response"):
-                return {"answer": result["response"], "handover": result.get("handover", False)}
+        process = await asyncio.create_subprocess_exec(
+            "python", "mcp_server/server.py",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd="/app/chat-system"
+        )
+        
+        stdout, stderr = await process.communicate(
+            input=json.dumps(mcp_request).encode() + b'\n'
+        )
+        
+        if process.returncode == 0:
+            response = json.loads(stdout.decode())
+            if "result" in response and "content" in response["result"]:
+                result_text = response["result"]["content"][0]["text"]
+                handover = "handover" in result_text.lower() or "support team" in result_text.lower()
+                
+                if handover:
+                    await chat_manager.add_chat(req.session_id, req.message)
+                
+                return {"answer": result_text, "handover": handover}
+        
+        # Fallback to human support
+        await chat_manager.add_chat(req.session_id, req.message)
+        return {"answer": "I'm connecting you to our support team. Please wait a moment.", "handover": True}
+        
     except Exception as e:
-        print(f"MCP server error: {e}")
-    
-    # If MCP server fails, handover to human support
-    await chat_manager.add_chat(req.session_id, req.message)
-    return {"answer": "I'm connecting you to our support team. Please wait a moment.", "handover": True}
+        print(f"MCP error: {e}")
+        await chat_manager.add_chat(req.session_id, req.message)
+        return {"answer": "I'm connecting you to our support team. Please wait a moment.", "handover": True}
 
 @app.websocket("/ws/chat/{session_id}")
 async def chat_websocket(websocket: WebSocket, session_id: str):
