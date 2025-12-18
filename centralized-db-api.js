@@ -321,12 +321,11 @@ app.post('/api/bookings', async (req, res) => {
         });
         
         const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, 
-                                total_price, transaction_id, booking_reference)
+            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, total_price, booking_reference, transaction_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [req.body.resortId, req.body.guestName, req.body.email, req.body.phone,
             req.body.checkIn, req.body.checkOut, req.body.guests, req.body.totalPrice,
-            req.body.transactionId || null, req.body.bookingReference]);
+            req.body.bookingReference, req.body.transactionId || null]);
         
         console.log('✅ EC2 Booking created with ID:', result.lastID);
         
