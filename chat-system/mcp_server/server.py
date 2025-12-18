@@ -35,8 +35,14 @@ async def handle_chat(request: dict):
     if any(word in text for word in ["booking", "reservation"]) and any(char.isdigit() for char in text):
         return await get_booking_info(message)
     
+    print(f"DEBUG: Message '{message}' from session {session_id}")
+    print(f"DEBUG: Session exists: {session_id in session_data}")
+    if session_id in session_data:
+        print(f"DEBUG: Session keys: {list(session_data[session_id].keys())}")
+    
     # 4. Check for resort selection FIRST (if in resort selection mode)
     if session_id in session_data and 'available_resorts' in session_data[session_id] and re.search(r'^\s*(\d+)\s*$', text):
+        print(f"DEBUG: Calling resort selection handler")
         return await handle_resort_selection(message, session_id)
     
     # 5. Check for main menu selection (A, B, C, D) - only if NOT in resort selection mode
