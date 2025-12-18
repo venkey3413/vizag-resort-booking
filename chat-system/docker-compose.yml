@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  chat-system:
+    build: .
+    ports:
+      - "8000:8000"  # Chat API
+      - "8001:8001"  # Dashboard
+    environment:
+      - RESORT_API_URL=http://host.docker.internal:3003/api
+    volumes:
+      - .:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

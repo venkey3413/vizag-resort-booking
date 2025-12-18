@@ -75,6 +75,17 @@ services:
     depends_on:
       - redis
 
+  chat-system:
+    build:
+      context: ./chat-system
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      - RESORT_API_URL=http://centralized-db-api:3003/api
+    depends_on:
+      - centralized-db-api
+
 volumes:
   redis-data:
   db-data:
