@@ -32,21 +32,32 @@ class ChatRequest(BaseModel):
 async def chat(req: ChatRequest):
     text = req.message.lower()
     
-    # Try MCP server first for all queries
-    try:
-        mcp_response = requests.post("http://127.0.0.1:3004/chat", json={
-            "message": req.message,
-            "session_id": req.session_id
-        }, timeout=5)
-        
-        if mcp_response.status_code == 200:
-            result = mcp_response.json()
-            if result.get("response"):
-                return {"answer": result["response"], "handover": result.get("handover", False)}
-    except Exception as e:
-        print(f"MCP server error: {e}")
+    # Check for resort availability queries
+    if any(word in text for word in ["available", "availability", "book", "resort"]):
+        try:
+            response = requests.get(f"{RESORT_API_URL}/resorts")
+            if response.status_code == 200:
+                resorts = response.json()
+                resort_list = "\n".join([f"• {r['name']} - ₹{r['price']}/night at {r['location']}" for r in resorts[:3]])
+                return {"answer": f"Available resorts:\n{resort_list}\n\nWould you like to make a booking?", "handover": False}
+        except:
+            pass
     
-    # Fallback responses
+    # Check for booking ID queries
+    match = re.search(r"(\d{3,10})", text)
+    booking_id = match.group(1) if match else None
+
+    if "booking" in text and booking_id:
+        try:
+            response = requests.get(f"{RESORT_API_URL}/bookings")
+            if response.status_code == 200:
+                bookings = response.json()
+                booking = next((b for b in bookings if str(b['id']) == booking_id), None)
+                if booking:
+                    return {"answer": f"Booking {booking_id}:\nGuest: {booking['guest_name']}\nResort: {booking.get('resort_name', 'N/A')}\nDates: {booking['check_in']} to {booking['check_out']}\nStatus: {booking.get('payment_status', 'pending')}", "handover": False}
+        except:
+            pass
+
     if "refund" in text or "cancel" in text:
         return {"answer": "Refund Policy:\n• Full refund if cancelled 24 hours before check-in\n• 50% refund if cancelled within 24 hours\n• No refund for no-shows\n\nNeed help with cancellation? I'll connect you to support.", "handover": True}
 
