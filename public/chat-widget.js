@@ -345,7 +345,7 @@ class ResortChatWidget {
 // Initialize widget when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new ResortChatWidget({
-        apiUrl: window.location.origin + '/chat',
-        wsUrl: window.location.origin.replace('http', 'ws') + '/chat'
+        apiUrl: window.location.origin,
+        wsUrl: 'ws://chat-system:8000'
     });
 });
