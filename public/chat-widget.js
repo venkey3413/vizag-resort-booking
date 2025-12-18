@@ -34,9 +34,6 @@ class ResortChatWidget {
                         <button id="chat-close">×</button>
                     </div>
                     <div id="chat-messages" class="chat-messages">
-                        <div class="bot-message">
-                            HI, I am Keey vizag resort chat bot, How may assist you today?
-                        </div>
                     </div>
                     <div class="chat-input">
                         <input type="text" id="chat-input" placeholder="Type your message...">
@@ -319,8 +316,36 @@ class ResortChatWidget {
         const window = document.getElementById('chat-window');
         if (this.isOpen) {
             window.classList.add('open');
+            // Send initial greeting when chat opens
+            if (document.getElementById('chat-messages').children.length === 0) {
+                this.sendInitialMessage();
+            }
         } else {
             window.classList.remove('open');
+        }
+    }
+    
+    async sendInitialMessage() {
+        try {
+            const response = await fetch(`${this.apiUrl}/api/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_id: this.sessionId,
+                    message: 'hi'
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.answer) {
+                    this.addMessage(data.answer, 'bot');
+                }
+            }
+        } catch (error) {
+            this.addMessage('Hi! I\'m Keey, your resort booking assistant. How can I help you?', 'bot');
         }
     }
 

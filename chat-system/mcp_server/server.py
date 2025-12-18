@@ -13,10 +13,17 @@ async def handle_chat(request: dict):
     session_id = request.get("session_id", "")
     text = message.lower()
     
-    # 1. Check for booking confirmation first
+    # 1. Check for human connection request
+    if any(word in text for word in ["human", "agent", "support", "help me", "talk to someone"]):
+        return {
+            "response": "👥 **Connecting you to our support team...**\n\nA human agent will assist you shortly. Please wait a moment.",
+            "handover": True
+        }
+    
+    # 2. Check for booking confirmation
     if text.strip() in ["yes", "y", "ok", "okay", "proceed", "confirm"]:
         return {
-            "response": "🎉 **Great! Let's proceed with your booking.**\n\nPlease click the link below to complete your reservation:\n\n🔗 **[Complete Booking](/)** \n\nYou'll be redirected to our booking page where you can:\n• Enter your guest details\n• Confirm dates and resort\n• Make secure payment\n• Receive instant confirmation",
+            "response": "🎉 **Great! Let's proceed with your booking.**\n\nPlease click the link below to complete your reservation:\n\n🔗 **[Complete Booking](/)** \n\nYou'll be redirected to our booking page where you can:\n• Enter your guest details\n• Confirm dates and resort\n• Make secure payment\n• Receive instant confirmation\n\n👥 **Need help? Type 'human' to connect with support**",
             "handover": False
         }
     
@@ -59,13 +66,13 @@ async def handle_chat(request: dict):
     # 2. Check for greeting - HIGH PRIORITY
     if any(word in text for word in ["hi", "hello", "hey", "good", "start"]):
         return {
-            "response": "Hi! I'm Keey, your resort booking assistant.\n\n🏨 **Please select an option:**\n\n**A.** 🏖️ Resort Availability\n**B.** 📋 Booking Information\n**C.** 💰 Refund Policies\n**D.** 📞 Contact Details\n\n**Type the letter (A, B, C, or D) to continue**",
+            "response": "Hi! I'm Keey, your resort booking assistant.\n\n🏨 **Please select an option:**\n\n**A.** 🏖️ Resort Availability\n**B.** 📋 Booking Information\n**C.** 💰 Refund Policies\n**D.** 📞 Contact Details\n\n**Type the letter (A, B, C, or D) to continue**\n\n👥 **Or type 'human' to connect with our support team**",
             "handover": False
         }
     
     # Default response with menu options
     return {
-        "response": "🏨 **Welcome! I can help you with:**\n\n**A.** 🏖️ Resort Availability\n**B.** 📋 Booking Information\n**C.** 💰 Refund Policies\n**D.** 📞 Contact Details\n\n**Please select an option by typing the letter (A, B, C, or D)**",
+        "response": "🏨 **Welcome! I can help you with:**\n\n**A.** 🏖️ Resort Availability\n**B.** 📋 Booking Information\n**C.** 💰 Refund Policies\n**D.** 📞 Contact Details\n\n**Please select an option by typing the letter (A, B, C, or D)**\n\n👥 **Or type 'human' to connect with our support team**",
         "handover": False
     }
 
