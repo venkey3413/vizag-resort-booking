@@ -36,16 +36,16 @@ async def handle_chat(request: dict):
     if re.search(r'^\s*(\d{4}-\d{2}-\d{2})\s*$', text):
         return await handle_single_date(message, session_id)
     
-    # 6. Check for resort availability queries with dates
-    if any(word in text for word in ["available", "availability", "resort", "check"]) and any(char.isdigit() for char in text):
-        return await check_availability(message, session_id)
+    # 6. Check for OLD STYLE availability queries (disable this)
+    # if any(word in text for word in ["available", "availability", "resort", "check"]) and any(char.isdigit() for char in text):
+    #     return await check_availability(message, session_id)
     
-    # 6. Check for general resort availability request (no dates)
-    if any(word in text for word in ["available", "availability", "resort", "check", "book"]):
+    # 6. Check for general resort availability request (no dates) - PRIORITY
+    if any(word in text for word in ["available", "availability", "check", "book"]) and not any(char.isdigit() for char in text):
         return await ask_for_dates()
     
     # 7. Check for general resort information
-    if any(word in text for word in ["resort", "hotel", "accommodation"]):
+    if any(word in text for word in ["resort", "hotel", "accommodation"]) and not any(char.isdigit() for char in text):
         return await get_resort_list()
     
     # 6. Check for contact/help queries
