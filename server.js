@@ -247,6 +247,10 @@ app.post('/api/bookings', async (req, res) => {
         const result = await bookingResponse.json();
         console.log('📋 EC2 Main: Booking result:', result);
         
+        if (!bookingResponse.ok || !result.id) {
+            throw new Error(`Booking creation failed: ${result.error || 'Unknown error'}`);
+        }
+        
         // Store payment proof if transactionId provided
         if (transactionId) {
             try {

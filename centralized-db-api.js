@@ -294,6 +294,10 @@ app.delete('/api/resorts/:id', async (req, res) => {
 // BOOKINGS API
 app.get('/api/bookings', async (req, res) => {
     try {
+        if (!db) {
+            throw new Error('Database not initialized');
+        }
+        
         const bookings = await db.all(`
             SELECT b.*, r.name as resort_name 
             FROM bookings b 
@@ -301,6 +305,9 @@ app.get('/api/bookings', async (req, res) => {
             ORDER BY b.booking_date DESC
         `);
         console.log('📊 EC2 Bookings fetch:', bookings.length, 'bookings found');
+        if (bookings.length > 0) {
+            console.log('📋 Latest booking:', bookings[0]);
+        }
         res.json(bookings);
     } catch (error) {
         console.error('❌ EC2 Bookings fetch failed:', error);
@@ -547,8 +554,24 @@ app.get('/api/events', (req, res) => {
 });
 
 // Health check
-app.get('/health', (req, res) => {
-    res.json({ status: 'OK', service: 'Centralized Database API', port: PORT });
+app.get('/health', async (req, res) => {
+    try {
+        const bookingCount = await db.get('SELECT COUNT(*) as count FROM bookings');
+        const resortCount = await db.get('SELECT COUNT(*) as count FROM resorts');
+        res.json({ 
+            status: 'OK', 
+            service: 'Centralized Database API', 
+            port: PORT,
+            bookings: bookingCount.count,
+            resorts: resortCount.count
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            status: 'ERROR', 
+            service: 'Centralized Database API', 
+            error: error.message 
+        });
+    }
 });
 
 // Start server
