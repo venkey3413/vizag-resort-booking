@@ -1,7 +1,8 @@
 class ResortChatWidget {
-    constructor() {
+    constructor(options = {}) {
         this.isOpen = false;
         this.sessionId = this.generateSessionId();
+        this.apiUrl = options.apiUrl || window.location.protocol + '//' + window.location.hostname + ':8000';
         this.init();
     }
 
@@ -207,7 +208,7 @@ class ResortChatWidget {
         input.value = '';
 
         try {
-            const response = await fetch('http://vizagresortbooking.in:8000/api/chat', {
+            const response = await fetch(`${this.apiUrl}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -218,8 +219,16 @@ class ResortChatWidget {
                 })
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
             const data = await response.json();
-            this.addMessage(data.answer, 'bot');
+            if (data && data.answer) {
+                this.addMessage(data.answer, 'bot');
+            } else {
+                throw new Error('Invalid response format');
+            }
 
             if (data.handover) {
                 setTimeout(() => {

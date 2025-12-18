@@ -11,6 +11,16 @@ from dashboard import chat_manager
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Add CORS middleware
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Resort API base URL
 RESORT_API_URL = "http://centralized-db-api:3003/api"
 
