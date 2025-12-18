@@ -68,19 +68,19 @@ class ResortChatWidget {
             .chat-toggle {
                 width: 60px;
                 height: 60px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #32CD32 0%, #9ACD32 100%);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 8px 25px rgba(50, 205, 50, 0.4);
                 transition: all 0.3s ease;
             }
             
             .chat-toggle:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+                box-shadow: 0 12px 35px rgba(50, 205, 50, 0.5);
             }
             
             .chat-logo {
@@ -115,14 +115,15 @@ class ResortChatWidget {
             }
             
             .chat-header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: linear-gradient(135deg, #32CD32 0%, #9ACD32 100%);
+                color: #2d3748;
                 padding: 20px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 font-weight: 600;
                 font-size: 16px;
+                box-shadow: 0 2px 10px rgba(50, 205, 50, 0.2);
             }
             
             .chat-messages {
@@ -160,18 +161,45 @@ class ResortChatWidget {
             }
             
             .bot-message {
-                background: white;
+                background: #f8fff8;
                 color: #2d3748;
                 align-self: flex-start;
-                border: 1px solid #e2e8f0;
+                border: 1px solid #32CD32;
                 border-bottom-left-radius: 6px;
+                position: relative;
+                line-height: 1.6;
+            }
+            
+            .bot-message::before {
+                content: '🤖';
+                position: absolute;
+                left: -8px;
+                top: -8px;
+                background: #32CD32;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 10px;
+            }
+            
+            .bot-message a {
+                transition: all 0.2s ease;
+            }
+            
+            .bot-message a:hover {
+                background: rgba(50,205,50,0.2) !important;
+                transform: translateY(-1px);
             }
             
             .user-message {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: linear-gradient(135deg, #32CD32 0%, #9ACD32 100%);
+                color: #2d3748;
                 align-self: flex-end;
                 border-bottom-right-radius: 6px;
+                font-weight: 500;
             }
             
             .chat-input {
@@ -195,19 +223,19 @@ class ResortChatWidget {
             }
             
             .chat-input input:focus {
-                border-color: #667eea;
+                border-color: #32CD32;
                 background: white;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.1);
             }
             
             .chat-input button {
                 padding: 12px 20px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: linear-gradient(135deg, #32CD32 0%, #9ACD32 100%);
+                color: #2d3748;
                 border: none;
                 border-radius: 24px;
                 cursor: pointer;
-                font-weight: 500;
+                font-weight: 600;
                 font-size: 14px;
                 transition: all 0.2s ease;
                 font-family: inherit;
@@ -215,13 +243,13 @@ class ResortChatWidget {
             
             .chat-input button:hover {
                 transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                box-shadow: 0 4px 12px rgba(50, 205, 50, 0.3);
             }
             
             #chat-close {
                 background: none;
                 border: none;
-                color: white;
+                color: #2d3748;
                 font-size: 24px;
                 cursor: pointer;
                 padding: 4px;
@@ -230,7 +258,7 @@ class ResortChatWidget {
             }
             
             #chat-close:hover {
-                background: rgba(255,255,255,0.1);
+                background: rgba(45,55,72,0.1);
             }
         `;
         document.head.appendChild(style);
@@ -336,7 +364,22 @@ class ResortChatWidget {
         const messagesContainer = document.getElementById('chat-messages');
         const messageDiv = document.createElement('div');
         messageDiv.className = sender === 'user' ? 'user-message' : 'bot-message';
-        messageDiv.textContent = message;
+        
+        // Format message with better line breaks, emojis, and clickable links
+        const formattedMessage = message
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/•/g, '<span style="color: #32CD32; font-weight: bold;">•</span>')
+            .replace(/✅/g, '<span style="font-size: 16px;">✅</span>')
+            .replace(/❌/g, '<span style="font-size: 16px;">❌</span>')
+            .replace(/💰/g, '<span style="font-size: 16px;">💰</span>')
+            .replace(/📍/g, '<span style="font-size: 16px;">📍</span>')
+            .replace(/📅/g, '<span style="font-size: 16px;">📅</span>')
+            .replace(/🏨/g, '<span style="font-size: 16px;">🏨</span>')
+            .replace(/🔗/g, '<span style="font-size: 16px;">🔗</span>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #32CD32; font-weight: bold; text-decoration: none; background: rgba(50,205,50,0.1); padding: 4px 8px; border-radius: 12px; display: inline-block; margin: 2px;">$1</a>');
+        
+        messageDiv.innerHTML = formattedMessage;
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }

@@ -45,19 +45,8 @@ async def check_availability(message: str):
             break
     
     if not found_date:
-        try:
-            response = requests.get(f"{RESORT_API_URL}/resorts")
-            if response.status_code == 200:
-                resorts = response.json()
-                resort_list = "\n".join([f"{i+1}. {r['name']} - {r['location']}" for i, r in enumerate(resorts[:5])])
-                return {
-                    "response": f"To check availability, please provide:\n\n📅 **Check-in Date** (YYYY-MM-DD format)\n🏨 **Resort Name**\n\nAvailable resorts:\n{resort_list}\n\nExample: 'Check availability for Sample Resort on 2024-12-25'",
-                    "handover": False
-                }
-        except:
-            pass
         return {
-            "response": "Please provide the check-in date (YYYY-MM-DD) and resort name to check availability.",
+            "response": "📅 **Please provide your check-in date**\n\nFormat: YYYY-MM-DD\nExample: 2024-12-25\n\nOnce you provide the date, I'll show you all available resorts for that day.",
             "handover": False
         }
     
@@ -78,9 +67,37 @@ async def check_availability(message: str):
                     break
             
             if not selected_resort:
-                resort_list = "\n".join([f"{i+1}. {r['name']} - {r['location']}" for i, r in enumerate(resorts[:5])])
+                # Show all available resorts for the date with booking options
+                available_resorts = []
+                for resort in resorts:
+                    # Check if this resort is available on the date
+                    is_booked = False
+                    for booking in bookings:
+                        if (booking.get('resort_id') == resort['id'] and 
+                            booking.get('check_in') <= found_date <= booking.get('check_out', found_date)):
+                            is_booked = True
+                            break
+                    
+                    if not is_booked:
+                        available_resorts.append(resort)
+                
+                if not available_resorts:
+                    return {
+                        "response": f"❌ **No resorts available on {found_date}**\n\nAll resorts are booked for this date. Please try a different date.",
+                        "handover": False
+                    }
+                
+                resort_options = []
+                for i, resort in enumerate(available_resorts[:5]):
+                    resort_options.append(
+                        f"**{i+1}. {resort['name']}**\n"
+                        f"📍 Location: {resort['location']}\n"
+                        f"💰 Price: ₹{resort['price']}/night\n"
+                        f"🔗 [Book Now](/?resort={resort['id']}&date={found_date})\n"
+                    )
+                
                 return {
-                    "response": f"Please specify which resort you'd like to check for {found_date}:\n\n{resort_list}",
+                    "response": f"✅ **Available Resorts for {found_date}:**\n\n" + "\n".join(resort_options) + "\n\nClick 'Book Now' to proceed with your reservation!",
                     "handover": False
                 }
             
@@ -99,7 +116,7 @@ async def check_availability(message: str):
                 }
             else:
                 return {
-                    "response": f"✅ **{selected_resort['name']}** is available on {found_date}!\n\n💰 **Price:** ₹{selected_resort['price']}/night\n📍 **Location:** {selected_resort['location']}\n\nWould you like to proceed with booking?",
+                    "response": f"✅ **{selected_resort['name']}** is available on {found_date}!\n\n💰 **Price:** ₹{selected_resort['price']}/night\n📍 **Location:** {selected_resort['location']}\n\n🔗 **[Book Now](/?resort={selected_resort['id']}&date={found_date})**\n\nClick the link above to proceed with your reservation!",
                     "handover": False
                 }
     except Exception as e:
