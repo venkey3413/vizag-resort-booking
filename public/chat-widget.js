@@ -23,7 +23,7 @@ class ResortChatWidget {
         widget.innerHTML = `
             <div id="chat-widget" class="chat-widget">
                 <div id="chat-toggle" class="chat-toggle">
-                    <img src="logo.png" alt="Chat" class="chat-logo">
+                    <img src="/logo.png" alt="Chat" class="chat-logo">
                 </div>
                 <div id="chat-window" class="chat-window">
                     <div class="chat-header">
