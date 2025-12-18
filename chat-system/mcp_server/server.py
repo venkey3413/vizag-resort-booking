@@ -20,7 +20,7 @@ async def handle_chat(request: dict):
             "handover": False
         }
     
-    # 2. Check for refund/cancellation queries
+    # 7. Check for refund/cancellation queries
     if any(word in text for word in ["refund", "cancel", "cancellation", "policy"]):
         return await handle_refund_policy(message)
     
@@ -56,10 +56,10 @@ async def handle_chat(request: dict):
     if any(word in text for word in ["contact", "help", "support", "phone", "email"]):
         return await get_contact_info()
     
-    # 7. Check for greeting
-    if any(word in text for word in ["hi", "hello", "hey", "good"]):
+    # 2. Check for greeting - HIGH PRIORITY
+    if any(word in text for word in ["hi", "hello", "hey", "good", "start"]):
         return {
-            "response": "Hi! I'm Keey, your resort booking assistant. \n\n🏨 **Please select an option:**\n\n**A.** 🏖️ Resort Availability\n**B.** 📋 Booking Information\n**C.** 💰 Refund Policies\n**D.** 📞 Contact Details\n\n**Type the letter (A, B, C, or D) to continue**",
+            "response": "Hi! I'm Keey, your resort booking assistant.\n\n🏨 **Please select an option:**\n\n**A.** 🏖️ Resort Availability\n**B.** 📋 Booking Information\n**C.** 💰 Refund Policies\n**D.** 📞 Contact Details\n\n**Type the letter (A, B, C, or D) to continue**",
             "handover": False
         }
     
