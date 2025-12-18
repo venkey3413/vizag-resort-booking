@@ -28,13 +28,13 @@ async def handle_chat(request: dict):
     if any(word in text for word in ["booking", "reservation"]) and any(char.isdigit() for char in text):
         return await get_booking_info(message)
     
-    # 4. Check for main menu selection (1, 2, 3)
-    if re.search(r'^\s*[123]\s*$', text):
-        return await handle_main_menu_selection(message, session_id)
-    
-    # 5. Check for resort selection (option 1, 2, 3, etc.) - only if in resort selection mode
+    # 4. Check for resort selection FIRST (if in resort selection mode)
     if session_id in session_data and 'available_resorts' in session_data[session_id] and re.search(r'^\s*(\d+)\s*$', text):
         return await handle_resort_selection(message, session_id)
+    
+    # 5. Check for main menu selection (1, 2, 3, 4) - only if NOT in resort selection mode
+    if re.search(r'^\s*[1234]\s*$', text) and (session_id not in session_data or 'available_resorts' not in session_data[session_id]):
+        return await handle_main_menu_selection(message, session_id)
     
     # 5. Check for single date input (check-in date)
     if re.search(r'^\s*(\d{4}-\d{2}-\d{2})\s*$', text):
@@ -59,13 +59,13 @@ async def handle_chat(request: dict):
     # 7. Check for greeting
     if any(word in text for word in ["hi", "hello", "hey", "good"]):
         return {
-            "response": "Hi! I'm Keey, your resort booking assistant. I can help you with:\n\n• 🏨 Resort availability\n• 💰 Booking information\n• 🔄 Refund policies\n• 📞 Contact details\n\nHow can I assist you today?",
+            "response": "Hi! I'm Keey, your resort booking assistant. \n\n🏨 **Please select an option:**\n\n**1.** 🏖️ Resort Availability\n**2.** 📋 Booking Information\n**3.** 💰 Refund Policies\n**4.** 📞 Contact Details\n\n**Type the number (1, 2, 3, or 4) to continue**",
             "handover": False
         }
     
     # Default response with menu options
     return {
-        "response": "🏨 **Welcome! I can help you with:**\n\n**1.** 🏖️ Resort Availability\n**2.** 📋 Booking Information\n**3.** 💰 Refund Policies\n\n**Please select an option by typing the number (1, 2, or 3)**",
+        "response": "🏨 **Welcome! I can help you with:**\n\n**1.** 🏖️ Resort Availability\n**2.** 📋 Booking Information\n**3.** 💰 Refund Policies\n**4.** 📞 Contact Details\n\n**Please select an option by typing the number (1, 2, 3, or 4)**",
         "handover": False
     }
 
@@ -90,9 +90,11 @@ async def handle_main_menu_selection(message: str, session_id: str):
         }
     elif option == "3":
         return await handle_refund_policy("")
+    elif option == "4":
+        return await get_contact_info()
     else:
         return {
-            "response": "Please select a valid option (1, 2, or 3):\n\n**1.** Resort Availability\n**2.** Booking Information\n**3.** Refund Policies",
+            "response": "Please select a valid option (1, 2, 3, or 4):\n\n**1.** Resort Availability\n**2.** Booking Information\n**3.** Refund Policies\n**4.** Contact Details",
             "handover": False
         }
 
