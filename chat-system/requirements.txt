@@ -3,5 +3,4 @@ uvicorn
 requests
 websockets
 pydantic
-mcp==1.0.0
-mcp-server
+mcp-server-python==0.5.0
