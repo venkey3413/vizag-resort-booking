@@ -435,6 +435,22 @@ app.get('/owner-dashboard', (req, res) => {
     res.sendFile(__dirname + '/owner-public/login.html');
 });
 
+// Chat proxy endpoint
+app.post('/api/chat', async (req, res) => {
+    try {
+        const response = await fetch('http://chat-system:8000/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Chat proxy error:', error);
+        res.status(500).json({ error: 'Chat service unavailable' });
+    }
+});
+
 // Initialize and start server
 async function initServices() {
     console.log('✅ Main service initialized - using centralized database API');

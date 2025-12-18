@@ -2,7 +2,7 @@ class ResortChatWidget {
     constructor(options = {}) {
         this.isOpen = false;
         this.sessionId = this.generateSessionId();
-        this.apiUrl = options.apiUrl || 'http://vizagresortbooking.in:8000';
+        this.apiUrl = options.apiUrl || '';
         this.init();
     }
 
