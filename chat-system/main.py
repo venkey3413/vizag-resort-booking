@@ -32,54 +32,21 @@ class ChatRequest(BaseModel):
 async def chat(req: ChatRequest):
     text = req.message.lower()
     
-    # Check for resort availability queries
-    if any(word in text for word in ["available", "availability", "book", "resort"]):
-        # Parse date and resort from message
-        import re
-        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', req.message)
+    # Try MCP server first for all queries
+    try:
+        mcp_response = requests.post("http://localhost:3004/chat", json={
+            "message": req.message,
+            "session_id": req.session_id
+        }, timeout=10)
         
-        if date_match:
-            date = date_match.group(1)
-            # Try to find resort name in message
-            try:
-                response = requests.get(f"{RESORT_API_URL}/resorts")
-                if response.status_code == 200:
-                    resorts = response.json()
-                    for resort in resorts:
-                        if resort['name'].lower() in text:
-                            # Use MCP server to check availability
-                            try:
-                                from mcp_client import call_mcp_tool
-                                result = await call_mcp_tool("check_resort_availability", {
-                                    "date": date,
-                                    "resort_name": resort['name']
-                                })
-                                return {"answer": result, "handover": False}
-                            except:
-                                pass
-            except:
-                pass
-        
-        # If no date/resort found, ask for details
-        try:
-            from mcp_client import call_mcp_tool
-            result = await call_mcp_tool("get_resort_list", {})
-            return {"answer": f"To check availability, please provide:\n\n📅 **Check-in Date** (YYYY-MM-DD format)\n🏨 **Resort Name**\n\n{result}\n\nExample: 'Check availability for Resort Paradise on 2024-12-25'", "handover": False}
-        except:
-            return {"answer": "Please provide the check-in date (YYYY-MM-DD) and resort name to check availability.", "handover": False}
+        if mcp_response.status_code == 200:
+            result = mcp_response.json()
+            if result.get("response"):
+                return {"answer": result["response"], "handover": result.get("handover", False)}
+    except Exception as e:
+        print(f"MCP server error: {e}")
     
-    # Check for booking ID queries
-    match = re.search(r"(\d{3,10})", text)
-    booking_id = match.group(1) if match else None
-
-    if "booking" in text and booking_id:
-        try:
-            from mcp_client import call_mcp_tool
-            result = await call_mcp_tool("get_booking_info", {"booking_id": booking_id})
-            return {"answer": result, "handover": False}
-        except:
-            pass
-
+    # Fallback responses
     if "refund" in text or "cancel" in text:
         return {"answer": "Refund Policy:\n• Full refund if cancelled 24 hours before check-in\n• 50% refund if cancelled within 24 hours\n• No refund for no-shows\n\nNeed help with cancellation? I'll connect you to support.", "handover": True}
 
