@@ -40,11 +40,10 @@ async def chat(req: ChatRequest):
         }
         
         process = await asyncio.create_subprocess_exec(
-            "python", "mcp_server/server.py",
+            "python", "/app/chat-system/mcp_server/server.py",
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd="/app/chat-system"
+            stderr=asyncio.subprocess.PIPE
         )
         
         stdout, stderr = await process.communicate(
