@@ -207,7 +207,7 @@ class ResortChatWidget {
         input.value = '';
 
         try {
-            const response = await fetch('/api/chat', {
+            const response = await fetch('http://vizagresortbooking.in:8000/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
