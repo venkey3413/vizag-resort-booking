@@ -10,4 +10,4 @@ COPY mcp_server/ ./mcp_server/
 
 EXPOSE 8000 8001
 
-CMD ["python", "run_mcp.py"]
+CMD ["python", "run.py"]
