@@ -19,6 +19,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - DB_API_URL=http://centralized-db-api:3003
       - BOOKING_API_URL=http://booking-service:3002
+      - EMAIL_USER=vizagresortbooking@gmail.com
+      - EMAIL_PASS=pcvclorjnrxdlnku
     volumes:
       - .:/app
       - /app/node_modules
