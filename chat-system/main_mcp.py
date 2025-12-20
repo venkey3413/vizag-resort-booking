@@ -30,21 +30,17 @@ async def call_mcp_tool(tool_name: str, arguments: dict = None):
     try:
         server_params = StdioServerParameters(
             command="python",
-            args=["mcp_server/server.py"]
+            args=["mcp_server/server_fixed.py"]
         )
         
         async with stdio_client(server_params) as (read, write):
             async with ClientSession(read, write) as session:
                 await session.initialize()
                 
-                # List available tools
-                tools = await session.list_tools()
-                
                 # Call the specific tool
-                if any(tool.name == tool_name for tool in tools.tools):
-                    result = await session.call_tool(tool_name, arguments or {})
-                    if result.content:
-                        return result.content[0].text
+                result = await session.call_tool(tool_name, arguments or {})
+                if result.content:
+                    return result.content[0].text
                 
         return None
     except Exception as e:
