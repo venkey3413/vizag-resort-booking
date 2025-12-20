@@ -4,3 +4,4 @@ requests
 websockets
 pydantic
 mcp
+anyio
