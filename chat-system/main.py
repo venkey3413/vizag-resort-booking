@@ -108,27 +108,27 @@ def find_and_call_tool(message: str):
     """Find appropriate tool based on message content"""
     text = message.lower()
     
-    # Check for booking ID pattern
+    # Check for booking ID pattern first
     if any(char.isdigit() for char in message) and ("booking" in text or "id" in text):
         booking_id = re.search(r'\d+', message)
         if booking_id:
             return get_booking_status(booking_id.group())
     
-    # Map keywords to tools
+    # Map keywords to tools (order matters - more specific first)
     if any(word in text for word in ["refund", "cancel", "cancellation"]):
         return get_refund_policy()
     
     if any(word in text for word in ["check-in", "checkout", "timing", "time"]):
         return get_checkin_checkout_policy()
     
-    if any(word in text for word in ["rules", "policy", "allowed"]):
-        return get_resort_rules()
-    
-    if any(word in text for word in ["resorts", "hotels", "properties"]):
+    if any(word in text for word in ["resorts", "hotels", "properties", "available"]):
         return list_resorts()
     
     if any(word in text for word in ["terms", "conditions"]):
         return get_terms_conditions()
+    
+    if any(word in text for word in ["rules", "allowed", "music", "food", "pool"]):
+        return get_resort_rules()
     
     return None
 
