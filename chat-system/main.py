@@ -24,64 +24,69 @@ class ChatRequest(BaseModel):
     session_id: str
     message: str
 
-# Tool functions (same as MCP tools but as regular functions)
-def get_refund_policy():
-    return "🔄 **Refund Policy:**\n\n✅ **Full refund** if cancelled 24+ hours before check-in\n🟡 **50% refund** if cancelled within 24 hours\n❌ **No refund** for no-shows\n\n📞 Contact: +91 8341674465"
+import subprocess
+import json
 
-def get_checkin_checkout_policy():
-    return "🕐 **Check-in/Check-out Policy:**\n\n📅 **Check-in:** 11:00 AM\n📅 **Check-out:** 9:00 AM\n\n⏰ Early check-in/late check-out subject to availability"
-
-def get_resort_rules():
-    return "📋 **Resort Rules:**\n\n🎵 Music allowed until 10:00 PM\n🍽️ Outside food not allowed\n🏊 Pool timings: 6 AM - 10 PM\n🚭 No smoking in rooms"
-
-def list_resorts():
+# Call MCP server tools directly
+def call_mcp_tool(tool_name: str, arguments: dict = None):
     try:
-        r = requests.get(f"{BASE_URL}/api/resorts")
-        if r.status_code == 200:
-            resorts = r.json()
-            result = "🏨 **Available Resorts:**\n\n"
-            for resort in resorts[:3]:
-                result += f"**{resort['name']}**\n📍 {resort['location']}\n💰 ₹{resort['price']}/night\n\n"
-            return result
-        return "Sorry, couldn't fetch resort information right now."
-    except:
-        return "Sorry, couldn't fetch resort information right now."
-
-def get_booking_status(booking_id: str):
-    try:
-        r = requests.get(f"{BASE_URL}/api/bookings")
-        if r.status_code == 200:
-            bookings = r.json()
-            for booking in bookings:
-                if str(booking.get("id")) == str(booking_id):
-                    return f"📋 **Booking Status:**\n\nID: {booking.get('id')}\nGuest: {booking.get('guest_name')}\nStatus: {booking.get('payment_status')}\nDates: {booking.get('check_in')} to {booking.get('check_out')}"
-            return "❌ Booking not found. Please check your booking ID."
-        return "Sorry, couldn't fetch booking information right now."
-    except:
-        return "Sorry, couldn't fetch booking information right now."
+        # Create MCP request
+        request = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {
+                "name": tool_name,
+                "arguments": arguments or {}
+            }
+        }
+        
+        # Call MCP server
+        process = subprocess.Popen(
+            ["python", "mcp_server/server.py"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        stdout, stderr = process.communicate(json.dumps(request))
+        
+        if process.returncode == 0 and stdout:
+            response = json.loads(stdout)
+            if "result" in response:
+                return response["result"]["text"]
+        
+        return None
+    except Exception as e:
+        print(f"MCP tool error: {e}")
+        return None
 
 def find_and_call_tool(message: str):
-    """Find appropriate tool based on message content"""
+    """Find appropriate MCP tool based on message content"""
     text = message.lower()
     
     # Check for booking ID pattern
     if any(char.isdigit() for char in message) and ("booking" in text or "id" in text):
         booking_id = re.search(r'\d+', message)
         if booking_id:
-            return get_booking_status(booking_id.group())
+            return call_mcp_tool("get_booking_status", {"booking_id": booking_id.group()})
     
-    # Map keywords to functions
+    # Map keywords to MCP tools
     if any(word in text for word in ["refund", "cancel", "cancellation"]):
-        return get_refund_policy()
+        return call_mcp_tool("get_refund_policy")
     
     if any(word in text for word in ["check-in", "checkout", "timing", "time"]):
-        return get_checkin_checkout_policy()
+        return call_mcp_tool("get_checkin_checkout_policy")
     
     if any(word in text for word in ["rules", "policy", "allowed"]):
-        return get_resort_rules()
+        return call_mcp_tool("get_resort_rules")
     
     if any(word in text for word in ["resorts", "hotels", "properties"]):
-        return list_resorts()
+        return call_mcp_tool("list_resorts")
+    
+    if any(word in text for word in ["terms", "conditions"]):
+        return call_mcp_tool("get_terms_conditions")
     
     return None
 
