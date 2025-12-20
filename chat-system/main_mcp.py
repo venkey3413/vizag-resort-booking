@@ -30,7 +30,7 @@ async def call_mcp_tool(tool_name: str, arguments: dict = None):
     try:
         server_params = StdioServerParameters(
             command="python",
-            args=["mcp_server/server_fixed.py"]
+            args=["mcp_server/server_working.py"]
         )
         
         async with stdio_client(server_params) as (read, write):
