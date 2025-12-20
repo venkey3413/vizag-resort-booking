@@ -54,6 +54,8 @@ async function initDB() {
             total_price INTEGER NOT NULL,
             booking_reference TEXT,
             transaction_id TEXT,
+            coupon_code TEXT,
+            discount_amount INTEGER DEFAULT 0,
             status TEXT DEFAULT 'pending_payment',
             payment_status TEXT DEFAULT 'pending',
             booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -326,11 +328,11 @@ app.post('/api/bookings', async (req, res) => {
         });
         
         const result = await db.run(`
-            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, total_price, booking_reference, transaction_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO bookings (resort_id, guest_name, email, phone, check_in, check_out, guests, total_price, booking_reference, transaction_id, coupon_code, discount_amount)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [req.body.resortId, req.body.guestName, req.body.email, req.body.phone,
             req.body.checkIn, req.body.checkOut, req.body.guests, req.body.totalPrice,
-            req.body.bookingReference, req.body.transactionId || null]);
+            req.body.bookingReference, req.body.transactionId || null, req.body.couponCode || null, req.body.discountAmount || 0]);
         
         console.log('✅ EC2 Booking created with ID:', result.lastID);
         
