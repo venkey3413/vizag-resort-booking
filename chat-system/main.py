@@ -91,14 +91,14 @@ async def chat(req: ChatRequest):
     session_id = req.session_id
     text = message.lower().strip()
     
+    # Greeting - check this BEFORE tool matching
+    if any(word in text for word in ["hi", "hello", "hey", "good", "start"]):
+        return {"answer": "Hi, I am Keey vizag resort booking assistance. How may help you?", "handover": False}
+    
     # Direct human connection request
     if any(word in text for word in ["human", "agent", "support", "talk to someone"]):
         await chat_manager.add_chat(session_id, message)
         return {"answer": "👥 **Connecting you to our support team...**\n\nA human agent will assist you shortly. Please wait a moment.", "handover": True}
-    
-    # Greeting
-    if any(word in text for word in ["hi", "hello", "hey", "good", "start"]):
-        return {"answer": "Hi! I'm Keey, your resort booking assistant.\n\nI can help you with:\n• Resort information\n• Booking details\n• Refund policies\n• Check-in/out timings\n• Resort rules\n\nWhat would you like to know?", "handover": False}
     
     # Try to find and call appropriate tool
     tool_response = find_and_call_tool(message)
