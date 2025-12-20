@@ -1,6 +1,6 @@
 
 from mcp.server import Server
-from mcp.server.types import TextContent
+from mcp.types import TextContent
 import requests
 
 BASE_URL = "http://centralized-db-api:3003"
