@@ -1,133 +1,63 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 from pydantic import BaseModel
-import subprocess
-import re
-import json
-
-from dashboard import chat_manager
+from fastapi.middleware.cors import CORSMiddleware
+import subprocess, re
 from mcp.client import ClientSession
+from dashboard import chat_manager
 
 app = FastAPI()
-
-# -------------------- Static & CORS --------------------
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# -------------------- MCP CLIENT --------------------
-mcp_process = subprocess.Popen(
-    ["vizag-mcp-server"],
-    stdin=subprocess.PIPE,
-    stdout=subprocess.PIPE
-)
-
-mcp_session = ClientSession(
-    stdin=mcp_process.stdin,
-    stdout=mcp_process.stdout
-)
-
-# -------------------- Models --------------------
 class ChatRequest(BaseModel):
     session_id: str
     message: str
 
+# ---------------- MCP Lazy Init ----------------
+mcp_process = None
+mcp = None
 
-# -------------------- Intent Router --------------------
-async def route_to_tool(message: str):
-    text = message.lower()
+async def get_mcp():
+    global mcp_process, mcp
+    if mcp is None:
+        mcp_process = subprocess.Popen(
+            ["vizag-mcp-server"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE
+        )
+        mcp = ClientSession(
+            stdin=mcp_process.stdin,
+            stdout=mcp_process.stdout
+        )
+    return mcp
 
-    # Booking ID detection
-    booking_match = re.search(r"\b(\d{3,10})\b", text)
-    booking_id = booking_match.group(1) if booking_match else None
-
-    if "booking summary" in text or "booking details" in text:
-        if booking_id:
-            return await mcp_session.call_tool(
-                "get_full_booking_summary",
-                booking_id=booking_id
-            )
-
-    if "booking status" in text or "check booking" in text:
-        if booking_id:
-            return await mcp_session.call_tool(
-                "get_booking_status",
-                booking_id=booking_id
-            )
-
-    if any(k in text for k in ["refund", "cancellation"]):
-        return await mcp_session.call_tool("get_refund_policy")
-
-    if any(k in text for k in ["check-in", "checkout", "timing"]):
-        return await mcp_session.call_tool("get_checkin_checkout_policy")
-
-    if any(k in text for k in ["resorts", "available resorts"]):
-        return await mcp_session.call_tool("list_resorts")
-
-    if any(k in text for k in ["rules", "music", "food", "pool"]):
-        return await mcp_session.call_tool("get_resort_rules")
-
-    if any(k in text for k in ["terms", "conditions"]):
-        return await mcp_session.call_tool("get_terms_conditions")
-
-    return None
-
-
-# -------------------- Chat API --------------------
+# ---------------- Chat API ----------------
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
     text = req.message.lower()
+    mcp = await get_mcp()
 
-    # Greeting
-    if any(w in text for w in ["hi", "hello", "hey"]):
+    booking_id = re.search(r"\d{3,10}", text)
+    booking_id = booking_id.group() if booking_id else None
+
+    if "refund" in text:
         return {
-            "answer": "Hi 👋 I am **Keey**, your Vizag Resort Booking Assistant. How can I help you?",
+            "answer": await mcp.call_tool("get_refund_policy"),
             "handover": False
         }
 
-    # Explicit human request
-    if any(w in text for w in ["human", "agent", "support"]):
-        await chat_manager.add_chat(req.session_id, req.message)
+    if "booking summary" in text and booking_id:
         return {
-            "answer": "👥 Connecting you to a human agent. Please wait...",
-            "handover": True
-        }
-
-    # MCP Tool Routing
-    tool_response = await route_to_tool(req.message)
-
-    if tool_response:
-        return {
-            "answer": tool_response,
+            "answer": await mcp.call_tool(
+                "get_full_booking_summary",
+                booking_id=booking_id
+            ),
             "handover": False
         }
 
-    # Fallback → Human
     await chat_manager.add_chat(req.session_id, req.message)
-    return {
-        "answer": "I’m not confident about this request. Let me connect you to a human agent.",
-        "handover": True
-    }
-
-
-# -------------------- WebSocket (Dashboard Support) --------------------
-@app.websocket("/ws/chat/{session_id}")
-async def chat_websocket(websocket: WebSocket, session_id: str):
-    await websocket.accept()
-    chat_manager.user_connections[session_id] = websocket
-
-    try:
-        while True:
-            data = await websocket.receive_text()
-            payload = json.loads(data)
-            await chat_manager.add_message(session_id, payload["message"], "user")
-
-    except WebSocketDisconnect:
-        chat_manager.user_connections.pop(session_id, None)
+    return {"answer": "Connecting to human support…", "handover": True}
