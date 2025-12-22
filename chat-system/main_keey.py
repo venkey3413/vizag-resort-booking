@@ -1,72 +1,143 @@
-
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import requests
+import subprocess
 import re
 import json
-from datetime import datetime
-from dashboard import chat_manager
 
+from dashboard import chat_manager
+from mcp.client import ClientSession
+
+# --------------------------------------------------
+# App setup
+# --------------------------------------------------
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Resort API base URL
-RESORT_API_URL = "http://localhost:3003/api"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# --------------------------------------------------
+# MCP Client setup (CRITICAL)
+# --------------------------------------------------
+mcp_process = subprocess.Popen(
+    ["vizag-mcp-server"],  # must match your MCP server name
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE
+)
+
+mcp_session = ClientSession(
+    stdin=mcp_process.stdin,
+    stdout=mcp_process.stdout
+)
+
+# --------------------------------------------------
+# Models
+# --------------------------------------------------
 class ChatRequest(BaseModel):
     session_id: str
     message: str
 
+# --------------------------------------------------
+# Intent → Tool Router
+# --------------------------------------------------
+async def route_to_mcp_tool(message: str):
+    text = message.lower()
+
+    # Extract booking ID if present
+    match = re.search(r"\b(\d{3,10})\b", text)
+    booking_id = match.group(1) if match else None
+
+    # ---- Booking ----
+    if any(k in text for k in ["booking summary", "booking details", "full booking"]):
+        if booking_id:
+            return await mcp_session.call_tool(
+                "get_full_booking_summary",
+                booking_id=booking_id
+            )
+
+    if "booking" in text and booking_id:
+        return await mcp_session.call_tool(
+            "get_booking_status",
+            booking_id=booking_id
+        )
+
+    # ---- Availability / Resorts ----
+    if any(k in text for k in ["available", "availability", "resorts"]):
+        return await mcp_session.call_tool("list_resorts")
+
+    # ---- Policies ----
+    if any(k in text for k in ["refund", "cancel", "cancellation"]):
+        return await mcp_session.call_tool("get_refund_policy")
+
+    if any(k in text for k in ["check-in", "checkout", "timing"]):
+        return await mcp_session.call_tool("get_checkin_checkout_policy")
+
+    if any(k in text for k in ["rules", "music", "food", "pool"]):
+        return await mcp_session.call_tool("get_resort_rules")
+
+    if any(k in text for k in ["terms", "conditions"]):
+        return await mcp_session.call_tool("get_terms_conditions")
+
+    return None
+
+# --------------------------------------------------
+# Chat API
+# --------------------------------------------------
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
     text = req.message.lower()
-    
-    # Check for resort availability queries
-    if any(word in text for word in ["available", "availability", "book", "resort"]):
-        try:
-            response = requests.get(f"{RESORT_API_URL}/resorts")
-            if response.status_code == 200:
-                resorts = response.json()
-                available_resorts = [r for r in resorts if r.get('available', True)]
-                
-                if available_resorts:
-                    resort_list = "\n".join([f"• {r['name']} - ₹{r['price']}/night at {r['location']}" for r in available_resorts[:3]])
-                    return {"answer": f"Available resorts:\n{resort_list}\n\nWould you like to make a booking?", "handover": False}
-                else:
-                    return {"answer": "No resorts are currently available. Please try again later.", "handover": False}
-        except:
-            pass
-    
-    # Check for booking ID queries
-    match = re.search(r"(\d{3,10})", text)
-    booking_id = match.group(1) if match else None
 
-    if "booking" in text and booking_id:
-        try:
-            response = requests.get(f"{RESORT_API_URL}/bookings")
-            if response.status_code == 200:
-                bookings = response.json()
-                booking = next((b for b in bookings if str(b['id']) == booking_id), None)
-                if booking:
-                    return {"answer": f"Booking {booking_id}:\nGuest: {booking['guest_name']}\nResort: {booking.get('resort_name', 'N/A')}\nDates: {booking['check_in']} to {booking['check_out']}\nStatus: {booking.get('payment_status', 'pending')}", "handover": False}
-        except:
-            pass
+    # Greeting
+    if any(w in text for w in ["hi", "hello", "hey"]):
+        return {
+            "answer": "Hi 👋 I’m **Keey**, your Vizag Resort Booking Assistant. How can I help you today?",
+            "handover": False
+        }
 
-    if "refund" in text or "cancel" in text:
-        return {"answer": "Refund Policy:\n• Full refund if cancelled 24 hours before check-in\n• 50% refund if cancelled within 24 hours\n• No refund for no-shows\n\nNeed help with cancellation? I'll connect you to support.", "handover": True}
+    # Explicit human request
+    if any(w in text for w in ["human", "agent", "support", "talk to someone"]):
+        await chat_manager.add_chat(req.session_id, req.message)
+        return {
+            "answer": "👥 Connecting you to a human agent. Please wait…",
+            "handover": True
+        }
 
-    # Handover to human support
+    # MCP Tool handling
+    tool_response = await route_to_mcp_tool(req.message)
+
+    if tool_response:
+        return {
+            "answer": tool_response,
+            "handover": False
+        }
+
+    # Fallback → Human
     await chat_manager.add_chat(req.session_id, req.message)
-    return {"answer": "I'm connecting you to our support team. Please wait a moment.", "handover": True}
+    return {
+        "answer": "I’m not fully sure about this. Let me connect you to a human agent for assistance.",
+        "handover": True
+    }
 
+# --------------------------------------------------
+# WebSocket (Human Dashboard)
+# --------------------------------------------------
 @app.websocket("/ws/chat/{session_id}")
 async def chat_websocket(websocket: WebSocket, session_id: str):
     await websocket.accept()
+    chat_manager.user_connections[session_id] = websocket
+
     try:
         while True:
             data = await websocket.receive_text()
-            message_data = json.loads(data)
-            await chat_manager.add_message(session_id, message_data["message"], "user")
-    except:
-        pass
+            payload = json.loads(data)
+            await chat_manager.add_message(session_id, payload["message"], "user")
+
+    except WebSocketDisconnect:
+        chat_manager.user_connections.pop(session_id, None)
