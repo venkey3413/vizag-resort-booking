@@ -3,3 +3,6 @@ uvicorn
 requests
 websockets
 pydantic
+
+# MCP (REQUIRED)
+mcp
