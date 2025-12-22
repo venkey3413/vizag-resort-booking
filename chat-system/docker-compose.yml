@@ -1,13 +1,22 @@
 version: '3.8'
+
 services:
   chat-system:
     build: .
+    container_name: keey-chat-system
     ports:
-      - "8000:8000"  # Chat API
-      - "8001:8001"  # Dashboard
+      - "8000:8000"   # Chat API
+      - "8001:8001"   # Human dashboard
+    restart: unless-stopped
+
+    # ❌ No DB URL here — MCP handles DB
     environment:
-      - RESORT_API_URL=http://host.docker.internal:3003/api
+      - PYTHONUNBUFFERED=1
+
+    # ✅ DO NOT mount project root (breaks MCP)
     volumes:
-      - .:/app
+      - ./static:/app/static
+      - ./templates:/app/templates
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
