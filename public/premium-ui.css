@@ -1062,3 +1062,514 @@ footer a:hover{
   opacity: 1;
   transform: translateY(0px) scale(1);
 }
+/* ======================================
+   PREMIUM WHY BOOK + LOCATION SECTION
+====================================== */
+
+.vrb-soft-bg{
+  padding: 80px 0;
+  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%);
+}
+
+.vrb-wrap{
+  width: min(1100px, 92%);
+  margin: auto;
+  background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(15,23,42,0.08);
+  box-shadow: 0 18px 50px rgba(2,8,20,0.08);
+  border-radius: 26px;
+  padding: 45px 30px;
+  position: relative;
+  overflow:hidden;
+}
+
+.vrb-wrap::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius: 26px;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(10,116,218,0.40),
+    rgba(255,111,0,0.25),
+    rgba(26,163,255,0.25)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events:none;
+}
+
+.vrb-heading{
+  text-align: center;
+  font-size: 26px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: .2px;
+}
+
+.vrb-desc{
+  text-align:center;
+  margin-top: 10px;
+  color:#475569;
+  font-weight: 700;
+}
+
+.vrb-feature-grid{
+  margin-top: 30px;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.vrb-feature-card{
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(15,23,42,0.08);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 16px 45px rgba(2,8,20,0.06);
+  transition: 0.25s ease;
+}
+
+.vrb-feature-card:hover{
+  transform: translateY(-8px);
+  box-shadow: 0 26px 70px rgba(2,8,20,0.12);
+}
+
+.vrb-icon{
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background: rgba(10,116,218,0.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 26px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(10,116,218,0.14);
+}
+
+.vrb-feature-card h3{
+  font-size: 17px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color:#0f172a;
+}
+
+.vrb-feature-card p{
+  color:#475569;
+  font-weight: 700;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+/* Locations Grid */
+.vrb-location-grid{
+  margin-top: 30px;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.vrb-location-card{
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(15,23,42,0.08);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 16px 45px rgba(2,8,20,0.06);
+  transition: 0.25s ease;
+  position: relative;
+}
+
+.vrb-location-card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 26px 70px rgba(2,8,20,0.12);
+}
+
+.vrb-location-card h3{
+  font-size: 16px;
+  font-weight: 900;
+  color:#0f172a;
+}
+
+.vrb-location-card p{
+  margin-top: 8px;
+  color:#475569;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.vrb-mini-btn{
+  margin-top: 14px;
+  border: none;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-weight: 900;
+  background: rgba(10,116,218,0.10);
+  color: #0a74da;
+  border: 1px solid rgba(10,116,218,0.14);
+  transition: 0.2s ease;
+}
+
+.vrb-mini-btn:hover{
+  background: rgba(10,116,218,0.18);
+}
+
+.vrb-location-highlight{
+  background: linear-gradient(135deg, rgba(10,116,218,0.12), rgba(255,111,0,0.10));
+  border: 1px solid rgba(255,111,0,0.16);
+}
+
+.vrb-mini-btn-accent{
+  background: linear-gradient(135deg,#ff6f00,#ff9a3c);
+  color:#fff;
+  border:none;
+  box-shadow: 0 14px 30px rgba(255,111,0,0.28);
+}
+
+/* Mobile */
+@media(max-width: 900px){
+  .vrb-wrap{
+    padding: 28px 16px;
+  }
+  .vrb-heading{
+    font-size: 22px;
+  }
+}
+/* ==============================
+   PREMIUM CHAT WIDGET (UI)
+============================== */
+
+.vrb-chat-widget{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9999;
+  font-family: inherit;
+}
+
+/* Floating button */
+.vrb-chat-fab{
+  width: 62px;
+  height: 62px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(10,116,218,1), rgba(26,163,255,1));
+  box-shadow: 0 20px 50px rgba(2,8,20,.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  transition: 0.25s ease;
+}
+
+.vrb-chat-fab img{
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.vrb-chat-fab:hover{
+  transform: translateY(-3px) scale(1.03);
+}
+
+/* Chat box */
+.vrb-chat-box{
+  position: absolute;
+  right: 0;
+  bottom: 78px;
+  width: 340px;
+  max-width: calc(100vw - 30px);
+  background: rgba(255,255,255,.97);
+  border-radius: 22px;
+  border: 1px solid rgba(15,23,42,.12);
+  box-shadow: 0 28px 90px rgba(2,8,20,.22);
+  overflow:hidden;
+  transform: translateY(16px) scale(.98);
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s ease;
+}
+
+.vrb-chat-box.open{
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+  pointer-events: auto;
+}
+
+/* Header */
+.vrb-chat-header{
+  padding: 14px;
+  background: linear-gradient(135deg, #0a74da, #1aa3ff);
+  color: #fff;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+}
+
+.vrb-chat-title{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+}
+
+.vrb-chat-title img{
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(255,255,255,.25);
+  padding: 4px;
+}
+
+.vrb-chat-title h4{
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.vrb-chat-title p{
+  margin: 0;
+  font-size: 12px;
+  opacity: .85;
+  font-weight: 700;
+}
+
+.vrb-chat-close{
+  border:none;
+  background: rgba(255,255,255,.18);
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  color:#fff;
+  font-weight: 900;
+  cursor:pointer;
+}
+
+/* Body */
+.vrb-chat-body{
+  padding: 14px;
+  height: 240px;
+  overflow-y: auto;
+  background: radial-gradient(circle at top, rgba(10,116,218,.06), transparent 40%);
+}
+
+.vrb-msg{
+  max-width: 85%;
+  padding: 10px 12px;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.vrb-bot{
+  background: rgba(15,23,42,.06);
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,.08);
+}
+
+.vrb-user{
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c);
+  color: #fff;
+  margin-left: auto;
+}
+
+/* Footer */
+.vrb-chat-footer{
+  display:flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(15,23,42,.10);
+}
+
+.vrb-chat-footer input{
+  flex: 1;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.12);
+  padding: 10px 12px;
+  font-weight: 700;
+  outline:none;
+}
+
+.vrb-chat-send{
+  width: 44px;
+  border:none;
+  cursor:pointer;
+  border-radius: 14px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c);
+  color:#fff;
+}
+
+/* Quick buttons */
+.vrb-chat-quick{
+  display:flex;
+  gap: 8px;
+  padding: 12px;
+  flex-wrap: wrap;
+  background: rgba(10,116,218,.05);
+  border-top: 1px solid rgba(15,23,42,.08);
+}
+
+.vrb-chat-quick button{
+  border:none;
+  cursor:pointer;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(15,23,42,.10);
+  font-size: 12px;
+}
+.vrb-hide{
+  opacity: 0;
+  transform: translateY(35px) scale(0.98);
+  transition: all 0.8s ease;
+}
+
+.vrb-show{
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+}
+/* ===========================
+   PREMIUM BOOKING POPUP UI
+=========================== */
+.vrb-modal{
+  position: fixed;
+  inset: 0;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  padding: 20px;
+  background: rgba(0,0,0,.60);
+  z-index: 99999;
+}
+
+.vrb-modal.show{
+  display:flex;
+}
+
+.vrb-modal-card{
+  width: min(560px, 96%);
+  background: rgba(255,255,255,.95);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 30px 100px rgba(0,0,0,.30);
+  position: relative;
+  animation: popIn 0.35s ease;
+}
+
+@keyframes popIn{
+  from{opacity:0; transform: translateY(20px) scale(0.95);}
+  to{opacity:1; transform: translateY(0px) scale(1);}
+}
+
+.vrb-close{
+  position:absolute;
+  top: 14px;
+  right: 14px;
+  border:none;
+  cursor:pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: rgba(15,23,42,.06);
+  font-weight: 900;
+}
+
+.vrb-modal-head h2{
+  font-size: 22px;
+  font-weight: 900;
+  margin: 0;
+}
+
+.vrb-modal-head p{
+  margin-top: 6px;
+  color:#475569;
+  font-weight: 700;
+}
+
+.vrb-modal-summary{
+  margin-top: 16px;
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(10,116,218,.06);
+  border: 1px solid rgba(10,116,218,.12);
+}
+
+.vrb-modal-summary .label{
+  display:block;
+  font-size: 11px;
+  font-weight: 900;
+  color:#475569;
+}
+
+.vrb-modal-summary b{
+  font-size: 13px;
+  font-weight: 900;
+  color:#0f172a;
+}
+
+.vrb-form{
+  margin-top: 16px;
+  display:grid;
+  gap: 10px;
+}
+
+.vrb-form input,
+.vrb-form select{
+  width:100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.12);
+  font-weight: 700;
+  outline:none;
+}
+
+.vrb-form-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.vrb-btn{
+  border:none;
+  cursor:pointer;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-weight: 900;
+  transition: 0.2s ease;
+}
+
+.vrb-btn-primary{
+  background: linear-gradient(135deg,#ff6f00,#ff9a3c);
+  color:#fff;
+  box-shadow: 0 14px 30px rgba(255,111,0,.35);
+}
+
+.vrb-btn-light{
+  background: rgba(15,23,42,.06);
+  color:#0f172a;
+}
+
+.vrb-note{
+  margin-top: 12px;
+  font-size: 12px;
+  color:#475569;
+  font-weight: 700;
+}
+
+@media(max-width: 900px){
+  .vrb-modal-summary{
+    grid-template-columns: 1fr;
+  }
+}

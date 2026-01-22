@@ -556,8 +556,78 @@
         </div>
       </article>
 
+<section class="vrb-section vrb-soft-bg">
+
+  <!-- WHY BOOK -->
+  <div class="vrb-wrap vrb-anim">
+    <h2 class="vrb-heading">Why Book Resorts with Vizag Resort Booking?</h2>
+    <p class="vrb-desc">Premium stays • Verified listings • Instant support</p>
+
+    <div class="vrb-feature-grid">
+      <div class="vrb-feature-card">
+        <div class="vrb-icon">🏖</div>
+        <h3>Beach Resorts</h3>
+        <p>Best beach stays near RK Beach, Rushikonda, Yarada and more.</p>
+      </div>
+
+      <div class="vrb-feature-card">
+        <div class="vrb-icon">👨👩👧👦</div>
+        <h3>Family Friendly</h3>
+        <p>Safe and comfortable resorts perfect for families with kids.</p>
+      </div>
+
+      <div class="vrb-feature-card">
+        <div class="vrb-icon">🏢</div>
+        <h3>Corporate Stays</h3>
+        <p>Conference-friendly resorts for meetings, offsites & team outings.</p>
+      </div>
     </div>
   </div>
+
+  <!-- LOCATION GRID -->
+  <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
+    <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
+    <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
+
+    <div class="vrb-location-grid">
+      <div class="vrb-location-card">
+        <h3>S.R Puram Resorts</h3>
+        <p>Premium resorts in S.R Puram area with modern amenities.</p>
+        <button class="vrb-mini-btn">Explore →</button>
+      </div>
+
+      <div class="vrb-location-card">
+        <h3>S Kota Resort</h3>
+        <p>Beachside resorts in S Kota with stunning sea views.</p>
+        <button class="vrb-mini-btn">Explore →</button>
+      </div>
+
+      <div class="vrb-location-card">
+        <h3>Narava Resort</h3>
+        <p>Peaceful retreat in Narava with natural surroundings.</p>
+        <button class="vrb-mini-btn">Explore →</button>
+      </div>
+
+      <div class="vrb-location-card">
+        <h3>Pinagadi Resort</h3>
+        <p>Hill station style resorts near Araku Valley route.</p>
+        <button class="vrb-mini-btn">Explore →</button>
+      </div>
+
+      <div class="vrb-location-card">
+        <h3>Pendurthi Resort</h3>
+        <p>Family-friendly resorts in Pendurthi with easy access.</p>
+        <button class="vrb-mini-btn">Explore →</button>
+      </div>
+
+      <div class="vrb-location-card vrb-location-highlight">
+        <h3>All Resorts in Vizag</h3>
+        <p>Browse all available resorts in Vizag at best prices.</p>
+        <button class="vrb-mini-btn vrb-mini-btn-accent">View All →</button>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 
@@ -632,26 +702,7 @@
 
 
 
-    <!-- Gallery Modal -->
-    <div id="galleryModal" class="gallery-modal">
-        <div class="gallery-content">
-            <span class="gallery-close" onclick="closeGallery()">&times;</span>
-            <div class="gallery-header">
-                <h3 id="galleryTitle"></h3>
-            </div>
-            <div class="gallery-body">
-                <div class="gallery-images">
-                    <img id="galleryMainImage" src="" alt="">
-                    <div class="gallery-controls">
-                        <button id="galleryPrev">&lt;</button>
-                        <button id="galleryNext">&gt;</button>
-                    </div>
-                </div>
-                <div class="gallery-thumbnails" id="galleryThumbnails"></div>
-                <div class="gallery-description" id="galleryDescription"></div>
-            </div>
-        </div>
-    </div>
+
 
     <footer id="contact" class="vrb-footer">
         <div class="vrb-container vrb-footer-grid">
@@ -727,8 +778,7 @@
     };
     </script>
     
-    <!-- Chat Widget -->
-    <script src="/chat-widget.js?v=FINAL1"></script>
+    <!-- <script src="/chat-widget.js?v=FINAL1"></script> -->
 
 <script>
   function vrbShowTab(type) {
@@ -836,20 +886,199 @@
     observer.observe(item);
   });
 </script>
+<!-- =========================
+     PREMIUM CHAT WIDGET UI
+     (Uses same logo.png)
+========================= -->
+<div class="vrb-chat-widget">
+  <button class="vrb-chat-fab" id="vrbChatFab">
+    <img src="logo.png" alt="Chat Logo">
+  </button>
+
+  <div class="vrb-chat-box" id="vrbChatBox">
+    <div class="vrb-chat-header">
+      <div class="vrb-chat-title">
+        <img src="logo.png" alt="Logo">
+        <div>
+          <h4>Vizag Support</h4>
+          <p>Online • Reply in minutes</p>
+        </div>
+      </div>
+
+      <button class="vrb-chat-close" id="vrbChatClose">✕</button>
+    </div>
+
+    <div class="vrb-chat-body" id="vrbChatBody">
+      <div class="vrb-msg vrb-bot">
+        👋 Hi! Welcome to Vizag Resort Booking. How can I help you?
+      </div>
+      <div class="vrb-msg vrb-bot">
+        ✅ Resort Booking <br>
+        ✅ Cab / Travel Booking <br>
+        ✅ Event Booking
+      </div>
+    </div>
+
+    <div class="vrb-chat-footer">
+      <input id="vrbChatInput" type="text" placeholder="Type your message..." />
+      <button class="vrb-chat-send" id="vrbChatSend">➤</button>
+    </div>
+
+    <div class="vrb-chat-quick">
+      <button class="vrb-q" data-msg="I want to book resort">🏖 Book Resort</button>
+      <button class="vrb-q" data-msg="I want cab booking">🚖 Book Cab</button>
+      <button class="vrb-q" data-msg="I want event booking">🎉 Book Event</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  const elements = document.querySelectorAll(".vrb-anim");
+  // ✅ Premium Chat Widget UI Toggle + Simple message flow
+  const chatFab = document.getElementById("vrbChatFab");
+  const chatBox = document.getElementById("vrbChatBox");
+  const chatClose = document.getElementById("vrbChatClose");
+  const chatSend = document.getElementById("vrbChatSend");
+  const chatInput = document.getElementById("vrbChatInput");
+  const chatBody = document.getElementById("vrbChatBody");
 
-  const obs = new IntersectionObserver((entries)=>{
-    entries.forEach((e)=>{
-      if(e.isIntersecting){
-        e.target.classList.add("vrb-show");
-      }
+  function toggleChat(){
+    chatBox.classList.toggle("open");
+  }
+
+  chatFab.addEventListener("click", toggleChat);
+  chatClose.addEventListener("click", toggleChat);
+
+  function addMsg(text, type){
+    const div = document.createElement("div");
+    div.className = "vrb-msg " + type;
+    div.innerText = text;
+    chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function sendMsg(){
+    const msg = chatInput.value.trim();
+    if(!msg) return;
+
+    addMsg(msg, "vrb-user");
+    chatInput.value = "";
+
+    setTimeout(() => {
+      addMsg("✅ Thanks! Please share Check-in date, Guests & Budget.", "vrb-bot");
+    }, 500);
+  }
+
+  chatSend.addEventListener("click", sendMsg);
+
+  chatInput.addEventListener("keypress", (e) => {
+    if(e.key === "Enter") sendMsg();
+  });
+
+  document.querySelectorAll(".vrb-q").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      chatInput.value = btn.getAttribute("data-msg");
+      sendMsg();
     });
-  }, { threshold: 0.15 });
+  });
+</script>
 
-  elements.forEach((el)=>{
+<!-- ===============================
+   PREMIUM BOOKING POPUP (NEW UI)
+   Works with old Book Now logic
+================================= -->
+<div class="vrb-modal" id="bookingModal">
+  <div class="vrb-modal-card">
+
+    <button class="vrb-close" onclick="closeBookingPopup()">✕</button>
+
+    <div class="vrb-modal-head">
+      <h2>Book Resort</h2>
+      <p>Fill details to confirm booking</p>
+    </div>
+
+    <div class="vrb-modal-summary">
+      <div>
+        <span class="label">Resort</span>
+        <b id="modalResortName">-</b>
+      </div>
+      <div>
+        <span class="label">Location</span>
+        <b id="modalResortLocation">-</b>
+      </div>
+      <div>
+        <span class="label">Price</span>
+        <b id="modalResortPrice">-</b>
+      </div>
+    </div>
+
+    <form id="vrbBookingForm" class="vrb-form">
+      <input id="custName" type="text" placeholder="Full Name" required />
+      <input id="custPhone" type="tel" placeholder="Mobile Number" required />
+
+      <div class="vrb-form-grid">
+        <input id="checkin" type="date" required />
+        <input id="checkout" type="date" required />
+      </div>
+
+      <select id="guests" required>
+        <option value="2 Adults">2 Adults</option>
+        <option value="3 Adults">3 Adults</option>
+        <option value="4 Adults">4 Adults</option>
+        <option value="Family (2+2)">Family (2+2)</option>
+      </select>
+
+      <button type="submit" class="vrb-btn vrb-btn-primary">
+        Proceed to Pay
+      </button>
+
+      <button type="button" class="vrb-btn vrb-btn-light" onclick="closeBookingPopup()">
+        Cancel
+      </button>
+    </form>
+
+    <p class="vrb-note">
+      ✅ Verified Resorts • ✅ Secure Payment • ✅ Instant Confirmation
+    </p>
+  </div>
+</div>
+
+<script>
+  function openBookingPopup(name, location, price){
+    document.getElementById("modalResortName").innerText = name;
+    document.getElementById("modalResortLocation").innerText = location;
+    document.getElementById("modalResortPrice").innerText = "₹" + price + " / night";
+
+    document.getElementById("bookingModal").classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeBookingPopup(){
+    document.getElementById("bookingModal").classList.remove("show");
+    document.body.style.overflow = "auto";
+  }
+</script>
+
+<script>
+  const items = document.querySelectorAll(".vrb-anim");
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+
+      // ✅ Add animation when visible
+      if (entry.isIntersecting) {
+        entry.target.classList.add("vrb-show");
+      } 
+      // ✅ Remove animation when not visible (so it replays)
+      else {
+        entry.target.classList.remove("vrb-show");
+      }
+
+    });
+  }, { threshold: 0.18 });
+
+  items.forEach((el) => {
     el.classList.add("vrb-hide");
-    obs.observe(el);
+    observer.observe(el);
   });
 </script>
 
