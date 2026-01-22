@@ -1027,3 +1027,66 @@ img{ max-width:100%; display:block; }
   opacity:1;
   transform: translateY(0px) scale(1);
 }
+/* ==========================================
+   PREMIUM FIX FOR BELOW RESORT SECTION
+   (Why Book + Locations)
+========================================== */
+
+.vrb-soft-bg{
+  padding: 90px 0;
+  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%);
+}
+
+/* This fixes the broken alignment + empty space */
+.vrb-premium-area{
+  width: min(1200px, 92%);
+  margin: auto;
+  display: grid;
+  gap: 26px;
+}
+
+/* Make both blocks look like premium clean cards */
+.vrb-wrap{
+  width: 100% !important;
+  margin: 0 !important;
+  border-radius: 28px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(15,23,42,0.08);
+  box-shadow: 0 22px 70px rgba(2,8,20,0.10);
+}
+
+/* ✅ Improve top heading spacing */
+.vrb-heading{
+  font-size: 28px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.vrb-desc{
+  font-size: 14px;
+  color: #475569;
+}
+
+/* ✅ Feature cards become 3 equal premium cards */
+.vrb-feature-grid{
+  margin-top: 26px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ✅ Location cards look like proper grid */
+.vrb-location-grid{
+  margin-top: 26px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Responsive */
+@media(max-width: 1000px){
+  .vrb-feature-grid,
+  .vrb-location-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .vrb-wrap{
+    padding: 26px 16px !important;
+  }
+}
