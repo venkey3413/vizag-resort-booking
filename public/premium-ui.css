@@ -315,3 +315,125 @@
     display: flex;
   }
 }
+
+/* ===========================================
+   PREMIUM BACKGROUNDS + SECTIONS + FOOTER
+   (Does NOT change resort cards/containers)
+   =========================================== */
+
+/* Page Background Premium */
+body{
+  background: radial-gradient(circle at top, #f4fbff 0%, #ffffff 55%, #f8fbff 100%);
+}
+
+/* Premium Page Width */
+main, .main, .container, .page-container{
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* Premium Section Block Styling */
+section{
+  padding: 60px 0;
+}
+
+/* Section Title Premium */
+h2, h3.section-title, .section-title{
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.2px;
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+/* Title underline accent */
+h2::after, .section-title::after{
+  content: "";
+  display: block;
+  width: 90px;
+  height: 4px;
+  margin: 12px auto 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #0a74da, #1aa3ff, #ff6f00);
+  opacity: 0.85;
+}
+
+/* Premium Light Background bands */
+.premium-section{
+  background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 16px 45px rgba(2,8,20,0.06);
+  border-radius: 22px;
+  padding: 45px 25px;
+  margin: 30px auto;
+  max-width: 1200px;
+}
+
+/* Why book us / Location area cards background only */
+.why-book, .location-section, .info-section{
+  background: transparent !important;
+}
+
+/* Small Info Boxes look premium (NOT resort cards) */
+.why-book div, 
+.location-section div,
+.info-section div{
+  border-radius: 16px !important;
+}
+
+/* Footer Premium */
+footer{
+  background: linear-gradient(135deg, #061a33, #0a2547);
+  color: #fff;
+  padding: 55px 0 25px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  margin-top: 50px;
+}
+
+footer h3, footer h4{
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+
+footer a{
+  color: rgba(207,230,255,0.92);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  margin: 6px 0;
+}
+
+footer a:hover{
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Footer bottom line */
+.footer-bottom{
+  text-align: center;
+  margin-top: 30px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* Premium spacing around footer icons */
+footer .social-icons, footer .footer-icons{
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+/* Mobile spacing */
+@media(max-width: 900px){
+  section{
+    padding: 40px 0;
+  }
+
+  .premium-section{
+    padding: 30px 16px;
+  }
+}
