@@ -988,7 +988,7 @@
 </div>
 
 <script>
-// Premium Booking Modal with Full Validation & API Integration
+// Premium Booking Modal with Database Integration
 let currentResort = {};
 let appliedCoupon = null;
 
@@ -1019,92 +1019,212 @@ function resetForm() {
 }
 
 // Phone Number Validation
-document.getElementById("phone").addEventListener("input", function() {
-  let value = this.value.replace(/\D/g, '');
-  if (value.length > 10) value = value.slice(0, 10);
-  if (value.length === 10 && !value.startsWith('+91')) {
-    this.value = '+91' + value;
-  } else {
-    this.value = value;
+document.addEventListener('DOMContentLoaded', function() {
+  const phoneInput = document.getElementById("phone");
+  if (phoneInput) {
+    phoneInput.addEventListener("input", function() {
+      let value = this.value.replace(/\D/g, '');
+      if (value.length > 10) value = value.slice(0, 10);
+      if (value.length === 10 && !value.startsWith('+91')) {
+        this.value = '+91' + value;
+      } else {
+        this.value = value;
+      }
+    });
   }
-});
 
-// Guest Count Validation
-document.getElementById("guests").addEventListener("input", function() {
-  const guests = parseInt(this.value);
-  const warning = document.getElementById("guestWarning");
-  
-  if (guests > 6) {
-    warning.style.display = "block";
-  } else {
-    warning.style.display = "none";
+  // Guest Count Validation
+  const guestsInput = document.getElementById("guests");
+  if (guestsInput) {
+    guestsInput.addEventListener("input", function() {
+      const guests = parseInt(this.value);
+      const warning = document.getElementById("guestWarning");
+      
+      if (guests > 6 && warning) {
+        warning.style.display = "block";
+      } else if (warning) {
+        warning.style.display = "none";
+      }
+      
+      calculatePricing();
+    });
   }
-  
-  calculatePricing();
+
+  // Apply Coupon Button
+  const applyCouponBtn = document.getElementById("applyCouponBtn");
+  if (applyCouponBtn) {
+    applyCouponBtn.addEventListener("click", function() {
+      const couponCode = document.getElementById("couponCode").value.trim();
+      if (!couponCode) return;
+      
+      fetch('/api/coupons?code=' + encodeURIComponent(couponCode), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        const messageDiv = document.getElementById("couponMessage");
+        if (data && data.length > 0) {
+          const coupon = data[0];
+          appliedCoupon = coupon;
+          if (messageDiv) messageDiv.innerHTML = `<span style='color:green'>✅ Coupon applied! ${coupon.discount_percentage}% discount</span>`;
+          calculatePricing();
+        } else {
+          appliedCoupon = null;
+          if (messageDiv) messageDiv.innerHTML = "<span style='color:red'>❌ Invalid coupon code</span>";
+          calculatePricing();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const messageDiv = document.getElementById("couponMessage");
+        if (messageDiv) messageDiv.innerHTML = "<span style='color:red'>❌ Error validating coupon</span>";
+      });
+    });
+  }
+
+  // Form Submission
+  const bookingForm = document.getElementById("vrbBookingForm");
+  if (bookingForm) {
+    bookingForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      // Validation
+      const name = document.getElementById("guestName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const checkIn = document.getElementById("checkIn").value;
+      const checkOut = document.getElementById("checkOut").value;
+      const guests = document.getElementById("guests").value;
+      
+      if (!name || !email || !phone || !checkIn || !checkOut || !guests) {
+        alert("❌ Please fill all required fields");
+        return;
+      }
+      
+      if (phone.length < 13) {
+        alert("❌ Please enter a valid 10-digit phone number");
+        return;
+      }
+      
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
+      const today = new Date();
+      
+      if (checkInDate <= today) {
+        alert("❌ Check-in date must be in the future");
+        return;
+      }
+      
+      if (checkOutDate <= checkInDate) {
+        alert("❌ Check-out date must be after check-in date");
+        return;
+      }
+      
+      // Get resort ID from resorts API
+      fetch('/api/resorts')
+      .then(response => response.json())
+      .then(resorts => {
+        const resort = resorts.find(r => r.name === currentResort.name);
+        if (!resort) {
+          alert('Resort not found');
+          return;
+        }
+        
+        // Prepare booking data
+        const bookingData = {
+          resortId: resort.id,
+          guestName: name,
+          email: email,
+          phone: phone,
+          checkIn: checkIn,
+          checkOut: checkOut,
+          guests: parseInt(guests),
+          couponCode: appliedCoupon ? appliedCoupon.code : null,
+          discountAmount: appliedCoupon ? Math.round(currentResort.price * (appliedCoupon.discount_percentage / 100)) : 0
+        };
+        
+        // Submit booking
+        fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bookingData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.id) {
+            // Use existing payment interface from critical.js
+            const paymentBookingData = {
+              ...bookingData,
+              resortName: resort.name,
+              resortNote: resort.note,
+              basePrice: currentResort.price,
+              platformFee: Math.round(currentResort.price * 0.015),
+              totalPrice: parseInt(document.getElementById("totalAmount").innerText.replace('₹', '').replace(',', '')),
+              bookingReference: data.bookingReference || `VE${Date.now()}`
+            };
+            
+            closeBookingPopup();
+            showPaymentInterface(paymentBookingData);
+          } else {
+            alert("❌ Booking failed: " + (data.error || 'Unknown error'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert("❌ Error creating booking. Please try again.");
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching resorts:', error);
+        alert('Error finding resort details');
+      });
+    });
+  }
 });
 
 // Coupon Code Functionality
 function showAvailableCoupons() {
   const couponsDiv = document.getElementById("availableCoupons");
+  if (!couponsDiv) return;
+  
   couponsDiv.style.display = couponsDiv.style.display === "none" ? "block" : "none";
   
   if (couponsDiv.style.display === "block") {
-    fetch('/get-coupons')
+    fetch('/api/coupons')
     .then(response => response.json())
     .then(data => {
-      if (data.success) {
-        couponsDiv.innerHTML = data.coupons.map(coupon => 
+      if (data && data.length > 0) {
+        couponsDiv.innerHTML = data.map(coupon => 
           `<div class="coupon-item" onclick="applyCoupon('${coupon.code}')">
-            <strong>${coupon.code}</strong> - ${coupon.description} (${coupon.discount}% off)
+            <strong>${coupon.code}</strong> - ${coupon.description} (${coupon.discount_percentage}% off)
           </div>`
         ).join('');
+      } else {
+        couponsDiv.innerHTML = '<p>No coupons available</p>';
       }
     })
-    .catch(error => console.error('Error fetching coupons:', error));
+    .catch(error => {
+      console.error('Error fetching coupons:', error);
+      couponsDiv.innerHTML = '<p>Error loading coupons</p>';
+    });
   }
 }
 
 function applyCoupon(code) {
-  document.getElementById("couponCode").value = code;
-  document.getElementById("applyCouponBtn").click();
+  const couponInput = document.getElementById("couponCode");
+  if (couponInput) {
+    couponInput.value = code;
+    const applyBtn = document.getElementById("applyCouponBtn");
+    if (applyBtn) applyBtn.click();
+  }
 }
-
-document.getElementById("applyCouponBtn").addEventListener("click", function() {
-  const couponCode = document.getElementById("couponCode").value.trim();
-  if (!couponCode) return;
-  
-  fetch('/validate-coupon', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      couponCode,
-      resortPrice: currentResort.price,
-      guests: document.getElementById("guests").value
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    const messageDiv = document.getElementById("couponMessage");
-    if (data.success) {
-      appliedCoupon = data.coupon;
-      messageDiv.innerHTML = `<span style='color:green'>✅ Coupon applied! ${data.coupon.discount}% discount</span>`;
-      calculatePricing();
-    } else {
-      appliedCoupon = null;
-      messageDiv.innerHTML = `<span style='color:red'>❌ ${data.message}</span>`;
-      calculatePricing();
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    document.getElementById("couponMessage").innerHTML = "<span style='color:red'>❌ Error validating coupon</span>";
-  });
-});
 
 // Pricing Calculation
 function calculatePricing() {
   const basePrice = currentResort.price || 0;
-  const guests = parseInt(document.getElementById("guests").value) || 2;
+  const guestsInput = document.getElementById("guests");
+  const guests = parseInt(guestsInput ? guestsInput.value : 2) || 2;
   
   let baseAmount = basePrice;
   if (guests > 6) {
@@ -1115,102 +1235,29 @@ function calculatePricing() {
   let discount = 0;
   
   if (appliedCoupon) {
-    discount = Math.round(baseAmount * (appliedCoupon.discount / 100));
+    discount = Math.round(baseAmount * (appliedCoupon.discount_percentage / 100));
   }
   
   const totalAmount = baseAmount + platformFee - discount;
   
-  document.getElementById("baseAmount").innerText = "₹" + baseAmount;
-  document.getElementById("platformFee").innerText = "₹" + platformFee;
-  document.getElementById("totalAmount").innerText = "₹" + totalAmount;
+  // Update DOM elements if they exist
+  const baseAmountEl = document.getElementById("baseAmount");
+  const platformFeeEl = document.getElementById("platformFee");
+  const totalAmountEl = document.getElementById("totalAmount");
+  const discountRowEl = document.getElementById("discountRow");
+  const discountAmountEl = document.getElementById("discountAmount");
   
-  if (discount > 0) {
-    document.getElementById("discountRow").style.display = "flex";
-    document.getElementById("discountAmount").innerText = "-₹" + discount;
-  } else {
-    document.getElementById("discountRow").style.display = "none";
+  if (baseAmountEl) baseAmountEl.innerText = "₹" + baseAmount;
+  if (platformFeeEl) platformFeeEl.innerText = "₹" + platformFee;
+  if (totalAmountEl) totalAmountEl.innerText = "₹" + totalAmount;
+  
+  if (discount > 0 && discountRowEl && discountAmountEl) {
+    discountRowEl.style.display = "flex";
+    discountAmountEl.innerText = "-₹" + discount;
+  } else if (discountRowEl) {
+    discountRowEl.style.display = "none";
   }
 }
-
-// Form Submission
-document.getElementById("vrbBookingForm").addEventListener("submit", function(e) {
-  e.preventDefault();
-  
-  // Validation
-  const name = document.getElementById("guestName").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const checkIn = document.getElementById("checkIn").value;
-  const checkOut = document.getElementById("checkOut").value;
-  const guests = document.getElementById("guests").value;
-  
-  if (!name || !email || !phone || !checkIn || !checkOut || !guests) {
-    alert("❌ Please fill all required fields");
-    return;
-  }
-  
-  if (phone.length < 13) {
-    alert("❌ Please enter a valid 10-digit phone number");
-    return;
-  }
-  
-  const checkInDate = new Date(checkIn);
-  const checkOutDate = new Date(checkOut);
-  const today = new Date();
-  
-  if (checkInDate <= today) {
-    alert("❌ Check-in date must be in the future");
-    return;
-  }
-  
-  if (checkOutDate <= checkInDate) {
-    alert("❌ Check-out date must be after check-in date");
-    return;
-  }
-  
-  // Prepare booking data
-  const bookingData = {
-    resortName: currentResort.name,
-    resortLocation: currentResort.location,
-    guestName: name,
-    email: email,
-    phone: phone,
-    checkIn: checkIn,
-    checkOut: checkOut,
-    guests: parseInt(guests),
-    couponCode: appliedCoupon ? appliedCoupon.code : null,
-    baseAmount: parseInt(document.getElementById("baseAmount").innerText.replace('₹', '')),
-    platformFee: parseInt(document.getElementById("platformFee").innerText.replace('₹', '')),
-    discount: appliedCoupon ? parseInt(document.getElementById("discountAmount").innerText.replace('-₹', '')) : 0,
-    totalAmount: parseInt(document.getElementById("totalAmount").innerText.replace('₹', ''))
-  };
-  
-  // Submit booking
-  fetch('/create-booking', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(bookingData)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Redirect to payment or show success
-      alert("✅ Booking created successfully! Redirecting to payment...");
-      window.location.href = `/payment?bookingId=${data.bookingId}`;
-    } else {
-      alert("❌ Booking failed: " + data.message);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert("❌ Error creating booking. Please try again.");
-  });
-});
-
-// Initialize pricing on load
-document.addEventListener('DOMContentLoaded', function() {
-  calculatePricing();
-});
 </script>
 
 <script>
