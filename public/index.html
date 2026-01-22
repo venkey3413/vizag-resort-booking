@@ -321,20 +321,40 @@
 <body>
 
 
-    <header>
-        <nav>
-            <div class="nav-container">
-                <div class="logo-container">
-                    <span class="logo-text">I</span>
-                    <img src="cropped_circle_image.png" alt="Vizag Resort Booking" class="logo-image" width="60" height="60" loading="eager" fetchpriority="high">
-                    <span class="logo-title">Vizag Resorts</span>
-                </div>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="https://vizagresortbooking.in/owner-dashboard" target="_blank" style="line-height: 1.2; text-align: center;">Owner<br>Dashboard</a></li>
-                </ul>
+    <header class="vrb-navbar">
+        <div class="vrb-nav-container">
+
+            <!-- Logo -->
+            <a href="index.html" class="vrb-logo">
+                <img src="logo.png" alt="Vizag Resorts Logo" />
+                <span>Vizag Resorts</span>
+            </a>
+
+            <!-- Desktop Menu -->
+            <nav class="vrb-nav-links" id="vrbNavLinks">
+                <a class="active" href="#home">Home</a>
+                <a href="#resorts">Resorts</a>
+                <a href="#travel">Cabs / Travel</a>
+                <a href="#events">Events</a>
+                <a href="#offers">Offers</a>
+                <a href="#contact">Contact</a>
+                <a class="vrb-dashboard" href="owner-dashboard.html">Owner Dashboard</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="vrb-nav-actions">
+                <a class="vrb-whatsapp" href="https://wa.me/918341674465" target="_blank">
+                    WhatsApp
+                </a>
+
+                <a class="vrb-btn-nav" href="#booking">
+                    Book Now
+                </a>
+
+                <!-- Mobile Menu Button -->
+                <button class="vrb-hamburger" onclick="vrbToggleMenu()">☰</button>
             </div>
-        </nav>
+        </div>
     </header>
 
     <!-- Food Order Notice -->
@@ -698,6 +718,10 @@
       document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
       document.getElementById("vrb-cab").classList.add("active");
     }
+  }
+
+  function vrbToggleMenu() {
+    document.getElementById("vrbNavLinks").classList.toggle("open");
   }
 </script>
 </body>
