@@ -1,170 +1,169 @@
-/* Premium UI Enhancements for VizagResortBooking.in
-   ✅ Load AFTER critical.css to override safely
-*/
+/* ===========================
+   Premium UI (Resort + Cab)
+   File: public/premium-ui.css
+   =========================== */
 
 :root{
-  --brand: #0a74da;
-  --brand-2:#1aa3ff;
+  --brand:#0a74da;
   --accent:#ff6f00;
-
+  --dark:#0b1220;
   --text:#0f172a;
   --muted:#475569;
-
-  --bg:#ffffff;
-  --soft:#f6fbff;
-
-  --card:#ffffff;
-  --border: rgba(15, 23, 42, .10);
-
-  --shadow: 0 14px 40px rgba(2, 8, 20, .10);
-  --shadow-sm: 0 10px 28px rgba(2, 8, 20, .08);
-
+  --glass: rgba(255,255,255,.92);
+  --border: rgba(15,23,42,.12);
+  --shadow: 0 16px 46px rgba(2,8,20,.14);
   --radius: 18px;
 }
 
-body{
-  background: var(--bg);
-  color: var(--text);
+.vrb-hero{
+  position: relative;
+  min-height: 540px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 70px 14px;
+  background: url("https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800")
+    center/cover no-repeat;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  overflow: hidden;
 }
 
-/* ===== Global Polish ===== */
-img{max-width:100%; height:auto}
-a{color:inherit}
-.container{
-  width:min(1200px, 92%);
-  margin-inline:auto;
-}
-
-/* ===== Navbar Premium ===== */
-header, .header, nav{
-  font-family: inherit;
-}
-
-.navbar, .header, header{
-  background: rgba(10,116,218,.92) !important;
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,.18);
-}
-
-.navbar a, header a, nav a{
-  color: rgba(255,255,255,.92) !important;
-  text-decoration:none;
-  font-weight:600;
-}
-
-.navbar a:hover, header a:hover, nav a:hover{
-  color:#fff !important;
-}
-
-button, .btn, .button{
-  border-radius: 14px !important;
-  font-weight: 700;
-}
-
-/* ===== Hero Section ===== */
-.hero, .banner, #hero{
-  position:relative;
-  overflow:hidden;
-  border-bottom-left-radius: 26px;
-  border-bottom-right-radius: 26px;
-}
-
-.hero::before, .banner::before, #hero::before{
-  content:"";
+.vrb-overlay{
   position:absolute;
   inset:0;
   background: linear-gradient(
     180deg,
-    rgba(0,18,55,.56),
-    rgba(0,18,55,.18),
-    rgba(255,255,255,0)
+    rgba(0,18,55,.65),
+    rgba(0,18,55,.30),
+    rgba(0,0,0,.10)
   );
-  pointer-events:none;
 }
 
-.hero h1, .hero-title{
-  text-shadow: 0 10px 30px rgba(0,0,0,.35);
-  letter-spacing: .2px;
+.vrb-hero-content{
+  position: relative;
+  z-index: 2;
+  width: min(1100px, 94%);
+  text-align: center;
+  color: #fff;
 }
 
-/* ===== Search / Booking Box ===== */
-.search-box, .searchBar, .booking-form, form.search, .search-container{
-  background: rgba(255,255,255,.92) !important;
+.vrb-hero-content h1{
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  text-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
+
+.vrb-hero-content p{
+  margin-top: 10px;
+  font-size: 16px;
+  opacity: .92;
+}
+
+/* Tabs */
+.vrb-tabs{
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vrb-tab-btn{
   border: 1px solid rgba(255,255,255,.25);
-  box-shadow: var(--shadow) !important;
-  border-radius: 18px !important;
+  background: rgba(255,255,255,.14);
+  color:#fff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor:pointer;
+  font-weight: 700;
+  transition: 0.2s ease;
 }
 
-input, select, textarea{
-  border: 1px solid var(--border) !important;
-  border-radius: 14px !important;
-  padding: 12px 14px !important;
-  outline:none !important;
+.vrb-tab-btn.active{
+  background: #fff;
+  color: var(--dark);
 }
 
-input:focus, select:focus, textarea:focus{
-  border-color: rgba(10,116,218,.55) !important;
-  box-shadow: 0 0 0 4px rgba(10,116,218,.15) !important;
+/* Search box */
+.vrb-search-box{
+  margin: 18px auto 0;
+  background: var(--glass);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
 }
 
-/* ===== Primary CTA Buttons ===== */
-.primary, .btn-primary, .search-btn, .book-now, .bookBtn, .cta, .razorpay-payment-button{
-  background: linear-gradient(135deg, var(--accent), #ff9a3c) !important;
-  color:#fff !important;
-  border:none !important;
-  box-shadow: 0 12px 26px rgba(255,111,0,.35) !important;
+/* Hide/Show tabs content */
+.vrb-tab-content{
+  display: none;
 }
 
-.primary:hover, .btn-primary:hover, .search-btn:hover, .book-now:hover, .bookBtn:hover, .cta:hover{
+.vrb-tab-content.active{
+  display: grid;
+}
+
+.vrb-field{
+  text-align: left;
+}
+
+.vrb-field label{
+  display:block;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.vrb-field input,
+.vrb-field select{
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  outline: none;
+  font-weight: 600;
+}
+
+.vrb-field input:focus,
+.vrb-field select:focus{
+  border-color: rgba(10,116,218,.6);
+  box-shadow: 0 0 0 4px rgba(10,116,218,.16);
+}
+
+/* Buttons */
+.vrb-btn{
+  border:none;
+  cursor:pointer;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-weight: 800;
+  height: 46px;
+}
+
+.vrb-btn-orange{
+  background: linear-gradient(135deg, var(--accent), #ff9a3c);
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(255,111,0,.35);
+}
+
+.vrb-btn-orange:hover{
   transform: translateY(-1px);
 }
 
-/* ===== Cards (Resort / Category) ===== */
-.card, .resort-card, .category-card, .hotel-card, .listing-card{
-  background: var(--card) !important;
-  border: 1px solid rgba(15,23,42,.08);
-  border-radius: var(--radius) !important;
-  box-shadow: var(--shadow-sm) !important;
-  overflow:hidden;
-}
-
-.card img, .resort-card img{
-  border-top-left-radius: var(--radius);
-  border-top-right-radius: var(--radius);
-}
-
-.section, section{
-  padding: 56px 0;
-}
-
-.section-title, h2{
-  font-weight: 800;
-  letter-spacing: .2px;
-}
-
-/* ===== Offer Banners ===== */
-.offer, .offer-card, .offers .card{
-  border-radius: var(--radius) !important;
-  box-shadow: var(--shadow) !important;
-}
-
-/* ===== Footer ===== */
-footer{
-  background: #061a33 !important;
-  color: #fff !important;
-  border-top: 1px solid rgba(255,255,255,.12);
-}
-
-footer a{
-  color: rgba(207,230,255,.92) !important;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 900px){
-  .menu, .nav-links{display:none !important}
-  .hero, .banner, #hero{
-    border-bottom-left-radius: 18px;
-    border-bottom-right-radius: 18px;
+/* Mobile */
+@media (max-width: 980px){
+  .vrb-hero-content h1{
+    font-size: 30px;
   }
-  .section, section{padding: 42px 0}
+
+  .vrb-search-box{
+    grid-template-columns: 1fr;
+  }
 }

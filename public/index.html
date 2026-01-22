@@ -345,25 +345,83 @@
     </div>
 
     <main>
-        <section id="home" class="hero">
-            <div class="hero-content">
-                <div class="rotating-banner">
-                    <div class="banner-slide active">
-                        <h1>Book Resorts in Vizag</h1>
-                        <p class="banner-description"><span class="desktop-text">Book luxury beach resorts in Vizag with private pool, swimming pool. Perfect for family vacations, corporate events.</span><span class="mobile-text">Book luxury beach resorts in Vizag. Resorts with private pool & swimming pool.</span></p>
-                        <button onclick="scrollToSection('resorts')" class="cta-btn">Book Resorts Now</button>
-                    </div>
-                    <div class="banner-slide">
-                        <h2>Delicious Food Delivered</h2>
-                        <p class="banner-description"><span class="desktop-text">Fresh, tasty meals prepared with love and delivered hot to your resort doorstep</span><span class="mobile-text">Fresh meals delivered hot to your resort</span></p>
-                        <button onclick="window.open('https://vizagresortbooking.in/food/', '_blank')" class="cta-btn">Order Food</button>
-                    </div>
-                    <div class="banner-slide">
-                        <h2>Explore Vizag with Comfort</h2>
-                        <p class="banner-description"><span class="desktop-text">Professional drivers, comfortable vehicles, and memorable travel experiences</span><span class="mobile-text">Professional drivers & comfortable vehicles</span></p>
-                        <button onclick="window.open('https://vizagresortbooking.in/travel/', '_blank')" class="cta-btn">Book Travel</button>
-                    </div>
+        <section class="vrb-hero">
+            <div class="vrb-overlay"></div>
+
+            <div class="vrb-hero-content">
+                <h1>Book Resorts & Travel in Vizag</h1>
+                <p>Resorts • Cabs • Events • Best Deals • 24/7 Support</p>
+
+                <!-- Tabs -->
+                <div class="vrb-tabs">
+                    <button class="vrb-tab-btn active" onclick="vrbShowTab('resort')">🏖 Resort Booking</button>
+                    <button class="vrb-tab-btn" onclick="vrbShowTab('cab')">🚖 Cab / Travel</button>
                 </div>
+
+                <!-- Resort Booking Form -->
+                <div class="vrb-search-box vrb-tab-content active" id="vrb-resort">
+                    <div class="vrb-field">
+                        <label>Location</label>
+                        <select>
+                            <option>Visakhapatnam</option>
+                            <option>Rushikonda</option>
+                            <option>Araku</option>
+                            <option>Yarada</option>
+                        </select>
+                    </div>
+
+                    <div class="vrb-field">
+                        <label>Check-in</label>
+                        <input type="date" />
+                    </div>
+
+                    <div class="vrb-field">
+                        <label>Check-out</label>
+                        <input type="date" />
+                    </div>
+
+                    <div class="vrb-field">
+                        <label>Guests</label>
+                        <select>
+                            <option>2 Adults</option>
+                            <option>3 Adults</option>
+                            <option>4 Adults</option>
+                            <option>Family (2+2)</option>
+                        </select>
+                    </div>
+
+                    <button class="vrb-btn vrb-btn-orange">Search Resorts</button>
+                </div>
+
+                <!-- Cab / Travel Booking Form -->
+                <div class="vrb-search-box vrb-tab-content" id="vrb-cab">
+                    <div class="vrb-field">
+                        <label>Pickup Location</label>
+                        <input type="text" placeholder="Enter pickup area" />
+                    </div>
+
+                    <div class="vrb-field">
+                        <label>Drop Location</label>
+                        <input type="text" placeholder="Enter drop area" />
+                    </div>
+
+                    <div class="vrb-field">
+                        <label>Date</label>
+                        <input type="date" />
+                    </div>
+
+                    <div class="vrb-field">
+                        <label>Trip Type</label>
+                        <select>
+                            <option>One Way</option>
+                            <option>Round Trip</option>
+                            <option>Hourly Rental</option>
+                        </select>
+                    </div>
+
+                    <button class="vrb-btn vrb-btn-orange">Book Cab</button>
+                </div>
+
             </div>
         </section>
 
@@ -624,5 +682,23 @@
     
     <!-- Chat Widget -->
     <script src="/chat-widget.js?v=FINAL1"></script>
+
+<script>
+  function vrbShowTab(type) {
+    const buttons = document.querySelectorAll(".vrb-tab-btn");
+    const contents = document.querySelectorAll(".vrb-tab-content");
+
+    buttons.forEach(btn => btn.classList.remove("active"));
+    contents.forEach(c => c.classList.remove("active"));
+
+    if (type === "resort") {
+      document.querySelectorAll(".vrb-tab-btn")[0].classList.add("active");
+      document.getElementById("vrb-resort").classList.add("active");
+    } else {
+      document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
+      document.getElementById("vrb-cab").classList.add("active");
+    }
+  }
+</script>
 </body>
 </html>
