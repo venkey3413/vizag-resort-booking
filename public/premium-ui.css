@@ -1,10 +1,11 @@
-/* ===========================
-   Premium UI (Resort + Cab)
-   File: public/premium-ui.css
-   =========================== */
+/* =========================================
+   VIZAG RESORT BOOKING - PREMIUM UI (FINAL)
+   Clean + No conflicts + Works perfectly
+========================================= */
 
 :root{
   --brand:#0a74da;
+  --brand2:#1aa3ff;
   --accent:#ff6f00;
   --dark:#0b1220;
   --text:#0f172a;
@@ -12,21 +13,154 @@
   --glass: rgba(255,255,255,.92);
   --border: rgba(15,23,42,.12);
   --shadow: 0 16px 46px rgba(2,8,20,.14);
+  --shadow2: 0 26px 70px rgba(2,8,20,.13);
   --radius: 18px;
 }
 
-.vrb-hero{
-  position: relative;
-  min-height: 540px;
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%);
+  color: var(--text);
+}
+html{ scroll-behavior:smooth; }
+
+a{ text-decoration:none; }
+img{ max-width:100%; display:block; }
+
+/* =========================
+   PREMIUM NAVBAR
+========================= */
+
+.vrb-navbar{
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(10,116,218,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.16);
+  padding: 14px 0;
+}
+
+.vrb-nav-container{
+  width: min(1200px, 92%);
+  margin: auto;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.vrb-logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#fff;
+  font-weight:900;
+  font-size:18px;
+}
+
+.vrb-logo img{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid rgba(255,255,255,.35);
+  box-shadow: 0 8px 20px rgba(0,0,0,.22);
+}
+
+.vrb-nav-links{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.vrb-nav-links a{
+  color: rgba(255,255,255,.92);
+  font-weight:800;
+  font-size:14px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  transition: .2s ease;
+}
+
+.vrb-nav-links a:hover{
+  background: rgba(255,255,255,.14);
+  color:#fff;
+}
+
+.vrb-nav-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.vrb-btn-nav{
+  background: linear-gradient(135deg, var(--accent), #ff9a3c);
+  color:#fff;
+  font-weight:900;
+  padding:10px 16px;
+  border-radius: 999px;
+  box-shadow: 0 12px 26px rgba(255,111,0,.35);
+}
+
+.vrb-whatsapp{
+  background: rgba(255,255,255,.14);
+  color:#fff;
+  font-weight:900;
+  padding:10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.22);
+}
+
+.vrb-hamburger{
+  display:none;
+  border:none;
+  background: rgba(255,255,255,.14);
+  color:#fff;
+  font-size:18px;
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,.22);
+}
+
+@media (max-width: 950px){
+  .vrb-hamburger{ display:inline-flex; }
+
+  .vrb-nav-links{
+    position:absolute;
+    top:72px;
+    left:4%;
+    right:4%;
+    display:none;
+    flex-direction:column;
+    gap:10px;
+    padding:14px;
+    border-radius:16px;
+    background: rgba(10,116,218,.96);
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 18px 40px rgba(0,0,0,.22);
+  }
+  .vrb-nav-links.open{ display:flex; }
+}
+
+/* =========================
+   HERO
+========================= */
+
+.vrb-hero{
+  position: relative;
+  min-height: 560px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   padding: 70px 14px;
   background: url("https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800")
     center/cover no-repeat;
   border-bottom-left-radius: 24px;
   border-bottom-right-radius: 24px;
-  overflow: hidden;
+  overflow:hidden;
 }
 
 .vrb-overlay{
@@ -44,14 +178,14 @@
   position: relative;
   z-index: 2;
   width: min(1100px, 94%);
-  text-align: center;
-  color: #fff;
+  text-align:center;
+  color:#fff;
 }
 
 .vrb-hero-content h1{
   font-size: 44px;
-  font-weight: 800;
-  letter-spacing: .3px;
+  font-weight: 900;
+  letter-spacing:.3px;
   text-shadow: 0 12px 30px rgba(0,0,0,.35);
 }
 
@@ -64,25 +198,25 @@
 /* Tabs */
 .vrb-tabs{
   margin-top: 22px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 .vrb-tab-btn{
   border: 1px solid rgba(255,255,255,.25);
   background: rgba(255,255,255,.14);
   color:#fff;
-  padding: 10px 16px;
-  border-radius: 999px;
+  padding:10px 16px;
+  border-radius:999px;
   cursor:pointer;
-  font-weight: 700;
-  transition: 0.2s ease;
+  font-weight:900;
+  transition: .2s ease;
 }
 
 .vrb-tab-btn.active{
-  background: #fff;
+  background:#fff;
   color: var(--dark);
 }
 
@@ -91,44 +225,35 @@
   margin: 18px auto 0;
   background: var(--glass);
   border: 1px solid rgba(255,255,255,.25);
-  border-radius: var(--radius);
+  border-radius: 18px;
   box-shadow: var(--shadow);
   padding: 16px;
-  display: grid;
+  display:grid;
   grid-template-columns: 1.2fr 1fr 1fr 1fr auto;
-  gap: 10px;
-  align-items: end;
+  gap:10px;
+  align-items:end;
 }
 
-/* Hide/Show tabs content */
-.vrb-tab-content{
-  display: none;
-}
+.vrb-tab-content{ display:none; }
+.vrb-tab-content.active{ display:grid; }
 
-.vrb-tab-content.active{
-  display: grid;
-}
-
-.vrb-field{
-  text-align: left;
-}
-
+.vrb-field{ text-align:left; }
 .vrb-field label{
   display:block;
-  font-size: 12px;
-  font-weight: 800;
+  font-size:12px;
+  font-weight:900;
   color: var(--text);
-  margin-bottom: 6px;
+  margin-bottom:6px;
 }
 
 .vrb-field input,
 .vrb-field select{
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 14px;
+  width:100%;
+  padding:12px 14px;
+  border-radius:14px;
   border: 1px solid var(--border);
-  outline: none;
-  font-weight: 600;
+  outline:none;
+  font-weight:800;
 }
 
 .vrb-field input:focus,
@@ -137,77 +262,76 @@
   box-shadow: 0 0 0 4px rgba(10,116,218,.16);
 }
 
-/* Buttons */
+@media(max-width:980px){
+  .vrb-hero-content h1{ font-size:30px; }
+  .vrb-search-box{ grid-template-columns:1fr; }
+}
+
+/* =========================
+   COMMON BUTTONS
+========================= */
+
 .vrb-btn{
   border:none;
   cursor:pointer;
-  padding: 12px 18px;
-  border-radius: 14px;
-  font-weight: 800;
-  height: 46px;
+  border-radius:14px;
+  padding:12px 16px;
+  font-weight:900;
+  transition:.2s ease;
 }
 
 .vrb-btn-orange{
   background: linear-gradient(135deg, var(--accent), #ff9a3c);
-  color: #fff;
+  color:#fff;
   box-shadow: 0 14px 30px rgba(255,111,0,.35);
 }
 
-.vrb-btn-orange:hover{
-  transform: translateY(-1px);
+.vrb-btn-primary{
+  background: linear-gradient(135deg, var(--accent), #ff9a3c);
+  color:#fff;
+  box-shadow: 0 14px 30px rgba(255,111,0,.35);
 }
 
-/* Mobile */
-@media (max-width: 980px){
-  .vrb-hero-content h1{
-    font-size: 30px;
-  }
-
-  .vrb-search-box{
-    grid-template-columns: 1fr;
-  }
+.vrb-btn-light{
+  background: rgba(15,23,42,.06);
+  color: var(--text);
 }
 
-/* ===========================
-   PREMIUM BELOW HERO UI
-=========================== */
+/* =========================
+   SECTIONS + RESORT CARDS
+========================= */
 
 .vrb-container{
   width: min(1200px, 92%);
   margin: auto;
 }
 
-/* Premium background */
 .vrb-section{
   padding: 80px 0;
-  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%);
 }
 
-/* Section heading */
 .vrb-section-head{
-  text-align: center;
+  text-align:center;
   margin-bottom: 28px;
 }
 
 .vrb-title{
   font-size: 34px;
   font-weight: 900;
-  color: #0f172a;
-  letter-spacing: .2px;
 }
 
 .vrb-subtitle{
-  margin-top: 10px;
-  color: #475569;
-  font-weight: 600;
+  margin-top:10px;
+  color: var(--muted);
+  font-weight:700;
 }
 
-/* Filters */
+/* filters */
 .vrb-filters{
   display:flex;
   justify-content:center;
   flex-wrap:wrap;
-  gap: 10px;
+  gap:10px;
   margin: 20px 0 35px;
 }
 
@@ -217,28 +341,27 @@
   padding: 10px 16px;
   border-radius: 999px;
   cursor:pointer;
-  font-weight: 800;
-  color:#0f172a;
-  transition: 0.2s ease;
+  font-weight:900;
+  transition:.2s ease;
 }
 
 .vrb-chip.active,
 .vrb-chip:hover{
-  background: linear-gradient(135deg,#0a74da,#1aa3ff);
-  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  color:#fff;
   border-color: transparent;
 }
 
-/* Resorts grid */
+/* grid */
 .vrb-grid{
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 22px;
+  gap:22px;
 }
 
-/* Card */
+/* resort card */
 .vrb-card{
-  background: rgba(255,255,255,.85);
+  background: rgba(255,255,255,.90);
   border: 1px solid rgba(15,23,42,.08);
   border-radius: 22px;
   overflow:hidden;
@@ -248,7 +371,7 @@
 
 .vrb-card:hover{
   transform: translateY(-8px);
-  box-shadow: 0 26px 70px rgba(2,8,20,.13);
+  box-shadow: var(--shadow2);
 }
 
 .vrb-img{
@@ -271,812 +394,79 @@
 
 .vrb-badge{
   position:absolute;
-  top: 14px;
-  right: 14px;
+  top:14px;
+  right:14px;
   background: rgba(0,0,0,.55);
   color:#fff;
   padding: 6px 10px;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 13px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:13px;
 }
 
-.vrb-body{
-  padding: 18px 18px 16px;
-}
-
-.vrb-body h3{
-  font-size: 18px;
-  font-weight: 900;
-  color:#0f172a;
-}
+.vrb-body{ padding: 18px 18px 16px; }
+.vrb-body h3{ font-size:18px; font-weight:900; }
 
 .vrb-meta{
-  margin-top: 6px;
-  font-weight: 700;
-  color:#475569;
-  font-size: 13px;
+  margin-top:6px;
+  font-weight:800;
+  color: var(--muted);
+  font-size:13px;
 }
 
-/* tags */
 .vrb-tags{
-  margin-top: 12px;
+  margin-top:12px;
   display:flex;
   flex-wrap:wrap;
-  gap: 8px;
+  gap:8px;
 }
 
 .vrb-tags span{
   font-size: 12px;
-  font-weight: 800;
+  font-weight:900;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius:999px;
   background: rgba(10,116,218,.10);
-  color:#0a74da;
+  color: var(--brand);
   border: 1px solid rgba(10,116,218,.15);
 }
 
 .vrb-bottom{
-  margin-top: 16px;
+  margin-top:16px;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap: 14px;
+  gap:14px;
 }
 
 .vrb-price{
-  font-weight: 900;
-  font-size: 18px;
-  color:#0f172a;
+  font-weight:900;
+  font-size:18px;
 }
 
-.vrb-price span{
-  font-size: 12px;
-  opacity: .7;
-}
+.vrb-price span{ font-size:12px; opacity:.7; }
 
 .vrb-small{
-  font-size: 12px;
-  font-weight: 700;
+  font-size:12px;
+  font-weight:800;
   color:#16a34a;
-  margin-top: 2px;
+  margin-top:2px;
 }
 
-/* Buttons */
-.vrb-btn{
-  border:none;
-  cursor:pointer;
-  border-radius: 14px;
-  padding: 12px 16px;
-  font-weight: 900;
-  transition: 0.2s ease;
-}
-
-.vrb-btn-primary{
-  background: linear-gradient(135deg,#ff6f00,#ff9a3c);
-  color:#fff;
-  box-shadow: 0 14px 30px rgba(255,111,0,.35);
-}
-
-.vrb-btn-primary:hover{
-  transform: translateY(-1px);
-}
-
-.vrb-btn-light{
-  background: rgba(15,23,42,.06);
-  color:#0f172a;
-}
-
-/* ===========================
-   BOOKING MODAL
-=========================== */
-
-.vrb-modal{
-  position: fixed;
-  inset: 0;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  padding: 20px;
-  background: rgba(0,0,0,.55);
-  z-index: 9999;
-}
-
-.vrb-modal.show{
-  display:flex;
-}
-
-.vrb-modal-card{
-  width: min(560px, 96%);
-  background: rgba(255,255,255,.95);
-  border-radius: 22px;
-  padding: 22px;
-  box-shadow: 0 30px 90px rgba(0,0,0,.25);
-  position: relative;
-}
-
-.vrb-close{
-  position:absolute;
-  top: 12px;
-  right: 12px;
-  border:none;
-  cursor:pointer;
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
-  background: rgba(15,23,42,.06);
-  font-weight: 900;
-}
-
-.vrb-modal-card h2{
-  font-size: 22px;
-  font-weight: 900;
-}
-
-.vrb-modal-sub{
-  margin-top: 6px;
-  color:#475569;
-  font-weight: 700;
-}
-
-.vrb-modal-info{
-  display:grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 18px;
-  background: rgba(10,116,218,.06);
-  border: 1px solid rgba(10,116,218,.12);
-}
-
-.vrb-label{
-  font-size: 11px;
-  font-weight: 900;
-  color:#475569;
-}
-
-.vrb-value{
-  font-size: 13px;
-  font-weight: 900;
-  color:#0f172a;
-  margin-top: 2px;
-}
-
-.vrb-form{
-  margin-top: 16px;
-  display:grid;
-  gap: 10px;
-}
-
-.vrb-form input,
-.vrb-form select{
-  width:100%;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(15,23,42,.12);
-  font-weight: 700;
-  outline:none;
-}
-
-.vrb-form input:focus,
-.vrb-form select:focus{
-  border-color: rgba(10,116,218,.55);
-  box-shadow: 0 0 0 4px rgba(10,116,218,.14);
-}
-
-.vrb-form-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.vrb-modal-actions{
-  margin-top: 16px;
-  display:flex;
-  justify-content:flex-end;
-  gap: 10px;
-}
-
-.vrb-modal-note{
-  margin-top: 12px;
-  font-size: 12px;
-  color:#475569;
-  font-weight: 700;
-}
-
-/* ===========================
-   FOOTER (NEW STYLE)
-=========================== */
-
-.vrb-footer{
-  padding: 75px 0 25px;
-  background: #050b18;
-  color:#fff;
-  position: relative;
-  overflow:hidden;
-}
-
-.vrb-footer::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: radial-gradient(circle at top left, rgba(26,163,255,.22), transparent 50%),
-              radial-gradient(circle at bottom right, rgba(255,111,0,.18), transparent 50%);
-}
-
-.vrb-footer-grid{
-  display:grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 30px;
-  position: relative;
-  z-index: 2;
-}
-
-.vrb-footer h3{
-  font-size: 22px;
-  font-weight: 900;
-}
-
-.vrb-footer p{
-  margin-top: 10px;
-  opacity: .85;
-  line-height: 1.7;
-}
-
-.vrb-footer h4{
-  font-weight: 900;
-  margin-bottom: 12px;
-}
-
-.vrb-footer a{
-  display:block;
-  margin: 8px 0;
-  text-decoration:none;
-  color: rgba(207,230,255,.92);
-  font-weight: 800;
-}
-
-.vrb-footer a:hover{
-  color:#fff;
-  text-decoration: underline;
-}
-
-.vrb-footer-badges{
-  margin-top: 14px;
-  display:flex;
-  flex-wrap:wrap;
-  gap: 10px;
-}
-
-.vrb-footer-badges span{
-  font-weight: 900;
-  font-size: 12px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.10);
-}
-
-.vrb-footer-bottom{
-  width: min(1200px, 92%);
-  margin: 28px auto 0;
-  text-align:center;
-  opacity: .65;
-  font-weight: 700;
-  font-size: 13px;
-  position: relative;
-  z-index: 2;
-}
-
-@media(max-width: 950px){
-  .vrb-title{
-    font-size: 26px;
-  }
-  .vrb-footer-grid{
-    grid-template-columns: 1fr;
-  }
-  .vrb-modal-info{
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =============================
-   PREMIUM NAVBAR
-   ============================= */
-
-.vrb-navbar{
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  background: rgba(10,116,218,.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,.16);
-  padding: 14px 0;
-}
-
-.vrb-nav-container{
-  width: min(1200px, 92%);
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.vrb-logo{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: #fff;
-  font-weight: 800;
-  font-size: 20px;
-  letter-spacing: .3px;
-}
-
-.vrb-logo img{
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255,255,255,.35);
-  box-shadow: 0 8px 20px rgba(0,0,0,.22);
-}
-
-.vrb-nav-links{
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
-.vrb-nav-links a{
-  color: rgba(255,255,255,.92);
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 14px;
-  padding: 8px 10px;
-  border-radius: 12px;
-  transition: 0.2s ease;
-}
-
-.vrb-nav-links a:hover{
-  background: rgba(255,255,255,.14);
-  color: #fff;
-}
-
-.vrb-nav-links a.active{
-  background: rgba(255,255,255,.18);
-  color: #fff;
-}
-
-.vrb-dashboard{
-  background: rgba(255,255,255,.18);
-}
-
-/* Actions */
-.vrb-nav-actions{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.vrb-btn-nav{
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c);
-  color: white;
-  font-weight: 800;
-  text-decoration: none;
-  padding: 10px 16px;
-  border-radius: 999px;
-  box-shadow: 0 12px 26px rgba(255,111,0,.35);
-}
-
-.vrb-btn-nav:hover{
-  transform: translateY(-1px);
-}
-
-.vrb-whatsapp{
-  background: rgba(255,255,255,.14);
-  color: #fff;
-  text-decoration: none;
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 800;
-  border: 1px solid rgba(255,255,255,.22);
-}
-
-.vrb-whatsapp:hover{
-  background: rgba(255,255,255,.18);
-}
-
-/* Mobile */
-.vrb-hamburger{
-  display: none;
-  border: none;
-  background: rgba(255,255,255,.14);
-  color: white;
-  font-size: 18px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,.22);
-}
-
-@media (max-width: 950px){
-  .vrb-hamburger{
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .vrb-nav-links{
-    position: absolute;
-    top: 72px;
-    left: 4%;
-    right: 4%;
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    padding: 14px;
-    border-radius: 16px;
-    background: rgba(10,116,218,.96);
-    border: 1px solid rgba(255,255,255,.16);
-    box-shadow: 0 18px 40px rgba(0,0,0,.22);
-  }
-
-  .vrb-nav-links.open{
-    display: flex;
-  }
-}
-
-/* ===========================================
-   PREMIUM BACKGROUNDS + SECTIONS + FOOTER
-   (Does NOT change resort cards/containers)
-   =========================================== */
-
-/* Page Background Premium */
-body{
-  background: radial-gradient(circle at top, #f4fbff 0%, #ffffff 55%, #f8fbff 100%);
-}
-
-/* Premium Page Width */
-main, .main, .container, .page-container{
-  max-width: 1200px;
-  margin: auto;
-}
-
-/* Premium Section Block Styling */
-section{
-  padding: 60px 0;
-}
-
-/* Section Title Premium */
-h2, h3.section-title, .section-title{
-  font-size: 26px;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: 0.2px;
-  text-align: center;
-  margin-bottom: 30px;
-  position: relative;
-}
-
-/* Title underline accent */
-h2::after, .section-title::after{
-  content: "";
-  display: block;
-  width: 90px;
-  height: 4px;
-  margin: 12px auto 0;
-  border-radius: 99px;
-  background: linear-gradient(90deg, #0a74da, #1aa3ff, #ff6f00);
-  opacity: 0.85;
-}
-
-/* Premium Light Background bands */
-.premium-section{
-  background: rgba(255,255,255,0.75);
-  border: 1px solid rgba(15,23,42,0.06);
-  box-shadow: 0 16px 45px rgba(2,8,20,0.06);
-  border-radius: 22px;
-  padding: 45px 25px;
-  margin: 30px auto;
-  max-width: 1200px;
-}
-
-/* Why book us / Location area cards background only */
-.why-book, .location-section, .info-section{
-  background: transparent !important;
-}
-
-/* Small Info Boxes look premium (NOT resort cards) */
-.why-book div, 
-.location-section div,
-.info-section div{
-  border-radius: 16px !important;
-}
-
-/* Footer Premium */
-footer{
-  background: linear-gradient(135deg, #061a33, #0a2547);
-  color: #fff;
-  padding: 55px 0 25px;
-  border-top: 1px solid rgba(255,255,255,0.12);
-  margin-top: 50px;
-}
-
-footer h3, footer h4{
-  font-weight: 800;
-  margin-bottom: 12px;
-  letter-spacing: 0.3px;
-}
-
-footer a{
-  color: rgba(207,230,255,0.92);
-  text-decoration: none;
-  font-weight: 600;
-  display: inline-block;
-  margin: 6px 0;
-}
-
-footer a:hover{
-  color: #fff;
-  text-decoration: underline;
-}
-
-/* Footer bottom line */
-.footer-bottom{
-  text-align: center;
-  margin-top: 30px;
-  font-size: 13px;
-  opacity: 0.8;
-}
-
-/* Premium spacing around footer icons */
-footer .social-icons, footer .footer-icons{
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-  margin-top: 16px;
-}
-
-/* Mobile spacing */
-@media(max-width: 900px){
-  section{
-    padding: 40px 0;
-  }
-
-  .premium-section{
-    padding: 30px 16px;
-  }
-}
-
-/* =====================================================
-   PREMIUM BELOW HERO + FOOTER UPGRADE + ANIMATIONS
-   ===================================================== */
-
-/* Smooth scrolling */
-html{
-  scroll-behavior: smooth;
-}
-
-/* PREMIUM background below hero */
-body{
-  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%) !important;
-}
-
-/* Make all sections premium blocks */
-section{
-  padding: 70px 0 !important;
-}
-
-/* Premium section container look */
-.premium-block{
-  width: min(1200px, 92%);
-  margin: 30px auto;
-  padding: 50px 30px;
-  border-radius: 26px;
-  background: rgba(255,255,255,0.75);
-  border: 1px solid rgba(15,23,42,0.06);
-  box-shadow: 0 18px 50px rgba(2,8,20,0.08);
-  backdrop-filter: blur(10px);
-  position: relative;
-}
-
-/* Premium decorative glow */
-.premium-block::before{
-  content:"";
-  position:absolute;
-  inset:-1px;
-  border-radius: 26px;
-  padding: 1px;
-  background: linear-gradient(135deg,
-    rgba(10,116,218,0.40),
-    rgba(255,111,0,0.25),
-    rgba(26,163,255,0.25)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events:none;
-}
-
-/* Premium headings */
-.premium-title{
-  font-size: 28px;
-  font-weight: 900;
-  text-align: center;
-  margin-bottom: 40px;
-  color: #0f172a;
-  letter-spacing: .2px;
-}
-
-/* Title underline gradient */
-.premium-title::after{
-  content:"";
-  width: 110px;
-  height: 5px;
-  display: block;
-  margin: 12px auto 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #0a74da, #1aa3ff, #ff6f00);
-}
-
-/* Do NOT change resort containers styling inside */
-.resort-card, .card, .resort-container{
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-/* Premium hover (light) */
-.resort-card:hover, .card:hover{
-  transform: translateY(-6px);
-  box-shadow: 0 22px 60px rgba(2,8,20,0.12);
-}
-
-/* =====================
-   PREMIUM FOOTER (BEST)
-   ===================== */
-
-footer{
-  background: linear-gradient(135deg, #061a33, #0a2d55) !important;
-  color: #fff !important;
-  padding: 70px 0 30px !important;
-  margin-top: 50px;
-  border-top: 1px solid rgba(255,255,255,0.12);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Footer glow */
-footer::before{
-  content:"";
-  position:absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(26,163,255,0.25), transparent 60%);
-  top: -200px;
-  left: -200px;
-}
-
-footer::after{
-  content:"";
-  position:absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(255,111,0,0.22), transparent 60%);
-  bottom: -220px;
-  right: -220px;
-}
-
-.footer-grid{
-  width: min(1200px, 92%);
-  margin: auto;
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 30px;
-  position: relative;
-  z-index: 2;
-}
-
-footer h3, footer h4{
-  font-weight: 900 !important;
-  letter-spacing: .2px;
-  margin-bottom: 14px;
-}
-
-footer p{
-  opacity: 0.88;
-  line-height: 1.7;
-}
-
-footer a{
-  color: rgba(207,230,255,0.92) !important;
-  text-decoration: none;
-  font-weight: 700;
-  display: inline-block;
-  margin: 7px 0;
-}
-
-footer a:hover{
-  color: #fff !important;
-  text-decoration: underline;
-}
-
-.footer-bottom{
-  width: min(1200px, 92%);
-  margin: 26px auto 0;
-  text-align: center;
-  opacity: 0.75;
-  font-size: 13px;
-  position: relative;
-  z-index: 2;
-}
-
-/* Social icons */
-.footer-social{
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.footer-social a{
-  width: 40px;
-  height: 40px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.14);
-  font-size: 16px;
-}
-
-.footer-social a:hover{
-  background: rgba(255,255,255,0.16);
-}
-
-/* Responsive */
-@media(max-width: 950px){
-  section{
-    padding: 45px 0 !important;
-  }
-  .premium-block{
-    padding: 28px 16px;
-  }
-  .footer-grid{
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ============================
-   SCROLL ANIMATIONS
-   ============================ */
-
-.scroll-anim{
-  opacity: 0;
-  transform: translateY(45px) scale(0.98);
-  transition: all 0.8s ease;
-}
-
-.scroll-show{
-  opacity: 1;
-  transform: translateY(0px) scale(1);
-}
-/* ======================================
-   PREMIUM WHY BOOK + LOCATION SECTION
-====================================== */
+/* =========================
+   WHY BOOK + LOCATIONS
+========================= */
 
 .vrb-soft-bg{
   padding: 80px 0;
-  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%);
 }
 
 .vrb-wrap{
   width: min(1100px, 92%);
   margin: auto;
-  background: rgba(255,255,255,0.75);
-  border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 18px 50px rgba(2,8,20,0.08);
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 18px 50px rgba(2,8,20,.08);
   border-radius: 26px;
   padding: 45px 30px;
   position: relative;
@@ -1101,29 +491,27 @@ footer a:hover{
 }
 
 .vrb-heading{
-  text-align: center;
-  font-size: 26px;
-  font-weight: 900;
-  color: #0f172a;
-  letter-spacing: .2px;
+  text-align:center;
+  font-size:26px;
+  font-weight:900;
 }
 
 .vrb-desc{
   text-align:center;
-  margin-top: 10px;
-  color:#475569;
-  font-weight: 700;
+  margin-top:10px;
+  color: var(--muted);
+  font-weight:800;
 }
 
 .vrb-feature-grid{
-  margin-top: 30px;
+  margin-top:30px;
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 18px;
+  gap:18px;
 }
 
 .vrb-feature-card{
-  background: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.95);
   border: 1px solid rgba(15,23,42,0.08);
   border-radius: 22px;
   padding: 22px;
@@ -1133,88 +521,81 @@ footer a:hover{
 
 .vrb-feature-card:hover{
   transform: translateY(-8px);
-  box-shadow: 0 26px 70px rgba(2,8,20,0.12);
+  box-shadow: var(--shadow2);
 }
 
 .vrb-icon{
-  width: 54px;
-  height: 54px;
-  border-radius: 18px;
+  width:54px;
+  height:54px;
+  border-radius:18px;
   background: rgba(10,116,218,0.10);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size: 26px;
-  margin-bottom: 14px;
+  font-size:26px;
+  margin-bottom:14px;
   border: 1px solid rgba(10,116,218,0.14);
 }
 
 .vrb-feature-card h3{
-  font-size: 17px;
-  font-weight: 900;
-  margin-bottom: 8px;
-  color:#0f172a;
+  font-size:17px;
+  font-weight:900;
+  margin-bottom:8px;
 }
 
 .vrb-feature-card p{
-  color:#475569;
-  font-weight: 700;
-  line-height: 1.6;
-  font-size: 13px;
+  color: var(--muted);
+  font-weight:800;
+  line-height:1.6;
+  font-size:13px;
 }
 
-/* Locations Grid */
+/* locations */
 .vrb-location-grid{
-  margin-top: 30px;
+  margin-top:30px;
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
+  gap:18px;
 }
 
 .vrb-location-card{
-  background: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.95);
   border: 1px solid rgba(15,23,42,0.08);
   border-radius: 22px;
   padding: 22px;
   box-shadow: 0 16px 45px rgba(2,8,20,0.06);
   transition: 0.25s ease;
-  position: relative;
 }
 
 .vrb-location-card:hover{
   transform: translateY(-6px);
-  box-shadow: 0 26px 70px rgba(2,8,20,0.12);
+  box-shadow: var(--shadow2);
 }
 
 .vrb-location-card h3{
-  font-size: 16px;
-  font-weight: 900;
-  color:#0f172a;
+  font-size:16px;
+  font-weight:900;
 }
 
 .vrb-location-card p{
-  margin-top: 8px;
-  color:#475569;
-  font-weight: 700;
-  font-size: 13px;
-  line-height: 1.6;
+  margin-top:8px;
+  color: var(--muted);
+  font-weight:800;
+  font-size:13px;
+  line-height:1.6;
 }
 
 .vrb-mini-btn{
-  margin-top: 14px;
-  border: none;
-  cursor: pointer;
-  padding: 10px 14px;
+  margin-top:14px;
+  border:none;
+  cursor:pointer;
+  padding:10px 14px;
   border-radius: 14px;
-  font-weight: 900;
+  font-weight:900;
   background: rgba(10,116,218,0.10);
-  color: #0a74da;
+  color: var(--brand);
   border: 1px solid rgba(10,116,218,0.14);
-  transition: 0.2s ease;
-}
-
-.vrb-mini-btn:hover{
-  background: rgba(10,116,218,0.18);
+  transition:.2s ease;
 }
 
 .vrb-location-highlight{
@@ -1222,227 +603,13 @@ footer a:hover{
   border: 1px solid rgba(255,111,0,0.16);
 }
 
-.vrb-mini-btn-accent{
-  background: linear-gradient(135deg,#ff6f00,#ff9a3c);
-  color:#fff;
-  border:none;
-  box-shadow: 0 14px 30px rgba(255,111,0,0.28);
-}
+/* =========================
+   BOOKING MODAL (PREMIUM)
+========================= */
 
-/* Mobile */
-@media(max-width: 900px){
-  .vrb-wrap{
-    padding: 28px 16px;
-  }
-  .vrb-heading{
-    font-size: 22px;
-  }
-}
-/* ==============================
-   PREMIUM CHAT WIDGET (UI)
-============================== */
-
-.vrb-chat-widget{
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 9999;
-  font-family: inherit;
-}
-
-/* Floating button */
-.vrb-chat-fab{
-  width: 62px;
-  height: 62px;
-  border-radius: 22px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(135deg, rgba(10,116,218,1), rgba(26,163,255,1));
-  box-shadow: 0 20px 50px rgba(2,8,20,.18);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  transition: 0.25s ease;
-}
-
-.vrb-chat-fab img{
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.vrb-chat-fab:hover{
-  transform: translateY(-3px) scale(1.03);
-}
-
-/* Chat box */
-.vrb-chat-box{
-  position: absolute;
-  right: 0;
-  bottom: 78px;
-  width: 340px;
-  max-width: calc(100vw - 30px);
-  background: rgba(255,255,255,.97);
-  border-radius: 22px;
-  border: 1px solid rgba(15,23,42,.12);
-  box-shadow: 0 28px 90px rgba(2,8,20,.22);
-  overflow:hidden;
-  transform: translateY(16px) scale(.98);
-  opacity: 0;
-  pointer-events: none;
-  transition: 0.25s ease;
-}
-
-.vrb-chat-box.open{
-  opacity: 1;
-  transform: translateY(0px) scale(1);
-  pointer-events: auto;
-}
-
-/* Header */
-.vrb-chat-header{
-  padding: 14px;
-  background: linear-gradient(135deg, #0a74da, #1aa3ff);
-  color: #fff;
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-}
-
-.vrb-chat-title{
-  display:flex;
-  gap: 10px;
-  align-items:center;
-}
-
-.vrb-chat-title img{
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  object-fit: cover;
-  background: rgba(255,255,255,.25);
-  padding: 4px;
-}
-
-.vrb-chat-title h4{
-  margin: 0;
-  font-size: 15px;
-  font-weight: 900;
-}
-
-.vrb-chat-title p{
-  margin: 0;
-  font-size: 12px;
-  opacity: .85;
-  font-weight: 700;
-}
-
-.vrb-chat-close{
-  border:none;
-  background: rgba(255,255,255,.18);
-  width: 34px;
-  height: 34px;
-  border-radius: 14px;
-  color:#fff;
-  font-weight: 900;
-  cursor:pointer;
-}
-
-/* Body */
-.vrb-chat-body{
-  padding: 14px;
-  height: 240px;
-  overflow-y: auto;
-  background: radial-gradient(circle at top, rgba(10,116,218,.06), transparent 40%);
-}
-
-.vrb-msg{
-  max-width: 85%;
-  padding: 10px 12px;
-  border-radius: 16px;
-  margin-bottom: 10px;
-  font-weight: 700;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.vrb-bot{
-  background: rgba(15,23,42,.06);
-  color: #0f172a;
-  border: 1px solid rgba(15,23,42,.08);
-}
-
-.vrb-user{
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c);
-  color: #fff;
-  margin-left: auto;
-}
-
-/* Footer */
-.vrb-chat-footer{
-  display:flex;
-  gap: 8px;
-  padding: 12px;
-  border-top: 1px solid rgba(15,23,42,.10);
-}
-
-.vrb-chat-footer input{
-  flex: 1;
-  border-radius: 14px;
-  border: 1px solid rgba(15,23,42,.12);
-  padding: 10px 12px;
-  font-weight: 700;
-  outline:none;
-}
-
-.vrb-chat-send{
-  width: 44px;
-  border:none;
-  cursor:pointer;
-  border-radius: 14px;
-  font-weight: 900;
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c);
-  color:#fff;
-}
-
-/* Quick buttons */
-.vrb-chat-quick{
-  display:flex;
-  gap: 8px;
-  padding: 12px;
-  flex-wrap: wrap;
-  background: rgba(10,116,218,.05);
-  border-top: 1px solid rgba(15,23,42,.08);
-}
-
-.vrb-chat-quick button{
-  border:none;
-  cursor:pointer;
-  padding: 8px 10px;
-  border-radius: 999px;
-  font-weight: 900;
-  background: rgba(255,255,255,.9);
-  border: 1px solid rgba(15,23,42,.10);
-  font-size: 12px;
-}
-.vrb-hide{
-  opacity: 0;
-  transform: translateY(35px) scale(0.98);
-  transition: all 0.8s ease;
-}
-
-.vrb-show{
-  opacity: 1;
-  transform: translateY(0px) scale(1);
-}
-/* ===========================
-   PREMIUM BOOKING POPUP UI
-=========================== */
 .vrb-modal{
   position: fixed;
-  inset: 0;
+  inset:0;
   display:none;
   justify-content:center;
   align-items:center;
@@ -1451,222 +618,412 @@ footer a:hover{
   z-index: 99999;
 }
 
-.vrb-modal.show{
-  display:flex;
-}
+.vrb-modal.show{ display:flex; }
 
 .vrb-modal-card{
-  width: min(560px, 96%);
-  background: rgba(255,255,255,.95);
+  width: min(600px, 96%);
+  background: rgba(255,255,255,.97);
   border-radius: 24px;
   padding: 22px;
-  box-shadow: 0 30px 100px rgba(0,0,0,.30);
+  box-shadow: 0 30px 110px rgba(0,0,0,.28);
   position: relative;
-  animation: popIn 0.35s ease;
+  animation: popIn .30s ease;
 }
 
 @keyframes popIn{
-  from{opacity:0; transform: translateY(20px) scale(0.95);}
+  from{opacity:0; transform: translateY(20px) scale(.96);}
   to{opacity:1; transform: translateY(0px) scale(1);}
 }
 
 .vrb-close{
   position:absolute;
-  top: 14px;
-  right: 14px;
+  top:14px;
+  right:14px;
+  width:40px;
+  height:40px;
+  border-radius:14px;
   border:none;
   cursor:pointer;
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
   background: rgba(15,23,42,.06);
-  font-weight: 900;
+  font-weight:900;
 }
 
 .vrb-modal-head h2{
-  font-size: 22px;
-  font-weight: 900;
-  margin: 0;
+  margin:0;
+  font-size:22px;
+  font-weight:900;
 }
 
 .vrb-modal-head p{
-  margin-top: 6px;
-  color:#475569;
-  font-weight: 700;
+  margin-top:6px;
+  color: var(--muted);
+  font-weight:800;
 }
 
-.vrb-modal-summary{
-  margin-top: 16px;
-  display:grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(10,116,218,.06);
-  border: 1px solid rgba(10,116,218,.12);
+.vrb-coupon-row{
+  margin-top:14px;
+  display:flex;
+  gap:10px;
 }
 
-.vrb-modal-summary .label{
-  display:block;
-  font-size: 11px;
-  font-weight: 900;
-  color:#475569;
+.vrb-coupon-row input{
+  flex:1;
+  padding:12px 14px;
+  border-radius:14px;
+  border: 1px solid rgba(15,23,42,.12);
+  font-weight:900;
 }
 
-.vrb-modal-summary b{
-  font-size: 13px;
-  font-weight: 900;
-  color:#0f172a;
+.vrb-price-box{
+  margin-top:14px;
+  padding:14px;
+  border-radius:18px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(15,23,42,.03);
 }
+
+.vrb-price-box .line{
+  display:flex;
+  justify-content:space-between;
+  padding:6px 0;
+  font-weight:900;
+}
+
+.vrb-price-box .total{
+  border-top: 1px solid rgba(15,23,42,.10);
+  margin-top:6px;
+  padding-top:10px;
+  font-size:16px;
+}
+
+.green{ color:#16a34a; }
 
 .vrb-form{
-  margin-top: 16px;
+  margin-top:16px;
   display:grid;
-  gap: 10px;
+  gap:10px;
 }
 
 .vrb-form input,
 .vrb-form select{
   width:100%;
-  padding: 12px 14px;
-  border-radius: 14px;
+  padding:12px 14px;
+  border-radius:14px;
   border: 1px solid rgba(15,23,42,.12);
-  font-weight: 700;
+  font-weight:900;
   outline:none;
 }
 
 .vrb-form-grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap:10px;
 }
 
-.vrb-btn{
+@media(max-width:900px){
+  .vrb-form-grid{ grid-template-columns:1fr; }
+}
+
+/* =========================
+   FOOTER (PREMIUM CLEAN)
+========================= */
+
+.vrb-footer{
+  padding: 75px 0 25px;
+  background: #050b18;
+  color:#fff;
+  position: relative;
+  overflow:hidden;
+}
+
+.vrb-footer::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at top left, rgba(26,163,255,.22), transparent 50%),
+    radial-gradient(circle at bottom right, rgba(255,111,0,.18), transparent 50%);
+}
+
+.vrb-footer-grid{
+  display:grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap:30px;
+  position: relative;
+  z-index:2;
+}
+
+.vrb-footer h3{
+  font-size:22px;
+  font-weight:900;
+}
+
+.vrb-footer p{
+  margin-top:10px;
+  opacity:.85;
+  line-height:1.7;
+}
+
+.vrb-footer h4{
+  font-weight:900;
+  margin-bottom:12px;
+}
+
+.vrb-footer a{
+  display:block;
+  margin:8px 0;
+  color: rgba(207,230,255,.92);
+  font-weight:900;
+}
+
+.vrb-footer a:hover{
+  color:#fff;
+  text-decoration: underline;
+}
+
+.vrb-footer-badges{
+  margin-top:14px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.vrb-footer-badges span{
+  font-weight:900;
+  font-size:12px;
+  padding: 8px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.vrb-footer-bottom{
+  width: min(1200px, 92%);
+  margin: 28px auto 0;
+  text-align:center;
+  opacity:.65;
+  font-weight:800;
+  font-size:13px;
+  position: relative;
+  z-index:2;
+}
+
+@media(max-width:950px){
+  .vrb-footer-grid{ grid-template-columns:1fr; }
+}
+
+/* =========================
+   POLICY BUTTON
+========================= */
+
+.vrb-policy-btn{
+  position: fixed;
+  left: 18px;
+  bottom: 24px;
+  z-index: 9999;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(15,23,42,.12);
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  color: var(--text);
+  box-shadow: 0 16px 40px rgba(2,8,20,.14);
+  transition: .25s ease;
+}
+
+.vrb-policy-btn:hover{
+  transform: translateY(-3px);
+}
+
+/* =========================
+   CHAT WIDGET
+========================= */
+
+.vrb-chat-widget{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9999;
+}
+
+.vrb-chat-fab{
+  width:62px;
+  height:62px;
+  border-radius:22px;
   border:none;
   cursor:pointer;
-  border-radius: 14px;
-  padding: 12px 16px;
-  font-weight: 900;
-  transition: 0.2s ease;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  box-shadow: 0 20px 50px rgba(2,8,20,.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  transition:.25s ease;
 }
 
-.vrb-btn-primary{
-  background: linear-gradient(135deg,#ff6f00,#ff9a3c);
+.vrb-chat-fab img{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.vrb-chat-box{
+  position:absolute;
+  right:0;
+  bottom:78px;
+  width:340px;
+  max-width: calc(100vw - 30px);
+  background: rgba(255,255,255,.97);
+  border-radius:22px;
+  border: 1px solid rgba(15,23,42,.12);
+  box-shadow: 0 28px 90px rgba(2,8,20,.22);
+  overflow:hidden;
+  transform: translateY(16px) scale(.98);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s ease;
+}
+
+.vrb-chat-box.open{
+  opacity:1;
+  transform: translateY(0px) scale(1);
+  pointer-events:auto;
+}
+
+.vrb-chat-header{
+  padding:14px;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
   color:#fff;
-  box-shadow: 0 14px 30px rgba(255,111,0,.35);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
-.vrb-btn-light{
+.vrb-chat-title{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.vrb-chat-title img{
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  object-fit:cover;
+  background: rgba(255,255,255,.25);
+  padding:4px;
+}
+
+.vrb-chat-title h4{
+  margin:0;
+  font-size:15px;
+  font-weight:900;
+}
+
+.vrb-chat-title p{
+  margin:0;
+  font-size:12px;
+  opacity:.85;
+  font-weight:800;
+}
+
+.vrb-chat-close{
+  border:none;
+  background: rgba(255,255,255,.18);
+  width:34px;
+  height:34px;
+  border-radius:14px;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.vrb-chat-body{
+  padding:14px;
+  height:240px;
+  overflow-y:auto;
+  background: radial-gradient(circle at top, rgba(10,116,218,.06), transparent 40%);
+}
+
+.vrb-msg{
+  max-width:85%;
+  padding:10px 12px;
+  border-radius:16px;
+  margin-bottom:10px;
+  font-weight:800;
+  font-size:13px;
+  line-height:1.4;
+}
+
+.vrb-bot{
   background: rgba(15,23,42,.06);
-  color:#0f172a;
+  color: var(--text);
+  border: 1px solid rgba(15,23,42,.08);
 }
 
-.vrb-note{
-  margin-top: 12px;
-  font-size: 12px;
-  color:#475569;
-  font-weight: 700;
+.vrb-user{
+  background: linear-gradient(135deg, var(--accent), #ff9a3c);
+  color:#fff;
+  margin-left:auto;
 }
 
-@media(max-width: 900px){
-  .vrb-modal-summary{
-    grid-template-columns: 1fr;
-  }
-}
-/* Additional Booking Modal Elements */
-.coupon-section{
-  display: flex;
-  gap: 8px;
-  align-items: center;
+.vrb-chat-footer{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-top: 1px solid rgba(15,23,42,.10);
 }
 
-.coupon-section input{
-  flex: 1;
+.vrb-chat-footer input{
+  flex:1;
+  border-radius:14px;
+  border: 1px solid rgba(15,23,42,.12);
+  padding:10px 12px;
+  font-weight:900;
+  outline:none;
 }
 
-.coupon-section button{
-  padding: 12px 16px;
-  border: none;
-  border-radius: 14px;
-  background: rgba(10,116,218,0.1);
-  color: #0a74da;
-  font-weight: 900;
-  cursor: pointer;
+.vrb-chat-send{
+  width:44px;
+  border:none;
+  cursor:pointer;
+  border-radius:14px;
+  font-weight:900;
+  background: linear-gradient(135deg, var(--accent), #ff9a3c);
+  color:#fff;
 }
 
-.available-coupons{
-  margin-top: 8px;
-  padding: 10px;
-  border-radius: 12px;
-  background: rgba(10,116,218,0.05);
-  border: 1px solid rgba(10,116,218,0.1);
+.vrb-chat-quick{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  flex-wrap:wrap;
+  background: rgba(10,116,218,.05);
+  border-top: 1px solid rgba(15,23,42,.08);
 }
 
-.coupon-item{
-  padding: 8px;
-  margin: 4px 0;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.8);
-  cursor: pointer;
-  font-size: 12px;
-  transition: 0.2s ease;
+.vrb-chat-quick button{
+  border:none;
+  cursor:pointer;
+  padding:8px 10px;
+  border-radius:999px;
+  font-weight:900;
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(15,23,42,.10);
+  font-size:12px;
 }
 
-.coupon-item:hover{
-  background: rgba(10,116,218,0.1);
-}
+/* =========================
+   ANIMATIONS (Replay)
+========================= */
 
-.otp-btn{
-  margin-top: 8px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 10px;
-  background: rgba(255,111,0,0.1);
-  color: #ff6f00;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 12px;
+.vrb-hide{
+  opacity:0;
+  transform: translateY(35px) scale(0.98);
+  transition: all .8s ease;
 }
-
-.otp-message{
-  margin-top: 6px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.coupon-message{
-  margin-top: 6px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.price-summary{
-  margin-top: 16px;
-  padding: 14px;
-  border-radius: 14px;
-  background: rgba(10,116,218,0.06);
-  border: 1px solid rgba(10,116,218,0.12);
-}
-
-.price-row{
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.price-row:last-child{
-  margin-bottom: 0;
-  padding-top: 8px;
-  border-top: 1px solid rgba(10,116,218,0.15);
-  font-size: 15px;
-  color: #0f172a;
-}
-
-.guest-warning{
-  font-size: 12px;
-  color: #dc3545;
-  margin-top: 6px;
-  font-weight: 700;
+.vrb-show{
+  opacity:1;
+  transform: translateY(0px) scale(1);
 }
