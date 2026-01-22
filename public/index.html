@@ -1,1288 +1,605 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <script>
-        // Dynamic viewport scaling and hero section adjustment
-        function setDynamicViewport() {
-            const screenWidth = screen.width;
-            const screenHeight = screen.height;
-            let scale = 1.0;
-            
-            if (screenWidth <= 480) scale = 0.9;
-            else if (screenWidth <= 768) scale = 1.0;
-            else if (screenWidth <= 1024) scale = 1.1;
-            else if (screenWidth <= 1440) scale = 1.2;
-            else scale = 1.3;
-            
-            const viewport = document.querySelector('meta[name="viewport"]');
-            viewport.content = `width=device-width, initial-scale=${scale}, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover`;
-            
-            // Fix mobile hero section width
-            if (screenWidth <= 768) {
-                const style = document.createElement('style');
-                style.textContent = `
-                    @media (max-width: 768px) {
-                        .rotating-banner { width: ${screenWidth <= 480 ? '130vw' : '120vw'} !important; margin-left: calc(${screenWidth <= 480 ? '-65vw' : '-60vw'} + 50%) !important; }
-                        .banner-slide { width: ${screenWidth <= 480 ? '130vw' : '120vw'} !important; margin-left: calc(${screenWidth <= 480 ? '-65vw' : '-60vw'} + 50%) !important; }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-        }
-        setDynamicViewport();
-        window.addEventListener('resize', setDynamicViewport);
-    </script>
-    <meta http-equiv="Cache-Control" content="public, max-age=31536000">
-    <meta http-equiv="Pragma" content="cache">
-    <meta http-equiv="Expires" content="31536000">
-    <title>Book Resorts in Vizag | Best Resorts in Visakhapatnam | Vizag Resort Booking</title>
-    <meta name="description" content="Book resorts in Vizag with instant confirmation. Best resorts in Visakhapatnam with private pool, swimming pool. Top vizag resorts near RK Beach, Rushikonda, Yarada. Book luxury resorts in S.R Puram, S Kota, Narava, Pinagadi, Pendurthi with best prices and amenities.">
-    <meta name="keywords" content="book resorts, book resorts vizag, vizag resorts, best resorts in vizag, resorts in visakhapatnam, vizag resort booking, book resort online, resort booking vizag, nearby resorts, resorts near me, private pool resorts vizag, swimming pool resorts vizag, beach resorts vizag, luxury resorts vizag, family resorts vizag, weekend resorts vizag, corporate resorts vizag, S.R Puram resorts, S Kota resort, Narava resort, Pinagadi resort, Pendurthi resort, RK Beach resorts, Rushikonda resorts, Yarada beach resorts, Araku resorts, Lambasingi resorts, hill station resorts vizag, budget resorts vizag, premium resorts vizag, resort deals vizag, resort offers vizag, vizag accommodation, visakhapatnam hotels, vizag hotels booking, resort stay vizag, vacation resorts vizag, holiday resorts vizag">
-    <meta name="author" content="Vizag Resort Booking">
-    <meta property="og:title" content="Book Resorts in Vizag | Best Resorts in Visakhapatnam">
-    <meta property="og:description" content="Book resorts in Vizag with instant confirmation. Best resorts in Visakhapatnam with private pool, swimming pool. Top vizag resorts near beaches with luxury amenities and best prices.">
-    <meta property="og:url" content="https://vizagresortbooking.in">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://vizagresortbooking.in/cropped_circle_image.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="Vizag Resort Booking">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Book Resorts in Vizag | Best Resorts in Visakhapatnam">
-    <meta name="twitter:description" content="Book resorts in Vizag with instant confirmation. Best resorts in Visakhapatnam with private pool, swimming pool. Top vizag resorts near beaches.">
-    <meta name="twitter:image" content="https://vizagresortbooking.in/cropped_circle_image.png">
-    <link rel="canonical" href="https://vizagresortbooking.in">
-    <link rel="icon" type="image/png" href="cropped_circle_image.png">
-    <link rel="shortcut icon" href="cropped_circle_image.png">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="//checkout.razorpay.com">
-    <link rel="dns-prefetch" href="//cdn.socket.io">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vizag Resort Booking</title>
 
-    <link rel="preload" href="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop" as="image" fetchpriority="high">
-    <meta name="image" content="https://vizagresortbooking.in/cropped_circle_image.png">
-    <meta name="image:alt" content="Book Resorts in Vizag - Best beach resorts in Visakhapatnam with private pool, swimming pool, luxury amenities and ocean views">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    <meta name="geo.region" content="IN-AP">
-    <meta name="geo.placename" content="Visakhapatnam, Andhra Pradesh, India">
-    <meta name="geo.position" content="17.6868;83.2185">
-    <meta name="ICBM" content="17.6868, 83.2185">
-    <link rel="alternate" hreflang="en" href="https://vizagresortbooking.in">
-    <link rel="alternate" hreflang="x-default" href="https://vizagresortbooking.in">
-    <link rel="preload" href="cropped_circle_image.png" as="image">
-    
-    <!-- Critical CSS for above-the-fold content -->
-    <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.6;color:#333;background:#f8f9fa}
-    header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:.3rem 0;position:fixed;width:100%;top:0;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,.1)}
-    .nav-container{width:100%;margin:0;padding:0;display:flex;justify-content:space-between;align-items:center;height:60px}
-    .logo-container{display:flex;align-items:center;gap:.3rem;margin-left:5px}
-    .logo-text{font-size:1.8rem;font-weight:800;color:white;text-shadow:1px 1px 2px rgba(0,0,0,.3)}
-    .logo-title{font-size:1.5rem;font-weight:800;color:white;text-shadow:1px 1px 2px rgba(0,0,0,.3)}
-    .logo-image{height:60px;width:60px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3)}
-    nav ul li a{font-weight:bold!important}
-    .logo-title{font-weight:800!important}
-    .hero{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;color:white;margin-top:80px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;position:relative;overflow:hidden}.rotating-banner{position:absolute;top:0;left:0;width:100%;height:100%}.banner-slide{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 1s ease-in-out;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;z-index:1}.banner-slide.active{opacity:1;z-index:2}.banner-slide:nth-child(1){background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop') center/cover!important}.banner-slide:nth-child(2){background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=1080&fit=crop') center/cover!important}.banner-slide:nth-child(3){background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&h=800&fit=crop&crop=center') center/cover!important}.desktop-text{display:inline}.mobile-text{display:none}@media (max-width:768px){.desktop-text{display:none}.mobile-text{display:inline}.hero{width:100vw;margin-left:calc(-50vw + 50%);overflow-x:hidden}.rotating-banner{width:120vw!important;margin-left:calc(-60vw + 50%)!important}.banner-slide{width:120vw!important;margin-left:calc(-60vw + 50%)!important}.banner-slide h1,.banner-slide h2{font-size:clamp(1.4rem,4.5vw,2.2rem)!important;padding:0 15px;text-align:center;word-wrap:break-word;font-family:'Playfair Display','Georgia',serif!important;font-weight:700!important;text-shadow:2px 2px 6px rgba(0,0,0,.7)!important;letter-spacing:0.5px!important}.banner-slide p{font-size:clamp(0.8rem,1.8vw,1rem)!important;padding:0 20px;text-align:center;line-height:1.4;word-wrap:break-word}.cta-btn{padding:12px 24px!important;font-size:1rem!important}}@media (max-width:480px){.hero{width:100vw;margin-left:calc(-50vw + 50%);overflow-x:hidden}.rotating-banner{width:130vw!important;margin-left:calc(-65vw + 50%)!important}.banner-slide{width:130vw!important;margin-left:calc(-65vw + 50%)!important}.banner-slide h1,.banner-slide h2{font-size:clamp(1.2rem,4vw,1.8rem)!important;padding:0 10px;text-align:center;word-wrap:break-word;font-family:'Playfair Display','Georgia',serif!important;font-weight:600!important;text-shadow:2px 2px 5px rgba(0,0,0,.8)!important;letter-spacing:0.4px!important}.banner-slide p{font-size:clamp(0.7rem,1.6vw,0.9rem)!important;padding:0 15px;text-align:center;line-height:1.3;word-wrap:break-word}.cta-btn{padding:8px 16px!important;font-size:0.8rem!important}}@media (max-width:360px){.banner-slide h2{font-size:clamp(1rem,3.5vw,1.5rem)!important;padding:0 8px;word-wrap:break-word}.banner-slide p{font-size:clamp(0.65rem,1.4vw,0.8rem)!important;padding:0 12px;line-height:1.2;word-wrap:break-word}.cta-btn{padding:6px 12px!important;font-size:0.75rem!important}}
-    .cta-btn{background:#ff6b6b;color:white;padding:15px 30px;border:none;border-radius:5px;font-size:1.1rem;cursor:pointer;transition:background .3s}
-    .banner-description{font-family:'Playfair Display','Georgia',serif!important;font-weight:600!important;font-style:italic!important;text-shadow:2px 2px 4px rgba(0,0,0,.5)!important;letter-spacing:0.5px!important}
-    .banner-slide h1{font-size:2.5rem!important}
-    @media (max-width:768px){.banner-description{font-family:'Playfair Display','Georgia',serif!important;font-weight:500!important;font-style:italic!important;letter-spacing:0.4px!important;text-shadow:1px 1px 3px rgba(0,0,0,.6)!important}}
-    @media (max-width:480px){.banner-description{font-weight:400!important;letter-spacing:0.3px!important;text-shadow:1px 1px 2px rgba(0,0,0,.7)!important}}
-    .resorts-section{background:#f8f9fa!important;padding:40px 0!important;margin-top:-20px!important}
-    .resorts-section .container{background:#f8f9fa!important}
-    .loading-placeholder{text-align:center;padding:60px 20px;color:#666}
-    .loading-spinner{width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #667eea;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
-    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-    .social-media a:hover{transform:scale(1.2)!important}
-    .resort-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .review-btn,.view-reviews-btn{background:#6c757d;color:white;padding:8px 12px;border:none;border-radius:4px;cursor:pointer;font-size:0.85rem;flex:1;min-width:100px}
-    .review-btn:hover{background:#5a6268}
-    .view-reviews-btn{background:#17a2b8}
-    .view-reviews-btn:hover{background:#138496}
-    @media (max-width:768px){.resort-actions{display:flex;flex-wrap:wrap;gap:8px}.resort-actions .book-btn{width:100%;order:1;flex-basis:100%}.resort-actions .review-btn{order:2;flex:1;min-width:calc(50% - 4px)}.resort-actions .view-reviews-btn{order:2;flex:1;min-width:calc(50% - 4px)}}
-    </style>
+  <link rel="icon" type="image/png" href="logo.png" />
 
-    <style>
-    @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:fallback;src:url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-    @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:fallback;src:url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-    @font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:fallback;src:url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiJ-Ek-_EeA.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-    @font-face{font-family:'Playfair Display';font-style:normal;font-weight:600;font-display:fallback;src:url(https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDTbtXK-F2qC0s.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-    @font-face{font-family:'Playfair Display';font-style:normal;font-weight:800;font-display:fallback;src:url(https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDYbtXK-F2qC0s.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-    </style>
+  <!-- ✅ Load your premium UI -->
+  <link rel="stylesheet" href="premium-ui.css" />
 
-
-
-    
-    <!-- Enhanced Structured Data for Google -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "TravelAgency",
-        "name": "Vizag Resort Booking",
-        "alternateName": "Book Resorts Vizag",
-        "url": "https://vizagresortbooking.in",
-        "logo": "https://vizagresortbooking.in/cropped_circle_image.png",
-        "description": "Book resorts in Vizag with instant confirmation. Best resorts in Visakhapatnam with private pool, swimming pool. Top vizag resorts near beaches with luxury amenities and best prices.",
-        "slogan": "Book Best Resorts in Vizag | Instant Confirmation",
-        "foundingDate": "2024",
-        "areaServed": {
-            "@type": "City",
-            "name": "Visakhapatnam",
-            "alternateName": "Vizag",
-            "addressRegion": "Andhra Pradesh",
-            "addressCountry": "India"
-        },
-        "serviceType": [
-            "Resort Booking",
-            "Hotel Booking",
-            "Beach Resort Booking",
-            "Private Pool Resort Booking",
-            "Family Resort Booking",
-            "Corporate Resort Booking"
-        ],
-        "priceRange": "₹₹-₹₹₹₹",
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "email": "vizagresortbooking@gmail.com",
-            "contactType": "Customer Service",
-            "availableLanguage": ["English", "Hindi", "Telugu"]
-        },
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Visakhapatnam",
-            "addressRegion": "Andhra Pradesh",
-            "addressCountry": "India"
-        },
-        "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "17.6868",
-            "longitude": "83.2185"
-        },
-        "sameAs": [
-            "https://vizagresortbooking.in"
-        ],
-        "hasOfferCatalog": {
-            "@type": "OfferCatalog",
-            "name": "Resort Booking Services",
-            "itemListElement": [
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "Beach Resort Booking in Vizag",
-                        "description": "Book best beach resorts in Vizag near RK Beach, Rushikonda, Yarada with private pool and swimming pool"
-                    }
-                },
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "Family Resort Booking with Private Pool",
-                        "description": "Book family-friendly resorts in Visakhapatnam with private pool, swimming pool, and kids facilities"
-                    }
-                },
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "Corporate Resort Booking",
-                        "description": "Book resorts for corporate events, conferences, and business stays in Vizag"
-                    }
-                }
-            ]
-        }
-    }
-    </script>
-    
-    <!-- Local Business Schema -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "Vizag Resort Booking",
-        "image": "https://vizagresortbooking.in/cropped_circle_image.png",
-        "@id": "https://vizagresortbooking.in",
-        "url": "https://vizagresortbooking.in",
-        "telephone": "+91-8341674465",
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Visakhapatnam",
-            "addressLocality": "Vizag",
-            "addressRegion": "Andhra Pradesh",
-            "postalCode": "530001",
-            "addressCountry": "IN"
-        },
-        "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": 17.6868,
-            "longitude": 83.2185
-        },
-        "openingHoursSpecification": {
-            "@type": "OpeningHoursSpecification",
-            "dayOfWeek": [
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday"
-            ],
-            "opens": "00:00",
-            "closes": "23:59"
-        },
-        "sameAs": "https://vizagresortbooking.in"
-    }
-    </script>
-    
-    <!-- Website Schema -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Vizag Resort Booking",
-        "alternateName": "Book Resorts in Vizag",
-        "url": "https://vizagresortbooking.in",
-        "description": "Book resorts in Vizag with instant confirmation. Best resorts in Visakhapatnam with private pool, swimming pool. Top vizag resorts near beaches.",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "https://vizagresortbooking.in/?search={search_term_string}"
-            },
-            "query-input": "required name=search_term_string"
-        },
-        "mainEntity": {
-            "@type": "Service",
-            "name": "Resort Booking Service",
-            "description": "Book best resorts in Vizag and Visakhapatnam with instant confirmation",
-            "provider": {
-                "@type": "Organization",
-                "name": "Vizag Resort Booking"
-            }
-        }
-    }
-    </script>
-    
-    <!-- FAQ Schema for better search visibility -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "How to book resorts in Vizag online?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "You can book resorts in Vizag online through our website vizagresortbooking.in. Select your preferred resort, choose dates, enter guest details, and make secure payment. You'll get instant confirmation via email and SMS."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Which are the best resorts in Visakhapatnam with private pool?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The best resorts in Visakhapatnam with private pool include luxury resorts in S.R Puram, S Kota beach resorts, Narava resorts, and Pinagadi hill resorts. All our listed resorts offer private pool and swimming pool facilities."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are the best beach resorts near RK Beach, Rushikonda, and Yarada?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "We offer the best beach resorts near RK Beach, Rushikonda Beach, and Yarada Beach in Vizag. These resorts provide direct beach access, ocean views, water sports, and luxury amenities with private pool and swimming pool."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Are there family-friendly resorts in Vizag with kids facilities?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes, we have many family-friendly resorts in Vizag with kids facilities, children's play areas, shallow pools, and safe environments. These resorts are perfect for family vacations with children of all ages."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I book corporate resorts for business events in Visakhapatnam?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes, you can book corporate resorts for business events, conferences, and team outings in Visakhapatnam. Our resorts offer meeting rooms, conference facilities, and group accommodation options."
-                }
-            }
-        ]
-    }
-    </script>
+  <style>
+    /* Small fallback */
+    html { scroll-behavior: smooth; }
+  </style>
 </head>
+
 <body>
 
+  <!-- ✅ PREMIUM NAVBAR -->
+  <header class="vrb-navbar">
+    <div class="vrb-nav-container">
 
-    <header class="vrb-navbar">
-        <div class="vrb-nav-container">
+      <a href="#home" class="vrb-logo">
+        <img src="logo.png" alt="Logo">
+        <span>Vizag Resort Booking</span>
+      </a>
 
-            <!-- Logo -->
-            <a href="index.html" class="vrb-logo">
-                <img src="logo.png" alt="Vizag Resorts Logo" />
-                <span>Vizag Resorts</span>
-            </a>
+      <nav class="vrb-nav-links" id="vrbNavLinks">
+        <a class="active" href="#home">Home</a>
+        <a href="#resorts">Resorts</a>
+        <a href="#travel">Cabs / Travel</a>
+        <a href="#events">Events</a>
+        <a href="#offers">Offers</a>
+        <a href="#contact">Contact</a>
+      </nav>
 
-            <!-- Desktop Menu -->
-            <nav class="vrb-nav-links" id="vrbNavLinks">
-                <a class="active" href="#home">Home</a>
-                <a href="#resorts">Resorts</a>
-                <a href="#travel">Cabs / Travel</a>
-                <a href="#events">Events</a>
-                <a href="#offers">Offers</a>
-                <a href="#contact">Contact</a>
-                <a class="vrb-dashboard" href="owner-dashboard.html">Owner Dashboard</a>
-            </nav>
+      <div class="vrb-nav-actions">
+        <a class="vrb-whatsapp" href="https://wa.me/918341674465" target="_blank">WhatsApp</a>
+        <a class="vrb-btn-nav" href="#resorts">Book Now</a>
+        <button class="vrb-hamburger" onclick="vrbToggleMenu()">☰</button>
+      </div>
+    </div>
+  </header>
 
-            <!-- Actions -->
-            <div class="vrb-nav-actions">
-                <a class="vrb-whatsapp" href="https://wa.me/918341674465" target="_blank">
-                    WhatsApp
-                </a>
+  <!-- ✅ HERO (HOME) -->
+  <section id="home" class="vrb-hero">
+    <div class="vrb-overlay"></div>
 
-                <a class="vrb-btn-nav" href="#booking">
-                    Book Now
-                </a>
+    <div class="vrb-hero-content vrb-anim">
+      <h1>Book Resorts & Travel in Vizag</h1>
+      <p>Resorts • Cabs • Events • Best Deals • 24/7 Support</p>
 
-                <!-- Mobile Menu Button -->
-                <button class="vrb-hamburger" onclick="vrbToggleMenu()">☰</button>
+      <!-- Tabs -->
+      <div class="vrb-tabs">
+        <button class="vrb-tab-btn active" onclick="vrbShowTab('resort')">🏖 Resort Booking</button>
+        <button class="vrb-tab-btn" onclick="vrbShowTab('cab')">🚖 Cab / Travel</button>
+      </div>
+
+      <!-- Resort Booking Form -->
+      <div class="vrb-search-box vrb-tab-content active" id="vrb-resort">
+        <div class="vrb-field">
+          <label>Location</label>
+          <select>
+            <option>Visakhapatnam</option>
+            <option>Rushikonda</option>
+            <option>Araku</option>
+            <option>Yarada</option>
+          </select>
+        </div>
+
+        <div class="vrb-field">
+          <label>Check-in</label>
+          <input type="date" />
+        </div>
+
+        <div class="vrb-field">
+          <label>Check-out</label>
+          <input type="date" />
+        </div>
+
+        <div class="vrb-field">
+          <label>Guests</label>
+          <select>
+            <option>2 Adults</option>
+            <option>3 Adults</option>
+            <option>4 Adults</option>
+            <option>Family (2+2)</option>
+          </select>
+        </div>
+
+        <button class="vrb-btn vrb-btn-orange">Search Resorts</button>
+      </div>
+
+      <!-- Cab / Travel Booking Form -->
+      <div class="vrb-search-box vrb-tab-content" id="vrb-cab">
+        <div class="vrb-field">
+          <label>Pickup</label>
+          <input type="text" placeholder="Enter pickup location" />
+        </div>
+
+        <div class="vrb-field">
+          <label>Drop</label>
+          <input type="text" placeholder="Enter drop location" />
+        </div>
+
+        <div class="vrb-field">
+          <label>Date</label>
+          <input type="date" />
+        </div>
+
+        <div class="vrb-field">
+          <label>Trip Type</label>
+          <select>
+            <option>One Way</option>
+            <option>Round Trip</option>
+            <option>Hourly Rental</option>
+          </select>
+        </div>
+
+        <button class="vrb-btn vrb-btn-orange">Book Cab</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ✅ RESORTS SECTION -->
+  <section id="resorts" class="vrb-section">
+    <div class="vrb-container">
+      <div class="vrb-section-head vrb-anim">
+        <h2 class="vrb-title">Popular Resorts in Vizag</h2>
+        <p class="vrb-subtitle">
+          Verified listings • Best prices • Instant booking
+        </p>
+      </div>
+
+      <div class="vrb-filters vrb-anim">
+        <button class="vrb-chip active">All</button>
+        <button class="vrb-chip">Beach</button>
+        <button class="vrb-chip">Family</button>
+        <button class="vrb-chip">Couple</button>
+        <button class="vrb-chip">Luxury</button>
+        <button class="vrb-chip">Budget</button>
+      </div>
+
+      <div class="vrb-grid">
+
+        <article class="vrb-card vrb-anim">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1400" alt="Resort">
+            <span class="vrb-badge">⭐ 4.6</span>
+          </div>
+          <div class="vrb-body">
+            <h3>Silver Stay Resort</h3>
+            <p class="vrb-meta">📍 Rushikonda, Vizag • Beach view</p>
+
+            <div class="vrb-tags">
+              <span>Pool</span><span>AC</span><span>Couple</span><span>WiFi</span>
             </div>
-        </div>
-    </header>
 
-    <!-- Food Order Notice -->
-    <div class="food-order-notice">
-        <div class="food-notice-content">
-            <span class="food-notice-text">FOR BOOKING EVENTS IN RESORT WHATSAPP- 8341674465</span>
+            <div class="vrb-bottom">
+              <div>
+                <p class="vrb-price">₹3500 <span>/ night</span></p>
+                <p class="vrb-small">Free cancellation</p>
+              </div>
+
+              <button class="vrb-btn vrb-btn-primary"
+                onclick="openBookingPopup('Silver Stay Resort','Rushikonda, Vizag','3500')">
+                Book Now
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="vrb-card vrb-anim">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1400" alt="Resort">
+            <span class="vrb-badge">⭐ 4.5</span>
+          </div>
+          <div class="vrb-body">
+            <h3>Royal Orchid</h3>
+            <p class="vrb-meta">📍 S.R Puram, Vizag • Premium stay</p>
+
+            <div class="vrb-tags">
+              <span>Luxury</span><span>Parking</span><span>Breakfast</span>
+            </div>
+
+            <div class="vrb-bottom">
+              <div>
+                <p class="vrb-price">₹5200 <span>/ night</span></p>
+                <p class="vrb-small">Instant confirmation</p>
+              </div>
+
+              <button class="vrb-btn vrb-btn-primary"
+                onclick="openBookingPopup('Royal Orchid','S.R Puram, Vizag','5200')">
+                Book Now
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="vrb-card vrb-anim">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1501117716987-c8e1ecb210d1?w=1400" alt="Resort">
+            <span class="vrb-badge">⭐ 4.7</span>
+          </div>
+          <div class="vrb-body">
+            <h3>Sun Vacation Resort</h3>
+            <p class="vrb-meta">📍 Narava, Vizag • Family friendly</p>
+
+            <div class="vrb-tags">
+              <span>Family</span><span>Play Area</span><span>Pool</span>
+            </div>
+
+            <div class="vrb-bottom">
+              <div>
+                <p class="vrb-price">₹4100 <span>/ night</span></p>
+                <p class="vrb-small">Best price guarantee</p>
+              </div>
+
+              <button class="vrb-btn vrb-btn-primary"
+                onclick="openBookingPopup('Sun Vacation Resort','Narava, Vizag','4100')">
+                Book Now
+              </button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ✅ WHY BOOK + LOCATIONS -->
+  <section class="vrb-section vrb-soft-bg">
+
+    <div class="vrb-wrap vrb-anim">
+      <h2 class="vrb-heading">Why Book Resorts with Vizag Resort Booking?</h2>
+      <p class="vrb-desc">Premium stays • Verified listings • Instant support</p>
+
+      <div class="vrb-feature-grid">
+        <div class="vrb-feature-card">
+          <div class="vrb-icon">🏖</div>
+          <h3>Beach Resorts</h3>
+          <p>Best beach stays near RK Beach, Rushikonda, Yarada and more.</p>
         </div>
+
+        <div class="vrb-feature-card">
+          <div class="vrb-icon">👨‍👩‍👧‍👦</div>
+          <h3>Family Friendly</h3>
+          <p>Safe and comfortable resorts perfect for families with kids.</p>
+        </div>
+
+        <div class="vrb-feature-card">
+          <div class="vrb-icon">🏢</div>
+          <h3>Corporate Stays</h3>
+          <p>Conference-friendly resorts for meetings, offsites & team outings.</p>
+        </div>
+      </div>
     </div>
 
-    <main>
-        <section class="vrb-hero">
-            <div class="vrb-overlay"></div>
+    <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
+      <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
+      <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
 
-            <div class="vrb-hero-content">
-                <h1>Book Resorts & Travel in Vizag</h1>
-                <p>Resorts • Cabs • Events • Best Deals • 24/7 Support</p>
+      <div class="vrb-location-grid">
+        <div class="vrb-location-card">
+          <h3>S.R Puram Resorts</h3>
+          <p>Premium resorts in S.R Puram area with modern amenities.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
 
-                <!-- Tabs -->
-                <div class="vrb-tabs">
-                    <button class="vrb-tab-btn active" onclick="vrbShowTab('resort')">🏖 Resort Booking</button>
-                    <button class="vrb-tab-btn" onclick="vrbShowTab('cab')">🚖 Cab / Travel</button>
-                </div>
+        <div class="vrb-location-card">
+          <h3>S Kota Resort</h3>
+          <p>Beachside resorts in S Kota with stunning sea views.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
 
-                <!-- Resort Booking Form -->
-                <div class="vrb-search-box vrb-tab-content active" id="vrb-resort">
-                    <div class="vrb-field">
-                        <label>Location</label>
-                        <select>
-                            <option>Visakhapatnam</option>
-                            <option>Rushikonda</option>
-                            <option>Araku</option>
-                            <option>Yarada</option>
-                        </select>
-                    </div>
+        <div class="vrb-location-card">
+          <h3>Narava Resort</h3>
+          <p>Peaceful retreat in Narava with natural surroundings.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
 
-                    <div class="vrb-field">
-                        <label>Check-in</label>
-                        <input type="date" />
-                    </div>
+        <div class="vrb-location-card">
+          <h3>Pinagadi Resort</h3>
+          <p>Best resorts near Araku & hill route for weekend stay.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
 
-                    <div class="vrb-field">
-                        <label>Check-out</label>
-                        <input type="date" />
-                    </div>
+        <div class="vrb-location-card">
+          <h3>Pendurthi Resort</h3>
+          <p>Comfort stay resorts with family-friendly amenities.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
 
-                    <div class="vrb-field">
-                        <label>Guests</label>
-                        <select>
-                            <option>2 Adults</option>
-                            <option>3 Adults</option>
-                            <option>4 Adults</option>
-                            <option>Family (2+2)</option>
-                        </select>
-                    </div>
+        <div class="vrb-location-card vrb-location-highlight">
+          <h3>All Resorts in Vizag</h3>
+          <p>Browse all available resorts in Vizag at best prices.</p>
+          <button class="vrb-mini-btn vrb-mini-btn-accent">View All →</button>
+        </div>
+      </div>
+    </div>
 
-                    <button class="vrb-btn vrb-btn-orange">Search Resorts</button>
-                </div>
+  </section>
 
-                <!-- Cab / Travel Booking Form -->
-                <div class="vrb-search-box vrb-tab-content" id="vrb-cab">
-                    <div class="vrb-field">
-                        <label>Pickup Location</label>
-                        <input type="text" placeholder="Enter pickup area" />
-                    </div>
+  <!-- ✅ OFFERS PLACEHOLDER -->
+  <section id="offers" class="vrb-section">
+    <div class="vrb-container vrb-anim">
+      <div class="vrb-section-head">
+        <h2 class="vrb-title">Offers & Deals</h2>
+        <p class="vrb-subtitle">Apply coupon codes and save more on booking.</p>
+      </div>
+    </div>
+  </section>
 
-                    <div class="vrb-field">
-                        <label>Drop Location</label>
-                        <input type="text" placeholder="Enter drop area" />
-                    </div>
+  <!-- ✅ EVENTS PLACEHOLDER -->
+  <section id="events" class="vrb-section">
+    <div class="vrb-container vrb-anim">
+      <div class="vrb-section-head">
+        <h2 class="vrb-title">Events & Party Bookings</h2>
+        <p class="vrb-subtitle">Birthday • Engagement • Corporate Parties</p>
+      </div>
+    </div>
+  </section>
 
-                    <div class="vrb-field">
-                        <label>Date</label>
-                        <input type="date" />
-                    </div>
+  <!-- ✅ TRAVEL PLACEHOLDER -->
+  <section id="travel" class="vrb-section">
+    <div class="vrb-container vrb-anim">
+      <div class="vrb-section-head">
+        <h2 class="vrb-title">Cab / Travel Booking</h2>
+        <p class="vrb-subtitle">Airport pickup • City rides • Araku trip</p>
+      </div>
+    </div>
+  </section>
 
-                    <div class="vrb-field">
-                        <label>Trip Type</label>
-                        <select>
-                            <option>One Way</option>
-                            <option>Round Trip</option>
-                            <option>Hourly Rental</option>
-                        </select>
-                    </div>
+  <!-- ✅ PREMIUM FOOTER -->
+  <footer id="contact" class="vrb-footer">
+    <div class="vrb-container vrb-footer-grid vrb-anim">
 
-                    <button class="vrb-btn vrb-btn-orange">Book Cab</button>
-                </div>
+      <div>
+        <h3>Vizag Resort Booking</h3>
+        <p>
+          Resorts + Cabs + Events booking in Vizag.<br>
+          Premium verified listings with best deals.
+        </p>
 
-            </div>
-            </div>
-        </section>
+        <div class="vrb-footer-badges">
+          <span>✅ Verified</span>
+          <span>⚡ Instant Booking</span>
+          <span>💰 Best Price</span>
+        </div>
+      </div>
 
-<!-- ===============================
-     PREMIUM RESORTS SECTION
-================================ -->
-<section id="resorts" class="vrb-section">
-  <div class="vrb-container">
+      <div>
+        <h4>Quick Links</h4>
+        <a href="#home">Home</a>
+        <a href="#resorts">Resorts</a>
+        <a href="#travel">Cabs / Travel</a>
+        <a href="#events">Events</a>
+        <a href="#offers">Offers</a>
+      </div>
 
-    <div class="vrb-section-head">
-      <h2 class="vrb-title">Popular Resorts in Vizag</h2>
-      <p class="vrb-subtitle">
-        Handpicked stays for couples, families & events — verified listings with best prices.
+      <div>
+        <h4>Support</h4>
+        <a href="tel:+918341674465">📞 +91 8341674465</a>
+        <a href="mailto:support@vizagresortbooking.in">✉️ support@vizagresortbooking.in</a>
+        <a href="https://wa.me/918341674465" target="_blank">💬 WhatsApp Support</a>
+      </div>
+
+    </div>
+
+    <div class="vrb-footer-bottom">
+      © 2026 Vizag Resort Booking • Built with ❤️ in Vizag
+    </div>
+  </footer>
+
+  <!-- ✅ POLICY BUTTON -->
+  <a class="vrb-policy-btn" href="Cancellation & terms and conditions (1).pdf" target="_blank">
+    📄 Policy
+  </a>
+
+  <!-- ✅ BOOKING MODAL -->
+  <div class="vrb-modal" id="bookingModal">
+    <div class="vrb-modal-card">
+      <button class="vrb-close" onclick="closeBookingPopup()">✕</button>
+
+      <div class="vrb-modal-head">
+        <h2>Confirm Booking</h2>
+        <p>Secure booking with instant confirmation</p>
+      </div>
+
+      <div class="vrb-modal-summary">
+        <div>
+          <span class="label">Resort</span>
+          <b id="modalResortName">-</b>
+        </div>
+        <div>
+          <span class="label">Location</span>
+          <b id="modalResortLocation">-</b>
+        </div>
+        <div>
+          <span class="label">Base Price</span>
+          <b id="modalResortPrice">-</b>
+        </div>
+      </div>
+
+      <div class="vrb-coupon-row">
+        <input id="couponCode" type="text" placeholder="Enter Coupon Code" />
+        <button class="vrb-btn vrb-btn-light" onclick="applyCouponCode()">Apply</button>
+      </div>
+
+      <div class="vrb-price-box">
+        <div class="line">
+          <span>Subtotal</span>
+          <b id="subtotalAmount">₹0</b>
+        </div>
+        <div class="line">
+          <span>Discount</span>
+          <b id="discountAmount" class="green">-₹0</b>
+        </div>
+        <div class="line total">
+          <span>Total Pay</span>
+          <b id="finalAmount">₹0</b>
+        </div>
+      </div>
+
+      <form id="bookingForm" class="vrb-form">
+        <input id="customerName" type="text" placeholder="Full Name" required />
+        <input id="customerMobile" type="tel" placeholder="Mobile Number" required />
+
+        <div class="vrb-form-grid">
+          <input id="checkinDate" type="date" required />
+          <input id="checkoutDate" type="date" required />
+        </div>
+
+        <select id="guestCount" required>
+          <option value="2 Adults">2 Adults</option>
+          <option value="3 Adults">3 Adults</option>
+          <option value="4 Adults">4 Adults</option>
+          <option value="Family (2+2)">Family (2+2)</option>
+        </select>
+
+        <button type="submit" class="vrb-btn vrb-btn-primary">
+          Proceed to Payment
+        </button>
+
+        <button type="button" class="vrb-btn vrb-btn-light" onclick="closeBookingPopup()">
+          Cancel
+        </button>
+      </form>
+
+      <p class="vrb-note">
+        ✅ Coupon supported • ✅ Secure Payment • ✅ Instant Confirmation
       </p>
     </div>
+  </div>
 
-    <!-- Filters -->
-    <div class="vrb-filters">
-      <button class="vrb-chip active">All</button>
-      <button class="vrb-chip">Beach</button>
-      <button class="vrb-chip">Family</button>
-      <button class="vrb-chip">Couple</button>
-      <button class="vrb-chip">Luxury</button>
-      <button class="vrb-chip">Budget</button>
-    </div>
+  <!-- ✅ CHAT WIDGET -->
+  <div class="vrb-chat-widget">
+    <button class="vrb-chat-fab" id="vrbChatFab">
+      <img src="logo.png" alt="Chat Logo">
+    </button>
 
-    <!-- Resort Grid -->
-    <div class="vrb-grid">
-
-      <!-- Card 1 -->
-      <article class="vrb-card vrb-anim">
-        <div class="vrb-img">
-          <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1400" alt="Resort">
-          <span class="vrb-badge">⭐ 4.6</span>
-        </div>
-        <div class="vrb-body">
-          <h3>Silver Stay Resort</h3>
-          <p class="vrb-meta">📍 Rushikonda, Vizag • Beach view</p>
-
-          <div class="vrb-tags">
-            <span>Pool</span><span>AC</span><span>Couple</span><span>WiFi</span>
-          </div>
-
-          <div class="vrb-bottom">
-            <div>
-              <p class="vrb-price">₹3,500 <span>/ night</span></p>
-              <p class="vrb-small">Free cancellation</p>
-            </div>
-
-            <button class="vrb-btn vrb-btn-primary"
-              onclick="openBookingPopup('Silver Stay Resort','Rushikonda, Vizag','3500')">
-              Book Now
-            </button>
+    <div class="vrb-chat-box" id="vrbChatBox">
+      <div class="vrb-chat-header">
+        <div class="vrb-chat-title">
+          <img src="logo.png" alt="Logo">
+          <div>
+            <h4>Vizag Support</h4>
+            <p>Online • Reply in minutes</p>
           </div>
         </div>
-      </article>
-
-      <!-- Card 2 -->
-      <article class="vrb-card vrb-anim">
-        <div class="vrb-img">
-          <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1400" alt="Resort">
-          <span class="vrb-badge">⭐ 4.5</span>
-        </div>
-        <div class="vrb-body">
-          <h3>Royal Orchid</h3>
-          <p class="vrb-meta">📍 S.R Puram, Vizag • Premium stay</p>
-
-          <div class="vrb-tags">
-            <span>Luxury</span><span>Parking</span><span>Breakfast</span>
-          </div>
-
-          <div class="vrb-bottom">
-            <div>
-              <p class="vrb-price">₹5,200 <span>/ night</span></p>
-              <p class="vrb-small">Instant confirmation</p>
-            </div>
-
-            <button class="vrb-btn vrb-btn-primary"
-              onclick="openBookingPopup('Royal Orchid','S.R Puram, Vizag','5200')">
-              Book Now
-            </button>
-          </div>
-        </div>
-      </article>
-
-      <!-- Card 3 -->
-      <article class="vrb-card vrb-anim">
-        <div class="vrb-img">
-          <img src="https://images.unsplash.com/photo-1501117716987-c8e1ecb210d1?w=1400" alt="Resort">
-          <span class="vrb-badge">⭐ 4.7</span>
-        </div>
-        <div class="vrb-body">
-          <h3>Sun Vacation Resort</h3>
-          <p class="vrb-meta">📍 Narava, Vizag • Perfect for families</p>
-
-          <div class="vrb-tags">
-            <span>Family</span><span>Play Area</span><span>Pool</span>
-          </div>
-
-          <div class="vrb-bottom">
-            <div>
-              <p class="vrb-price">₹4,100 <span>/ night</span></p>
-              <p class="vrb-small">Best price guarantee</p>
-            </div>
-
-            <button class="vrb-btn vrb-btn-primary"
-              onclick="openBookingPopup('Sun Vacation Resort','Narava, Vizag','4100')">
-              Book Now
-            </button>
-          </div>
-        </div>
-      </article>
-
-<section class="vrb-section vrb-soft-bg">
-
-  <!-- WHY BOOK -->
-  <div class="vrb-wrap vrb-anim">
-    <h2 class="vrb-heading">Why Book Resorts with Vizag Resort Booking?</h2>
-    <p class="vrb-desc">Premium stays • Verified listings • Instant support</p>
-
-    <div class="vrb-feature-grid">
-      <div class="vrb-feature-card">
-        <div class="vrb-icon">🏖</div>
-        <h3>Beach Resorts</h3>
-        <p>Best beach stays near RK Beach, Rushikonda, Yarada and more.</p>
+        <button class="vrb-chat-close" id="vrbChatClose">✕</button>
       </div>
 
-      <div class="vrb-feature-card">
-        <div class="vrb-icon">👨👩👧👦</div>
-        <h3>Family Friendly</h3>
-        <p>Safe and comfortable resorts perfect for families with kids.</p>
+      <div class="vrb-chat-body" id="vrbChatBody">
+        <div class="vrb-msg vrb-bot">👋 Hi! Welcome to Vizag Resort Booking.</div>
+        <div class="vrb-msg vrb-bot">How can I help you today?</div>
       </div>
 
-      <div class="vrb-feature-card">
-        <div class="vrb-icon">🏢</div>
-        <h3>Corporate Stays</h3>
-        <p>Conference-friendly resorts for meetings, offsites & team outings.</p>
+      <div class="vrb-chat-footer">
+        <input id="vrbChatInput" type="text" placeholder="Type your message..." />
+        <button class="vrb-chat-send" id="vrbChatSend">➤</button>
+      </div>
+
+      <div class="vrb-chat-quick">
+        <button class="vrb-q" data-msg="I want to book resort">🏖 Book Resort</button>
+        <button class="vrb-q" data-msg="I want cab booking">🚖 Book Cab</button>
+        <button class="vrb-q" data-msg="I want event booking">🎉 Book Event</button>
       </div>
     </div>
   </div>
 
-  <!-- LOCATION GRID -->
-  <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
-    <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
-    <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
-
-    <div class="vrb-location-grid">
-      <div class="vrb-location-card">
-        <h3>S.R Puram Resorts</h3>
-        <p>Premium resorts in S.R Puram area with modern amenities.</p>
-        <button class="vrb-mini-btn">Explore →</button>
-      </div>
-
-      <div class="vrb-location-card">
-        <h3>S Kota Resort</h3>
-        <p>Beachside resorts in S Kota with stunning sea views.</p>
-        <button class="vrb-mini-btn">Explore →</button>
-      </div>
-
-      <div class="vrb-location-card">
-        <h3>Narava Resort</h3>
-        <p>Peaceful retreat in Narava with natural surroundings.</p>
-        <button class="vrb-mini-btn">Explore →</button>
-      </div>
-
-      <div class="vrb-location-card">
-        <h3>Pinagadi Resort</h3>
-        <p>Hill station style resorts near Araku Valley route.</p>
-        <button class="vrb-mini-btn">Explore →</button>
-      </div>
-
-      <div class="vrb-location-card">
-        <h3>Pendurthi Resort</h3>
-        <p>Family-friendly resorts in Pendurthi with easy access.</p>
-        <button class="vrb-mini-btn">Explore →</button>
-      </div>
-
-      <div class="vrb-location-card vrb-location-highlight">
-        <h3>All Resorts in Vizag</h3>
-        <p>Browse all available resorts in Vizag at best prices.</p>
-        <button class="vrb-mini-btn vrb-mini-btn-accent">View All →</button>
-      </div>
-    </div>
-  </div>
-
-</section>
-
-
-
-
-        
-        <section class="features-section">
-            <div class="container">
-                <h2>Why Book Resorts with Vizag Resort Booking?</h2>
-                <div class="features-grid">
-                    <div class="feature">
-                        <h3>🏖️ Beach Resorts</h3>
-                        <p>Stunning ocean views at RK Beach, Rushikonda Beach, Yarada Beach, and S Kota resort areas</p>
-                    </div>
-
-
-                    <div class="feature">
-                        <h3>👨‍👩‍👧‍👦 Family Friendly</h3>
-                        <p>Safe and comfortable resorts perfect for family vacations and kids</p>
-                    </div>
-                    <div class="feature">
-                        <h3>🏢 Corporate Stays</h3>
-                        <p>Business hotels and conference facilities for corporate bookings</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section>
-            <div class="premium-block">
-                <h2 class="premium-title">Book Resorts by Location in Vizag | Best Resort Areas in Visakhapatnam</h2>
-                <div class="locations-grid">
-                    <div class="location">
-                        <h3>S.R Puram Resorts</h3>
-                        <p>Premium resorts in S.R Puram area with modern amenities</p>
-                    </div>
-                    <div class="location">
-                        <h3>S Kota Resort</h3>
-                        <p>Beachside resorts in S Kota with stunning sea views</p>
-                    </div>
-                    <div class="location">
-                        <h3>Narava Resort</h3>
-                        <p>Peaceful retreat in Narava with natural surroundings</p>
-                    </div>
-                    <div class="location">
-                        <h3>Pinagadi Resort</h3>
-                        <p>Hill station resort in Pinagadi area near Araku Valley</p>
-                    </div>
-                    <div class="location">
-                        <h3>Pendurthi Resort</h3>
-                        <p>Family-friendly resorts in Pendurthi with easy city access</p>
-                    </div>
-                    <div class="location">
-                        <h3>All Resorts in Vizag</h3>
-                        <p>Book any available resort in Visakhapatnam with best prices</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-    </main>
-
-    <!-- Fixed Cancellation Policy Button -->
-    <div class="fixed-policy-btn" style="display:block!important;visibility:visible!important;opacity:1!important;position:fixed!important;left:20px!important;bottom:20px!important;z-index:1000!important;background:#007bff!important;border-radius:25px!important;box-shadow:0 4px 12px rgba(0,123,255,0.3)!important">
-        <a href="Cancellation &amp; terms and conditions (1).pdf" target="_blank" style="display:block!important;padding:12px 16px!important;color:white!important;text-decoration:none!important;font-size:0.9rem!important;font-weight:600!important;white-space:nowrap!important">
-            📋 Policy
-        </a>
-    </div>
-
-
-
-
-
-
-
-    <footer id="contact" class="vrb-footer">
-        <div class="vrb-container vrb-footer-grid">
-
-            <div>
-                <h3>Vizag Resort Booking</h3>
-                <p>
-                    Resorts + Cabs + Events booking in Vizag.<br>
-                    Premium verified listings with best deals.
-                </p>
-
-                <div class="vrb-footer-badges">
-                    <span>✅ Verified</span>
-                    <span>⚡ Instant Booking</span>
-                    <span>💰 Best Price</span>
-                </div>
-            </div>
-
-            <div>
-                <h4>Quick Links</h4>
-                <a href="#home">Home</a>
-                <a href="#resorts">Resorts</a>
-                <a href="#travel">Cabs / Travel</a>
-                <a href="#events">Events</a>
-            </div>
-
-            <div>
-                <h4>Support</h4>
-                <a href="tel:+918341674465">📞 +91 8341674465</a>
-                <a href="mailto:support@vizagresortbooking.in">✉️ support@vizagresortbooking.in</a>
-                <a href="https://wa.me/918341674465" target="_blank">💬 WhatsApp Support</a>
-            </div>
-
-        </div>
-
-        <div class="vrb-footer-bottom">
-            © 2026 Vizag Resort Booking • Built with ❤️ in Vizag
-        </div>
-    </footer>
-
-
-    <link rel="stylesheet" href="premium-ui.css">
-    <script>
-        // Simple cache check
-        if (!sessionStorage.getItem('cache_cleared_v3')) {
-            sessionStorage.setItem('cache_cleared_v3', 'true');
-            window.location.reload(true);
-        }
-    </script>
-    <script src="critical.js" defer></script>
-    
-
-
-    <script type="module">
-    
-    // Load third-party scripts only when needed
-    window.loadRazorpay = () => {
-        if (!window.Razorpay) {
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.referrerPolicy = 'strict-origin-when-cross-origin';
-            document.head.appendChild(script);
-        }
-    };
-    window.loadSocketIO = () => {
-        if (!window.io) {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
-            script.integrity = 'sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjXfrPFxVNRWhyf3c/FqFONVa+/9ILPvOumdJO';
-            script.crossOrigin = 'anonymous';
-            document.head.appendChild(script);
-        }
-    };
-    </script>
-    
-    <!-- <script src="/chat-widget.js?v=FINAL1"></script> -->
-
-<script>
-  function vrbShowTab(type) {
-    const buttons = document.querySelectorAll(".vrb-tab-btn");
-    const contents = document.querySelectorAll(".vrb-tab-content");
-
-    buttons.forEach(btn => btn.classList.remove("active"));
-    contents.forEach(c => c.classList.remove("active"));
-
-    if (type === "resort") {
-      document.querySelectorAll(".vrb-tab-btn")[0].classList.add("active");
-      document.getElementById("vrb-resort").classList.add("active");
-    } else {
-      document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
-      document.getElementById("vrb-cab").classList.add("active");
+  <!-- ✅ SCRIPTS -->
+  <script>
+    function vrbToggleMenu() {
+      document.getElementById("vrbNavLinks").classList.toggle("open");
     }
-  }
 
-  function vrbToggleMenu() {
-    document.getElementById("vrbNavLinks").classList.toggle("open");
-  }
-</script>
+    function vrbShowTab(type) {
+      document.querySelectorAll(".vrb-tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".vrb-tab-content").forEach(c => c.classList.remove("active"));
 
-
-<!-- =========================
-     PREMIUM CHAT WIDGET UI
-     (Uses same logo.png)
-========================= -->
-<div class="vrb-chat-widget">
-  <button class="vrb-chat-fab" id="vrbChatFab">
-    <img src="logo.png" alt="Chat Logo">
-  </button>
-
-  <div class="vrb-chat-box" id="vrbChatBox">
-    <div class="vrb-chat-header">
-      <div class="vrb-chat-title">
-        <img src="logo.png" alt="Logo">
-        <div>
-          <h4>Vizag Support</h4>
-          <p>Online • Reply in minutes</p>
-        </div>
-      </div>
-
-      <button class="vrb-chat-close" id="vrbChatClose">✕</button>
-    </div>
-
-    <div class="vrb-chat-body" id="vrbChatBody">
-      <div class="vrb-msg vrb-bot">
-        👋 Hi! Welcome to Vizag Resort Booking. How can I help you?
-      </div>
-      <div class="vrb-msg vrb-bot">
-        ✅ Resort Booking <br>
-        ✅ Cab / Travel Booking <br>
-        ✅ Event Booking
-      </div>
-    </div>
-
-    <div class="vrb-chat-footer">
-      <input id="vrbChatInput" type="text" placeholder="Type your message..." />
-      <button class="vrb-chat-send" id="vrbChatSend">➤</button>
-    </div>
-
-    <div class="vrb-chat-quick">
-      <button class="vrb-q" data-msg="I want to book resort">🏖 Book Resort</button>
-      <button class="vrb-q" data-msg="I want cab booking">🚖 Book Cab</button>
-      <button class="vrb-q" data-msg="I want event booking">🎉 Book Event</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // ✅ Premium Chat Widget UI Toggle + Simple message flow
-  const chatFab = document.getElementById("vrbChatFab");
-  const chatBox = document.getElementById("vrbChatBox");
-  const chatClose = document.getElementById("vrbChatClose");
-  const chatSend = document.getElementById("vrbChatSend");
-  const chatInput = document.getElementById("vrbChatInput");
-  const chatBody = document.getElementById("vrbChatBody");
-
-  function toggleChat(){
-    chatBox.classList.toggle("open");
-  }
-
-  chatFab.addEventListener("click", toggleChat);
-  chatClose.addEventListener("click", toggleChat);
-
-  function addMsg(text, type){
-    const div = document.createElement("div");
-    div.className = "vrb-msg " + type;
-    div.innerText = text;
-    chatBody.appendChild(div);
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
-
-  function sendMsg(){
-    const msg = chatInput.value.trim();
-    if(!msg) return;
-
-    addMsg(msg, "vrb-user");
-    chatInput.value = "";
-
-    setTimeout(() => {
-      addMsg("✅ Thanks! Please share Check-in date, Guests & Budget.", "vrb-bot");
-    }, 500);
-  }
-
-  chatSend.addEventListener("click", sendMsg);
-
-  chatInput.addEventListener("keypress", (e) => {
-    if(e.key === "Enter") sendMsg();
-  });
-
-  document.querySelectorAll(".vrb-q").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      chatInput.value = btn.getAttribute("data-msg");
-      sendMsg();
-    });
-  });
-</script>
-
-<!-- ===============================
-   PREMIUM BOOKING POPUP (NEW UI)
-   Works with old Book Now logic
-================================= -->
-<div class="vrb-modal" id="bookingModal">
-  <div class="vrb-modal-card">
-
-    <button class="vrb-close" onclick="closeBookingPopup()">✕</button>
-
-    <div class="vrb-modal-head">
-      <h2>Book Resort</h2>
-      <p>Fill details to confirm booking</p>
-    </div>
-
-    <div class="vrb-modal-summary">
-      <div>
-        <span class="label">Resort</span>
-        <b id="modalResortName">-</b>
-      </div>
-      <div>
-        <span class="label">Location</span>
-        <b id="modalResortLocation">-</b>
-      </div>
-      <div>
-        <span class="label">Price</span>
-        <b id="modalResortPrice">-</b>
-      </div>
-    </div>
-
-    <form id="vrbBookingForm" class="vrb-form">
-      <input type="hidden" id="resortId">
-      <input type="hidden" id="resortPrice">
-      
-      <input id="guestName" type="text" placeholder="Full Name" required />
-      
-      <input id="email" type="email" placeholder="Email (Enter valid working email)" required />
-      
-      <input id="phone" type="tel" placeholder="WhatsApp Number (Enter 10 digits)" required />
-
-      <div class="vrb-form-grid">
-        <input id="checkIn" type="date" required />
-        <input id="checkOut" type="date" required />
-      </div>
-      
-      <input id="guests" type="number" min="1" max="50" value="2" placeholder="Number of Guests" required />
-      <div id="guestWarning" class="guest-warning" style="display:none;color:#dc3545;font-size:0.9rem;margin-top:5px;">⚠️ After maximum guests, there is charge applied per head</div>
-      
-      <div class="coupon-section">
-        <input id="couponCode" type="text" placeholder="Coupon Code (Optional)" onclick="showAvailableCoupons()" />
-        <button type="button" id="applyCouponBtn">Apply</button>
-        <div id="availableCoupons" class="available-coupons" style="display:none;"></div>
-        <div id="couponMessage" class="coupon-message"></div>
-      </div>
-      
-      <div class="price-summary">
-        <div class="price-row">
-          <span>Base Amount:</span>
-          <span id="baseAmount">₹0</span>
-        </div>
-        <div class="price-row">
-          <span>Platform Fee (1.5%):</span>
-          <span id="platformFee">₹0</span>
-        </div>
-        <div class="price-row" id="discountRow" style="display: none;">
-          <span>Discount:</span>
-          <span id="discountAmount" style="color: green;">-₹0</span>
-        </div>
-        <div class="price-row">
-          <span>Total Amount:</span>
-          <span id="totalAmount">₹0</span>
-        </div>
-      </div>
-
-      <button type="submit" class="vrb-btn vrb-btn-primary">
-        Confirm Booking
-      </button>
-
-      <button type="button" class="vrb-btn vrb-btn-light" onclick="closeBookingPopup()">
-        Cancel
-      </button>
-    </form>
-
-    <p class="vrb-note">
-      ✅ Verified Resorts • ✅ Secure Payment • ✅ Instant Confirmation
-    </p>
-  </div>
-</div>
-
-<script>
-// Premium Booking Modal with Database Integration
-let currentResort = {};
-let appliedCoupon = null;
-
-function openBookingPopup(name, location, price) {
-  currentResort = { name, location, price: parseInt(price) };
-  
-  document.getElementById("modalResortName").innerText = name;
-  document.getElementById("modalResortLocation").innerText = location;
-  document.getElementById("modalResortPrice").innerText = "₹" + price + " / night";
-  document.getElementById("resortPrice").value = price;
-  
-  calculatePricing();
-  document.getElementById("bookingModal").classList.add("show");
-  document.body.style.overflow = "hidden";
-}
-
-function closeBookingPopup() {
-  document.getElementById("bookingModal").classList.remove("show");
-  document.body.style.overflow = "auto";
-  resetForm();
-}
-
-function resetForm() {
-  document.getElementById("vrbBookingForm").reset();
-  appliedCoupon = null;
-  document.getElementById("availableCoupons").style.display = "none";
-  calculatePricing();
-}
-
-// Phone Number Validation
-document.addEventListener('DOMContentLoaded', function() {
-  const phoneInput = document.getElementById("phone");
-  if (phoneInput) {
-    phoneInput.addEventListener("input", function() {
-      let value = this.value.replace(/\D/g, '');
-      if (value.length > 10) value = value.slice(0, 10);
-      if (value.length === 10 && !value.startsWith('+91')) {
-        this.value = '+91' + value;
+      if (type === "resort") {
+        document.querySelectorAll(".vrb-tab-btn")[0].classList.add("active");
+        document.getElementById("vrb-resort").classList.add("active");
       } else {
-        this.value = value;
+        document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
+        document.getElementById("vrb-cab").classList.add("active");
       }
-    });
-  }
+    }
 
-  // Guest Count Validation
-  const guestsInput = document.getElementById("guests");
-  if (guestsInput) {
-    guestsInput.addEventListener("input", function() {
-      const guests = parseInt(this.value);
-      const warning = document.getElementById("guestWarning");
-      
-      if (guests > 6 && warning) {
-        warning.style.display = "block";
-      } else if (warning) {
-        warning.style.display = "none";
-      }
-      
-      calculatePricing();
-    });
-  }
+    function openBookingPopup(name, location, price) {
+      document.getElementById("modalResortName").innerText = name;
+      document.getElementById("modalResortLocation").innerText = location;
+      document.getElementById("modalResortPrice").innerText = "₹" + price;
 
-  // Apply Coupon Button
-  const applyCouponBtn = document.getElementById("applyCouponBtn");
-  if (applyCouponBtn) {
-    applyCouponBtn.addEventListener("click", function() {
-      const couponCode = document.getElementById("couponCode").value.trim();
-      if (!couponCode) return;
-      
-      fetch('/api/coupons?code=' + encodeURIComponent(couponCode), {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      .then(response => response.json())
-      .then(data => {
-        const messageDiv = document.getElementById("couponMessage");
-        if (data && data.length > 0) {
-          const coupon = data[0];
-          appliedCoupon = coupon;
-          if (messageDiv) messageDiv.innerHTML = `<span style='color:green'>✅ Coupon applied! ${coupon.discount_percentage}% discount</span>`;
-          calculatePricing();
-        } else {
-          appliedCoupon = null;
-          if (messageDiv) messageDiv.innerHTML = "<span style='color:red'>❌ Invalid coupon code</span>";
-          calculatePricing();
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        const messageDiv = document.getElementById("couponMessage");
-        if (messageDiv) messageDiv.innerHTML = "<span style='color:red'>❌ Error validating coupon</span>";
-      });
-    });
-  }
+      document.getElementById("subtotalAmount").innerText = "₹" + price;
+      document.getElementById("discountAmount").innerText = "-₹0";
+      document.getElementById("finalAmount").innerText = "₹" + price;
 
-  // Form Submission
-  const bookingForm = document.getElementById("vrbBookingForm");
-  if (bookingForm) {
-    bookingForm.addEventListener("submit", function(e) {
+      document.getElementById("bookingModal").classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeBookingPopup() {
+      document.getElementById("bookingModal").classList.remove("show");
+      document.body.style.overflow = "auto";
+    }
+
+    function applyCouponCode(){
+      const code = document.getElementById("couponCode").value.trim().toUpperCase();
+      const priceText = document.getElementById("modalResortPrice").innerText.replace("₹","");
+      const price = parseInt(priceText) || 0;
+
+      let discount = 0;
+      if(code === "VIZAG10") discount = Math.floor(price * 0.10);
+      if(code === "VIZAG20") discount = Math.floor(price * 0.20);
+
+      document.getElementById("subtotalAmount").innerText = "₹" + price;
+      document.getElementById("discountAmount").innerText = "-₹" + discount;
+      document.getElementById("finalAmount").innerText = "₹" + (price - discount);
+    }
+
+    document.getElementById("bookingForm").addEventListener("submit", function(e){
       e.preventDefault();
-      
-      // Validation
-      const name = document.getElementById("guestName").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const checkIn = document.getElementById("checkIn").value;
-      const checkOut = document.getElementById("checkOut").value;
-      const guests = document.getElementById("guests").value;
-      
-      if (!name || !email || !phone || !checkIn || !checkOut || !guests) {
-        alert("❌ Please fill all required fields");
-        return;
-      }
-      
-      if (phone.length < 13) {
-        alert("❌ Please enter a valid 10-digit phone number");
-        return;
-      }
-      
-      const checkInDate = new Date(checkIn);
-      const checkOutDate = new Date(checkOut);
-      const today = new Date();
-      
-      if (checkInDate <= today) {
-        alert("❌ Check-in date must be in the future");
-        return;
-      }
-      
-      if (checkOutDate <= checkInDate) {
-        alert("❌ Check-out date must be after check-in date");
-        return;
-      }
-      
-      // Get resort ID from resorts API
-      fetch('/api/resorts')
-      .then(response => response.json())
-      .then(resorts => {
-        const resort = resorts.find(r => r.name === currentResort.name);
-        if (!resort) {
-          alert('Resort not found');
-          return;
-        }
-        
-        // Prepare booking data
-        const bookingData = {
-          resortId: resort.id,
-          guestName: name,
-          email: email,
-          phone: phone,
-          checkIn: checkIn,
-          checkOut: checkOut,
-          guests: parseInt(guests),
-          couponCode: appliedCoupon ? appliedCoupon.code : null,
-          discountAmount: appliedCoupon ? Math.round(currentResort.price * (appliedCoupon.discount_percentage / 100)) : 0
-        };
-        
-        // Submit booking
-        fetch('/api/bookings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bookingData)
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.id) {
-            // Use existing payment interface from critical.js
-            const paymentBookingData = {
-              ...bookingData,
-              resortName: resort.name,
-              resortNote: resort.note,
-              basePrice: currentResort.price,
-              platformFee: Math.round(currentResort.price * 0.015),
-              totalPrice: parseInt(document.getElementById("totalAmount").innerText.replace('₹', '').replace(',', '')),
-              bookingReference: data.bookingReference || `VE${Date.now()}`
-            };
-            
-            closeBookingPopup();
-            showPaymentInterface(paymentBookingData);
-          } else {
-            alert("❌ Booking failed: " + (data.error || 'Unknown error'));
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert("❌ Error creating booking. Please try again.");
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching resorts:', error);
-        alert('Error finding resort details');
+      alert("✅ Booking popup working! Connect Razorpay here.");
+      closeBookingPopup();
+    });
+
+    // Chat widget
+    const chatFab = document.getElementById("vrbChatFab");
+    const chatBox = document.getElementById("vrbChatBox");
+    const chatClose = document.getElementById("vrbChatClose");
+    const chatSend = document.getElementById("vrbChatSend");
+    const chatInput = document.getElementById("vrbChatInput");
+    const chatBody = document.getElementById("vrbChatBody");
+
+    function toggleChat(){ chatBox.classList.toggle("open"); }
+    chatFab.addEventListener("click", toggleChat);
+    chatClose.addEventListener("click", toggleChat);
+
+    function addMsg(text, type){
+      const div = document.createElement("div");
+      div.className = "vrb-msg " + type;
+      div.innerText = text;
+      chatBody.appendChild(div);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function sendMsg(){
+      const msg = chatInput.value.trim();
+      if(!msg) return;
+      addMsg(msg, "vrb-user");
+      chatInput.value = "";
+      setTimeout(()=> addMsg("✅ Thanks! Please share check-in date, guests & budget.", "vrb-bot"), 500);
+    }
+
+    chatSend.addEventListener("click", sendMsg);
+    chatInput.addEventListener("keypress", (e)=>{ if(e.key==="Enter") sendMsg(); });
+
+    document.querySelectorAll(".vrb-q").forEach((btn)=>{
+      btn.addEventListener("click", ()=>{
+        chatInput.value = btn.getAttribute("data-msg");
+        sendMsg();
       });
     });
-  }
-});
 
-// Coupon Code Functionality
-function showAvailableCoupons() {
-  const couponsDiv = document.getElementById("availableCoupons");
-  if (!couponsDiv) return;
-  
-  couponsDiv.style.display = couponsDiv.style.display === "none" ? "block" : "none";
-  
-  if (couponsDiv.style.display === "block") {
-    fetch('/api/coupons')
-    .then(response => response.json())
-    .then(data => {
-      if (data && data.length > 0) {
-        couponsDiv.innerHTML = data.map(coupon => 
-          `<div class="coupon-item" onclick="applyCoupon('${coupon.code}')">
-            <strong>${coupon.code}</strong> - ${coupon.description} (${coupon.discount_percentage}% off)
-          </div>`
-        ).join('');
-      } else {
-        couponsDiv.innerHTML = '<p>No coupons available</p>';
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching coupons:', error);
-      couponsDiv.innerHTML = '<p>Error loading coupons</p>';
+    // ✅ Scroll animation replay (up/down)
+    const items = document.querySelectorAll(".vrb-anim");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add("vrb-show");
+        else entry.target.classList.remove("vrb-show");
+      });
+    }, { threshold: 0.15 });
+
+    items.forEach((el) => {
+      el.classList.add("vrb-hide");
+      observer.observe(el);
     });
-  }
-}
-
-function applyCoupon(code) {
-  const couponInput = document.getElementById("couponCode");
-  if (couponInput) {
-    couponInput.value = code;
-    const applyBtn = document.getElementById("applyCouponBtn");
-    if (applyBtn) applyBtn.click();
-  }
-}
-
-// Pricing Calculation
-function calculatePricing() {
-  const basePrice = currentResort.price || 0;
-  const guestsInput = document.getElementById("guests");
-  const guests = parseInt(guestsInput ? guestsInput.value : 2) || 2;
-  
-  let baseAmount = basePrice;
-  if (guests > 6) {
-    baseAmount += (guests - 6) * 500; // Extra charge per head
-  }
-  
-  const platformFee = Math.round(baseAmount * 0.015); // 1.5%
-  let discount = 0;
-  
-  if (appliedCoupon) {
-    discount = Math.round(baseAmount * (appliedCoupon.discount_percentage / 100));
-  }
-  
-  const totalAmount = baseAmount + platformFee - discount;
-  
-  // Update DOM elements if they exist
-  const baseAmountEl = document.getElementById("baseAmount");
-  const platformFeeEl = document.getElementById("platformFee");
-  const totalAmountEl = document.getElementById("totalAmount");
-  const discountRowEl = document.getElementById("discountRow");
-  const discountAmountEl = document.getElementById("discountAmount");
-  
-  if (baseAmountEl) baseAmountEl.innerText = "₹" + baseAmount;
-  if (platformFeeEl) platformFeeEl.innerText = "₹" + platformFee;
-  if (totalAmountEl) totalAmountEl.innerText = "₹" + totalAmount;
-  
-  if (discount > 0 && discountRowEl && discountAmountEl) {
-    discountRowEl.style.display = "flex";
-    discountAmountEl.innerText = "-₹" + discount;
-  } else if (discountRowEl) {
-    discountRowEl.style.display = "none";
-  }
-}
-</script>
-
-<script>
-  const items = document.querySelectorAll(".vrb-anim");
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-
-      // ✅ Add animation when visible
-      if (entry.isIntersecting) {
-        entry.target.classList.add("vrb-show");
-      } 
-      // ✅ Remove animation when not visible (so it replays)
-      else {
-        entry.target.classList.remove("vrb-show");
-      }
-
-    });
-  }, { threshold: 0.18 });
-
-  items.forEach((el) => {
-    el.classList.add("vrb-hide");
-    observer.observe(el);
-  });
-</script>
+  </script>
 
 </body>
 </html>
