@@ -935,13 +935,6 @@
       <input id="guestName" type="text" placeholder="Full Name" required />
       
       <input id="email" type="email" placeholder="Email (Enter valid working email)" required />
-      <button type="button" id="sendEmailOtpBtn" class="otp-btn" style="display:none;">Send Email OTP</button>
-      
-      <div id="emailOtpGroup" style="display:none;">
-        <input id="emailOtpCode" type="text" placeholder="Enter 6-digit OTP from email" maxlength="6" />
-        <button type="button" id="verifyEmailOtpBtn" class="otp-btn">Verify Email OTP</button>
-        <div id="emailOtpMessage" class="otp-message"></div>
-      </div>
       
       <input id="phone" type="tel" placeholder="WhatsApp Number (Enter 10 digits)" required />
 
@@ -997,7 +990,6 @@
 <script>
 // Premium Booking Modal with Full Validation & API Integration
 let currentResort = {};
-let emailVerified = false;
 let appliedCoupon = null;
 
 function openBookingPopup(name, location, price) {
@@ -1021,74 +1013,10 @@ function closeBookingPopup() {
 
 function resetForm() {
   document.getElementById("vrbBookingForm").reset();
-  emailVerified = false;
   appliedCoupon = null;
-  document.getElementById("emailOtpGroup").style.display = "none";
   document.getElementById("availableCoupons").style.display = "none";
   calculatePricing();
 }
-
-// Email OTP Functionality
-document.getElementById("email").addEventListener("blur", function() {
-  const email = this.value;
-  if (email && email.includes("@")) {
-    document.getElementById("sendEmailOtpBtn").style.display = "inline-block";
-  }
-});
-
-document.getElementById("sendEmailOtpBtn").addEventListener("click", function() {
-  const email = document.getElementById("email").value;
-  if (!email) return;
-  
-  fetch('/send-email-otp', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      document.getElementById("emailOtpGroup").style.display = "block";
-      document.getElementById("emailOtpMessage").innerHTML = "<span style='color:green'>✅ OTP sent to your email</span>";
-    } else {
-      document.getElementById("emailOtpMessage").innerHTML = "<span style='color:red'>❌ Failed to send OTP</span>";
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    document.getElementById("emailOtpMessage").innerHTML = "<span style='color:red'>❌ Error sending OTP</span>";
-  });
-});
-
-document.getElementById("verifyEmailOtpBtn").addEventListener("click", function() {
-  const email = document.getElementById("email").value;
-  const otp = document.getElementById("emailOtpCode").value;
-  
-  if (!otp || otp.length !== 6) {
-    document.getElementById("emailOtpMessage").innerHTML = "<span style='color:red'>❌ Please enter 6-digit OTP</span>";
-    return;
-  }
-  
-  fetch('/verify-email-otp', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, otp })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      emailVerified = true;
-      document.getElementById("emailOtpMessage").innerHTML = "<span style='color:green'>✅ Email verified successfully</span>";
-      document.getElementById("verifyEmailOtpBtn").disabled = true;
-    } else {
-      document.getElementById("emailOtpMessage").innerHTML = "<span style='color:red'>❌ Invalid OTP</span>";
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    document.getElementById("emailOtpMessage").innerHTML = "<span style='color:red'>❌ Error verifying OTP</span>";
-  });
-});
 
 // Phone Number Validation
 document.getElementById("phone").addEventListener("input", function() {
@@ -1218,11 +1146,6 @@ document.getElementById("vrbBookingForm").addEventListener("submit", function(e)
   
   if (!name || !email || !phone || !checkIn || !checkOut || !guests) {
     alert("❌ Please fill all required fields");
-    return;
-  }
-  
-  if (!emailVerified) {
-    alert("❌ Please verify your email first");
     return;
   }
   
