@@ -446,8 +446,8 @@
         </section>
 
         <section id="resorts" class="resorts-section">
-            <div class="container">
-                <h2 style="background:#f8f9fa!important;padding:20px 0!important;margin:0!important;">Premium Resorts in Visakhapatnam</h2>
+            <div class="premium-block">
+                <h2 class="premium-title">Premium Resorts in Visakhapatnam</h2>
                 <div id="resortsGrid" class="resorts-grid">
                     <div class="loading-placeholder">
                         <div class="loading-spinner"></div>
@@ -481,10 +481,9 @@
             </div>
         </section>
         
-        <div class="premium-section">
-        <section class="locations-section">
-            <div class="container">
-                <h2>Book Resorts by Location in Vizag | Best Resort Areas in Visakhapatnam</h2>
+        <section>
+            <div class="premium-block">
+                <h2 class="premium-title">Book Resorts by Location in Vizag | Best Resort Areas in Visakhapatnam</h2>
                 <div class="locations-grid">
                     <div class="location">
                         <h3>S.R Puram Resorts</h3>
@@ -513,7 +512,6 @@
                 </div>
             </div>
         </section>
-        </div>
 
 
     </main>
@@ -634,35 +632,39 @@
     </div>
 
     <footer>
-        <div class="container">
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:25px;">
-                <div>
-                    <h3>Vizag Resort Booking</h3>
-                    <p style="opacity:0.85;line-height:1.6;">
-                        Premium booking platform for Resorts & Travel in Vizag.<br>
-                        Verified Resorts • Best Price • 24/7 Support
-                    </p>
-                </div>
+        <div class="footer-grid">
+            <div>
+                <h3>Vizag Resort Booking</h3>
+                <p>
+                    Premium booking platform for Resorts & Travel in Vizag.<br>
+                    Verified Resorts • Best Price • 24/7 Support
+                </p>
 
-                <div>
-                    <h4>Quick Links</h4>
-                    <a href="#home">Home</a><br>
-                    <a href="#resorts">Resorts</a><br>
-                    <a href="#travel">Cabs / Travel</a><br>
-                    <a href="#contact">Contact</a><br>
-                </div>
-
-                <div>
-                    <h4>Contact</h4>
-                    <p style="opacity:0.85;">📍 Visakhapatnam, India</p>
-                    <p style="opacity:0.85;">📞 +91 8341674465</p>
-                    <p style="opacity:0.85;">✉️ support@vizagresortbooking.in</p>
+                <div class="footer-social">
+                    <a href="#" title="Facebook">f</a>
+                    <a href="#" title="Instagram">i</a>
+                    <a href="#" title="YouTube">y</a>
                 </div>
             </div>
 
-            <div class="footer-bottom">
-                © 2026 Vizag Resort Booking | All Rights Reserved
+            <div>
+                <h4>Quick Links</h4>
+                <a href="#home">Home</a><br>
+                <a href="#resorts">Resorts</a><br>
+                <a href="#travel">Cabs / Travel</a><br>
+                <a href="#contact">Contact</a><br>
             </div>
+
+            <div>
+                <h4>Contact</h4>
+                <p>📍 Visakhapatnam, India</p>
+                <p>📞 +91 9492394828</p>
+                <p>✉️ vizagresortbooking.in</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            © 2026 Vizag Resort Booking | All Rights Reserved
         </div>
     </footer>
 
@@ -734,6 +736,24 @@
   function vrbToggleMenu() {
     document.getElementById("vrbNavLinks").classList.toggle("open");
   }
+</script>
+
+<script>
+  // Scroll Animation using IntersectionObserver
+  const animatedItems = document.querySelectorAll(".premium-block, section, footer, .card, .resort-card");
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if(entry.isIntersecting){
+        entry.target.classList.add("scroll-show");
+      }
+    });
+  }, { threshold: 0.12 });
+
+  animatedItems.forEach((item) => {
+    item.classList.add("scroll-anim");
+    observer.observe(item);
+  });
 </script>
 </body>
 </html>

@@ -437,3 +437,215 @@ footer .social-icons, footer .footer-icons{
     padding: 30px 16px;
   }
 }
+
+/* =====================================================
+   PREMIUM BELOW HERO + FOOTER UPGRADE + ANIMATIONS
+   ===================================================== */
+
+/* Smooth scrolling */
+html{
+  scroll-behavior: smooth;
+}
+
+/* PREMIUM background below hero */
+body{
+  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%) !important;
+}
+
+/* Make all sections premium blocks */
+section{
+  padding: 70px 0 !important;
+}
+
+/* Premium section container look */
+.premium-block{
+  width: min(1200px, 92%);
+  margin: 30px auto;
+  padding: 50px 30px;
+  border-radius: 26px;
+  background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 18px 50px rgba(2,8,20,0.08);
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+/* Premium decorative glow */
+.premium-block::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius: 26px;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(10,116,218,0.40),
+    rgba(255,111,0,0.25),
+    rgba(26,163,255,0.25)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events:none;
+}
+
+/* Premium headings */
+.premium-title{
+  font-size: 28px;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 40px;
+  color: #0f172a;
+  letter-spacing: .2px;
+}
+
+/* Title underline gradient */
+.premium-title::after{
+  content:"";
+  width: 110px;
+  height: 5px;
+  display: block;
+  margin: 12px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0a74da, #1aa3ff, #ff6f00);
+}
+
+/* Do NOT change resort containers styling inside */
+.resort-card, .card, .resort-container{
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Premium hover (light) */
+.resort-card:hover, .card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 22px 60px rgba(2,8,20,0.12);
+}
+
+/* =====================
+   PREMIUM FOOTER (BEST)
+   ===================== */
+
+footer{
+  background: linear-gradient(135deg, #061a33, #0a2d55) !important;
+  color: #fff !important;
+  padding: 70px 0 30px !important;
+  margin-top: 50px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Footer glow */
+footer::before{
+  content:"";
+  position:absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(26,163,255,0.25), transparent 60%);
+  top: -200px;
+  left: -200px;
+}
+
+footer::after{
+  content:"";
+  position:absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,111,0,0.22), transparent 60%);
+  bottom: -220px;
+  right: -220px;
+}
+
+.footer-grid{
+  width: min(1200px, 92%);
+  margin: auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 30px;
+  position: relative;
+  z-index: 2;
+}
+
+footer h3, footer h4{
+  font-weight: 900 !important;
+  letter-spacing: .2px;
+  margin-bottom: 14px;
+}
+
+footer p{
+  opacity: 0.88;
+  line-height: 1.7;
+}
+
+footer a{
+  color: rgba(207,230,255,0.92) !important;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-block;
+  margin: 7px 0;
+}
+
+footer a:hover{
+  color: #fff !important;
+  text-decoration: underline;
+}
+
+.footer-bottom{
+  width: min(1200px, 92%);
+  margin: 26px auto 0;
+  text-align: center;
+  opacity: 0.75;
+  font-size: 13px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Social icons */
+.footer-social{
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.footer-social a{
+  width: 40px;
+  height: 40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  font-size: 16px;
+}
+
+.footer-social a:hover{
+  background: rgba(255,255,255,0.16);
+}
+
+/* Responsive */
+@media(max-width: 950px){
+  section{
+    padding: 45px 0 !important;
+  }
+  .premium-block{
+    padding: 28px 16px;
+  }
+  .footer-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================
+   SCROLL ANIMATIONS
+   ============================ */
+
+.scroll-anim{
+  opacity: 0;
+  transform: translateY(45px) scale(0.98);
+  transition: all 0.8s ease;
+}
+
+.scroll-show{
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+}
