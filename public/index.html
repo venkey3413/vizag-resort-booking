@@ -560,17 +560,7 @@
   </div>
 </section>
 
-        <section id="resorts" class="resorts-section">
-            <div class="premium-block">
-                <h2 class="premium-title">Premium Resorts in Visakhapatnam</h2>
-                <div id="resortsGrid" class="resorts-grid">
-                    <div class="loading-placeholder">
-                        <div class="loading-spinner"></div>
-                        <p>Loading premium resorts...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+
 
 
         
@@ -638,90 +628,7 @@
         </a>
     </div>
 
-    <!-- Booking Modal -->
-    <div id="bookingModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modalResortName">Book Resort</h2>
-            <form id="bookingForm">
-                <input type="hidden" id="resortId">
-                <input type="hidden" id="resortPrice">
-                
-                <div class="form-group">
-                    <label for="guestName">Full Name:</label>
-                    <input type="text" id="guestName" required>
-                </div>
-                
 
-                
-                <div class="form-group">
-                    <label for="email">Email (Enter valid working email):</label>
-                    <input type="email" id="email" placeholder="example@gmail.com" required>
-                    <button type="button" id="sendEmailOtpBtn" class="otp-btn" style="display:none;">Send Email OTP</button>
-                </div>
-                
-                <div class="form-group" id="emailOtpGroup" style="display:none;">
-                    <label for="emailOtpCode">Enter Email OTP:</label>
-                    <input type="text" id="emailOtpCode" placeholder="Enter 6-digit OTP from email" maxlength="6">
-                    <button type="button" id="verifyEmailOtpBtn" class="otp-btn">Verify Email OTP</button>
-                    <div id="emailOtpMessage" class="otp-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="phone">WhatsApp Number (Enter 10 digits number):</label>
-                    <input type="tel" id="phone" placeholder="Enter 10 digits number" pattern="\+91[0-9]{10}" maxlength="13" required>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="checkIn">Check-in (11 AM):</label>
-                        <input type="date" id="checkIn" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="checkOut">Check-out (9 AM):</label>
-                        <input type="date" id="checkOut" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="guests" id="guestsLabel">Number of Guests:</label>
-                    <input type="number" id="guests" min="1" max="50" value="2" required>
-                    <div id="guestWarning" class="guest-warning" style="display:none;color:#dc3545;font-size:0.9rem;margin-top:5px;">⚠️ After maximum guests, there is charge applied per head</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="couponCode">Coupon Code (Optional):</label>
-                    <div class="coupon-input">
-                        <input type="text" id="couponCode" placeholder="Enter coupon code or click to see available coupons" onclick="showAvailableCoupons()">
-                        <button type="button" id="applyCouponBtn">Apply</button>
-                    </div>
-                    <div id="availableCoupons" class="available-coupons" style="display:none;"></div>
-                    <div id="couponMessage" class="coupon-message"></div>
-                </div>
-                
-                <div class="price-summary">
-                    <div class="price-row">
-                        <span>Base Amount:</span>
-                        <span id="baseAmount">₹0</span>
-                    </div>
-                    <div class="price-row">
-                        <span>Platform Fee (1.5%):</span>
-                        <span id="platformFee">₹0</span>
-                    </div>
-                    <div class="price-row" id="discountRow" style="display: none;">
-                        <span>Discount:</span>
-                        <span id="discountAmount" style="color: green;">-₹0</span>
-                    </div>
-                    <div class="price-row">
-                        <span>Total Amount:</span>
-                        <span id="totalAmount">₹0</span>
-                    </div>
-                </div>
-                
-                <button type="submit" class="book-btn">Confirm Booking</button>
-            </form>
-        </div>
-    </div>
 
 
 
