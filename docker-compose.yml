@@ -90,6 +90,9 @@ services:
       - RESORT_API_URL=http://centralized-db-api:3003/api
     depends_on:
       - centralized-db-api
+    restart: unless-stopped
+
+
 
 volumes:
   redis-data:
