@@ -28,12 +28,14 @@
       </a>
 
       <nav class="vrb-nav-links" id="vrbNavLinks">
-        <a class="active" href="#home">Home</a>
-        <a href="#resorts">Resorts</a>
-        <a href="#travel">Cabs / Travel</a>
-        <a href="#events">Events</a>
-        <a href="#offers">Offers</a>
-        <a href="#contact">Contact</a>
+        <ul>
+          <li><a class="active" href="#home">Home</a></li>
+          <li><a href="#resorts">Resorts</a></li>
+          <li><a href="#food">Food</a></li>
+          <li><a href="#events">Events</a></li>
+          <li><a href="#offers">Offers</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
       </nav>
 
       <div class="vrb-nav-actions">
@@ -55,7 +57,7 @@
       <!-- Tabs -->
       <div class="vrb-tabs">
         <button class="vrb-tab-btn active" onclick="vrbShowTab('resort')">🏖 Resort Booking</button>
-        <button class="vrb-tab-btn" onclick="vrbShowTab('cab')">🚖 Cab / Travel</button>
+        <button class="vrb-tab-btn" onclick="vrbShowTab('food')">🍽 Food</button>
       </div>
 
       <!-- Resort Booking Form -->
@@ -93,16 +95,22 @@
         <button class="vrb-btn vrb-btn-orange">Search Resorts</button>
       </div>
 
-      <!-- Cab / Travel Booking Form -->
-      <div class="vrb-search-box vrb-tab-content" id="vrb-cab">
+      <!-- Food Ordering Form -->
+      <div class="vrb-search-box vrb-tab-content" id="vrb-food">
         <div class="vrb-field">
-          <label>Pickup</label>
-          <input type="text" placeholder="Enter pickup location" />
+          <label>Food Type</label>
+          <select>
+            <option>Veg</option>
+            <option>Non-Veg</option>
+            <option>Biryani</option>
+            <option>Snacks</option>
+            <option>Catering</option>
+          </select>
         </div>
 
         <div class="vrb-field">
-          <label>Drop</label>
-          <input type="text" placeholder="Enter drop location" />
+          <label>Location</label>
+          <input type="text" placeholder="Enter delivery location" />
         </div>
 
         <div class="vrb-field">
@@ -111,15 +119,11 @@
         </div>
 
         <div class="vrb-field">
-          <label>Trip Type</label>
-          <select>
-            <option>One Way</option>
-            <option>Round Trip</option>
-            <option>Hourly Rental</option>
-          </select>
+          <label>Time</label>
+          <input type="time" />
         </div>
 
-        <button class="vrb-btn vrb-btn-orange">Book Cab</button>
+        <button class="vrb-btn vrb-btn-orange">Order Food</button>
       </div>
     </div>
   </section>
@@ -143,89 +147,11 @@
         <button class="vrb-chip">Budget</button>
       </div>
 
-      <div class="vrb-grid">
-
-        <article class="vrb-card vrb-anim">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1400" alt="Resort">
-            <span class="vrb-badge">⭐ 4.6</span>
-          </div>
-          <div class="vrb-body">
-            <h3>Silver Stay Resort</h3>
-            <p class="vrb-meta">📍 Rushikonda, Vizag • Beach view</p>
-
-            <div class="vrb-tags">
-              <span>Pool</span><span>AC</span><span>Couple</span><span>WiFi</span>
-            </div>
-
-            <div class="vrb-bottom">
-              <div>
-                <p class="vrb-price">₹3500 <span>/ night</span></p>
-                <p class="vrb-small">Free cancellation</p>
-              </div>
-
-              <button class="vrb-btn vrb-btn-primary"
-                onclick="openBookingPopup('Silver Stay Resort','Rushikonda, Vizag','3500')">
-                Book Now
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <article class="vrb-card vrb-anim">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1400" alt="Resort">
-            <span class="vrb-badge">⭐ 4.5</span>
-          </div>
-          <div class="vrb-body">
-            <h3>Royal Orchid</h3>
-            <p class="vrb-meta">📍 S.R Puram, Vizag • Premium stay</p>
-
-            <div class="vrb-tags">
-              <span>Luxury</span><span>Parking</span><span>Breakfast</span>
-            </div>
-
-            <div class="vrb-bottom">
-              <div>
-                <p class="vrb-price">₹5200 <span>/ night</span></p>
-                <p class="vrb-small">Instant confirmation</p>
-              </div>
-
-              <button class="vrb-btn vrb-btn-primary"
-                onclick="openBookingPopup('Royal Orchid','S.R Puram, Vizag','5200')">
-                Book Now
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <article class="vrb-card vrb-anim">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1501117716987-c8e1ecb210d1?w=1400" alt="Resort">
-            <span class="vrb-badge">⭐ 4.7</span>
-          </div>
-          <div class="vrb-body">
-            <h3>Sun Vacation Resort</h3>
-            <p class="vrb-meta">📍 Narava, Vizag • Family friendly</p>
-
-            <div class="vrb-tags">
-              <span>Family</span><span>Play Area</span><span>Pool</span>
-            </div>
-
-            <div class="vrb-bottom">
-              <div>
-                <p class="vrb-price">₹4100 <span>/ night</span></p>
-                <p class="vrb-small">Best price guarantee</p>
-              </div>
-
-              <button class="vrb-btn vrb-btn-primary"
-                onclick="openBookingPopup('Sun Vacation Resort','Narava, Vizag','4100')">
-                Book Now
-              </button>
-            </div>
-          </div>
-        </article>
-
+      <div class="vrb-grid" id="resortsGrid">
+        <!-- Resorts will be loaded dynamically from database -->
+        <div style="text-align:center;padding:2rem;color:#666;">
+          Loading resorts...
+        </div>
       </div>
     </div>
   </section>
@@ -324,12 +250,12 @@
     </div>
   </section>
 
-  <!-- ✅ TRAVEL PLACEHOLDER -->
-  <section id="travel" class="vrb-section">
+  <!-- ✅ FOOD PLACEHOLDER -->
+  <section id="food" class="vrb-section">
     <div class="vrb-container vrb-anim">
       <div class="vrb-section-head">
-        <h2 class="vrb-title">Cab / Travel Booking</h2>
-        <p class="vrb-subtitle">Airport pickup • City rides • Araku trip</p>
+        <h2 class="vrb-title">Food Ordering</h2>
+        <p class="vrb-subtitle">Order from restaurants • Catering • Party food in Vizag</p>
       </div>
     </div>
   </section>
@@ -356,7 +282,7 @@
         <h4>Quick Links</h4>
         <a href="#home">Home</a>
         <a href="#resorts">Resorts</a>
-        <a href="#travel">Cabs / Travel</a>
+        <a href="#food">Food</a>
         <a href="#events">Events</a>
         <a href="#offers">Offers</a>
       </div>
@@ -386,17 +312,13 @@
       <button class="vrb-close" onclick="closeBookingPopup()">✕</button>
 
       <div class="vrb-modal-head">
-        <h2>Confirm Booking</h2>
+        <h2 id="modalResortName">Confirm Booking</h2>
         <p>Secure booking with instant confirmation</p>
       </div>
 
       <div class="vrb-modal-summary">
         <div>
           <span class="label">Resort</span>
-          <b id="modalResortName">-</b>
-        </div>
-        <div>
-          <span class="label">Location</span>
           <b id="modalResortLocation">-</b>
         </div>
         <div>
@@ -407,41 +329,48 @@
 
       <div class="vrb-coupon-row">
         <input id="couponCode" type="text" placeholder="Enter Coupon Code" />
-        <button class="vrb-btn vrb-btn-light" onclick="applyCouponCode()">Apply</button>
+        <button class="vrb-btn vrb-btn-light" id="applyCouponBtn">Apply</button>
       </div>
+      <div id="couponMessage"></div>
+      <div id="availableCoupons" style="display:none;"></div>
 
       <div class="vrb-price-box">
         <div class="line">
-          <span>Subtotal</span>
-          <b id="subtotalAmount">₹0</b>
+          <span>Base Amount</span>
+          <b id="baseAmount">₹0</b>
         </div>
         <div class="line">
+          <span>Platform Fee</span>
+          <b id="platformFee">₹0</b>
+        </div>
+        <div class="line" id="discountRow" style="display:none;">
           <span>Discount</span>
           <b id="discountAmount" class="green">-₹0</b>
         </div>
         <div class="line total">
           <span>Total Pay</span>
-          <b id="finalAmount">₹0</b>
+          <b id="totalAmount">₹0</b>
         </div>
       </div>
 
       <form id="bookingForm" class="vrb-form">
-        <input id="customerName" type="text" placeholder="Full Name" required />
-        <input id="customerMobile" type="tel" placeholder="Mobile Number" required />
+        <input type="hidden" id="resortId" />
+        <input type="hidden" id="resortPrice" />
+        
+        <input id="guestName" type="text" placeholder="Full Name" required />
+        <input id="email" type="email" placeholder="Email Address" required />
+        <input id="phone" type="tel" placeholder="Phone Number" required />
 
         <div class="vrb-form-grid">
-          <input id="checkinDate" type="date" required />
-          <input id="checkoutDate" type="date" required />
+          <input id="checkIn" type="date" required />
+          <input id="checkOut" type="date" required />
         </div>
 
-        <select id="guestCount" required>
-          <option value="2 Adults">2 Adults</option>
-          <option value="3 Adults">3 Adults</option>
-          <option value="4 Adults">4 Adults</option>
-          <option value="Family (2+2)">Family (2+2)</option>
-        </select>
+        <label id="guestsLabel">Number of Guests:</label>
+        <input id="guests" type="number" min="1" max="20" value="2" required />
+        <div id="guestWarning" style="display:none;color:#dc3545;font-size:0.9rem;">⚠️ Guest count exceeds maximum capacity</div>
 
-        <button type="submit" class="vrb-btn vrb-btn-primary">
+        <button type="submit" class="vrb-btn vrb-btn-primary book-btn">
           Proceed to Payment
         </button>
 
@@ -493,6 +422,7 @@
   </div>
 
   <!-- ✅ SCRIPTS -->
+  <script src="critical.js"></script>
   <script>
     function vrbToggleMenu() {
       document.getElementById("vrbNavLinks").classList.toggle("open");
@@ -505,23 +435,26 @@
       if (type === "resort") {
         document.querySelectorAll(".vrb-tab-btn")[0].classList.add("active");
         document.getElementById("vrb-resort").classList.add("active");
-      } else {
+      } 
+      else if (type === "food") {
         document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
-        document.getElementById("vrb-cab").classList.add("active");
+        document.getElementById("vrb-food").classList.add("active");
       }
     }
 
     function openBookingPopup(name, location, price) {
-      document.getElementById("modalResortName").innerText = name;
-      document.getElementById("modalResortLocation").innerText = location;
-      document.getElementById("modalResortPrice").innerText = "₹" + price;
-
-      document.getElementById("subtotalAmount").innerText = "₹" + price;
-      document.getElementById("discountAmount").innerText = "-₹0";
-      document.getElementById("finalAmount").innerText = "₹" + price;
-
-      document.getElementById("bookingModal").classList.add("show");
-      document.body.style.overflow = "hidden";
+      // Always use the advanced booking system from critical.js for database-driven functionality
+      if (typeof bookNow === 'function' && window.resorts) {
+        // Find resort by name to get ID and use database pricing
+        const resort = window.resorts.find(r => r.name === name);
+        if (resort) {
+          bookNow(resort.id, name);
+          return;
+        }
+      }
+      
+      // If critical.js not loaded, show message
+      alert('Please wait for the booking system to load completely.');
     }
 
     function closeBookingPopup() {
@@ -530,24 +463,42 @@
     }
 
     function applyCouponCode(){
+      // Remove hardcoded coupon validation - use database coupons only
       const code = document.getElementById("couponCode").value.trim().toUpperCase();
-      const priceText = document.getElementById("modalResortPrice").innerText.replace("₹","");
-      const price = parseInt(priceText) || 0;
-
-      let discount = 0;
-      if(code === "VIZAG10") discount = Math.floor(price * 0.10);
-      if(code === "VIZAG20") discount = Math.floor(price * 0.20);
-
-      document.getElementById("subtotalAmount").innerText = "₹" + price;
-      document.getElementById("discountAmount").innerText = "-₹" + discount;
-      document.getElementById("finalAmount").innerText = "₹" + (price - discount);
+      
+      if (!code) {
+        document.getElementById("couponMessage").innerHTML = '<span style="color:#dc3545;">Enter coupon code</span>';
+        return;
+      }
+      
+      // Use the advanced coupon system from critical.js if available
+      if (typeof window.bookingModalCoupons !== 'undefined' && window.bookingModalCoupons[code]) {
+        const applyCouponBtn = document.getElementById('applyCouponBtn');
+        if (applyCouponBtn && applyCouponBtn.onclick) {
+          applyCouponBtn.onclick();
+          return;
+        }
+      }
+      
+      // Fallback - no hardcoded validation
+      document.getElementById("couponMessage").innerHTML = '<span style="color:#dc3545;">Coupon validation requires database connection</span>';
     }
 
     document.getElementById("bookingForm").addEventListener("submit", function(e){
       e.preventDefault();
-      alert("✅ Booking popup working! Connect Razorpay here.");
-      closeBookingPopup();
+      
+      // Use advanced booking system if available
+      if (typeof handleBookingSubmit === 'function') {
+        handleBookingSubmit(e);
+        return;
+      }
+      
+      // Fallback alert
+      alert("✅ Booking system loading... Please wait and try again.");
     });
+    
+    // Setup coupon button event
+    document.getElementById("applyCouponBtn").addEventListener("click", applyCouponCode);
 
     // Chat widget
     const chatFab = document.getElementById("vrbChatFab");
