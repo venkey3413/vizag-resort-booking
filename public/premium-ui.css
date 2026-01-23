@@ -1781,7 +1781,7 @@ button.book-now{
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  background: rgba(0,0,0,0.7) !important;
+  background: rgba(0,0,0,0.8) !important;
   z-index: 99999 !important;
   display: none !important;
   justify-content: center !important;
@@ -1803,6 +1803,7 @@ button.book-now{
   overflow-y: auto !important;
   position: relative !important;
   box-shadow: 0 30px 80px rgba(0,0,0,0.3) !important;
+  z-index: 100000 !important;
 }
 
 /* =========================================
@@ -2032,27 +2033,45 @@ button.book-now{
   box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
 }
 
-/* ✅ Default View More style (light + premium) */
-.vrb-btn-viewmore{
-  background: rgba(15,23,42,0.06) !important;
-  border: 1px solid rgba(15,23,42,0.14) !important;
-  color: #0f172a !important;
-}
-
-/* ✅ Book Now = Orange Only */
-.vrb-btn-booknow{
+/* ✅ Book Now buttons - Orange (multiple selectors) */
+.resort-card button[onclick*="bookNow"],
+.resort-item button[onclick*="bookNow"],
+.resort button[onclick*="bookNow"],
+.card button[onclick*="bookNow"],
+.book-btn,
+.vrb-btn-booknow,
+button:contains("Book Now"),
+.resort-card button:first-child,
+.resort-item button:first-child{
   background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
   color: #fff !important;
   border: none !important;
   box-shadow: 0 16px 32px rgba(255,111,0,0.28) !important;
 }
 
+.resort-card button[onclick*="bookNow"]:hover,
+.resort-item button[onclick*="bookNow"]:hover,
+.book-btn:hover,
 .vrb-btn-booknow:hover{
   transform: translateY(-2px) scale(1.02) !important;
   box-shadow: 0 22px 55px rgba(255,111,0,0.40) !important;
 }
 
-/* ✅ Review buttons (clean blue outline) */
+/* ✅ View More buttons (light gray) */
+.resort-card button[onclick*="openGallery"],
+.resort-item button[onclick*="openGallery"],
+.view-more-btn,
+.vrb-btn-viewmore{
+  background: rgba(15,23,42,0.06) !important;
+  border: 1px solid rgba(15,23,42,0.14) !important;
+  color: #0f172a !important;
+}
+
+/* ✅ Review buttons (blue outline) */
+.resort-card button[onclick*="Review"],
+.resort-item button[onclick*="Review"],
+.review-btn,
+.view-reviews-btn,
 .vrb-btn-review{
   background: rgba(10,116,218,0.08) !important;
   border: 1px solid rgba(10,116,218,0.22) !important;
@@ -2060,16 +2079,18 @@ button.book-now{
 }
 
 /* ✅ Price highlight style (bigger + premium) */
-.vrb-price-text{
-  display: inline-block;
-  margin-top: 8px;
+.resort-price,
+.vrb-price-text,
+.price{
+  display: inline-block !important;
+  margin-top: 8px !important;
   font-size: 18px !important;
   font-weight: 950 !important;
   color: #0f172a !important;
-  padding: 6px 12px;
-  border-radius: 14px;
-  background: rgba(255,111,0,0.08);
-  border: 1px solid rgba(255,111,0,0.18);
+  padding: 6px 12px !important;
+  border-radius: 14px !important;
+  background: rgba(255,111,0,0.08) !important;
+  border: 1px solid rgba(255,111,0,0.18) !important;
 }
 
 /* Mobile */
@@ -2081,7 +2102,9 @@ button.book-now{
     font-size: 18px !important;
   }
 
-  .vrb-price-text{
+  .resort-price,
+  .vrb-price-text,
+  .price{
     font-size: 16px !important;
   }
 }

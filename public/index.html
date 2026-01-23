@@ -580,32 +580,47 @@
     document.addEventListener("DOMContentLoaded", () => {
 
       // ✅ Fix buttons styles by their text (View More, Book Now, Reviews)
-      document.querySelectorAll(".resort-card button, .resort-item button, .resort button, .card button")
-        .forEach(btn => {
-          const t = (btn.innerText || "").trim().toLowerCase();
+      function classifyButtons() {
+        document.querySelectorAll(".resort-card button, .resort-item button, .resort button, .card button")
+          .forEach(btn => {
+            const t = (btn.innerText || "").trim().toLowerCase();
 
-          btn.classList.remove("vrb-btn-booknow", "vrb-btn-review", "vrb-btn-viewmore");
+            // Remove existing classes
+            btn.classList.remove("vrb-btn-booknow", "vrb-btn-review", "vrb-btn-viewmore");
 
-          if(t.includes("book now")){
-            btn.classList.add("vrb-btn-booknow");
-          } 
-          else if(t.includes("view more") || t.includes("view less")){
-            btn.classList.add("vrb-btn-viewmore");
-          }
-          else if(t.includes("review")){
-            btn.classList.add("vrb-btn-review");
-          }
-        });
+            if(t.includes("book now") || t.includes("book")){
+              btn.classList.add("vrb-btn-booknow");
+            } 
+            else if(t.includes("view more") || t.includes("view less") || t.includes("view")){
+              btn.classList.add("vrb-btn-viewmore");
+            }
+            else if(t.includes("review")){
+              btn.classList.add("vrb-btn-review");
+            }
+          });
+      }
 
       // ✅ Highlight price text inside cards (₹xxxx/night)
-      document.querySelectorAll(".resort-card, .resort-item, .resort, .card").forEach(card => {
-        card.querySelectorAll("p, div, span").forEach(el => {
-          const txt = el.innerText || "";
-          if(txt.includes("₹") && (txt.includes("/night") || txt.toLowerCase().includes("from ₹"))){
-            el.classList.add("vrb-price-text");
-          }
+      function highlightPrices() {
+        document.querySelectorAll(".resort-card, .resort-item, .resort, .card").forEach(card => {
+          card.querySelectorAll("p, div, span").forEach(el => {
+            const txt = el.innerText || "";
+            if(txt.includes("₹") && (txt.includes("/night") || txt.toLowerCase().includes("from ₹"))){
+              el.classList.add("vrb-price-text");
+            }
+          });
         });
-      });
+      }
+
+      // Run immediately
+      classifyButtons();
+      highlightPrices();
+
+      // Run every 2 seconds to catch dynamically loaded content
+      setInterval(() => {
+        classifyButtons();
+        highlightPrices();
+      }, 2000);
 
     });
   </script>

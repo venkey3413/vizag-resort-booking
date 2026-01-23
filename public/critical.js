@@ -1183,9 +1183,9 @@ window.handleBookingSubmit=async function(e){
 function showPaymentInterface(bookingData){
     const paymentModal=document.createElement('div');
     paymentModal.className='payment-modal';
-    paymentModal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:20000;display:flex;align-items:center;justify-content:center;';
+    paymentModal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:200000;display:flex;align-items:center;justify-content:center;';
     paymentModal.innerHTML=`
-        <div style="background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;position:relative;max-height:90vh;overflow-y:auto;z-index:20001;">
+        <div style="background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;position:relative;max-height:90vh;overflow-y:auto;z-index:200001;">
             <span onclick="closePaymentModal(this)" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;">&times;</span>
             <h2>💳 Complete Payment</h2>
             <div style="margin:15px 0;">
@@ -1234,6 +1234,7 @@ function showPaymentInterface(bookingData){
         const modal = element ? element.closest('.payment-modal') : document.querySelector('.payment-modal');
         if (modal) {
             modal.remove();
+            document.body.style.overflow = 'auto';
         }
     };
     
@@ -1857,7 +1858,7 @@ function showCriticalNotification(message, type = 'success') {
             color: white;
             padding: 2rem;
             border-radius: 15px;
-            z-index: 10000;
+            z-index: 300000;
             box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
             font-size: 16px;
             max-width: 400px;
@@ -1884,7 +1885,7 @@ function showCriticalNotification(message, type = 'success') {
             color: white;
             padding: 2rem;
             border-radius: 15px;
-            z-index: 10000;
+            z-index: 300000;
             box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
             font-size: 16px;
             max-width: 400px;
@@ -1902,7 +1903,7 @@ function showCriticalNotification(message, type = 'success') {
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 8px;
-            z-index: 3000;
+            z-index: 300000;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             font-weight: 500;
         `;
