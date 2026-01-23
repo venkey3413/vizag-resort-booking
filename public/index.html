@@ -7,6 +7,9 @@
 
   <link rel="icon" type="image/png" href="logo.png" />
 
+  <!-- ✅ Premium Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+
   <!-- ✅ Load your premium UI -->
   <link rel="stylesheet" href="premium-ui.css" />
 
@@ -563,6 +566,41 @@
     items.forEach((el) => {
       el.classList.add("vrb-hide");
       observer.observe(el);
+    });
+  </script>
+
+  <script>
+    // ✅ Auto-connect Book Now buttons to Premium Booking Popup
+    document.addEventListener("DOMContentLoaded", () => {
+
+      document.querySelectorAll("button").forEach((btn) => {
+        const text = (btn.innerText || "").trim().toLowerCase();
+
+        // ✅ Detect Book Now buttons
+        if(text === "book now") {
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            // Try to get resort name from nearest card
+            const card = btn.closest(".resort-card, .resort-item, .card, .resort") || document;
+            let name = card.querySelector("h3") ? card.querySelector("h3").innerText.trim() : "Resort Booking";
+            let location = "Vizag";
+            let price = "0";
+
+            // If you show price like ₹10,000/night in text, extract it
+            const priceText = card.innerText.match(/₹\s?([\d,]+)/);
+            if(priceText && priceText[1]) price = priceText[1].replace(/,/g,"");
+
+            // ✅ Open your premium modal
+            if(typeof openBookingPopup === "function"){
+              openBookingPopup(name, location, price);
+            } else {
+              alert("openBookingPopup() function not found. Please add booking modal JS.");
+            }
+          });
+        }
+      });
+
     });
   </script>
 
