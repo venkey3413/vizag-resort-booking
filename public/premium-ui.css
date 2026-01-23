@@ -1804,3 +1804,182 @@ button.book-now{
   position: relative !important;
   box-shadow: 0 30px 80px rgba(0,0,0,0.3) !important;
 }
+
+/* =========================================
+   PREMIUM BRAND TEXT STYLING
+========================================= */
+
+/* ✅ PREMIUM RESORT TEXT */
+.vrb-brand-top{
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+
+  /* Premium gradient text */
+  background: linear-gradient(90deg, #ffffff, #ffe6c7, #ffffff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  /* Soft glow effect */
+  filter: drop-shadow(0 10px 24px rgba(0,0,0,0.25));
+  position: relative;
+  padding-bottom: 6px;
+}
+
+/* Premium underline */
+.vrb-brand-top::after{
+  content:"";
+  display:block;
+  width: 70px;
+  height: 3px;
+  margin: 10px auto 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.25), #ff9a3c, rgba(255,255,255,0.25));
+  box-shadow: 0 10px 22px rgba(255,154,60,0.30);
+}
+
+.vrb-brand-bottom{
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 950;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: 0 14px 30px rgba(0,0,0,0.28);
+}
+
+/* Mobile Responsive */
+@media(max-width: 950px){
+  .vrb-brand-top{
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+
+  .vrb-brand-top::after{
+    width: 55px;
+  }
+
+  .vrb-brand-bottom{
+    font-size: 15px;
+  }
+}
+
+/* =========================================
+   FINAL PREMIUM RESORT BUTTONS (CLEAN LOOK)
+   - Book Now = Orange Only
+   - Other buttons = Soft Premium Neutral
+========================================= */
+
+/* Resort Title premium */
+.resort-card h3,
+.resort-item h3,
+.resort h3,
+.card h3{
+  font-size: 20px !important;
+  font-weight: 950 !important;
+  color: #0f172a !important;
+  letter-spacing: 0.2px !important;
+  margin: 12px 0 8px !important;
+  text-transform: none !important;
+}
+
+/* All buttons base premium */
+.resort-card button,
+.resort-item button,
+.resort button,
+.card button{
+  border: 1px solid rgba(15,23,42,0.12) !important;
+  cursor: pointer !important;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.15px !important;
+  transition: 0.22s ease !important;
+
+  /* Premium neutral */
+  background: rgba(255,255,255,0.75) !important;
+  color: #0f172a !important;
+
+  /* Remove odd shadows */
+  box-shadow: none !important;
+}
+
+/* Hover premium effect */
+.resort-card button:hover,
+.resort-item button:hover,
+.resort button:hover,
+.card button:hover{
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
+  border-color: rgba(15,23,42,0.20) !important;
+}
+
+/* ✅ Book Now button = ORANGE (Only) */
+.resort-card button:nth-of-type(1),
+.resort-item button:nth-of-type(1),
+.resort button:nth-of-type(1),
+.card button:nth-of-type(1){
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 16px 30px rgba(255,111,0,0.28) !important;
+}
+
+.resort-card button:nth-of-type(1):hover,
+.resort-item button:nth-of-type(1):hover,
+.resort button:nth-of-type(1):hover,
+.card button:nth-of-type(1):hover{
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 22px 50px rgba(255,111,0,0.40) !important;
+}
+
+/* ✅ Write a Review = Premium outline */
+.resort-card button:nth-of-type(2),
+.resort-item button:nth-of-type(2),
+.resort button:nth-of-type(2),
+.card button:nth-of-type(2){
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(10,116,218,0.25) !important;
+  color: #0a74da !important;
+}
+
+/* ✅ View Reviews = Premium dark neutral */
+.resort-card button:nth-of-type(3),
+.resort-item button:nth-of-type(3),
+.resort button:nth-of-type(3),
+.card button:nth-of-type(3){
+  background: rgba(15,23,42,0.06) !important;
+  border: 1px solid rgba(15,23,42,0.14) !important;
+  color: #0f172a !important;
+}
+
+/* ✅ View More buttons (keep subtle, not orange) */
+.resort-card button:first-child,
+.resort-item button:first-child{
+  background: rgba(255,255,255,0.65) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15,23,42,0.12) !important;
+}
+
+/* ✅ Better spacing between buttons */
+.resort-card button,
+.resort-item button,
+.resort button,
+.card button{
+  margin: 8px 10px 0 0 !important;
+}
+
+/* Mobile: make buttons wrap clean */
+@media(max-width: 750px){
+  .resort-card button,
+  .resort-item button,
+  .resort button,
+  .card button{
+    width: auto !important;
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+  }
+}

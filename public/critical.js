@@ -353,9 +353,11 @@ window.bookNow=function(resortId,resortName){
                 phoneInput.blur();
             }
             
-            // Hide OTP elements
-            document.getElementById('sendEmailOtpBtn').style.display = 'none';
-            document.getElementById('emailOtpGroup').style.display = 'none';
+            // Hide OTP elements (if they exist)
+            const sendEmailOtpBtn = document.getElementById('sendEmailOtpBtn');
+            const emailOtpGroup = document.getElementById('emailOtpGroup');
+            if (sendEmailOtpBtn) sendEmailOtpBtn.style.display = 'none';
+            if (emailOtpGroup) emailOtpGroup.style.display = 'none';
             
             // Enable booking button by default
             const bookBtn = document.querySelector('#bookingModal .book-btn');
@@ -820,6 +822,7 @@ window.bookNow=function(resortId,resortName){
             }
             
             modal.style.display='block';
+            modal.classList.add('show');
         }
     }else{
         showCriticalNotification('Please wait for page to load completely.', 'error');
