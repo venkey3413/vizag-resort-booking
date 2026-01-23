@@ -1202,3 +1202,193 @@ img{ max-width:100%; display:block; }
     padding: 26px 16px !important;
   }
 }
+
+/* =========================================
+   PREMIUM UI FOR OLD RESORT LISTING CARDS
+   (CSS ONLY - no HTML change required)
+========================================= */
+
+/* ✅ Main resort grid fix */
+.resort-container,
+.resorts-container,
+#resortsContainer,
+.resort-list,
+.resort-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+  gap: 22px !important;
+  align-items: stretch !important;
+  padding: 30px 0 !important;
+}
+
+/* ✅ Each resort card */
+.resort-card,
+.resort-item,
+.resort,
+.card {
+  background: rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 16px 45px rgba(2,8,20,0.08) !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  transition: 0.25s ease !important;
+  position: relative !important;
+}
+
+/* Hover premium effect */
+.resort-card:hover,
+.resort-item:hover,
+.resort:hover,
+.card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 26px 75px rgba(2,8,20,0.14) !important;
+}
+
+/* ✅ Resort Image */
+.resort-card img,
+.resort-item img,
+.card img,
+.resort img {
+  width: 100% !important;
+  height: 220px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 0 !important;
+  transition: 0.35s ease !important;
+}
+
+.resort-card:hover img,
+.resort-item:hover img,
+.card:hover img,
+.resort:hover img {
+  transform: scale(1.06) !important;
+}
+
+/* ✅ Make inside text padding nice */
+.resort-card > div,
+.resort-item > div,
+.resort > div,
+.card > div {
+  padding: 16px 18px !important;
+}
+
+/* ✅ Resort Title */
+.resort-card h3,
+.resort-item h3,
+.resort h3,
+.card h3,
+.resort-card strong,
+.resort-item strong {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+  margin-top: 10px !important;
+  margin-bottom: 8px !important;
+}
+
+/* ✅ Location / meta text */
+.resort-card p,
+.resort-item p,
+.resort p,
+.card p {
+  color: #475569 !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+}
+
+/* ✅ Price Highlight */
+.resort-card .price,
+.resort-item .price,
+.resort .price {
+  font-weight: 900 !important;
+  font-size: 16px !important;
+  color: #0f172a !important;
+}
+
+/* ✅ Amenities block - convert to badge style */
+.resort-card .amenities,
+.resort-item .amenities,
+.resort .amenities {
+  margin-top: 10px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.resort-card .amenities span,
+.resort-item .amenities span,
+.resort .amenities span {
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  background: rgba(10,116,218,0.10) !important;
+  color: #0a74da !important;
+  border: 1px solid rgba(10,116,218,0.14) !important;
+}
+
+/* ✅ Buttons look premium */
+.resort-card button,
+.resort-item button,
+.resort button,
+.card button {
+  border: none !important;
+  cursor: pointer !important;
+  border-radius: 14px !important;
+  padding: 10px 14px !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  transition: 0.2s ease !important;
+}
+
+/* Book Now Premium */
+.resort-card .book-now,
+.resort-item .book-now,
+button.book-now {
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(255,111,0,0.32) !important;
+}
+
+.resort-card .book-now:hover,
+.resort-item .book-now:hover,
+button.book-now:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* Secondary buttons */
+.resort-card .write-review,
+.resort-item .write-review,
+.resort-card .view-review,
+.resort-item .view-review {
+  background: rgba(15,23,42,0.06) !important;
+  color: #0f172a !important;
+}
+
+/* ✅ Improve small links like View Map / View More */
+.resort-card a,
+.resort-item a,
+.resort a {
+  color: #0a74da !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+}
+
+.resort-card a:hover,
+.resort-item a:hover,
+.resort a:hover {
+  text-decoration: underline !important;
+}
+
+/* ✅ Mobile spacing */
+@media(max-width: 700px){
+  .resort-container,
+  .resorts-container,
+  #resortsContainer,
+  .resort-list,
+  .resort-grid{
+    grid-template-columns: 1fr !important;
+  }
+}

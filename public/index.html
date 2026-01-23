@@ -456,6 +456,19 @@
       // If critical.js not loaded, show message
       alert('Please wait for the booking system to load completely.');
     }
+    
+    // Make openBookingModal available globally for critical.js compatibility
+    window.openBookingModal = function(resortId) {
+      if (typeof bookNow === 'function') {
+        const resort = window.resorts?.find(r => r.id == resortId);
+        if (resort) {
+          bookNow(resortId, resort.name);
+        }
+      }
+    };
+    
+    // Make openBookingPopup available globally
+    window.openBookingPopup = openBookingPopup;
 
     function closeBookingPopup() {
       document.getElementById("bookingModal").classList.remove("show");
