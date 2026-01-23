@@ -1983,3 +1983,105 @@ button.book-now{
     font-size: 12px !important;
   }
 }
+
+/* =========================================
+   FINAL PREMIUM RESORT CARD TYPO + BUTTONS
+   - View More = Light
+   - Book Now = Orange
+   - Price = Bigger + premium highlight
+========================================= */
+
+/* ✅ Resort Name premium font style */
+.resort-card h3,
+.resort-item h3,
+.resort h3,
+.card h3{
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 950 !important;
+  color: #0f172a !important;
+  letter-spacing: 0.2px !important;
+  margin: 12px 0 10px !important;
+  text-transform: none !important;
+}
+
+/* ✅ All buttons - default premium light */
+.resort-card button,
+.resort-item button,
+.resort button,
+.card button{
+  border: 1px solid rgba(15,23,42,0.14) !important;
+  cursor: pointer !important;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  transition: 0.22s ease !important;
+
+  background: rgba(255,255,255,0.75) !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+/* Hover effect */
+.resort-card button:hover,
+.resort-item button:hover,
+.resort button:hover,
+.card button:hover{
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
+}
+
+/* ✅ Default View More style (light + premium) */
+.vrb-btn-viewmore{
+  background: rgba(15,23,42,0.06) !important;
+  border: 1px solid rgba(15,23,42,0.14) !important;
+  color: #0f172a !important;
+}
+
+/* ✅ Book Now = Orange Only */
+.vrb-btn-booknow{
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 16px 32px rgba(255,111,0,0.28) !important;
+}
+
+.vrb-btn-booknow:hover{
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 22px 55px rgba(255,111,0,0.40) !important;
+}
+
+/* ✅ Review buttons (clean blue outline) */
+.vrb-btn-review{
+  background: rgba(10,116,218,0.08) !important;
+  border: 1px solid rgba(10,116,218,0.22) !important;
+  color: #0a74da !important;
+}
+
+/* ✅ Price highlight style (bigger + premium) */
+.vrb-price-text{
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  color: #0f172a !important;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: rgba(255,111,0,0.08);
+  border: 1px solid rgba(255,111,0,0.18);
+}
+
+/* Mobile */
+@media(max-width: 750px){
+  .resort-card h3,
+  .resort-item h3,
+  .resort h3,
+  .card h3{
+    font-size: 18px !important;
+  }
+
+  .vrb-price-text{
+    font-size: 16px !important;
+  }
+}

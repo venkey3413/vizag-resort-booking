@@ -13,23 +13,89 @@ function initBannerRotation(){
 }
 
 // Initialize when DOM is ready
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){initBannerRotation();setupModalEvents()})}else{initBannerRotation();setupModalEvents()}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){initBannerRotation();setupModalEvents();setupUniversalModalClose()})}else{initBannerRotation();setupModalEvents();setupUniversalModalClose()}
 
-// Modal close function
+// Universal modal close functionality
+function setupUniversalModalClose() {
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+        // Check if click is on modal backdrop
+        if (e.target.classList.contains('vrb-modal') || 
+            e.target.classList.contains('payment-modal') ||
+            e.target.id === 'resortGalleryModal' ||
+            e.target.id === 'reviewModal' ||
+            e.target.id === 'viewReviewsModal') {
+            
+            if (e.target.classList.contains('vrb-modal') || e.target.id === 'bookingModal') {
+                window.closeBookingModal();
+            } else if (e.target.classList.contains('payment-modal')) {
+                window.closePaymentModal();
+            } else if (e.target.id === 'resortGalleryModal') {
+                closeResortGallery();
+            } else if (e.target.id === 'reviewModal') {
+                window.closeReviewModal();
+            } else if (e.target.id === 'viewReviewsModal') {
+                window.closeViewReviewsModal();
+            }
+        }
+    });
+    
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            // Close any open modal
+            if (document.getElementById('bookingModal') && document.getElementById('bookingModal').classList.contains('show')) {
+                window.closeBookingModal();
+            } else if (document.querySelector('.payment-modal')) {
+                window.closePaymentModal();
+            } else if (document.getElementById('resortGalleryModal')) {
+                closeResortGallery();
+            } else if (document.getElementById('reviewModal')) {
+                window.closeReviewModal();
+            } else if (document.getElementById('viewReviewsModal')) {
+                window.closeViewReviewsModal();
+            }
+        }
+    });
+}
+
+// Modal close function - unified for all modals
 window.closeModal=function(){
     const modal=document.getElementById('bookingModal');
     if(modal){
         modal.style.display='none';
+        modal.classList.remove('show');
         document.getElementById('bookingForm').reset();
+        document.body.style.overflow = 'auto';
     }
 }
+
+// Booking modal specific close function
+window.closeBookingModal=function(){
+    const modal=document.getElementById('bookingModal');
+    if(modal){
+        modal.style.display='none';
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Alias for compatibility
+window.closeBookingPopup = window.closeBookingModal;
 
 // Setup modal events
 function setupModalEvents(){
     // Close button - wait for DOM
     setTimeout(function(){
-        const closeBtn=document.querySelector('.close');
-        if(closeBtn)closeBtn.onclick=window.closeModal;
+        // Multiple selectors for close buttons
+        const closeBtns = document.querySelectorAll('.close, .vrb-close, [onclick*="closeModal"], [onclick*="closeBookingModal"]');
+        closeBtns.forEach(btn => {
+            btn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.closeBookingModal();
+            };
+        });
         
         // Form submission
         const form=document.getElementById('bookingForm');
@@ -337,6 +403,8 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('resortId').value=resortId;
             document.getElementById('resortPrice').value=resort.price;
             document.getElementById('modalResortName').textContent=`Book ${resortName}`;
+            document.getElementById('modalResortLocation').textContent=resort.location;
+            document.getElementById('modalResortPrice').textContent=`₹${resort.price.toLocaleString()}/night`;
             
             // Reset coupon data
             window.appliedCouponCode = null;
@@ -577,10 +645,14 @@ window.bookNow=function(resortId,resortName){
                 const checkIn = document.getElementById('checkIn').value;
                 const checkOut = document.getElementById('checkOut').value;
                 
+                console.log('💰 Updating pricing - CheckIn:', checkIn, 'CheckOut:', checkOut);
+                
                 if (checkIn && checkOut) {
                     const checkInDate = new Date(checkIn);
                     const checkOutDate = new Date(checkOut);
                     const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
+                    
+                    console.log('💰 Nights calculated:', nights);
                     
                     // Apply dynamic pricing
                     const checkInDayOfWeek = checkInDate.getDay();
@@ -607,8 +679,16 @@ window.bookNow=function(resortId,resortName){
                     const platformFee = Math.round(basePrice * 0.015);
                     const total = basePrice + platformFee;
                     
-                    document.getElementById('baseAmount').textContent = `₹${basePrice.toLocaleString()}`;
-                    document.getElementById('platformFee').textContent = `₹${platformFee.toLocaleString()}`;
+                    console.log('💰 Pricing calculated - Base:', basePrice, 'Platform Fee:', platformFee, 'Total:', total);
+                    
+                    // Update pricing display elements
+                    const baseAmountEl = document.getElementById('baseAmount');
+                    const platformFeeEl = document.getElementById('platformFee');
+                    const totalAmountEl = document.getElementById('totalAmount');
+                    
+                    if (baseAmountEl) baseAmountEl.textContent = `₹${basePrice.toLocaleString()}`;
+                    if (platformFeeEl) platformFeeEl.textContent = `₹${platformFee.toLocaleString()}`;
+                    if (totalAmountEl) totalAmountEl.textContent = `₹${total.toLocaleString()}`;
                     
                     // Recalculate coupon discount if applied
                     if (window.appliedCouponCode && window.bookingModalCoupons) {
@@ -634,34 +714,56 @@ window.bookNow=function(resortId,resortName){
                                 
                                 window.appliedDiscountAmount = discountAmount;
                                 const finalTotal = total - discountAmount;
-                                document.getElementById('totalAmount').textContent = `₹${finalTotal.toLocaleString()}`;
-                                document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
-                                document.getElementById('discountRow').style.display = 'block';
-                                document.getElementById('couponMessage').innerHTML = `<span style="color:#28a745;">Coupon applied! Saved ₹${discountAmount.toLocaleString()}</span>`;
+                                if (totalAmountEl) totalAmountEl.textContent = `₹${finalTotal.toLocaleString()}`;
+                                const discountEl = document.getElementById('discountAmount');
+                                if (discountEl) discountEl.textContent = `-₹${discountAmount.toLocaleString()}`;
+                                const discountRowEl = document.getElementById('discountRow');
+                                if (discountRowEl) discountRowEl.style.display = 'block';
+                                const couponMsgEl = document.getElementById('couponMessage');
+                                if (couponMsgEl) couponMsgEl.innerHTML = `<span style="color:#28a745;">Coupon applied! Saved ₹${discountAmount.toLocaleString()}</span>`;
                             } else {
                                 // Coupon not valid for new date
                                 window.appliedCouponCode = null;
                                 window.appliedDiscountAmount = 0;
-                                document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
-                                document.getElementById('discountRow').style.display = 'none';
+                                if (totalAmountEl) totalAmountEl.textContent = `₹${total.toLocaleString()}`;
+                                const discountRowEl = document.getElementById('discountRow');
+                                if (discountRowEl) discountRowEl.style.display = 'none';
                                 const validDays = coupon.day_type === 'weekday' ? 'weekdays (Mon-Thu)' : 'weekends (Fri-Sun)';
-                                document.getElementById('couponMessage').innerHTML = `<span style="color:#dc3545;">Coupon removed - valid only for ${validDays}</span>`;
+                                const couponMsgEl = document.getElementById('couponMessage');
+                                if (couponMsgEl) couponMsgEl.innerHTML = `<span style="color:#dc3545;">Coupon removed - valid only for ${validDays}</span>`;
                             }
                         } else {
-                            document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
-                            document.getElementById('discountRow').style.display = 'none';
+                            if (totalAmountEl) totalAmountEl.textContent = `₹${total.toLocaleString()}`;
+                            const discountRowEl = document.getElementById('discountRow');
+                            if (discountRowEl) discountRowEl.style.display = 'none';
                         }
                     } else {
-                        document.getElementById('totalAmount').textContent = `₹${total.toLocaleString()}`;
-                        document.getElementById('discountRow').style.display = 'none';
+                        if (totalAmountEl) totalAmountEl.textContent = `₹${total.toLocaleString()}`;
+                        const discountRowEl = document.getElementById('discountRow');
+                        if (discountRowEl) discountRowEl.style.display = 'none';
                     }
+                } else {
+                    console.log('💰 Missing dates for pricing calculation');
+                    // Set default pricing when dates are missing
+                    const basePrice = resort.price;
+                    const platformFee = Math.round(basePrice * 0.015);
+                    const total = basePrice + platformFee;
+                    
+                    const baseAmountEl = document.getElementById('baseAmount');
+                    const platformFeeEl = document.getElementById('platformFee');
+                    const totalAmountEl = document.getElementById('totalAmount');
+                    
+                    if (baseAmountEl) baseAmountEl.textContent = `₹${basePrice.toLocaleString()}`;
+                    if (platformFeeEl) platformFeeEl.textContent = `₹${platformFee.toLocaleString()}`;
+                    if (totalAmountEl) totalAmountEl.textContent = `₹${total.toLocaleString()}`;
                 }
             }
             
-            // Initial pricing calculation with delay
+            // Initial pricing calculation - call immediately and after DOM updates
+            updatePricing();
             setTimeout(() => {
                 updatePricing();
-            }, 200);
+            }, 100);
             
             // Function to show dynamic pricing for selected date
             window.showDynamicPriceForDate = function(selectedDate) {
@@ -823,6 +925,7 @@ window.bookNow=function(resortId,resortName){
             
             modal.style.display='block';
             modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
         }
     }else{
         showCriticalNotification('Please wait for page to load completely.', 'error');
@@ -1073,17 +1176,17 @@ window.handleBookingSubmit=async function(e){
     
     console.log('✅ Booking data prepared:', bookingData);
     showPaymentInterface(bookingData);
-    window.closeModal();
+    window.closeBookingModal();
 }
 
 // Enhanced payment interface with card payment
 function showPaymentInterface(bookingData){
     const paymentModal=document.createElement('div');
     paymentModal.className='payment-modal';
-    paymentModal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    paymentModal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:20000;display:flex;align-items:center;justify-content:center;';
     paymentModal.innerHTML=`
-        <div style="background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;position:relative;max-height:90vh;overflow-y:auto;">
-            <span onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;">&times;</span>
+        <div style="background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;position:relative;max-height:90vh;overflow-y:auto;z-index:20001;">
+            <span onclick="closePaymentModal(this)" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;">&times;</span>
             <h2>💳 Complete Payment</h2>
             <div style="margin:15px 0;">
                 <p><strong>Resort:</strong> ${bookingData.resortName.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}</p>
@@ -1121,10 +1224,18 @@ function showPaymentInterface(bookingData){
                 </div>
             </div>
             
-            <button onclick="this.parentElement.parentElement.remove()" style="background:#dc3545;color:white;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;width:100%;">Cancel</button>
+            <button onclick="closePaymentModal()" style="background:#dc3545;color:white;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;width:100%;">Cancel</button>
         </div>
     `;
     document.body.appendChild(paymentModal);
+    
+    // Payment modal close function
+    window.closePaymentModal = function(element) {
+        const modal = element ? element.closest('.payment-modal') : document.querySelector('.payment-modal');
+        if (modal) {
+            modal.remove();
+        }
+    };
     
     window.pendingCriticalBooking=bookingData;
     
@@ -1372,6 +1483,23 @@ function closeResortGallery(){
         document.body.style.overflow='auto';
     }
 }
+
+// Review modal close functions
+window.closeReviewModal = function() {
+    const modal = document.getElementById('reviewModal');
+    if (modal) {
+        modal.remove();
+        document.body.style.overflow='auto';
+    }
+};
+
+window.closeViewReviewsModal = function() {
+    const modal = document.getElementById('viewReviewsModal');
+    if (modal) {
+        modal.remove();
+        document.body.style.overflow='auto';
+    }
+};
 
 // Make functions globally accessible
 window.openGallery=openGallery;

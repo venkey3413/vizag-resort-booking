@@ -312,7 +312,7 @@
   <!-- ✅ BOOKING MODAL -->
   <div class="vrb-modal" id="bookingModal">
     <div class="vrb-modal-card">
-      <button class="vrb-close" onclick="closeBookingPopup()">✕</button>
+      <button class="vrb-close" onclick="closeBookingModal()">✕</button>
 
       <div class="vrb-modal-head">
         <h2 id="modalResortName">Confirm Booking</h2>
@@ -377,7 +377,7 @@
           Proceed to Payment
         </button>
 
-        <button type="button" class="vrb-btn vrb-btn-light" onclick="closeBookingPopup()">
+        <button type="button" class="vrb-btn vrb-btn-light" onclick="closeBookingModal()">
           Cancel
         </button>
       </form>
@@ -473,10 +473,17 @@
     // Make openBookingPopup available globally
     window.openBookingPopup = openBookingPopup;
 
-    function closeBookingPopup() {
-      document.getElementById("bookingModal").classList.remove("show");
-      document.body.style.overflow = "auto";
+    function closeBookingModal() {
+      const modal = document.getElementById("bookingModal");
+      if (modal) {
+        modal.classList.remove("show");
+        modal.style.display = "none";
+        document.body.style.overflow = "auto";
+      }
     }
+    
+    // Alias for compatibility
+    window.closeBookingPopup = closeBookingModal;
 
     function applyCouponCode(){
       // Remove hardcoded coupon validation - use database coupons only
@@ -566,6 +573,40 @@
     items.forEach((el) => {
       el.classList.add("vrb-hide");
       observer.observe(el);
+    });
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // ✅ Fix buttons styles by their text (View More, Book Now, Reviews)
+      document.querySelectorAll(".resort-card button, .resort-item button, .resort button, .card button")
+        .forEach(btn => {
+          const t = (btn.innerText || "").trim().toLowerCase();
+
+          btn.classList.remove("vrb-btn-booknow", "vrb-btn-review", "vrb-btn-viewmore");
+
+          if(t.includes("book now")){
+            btn.classList.add("vrb-btn-booknow");
+          } 
+          else if(t.includes("view more") || t.includes("view less")){
+            btn.classList.add("vrb-btn-viewmore");
+          }
+          else if(t.includes("review")){
+            btn.classList.add("vrb-btn-review");
+          }
+        });
+
+      // ✅ Highlight price text inside cards (₹xxxx/night)
+      document.querySelectorAll(".resort-card, .resort-item, .resort, .card").forEach(card => {
+        card.querySelectorAll("p, div, span").forEach(el => {
+          const txt = el.innerText || "";
+          if(txt.includes("₹") && (txt.includes("/night") || txt.toLowerCase().includes("from ₹"))){
+            el.classList.add("vrb-price-text");
+          }
+        });
+      });
+
     });
   </script>
 
