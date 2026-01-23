@@ -1678,3 +1678,129 @@ button.book-now{
     font-size: 14px;
   }
 }
+
+/* =========================================
+   FINAL OVERRIDE: Vibrant Resort Card Buttons
+   (Paste at bottom of premium-ui.css)
+========================================= */
+
+/* Target all buttons inside resort cards */
+.resort-card button,
+.resort-item button,
+.resort button,
+.card button{
+  border: none !important;
+  cursor: pointer !important;
+  border-radius: 999px !important;
+  padding: 11px 16px !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.2px !important;
+  transition: 0.25s ease !important;
+  box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
+  margin-top: 10px !important;
+}
+
+/* ✅ Default buttons = Blue gradient */
+.resort-card button{
+  background: linear-gradient(135deg, #0a74da, #1aa3ff) !important;
+  color: #fff !important;
+}
+
+/* ✅ Hover effect */
+.resort-card button:hover,
+.resort-item button:hover,
+.resort button:hover,
+.card button:hover{
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 22px 55px rgba(2,8,20,0.20) !important;
+}
+
+/* ===========================
+   Specific button colors based on text
+=========================== */
+
+/* ✅ BOOK NOW = Orange (Primary CTA) */
+.resort-card button:nth-of-type(1),
+.resort-item button:nth-of-type(1),
+.resort button:nth-of-type(1),
+.card button:nth-of-type(1){
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  box-shadow: 0 18px 40px rgba(255,111,0,0.35) !important;
+}
+
+/* ✅ Write a Review = Purple */
+.resort-card button:nth-of-type(2),
+.resort-item button:nth-of-type(2),
+.resort button:nth-of-type(2),
+.card button:nth-of-type(2){
+  background: linear-gradient(135deg, #7c3aed, #a855f7) !important;
+  color: #fff !important;
+  box-shadow: 0 18px 40px rgba(124,58,237,0.35) !important;
+}
+
+/* ✅ View Reviews = Green */
+.resort-card button:nth-of-type(3),
+.resort-item button:nth-of-type(3),
+.resort button:nth-of-type(3),
+.card button:nth-of-type(3){
+  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  color: #fff !important;
+  box-shadow: 0 18px 40px rgba(34,197,94,0.30) !important;
+}
+
+/* ✅ View More buttons = Dark / premium gray */
+.resort-card button:has(span),
+.resort-item button:has(span){
+  background: rgba(15,23,42,0.08) !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(15,23,42,0.14) !important;
+}
+
+/* Mobile spacing improvements */
+@media(max-width: 700px){
+  .resort-card button,
+  .resort-item button,
+  .resort button,
+  .card button{
+    width: auto !important;
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* =========================================
+   BOOKING MODAL FIX
+========================================= */
+
+.vrb-modal{
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0,0,0,0.7) !important;
+  z-index: 99999 !important;
+  display: none !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 20px !important;
+}
+
+.vrb-modal.show{
+  display: flex !important;
+}
+
+.vrb-modal-card{
+  background: white !important;
+  border-radius: 20px !important;
+  padding: 30px !important;
+  max-width: 500px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  position: relative !important;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.3) !important;
+}

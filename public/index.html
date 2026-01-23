@@ -570,16 +570,20 @@
   </script>
 
   <script>
-    // ✅ Auto-connect Book Now buttons to Premium Booking Popup
-    document.addEventListener("DOMContentLoaded", () => {
-
+    // ✅ Auto-connect Book Now buttons to Premium Booking Popup (Fixed for dynamic content)
+    function connectBookNowButtons() {
       document.querySelectorAll("button").forEach((btn) => {
+        // Skip if already connected
+        if (btn.dataset.connected) return;
+        
         const text = (btn.innerText || "").trim().toLowerCase();
 
         // ✅ Detect Book Now buttons
         if(text === "book now") {
+          btn.dataset.connected = "true";
           btn.addEventListener("click", (e) => {
             e.preventDefault();
+            e.stopPropagation();
 
             // Try to get resort name from nearest card
             const card = btn.closest(".resort-card, .resort-item, .card, .resort") || document;
@@ -591,17 +595,26 @@
             const priceText = card.innerText.match(/₹\s?([\d,]+)/);
             if(priceText && priceText[1]) price = priceText[1].replace(/,/g,"");
 
+            console.log('Book Now clicked:', {name, location, price});
+
             // ✅ Open your premium modal
             if(typeof openBookingPopup === "function"){
               openBookingPopup(name, location, price);
             } else {
-              alert("openBookingPopup() function not found. Please add booking modal JS.");
+              alert("Booking system loading... Please try again in a moment.");
             }
           });
         }
       });
+    }
 
-    });
+    // Run immediately and every 2 seconds to catch dynamically loaded buttons
+    document.addEventListener("DOMContentLoaded", connectBookNowButtons);
+    setInterval(connectBookNowButtons, 2000);
+    
+    // Also run when new content is added
+    const observer = new MutationObserver(connectBookNowButtons);
+    observer.observe(document.body, { childList: true, subtree: true });
   </script>
 
 </body>
