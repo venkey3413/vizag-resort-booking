@@ -1031,7 +1031,7 @@ img{ max-width:100%; display:block; }
 .vrb-chat-header{
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  padding: 20px;
+  padding: 12px 15px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1063,21 +1063,21 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-chat-title img{
-  width: 45px;
-  height: 45px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .vrb-chat-title h4{
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .chat-status{
   margin: 2px 0 0 0;
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.9;
   display: flex;
   align-items: center;
@@ -1088,11 +1088,11 @@ img{ max-width:100%; display:block; }
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
-  width: 35px;
-  height: 35px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;

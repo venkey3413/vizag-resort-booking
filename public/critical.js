@@ -2145,10 +2145,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('🔍 Hero search clicked - Value:', selectedValue, 'Text:', selectedText);
             
-            // ✅ CRITICAL FIX: Force reload all resorts from server first
+            // Handle "All Locations" selection
             if (!selectedValue || selectedValue === 'All Locations' || selectedText === 'All Locations') {
-                console.log('📍 Forcing reload of ALL resorts from server');
-                forceReloadAllResorts();
+                console.log('📍 Showing all resorts');
+                renderResorts(window.resorts || []);
+                document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
+                showCriticalNotification(`Showing all resorts`, 'success');
                 return;
             }
             
@@ -2180,60 +2182,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // ✅ Handle dropdown changes for immediate filtering
-    if (locationSelect) {
-        locationSelect.addEventListener('change', function() {
-            const selectedValue = this.value;
-            console.log('📍 Dropdown changed to:', selectedValue);
-            
-            // Auto-filter when "All Locations" is selected
-            if (selectedValue === 'All Locations') {
-                console.log('📍 Auto-reloading all resorts from dropdown change');
-                forceReloadAllResorts();
-            }
-        });
-    }
+
     
     // ✅ Initialize premium chat widget
     initializePremiumChatWidget();
 });
 
-// ✅ NEW: Force reload all resorts from server
-async function forceReloadAllResorts() {
-    try {
-        console.log('🔄 Force reloading all resorts from server...');
-        
-        // Add cache-busting parameter
-        const cacheBuster = Date.now();
-        const response = await fetch(`/api/resorts?_cb=${cacheBuster}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
-        });
-        
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
-        const allResorts = await response.json();
-        console.log('✅ Reloaded', allResorts.length, 'resorts from server');
-        
-        // Update global resorts and render
-        window.resorts = allResorts;
-        renderResorts(allResorts);
-        
-        // Scroll to resorts section
-        document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
-        
-        showCriticalNotification(`Showing all ${allResorts.length} resorts`, 'success');
-        
-    } catch (error) {
-        console.error('❌ Failed to reload resorts:', error);
-        showCriticalNotification('Failed to load resorts. Please refresh the page.', 'error');
-    }
-}
+
 
 // ✅ Premium Chat Widget Integration with MCP Server
 function initializePremiumChatWidget() {
