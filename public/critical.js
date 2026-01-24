@@ -2273,6 +2273,31 @@ function initializePremiumChatWidget() {
         
         chatBody.appendChild(messageDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
+        
+        // Add tool buttons after welcome message
+        if (sender === 'bot' && text.includes('Welcome to Vizag Resort Booking!')) {
+            addToolButtons();
+        }
+    }
+    
+    // Add tool buttons after welcome message
+    function addToolButtons() {
+        const toolButtonsDiv = document.createElement('div');
+        toolButtonsDiv.className = 'vrb-msg vrb-bot';
+        toolButtonsDiv.innerHTML = `
+            <div class="bot-avatar">🤖</div>
+            <div class="msg-content">
+                <div class="vrb-chat-tools">
+                    <button class="mcp-tool-btn" data-tool="refund">💰 Refund Policy</button>
+                    <button class="mcp-tool-btn" data-tool="checkin">🏨 Check-in Info</button>
+                    <button class="mcp-tool-btn" data-tool="rules">📋 Resort Rules</button>
+                    <button class="mcp-tool-btn" data-tool="availability">📅 Check Availability</button>
+                    <button class="mcp-tool-btn" data-tool="coupons">🎫 Active Coupons</button>
+                </div>
+            </div>
+        `;
+        chatBody.appendChild(toolButtonsDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
     }
     
     // Send button click

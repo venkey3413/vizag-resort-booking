@@ -1205,6 +1205,17 @@ img{ max-width:100%; display:block; }
   grid-column: 1 / -1;
 }
 
+.vrb-chat-tools{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.vrb-chat-tools .mcp-tool-btn:nth-child(5){
+  grid-column: 1 / -1;
+}
+
 .mcp-tool-btn{
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
