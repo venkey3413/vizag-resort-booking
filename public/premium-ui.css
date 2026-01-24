@@ -1,206 +1,189 @@
-/* =========================================
-   VIZAG RESORT BOOKING - PREMIUM UI V2
-   Latest Modern Design with Glass Effects
-========================================= */
+/* ===========================
+   Premium UI (Resort + Food)
+   File: public/premium-ui.css
+   =========================== */
 
 :root{
-  --brand: #0066ff;
-  --brand2: #00a8ff;
-  --accent: #ff6b35;
-  --dark: #0f172a;
-  --text: #1e293b;
-  --muted: #64748b;
-  --glass: rgba(255,255,255,0.95);
-  --border: rgba(15,23,42,0.1);
-  --shadow: 0 20px 60px rgba(0,0,0,0.12);
-  --shadow2: 0 30px 80px rgba(0,0,0,0.15);
-  --radius: 20px;
+  --brand:#0a74da;
+  --accent:#ff6f00;
+  --accent2:#ff9a3c;
+
+  --dark:#0b1220;
+  --text:#0f172a;
+  --muted:#475569;
+
+  --glass: rgba(255,255,255,.92);
+  --border: rgba(15,23,42,.12);
+  --shadow: 0 16px 46px rgba(2,8,20,.14);
+
+  --radius: 18px;
 }
 
-*{ margin:0; padding:0; box-sizing:border-box; }
+/* ✅ Premium background */
 body{
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%) !important;
   color: var(--text);
-  line-height: 1.6;
 }
-html{ scroll-behavior:smooth; }
 
-a{ text-decoration:none; }
-img{ max-width:100%; display:block; }
+html{ scroll-behavior: smooth; }
 
-/* =========================
-   MODERN GLASS NAVBAR
-========================= */
+/* =============================
+   PREMIUM NAVBAR
+   ============================= */
 
 .vrb-navbar{
   position: sticky;
   top: 0;
-  z-index: 1000;
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  padding: 16px 0;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  z-index: 999;
+  background: rgba(10,116,218,.90);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.16);
+  padding: 14px 0;
 }
 
 .vrb-nav-container{
-  width: min(1400px, 95%);
+  width: min(1200px, 92%);
   margin: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 18px;
 }
 
 .vrb-logo{
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  text-decoration: none;
   color: #fff;
-  font-weight: 800;
+  font-weight: 900;
   font-size: 20px;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  letter-spacing: .2px;
 }
 
 .vrb-logo img{
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(255,255,255,0.3);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-}
-
-.vrb-nav-links{
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  border: 2px solid rgba(255,255,255,.35);
+  box-shadow: 0 8px 20px rgba(0,0,0,.22);
 }
 
 .vrb-nav-links ul{
-  display: flex;
-  list-style: none;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  list-style:none;
+  margin:0;
+  padding:0;
 }
 
 .vrb-nav-links a{
-  color: rgba(255,255,255,0.9);
-  font-weight: 600;
-  font-size: 15px;
-  padding: 10px 16px;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  color: rgba(255,255,255,.92);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  transition: 0.2s ease;
 }
 
-.vrb-nav-links a:hover,
-.vrb-nav-links a.active{
-  background: rgba(255,255,255,0.2);
+.vrb-nav-links a:hover{
+  background: rgba(255,255,255,.14);
   color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.vrb-nav-links a.active{
+  background: rgba(255,255,255,.18);
+  color: #fff;
 }
 
 .vrb-nav-actions{
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
 }
 
 .vrb-btn-nav{
-  background: linear-gradient(135deg, var(--accent), #ff8a65);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #fff;
-  font-weight: 700;
-  padding: 12px 20px;
-  border-radius: 25px;
-  box-shadow: 0 8px 25px rgba(255,107,53,0.4);
-  transition: all 0.3s ease;
+  font-weight: 900;
+  text-decoration:none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  box-shadow: 0 14px 30px rgba(255,111,0,.35);
+  transition: 0.2s ease;
 }
 
-.vrb-btn-nav:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(255,107,53,0.5);
-}
+.vrb-btn-nav:hover{ transform: translateY(-1px); }
 
 .vrb-whatsapp{
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  font-weight: 600;
-  padding: 12px 18px;
-  border-radius: 25px;
-  border: 1px solid rgba(255,255,255,0.2);
-  transition: all 0.3s ease;
+  background: rgba(255,255,255,.14);
+  color:#fff;
+  text-decoration:none;
+  font-weight: 900;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.22);
 }
 
-.vrb-whatsapp:hover{
-  background: rgba(255,255,255,0.25);
-  transform: translateY(-2px);
-}
+.vrb-whatsapp:hover{ background: rgba(255,255,255,.18); }
 
 .vrb-hamburger{
-  display: none;
-  border: none;
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  font-size: 20px;
-  padding: 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.2);
+  display:none;
+  border:none;
+  background: rgba(255,255,255,.14);
+  color:#fff;
+  font-size: 18px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,.22);
 }
 
 @media (max-width: 950px){
-  .vrb-hamburger{ display: flex; }
+  .vrb-hamburger{ display:inline-flex; }
 
   .vrb-nav-links{
-    position: absolute;
-    top: 80px;
-    left: 5%;
-    right: 5%;
-    display: none;
+    position:absolute;
+    top: 72px;
+    left: 4%;
+    right: 4%;
+    display:none;
     flex-direction: column;
-    gap: 0;
-    padding: 20px;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(10,116,218,.96);
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 18px 40px rgba(0,0,0,.22);
   }
-  
+
+  .vrb-nav-links.open{ display:flex; }
+
   .vrb-nav-links ul{
     flex-direction: column;
-    gap: 0;
+    align-items:flex-start;
+    width:100%;
   }
-  
-  .vrb-nav-links a{
-    color: var(--text);
-    padding: 15px 20px;
-    border-radius: 12px;
-    margin: 4px 0;
-  }
-  
-  .vrb-nav-links.open{ display: flex; }
 }
 
-/* =========================
+/* ===========================
    HERO
-========================= */
+   =========================== */
 
 .vrb-hero{
   position: relative;
-  min-height: 560px;
+  min-height: 540px;
   display:flex;
   align-items:center;
   justify-content:center;
   padding: 70px 14px;
   background: url("https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800")
     center/cover no-repeat;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
+  border-bottom-left-radius: 26px;
+  border-bottom-right-radius: 26px;
   overflow:hidden;
 }
 
@@ -216,16 +199,17 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-hero-content{
-  position: relative;
-  z-index: 2;
+  position:relative;
+  z-index:2;
   width: min(1100px, 94%);
   text-align:center;
   color:#fff;
 }
 
 .vrb-hero-content h1{
-  font-size: 44px;
-  font-weight: 900;
+  font-family: "Playfair Display", serif;
+  font-size: 48px;
+  font-weight: 800;
   letter-spacing:.3px;
   text-shadow: 0 12px 30px rgba(0,0,0,.35);
 }
@@ -233,7 +217,8 @@ img{ max-width:100%; display:block; }
 .vrb-hero-content p{
   margin-top: 10px;
   font-size: 16px;
-  opacity: .92;
+  opacity:.95;
+  font-weight:700;
 }
 
 /* Tabs */
@@ -249,11 +234,11 @@ img{ max-width:100%; display:block; }
   border: 1px solid rgba(255,255,255,.25);
   background: rgba(255,255,255,.14);
   color:#fff;
-  padding:10px 16px;
-  border-radius:999px;
+  padding: 10px 16px;
+  border-radius: 999px;
   cursor:pointer;
-  font-weight:900;
-  transition: .2s ease;
+  font-weight: 900;
+  transition: 0.2s ease;
 }
 
 .vrb-tab-btn.active{
@@ -266,12 +251,12 @@ img{ max-width:100%; display:block; }
   margin: 18px auto 0;
   background: var(--glass);
   border: 1px solid rgba(255,255,255,.25);
-  border-radius: 18px;
+  border-radius: 22px;
   box-shadow: var(--shadow);
   padding: 16px;
   display:grid;
   grid-template-columns: 1.2fr 1fr 1fr 1fr auto;
-  gap:10px;
+  gap: 10px;
   align-items:end;
 }
 
@@ -279,22 +264,23 @@ img{ max-width:100%; display:block; }
 .vrb-tab-content.active{ display:grid; }
 
 .vrb-field{ text-align:left; }
+
 .vrb-field label{
   display:block;
-  font-size:12px;
-  font-weight:900;
+  font-size: 12px;
+  font-weight: 900;
   color: var(--text);
-  margin-bottom:6px;
+  margin-bottom: 6px;
 }
 
 .vrb-field input,
 .vrb-field select{
   width:100%;
-  padding:12px 14px;
-  border-radius:14px;
+  padding: 12px 14px;
+  border-radius: 16px;
   border: 1px solid var(--border);
   outline:none;
-  font-weight:800;
+  font-weight: 800;
 }
 
 .vrb-field input:focus,
@@ -303,542 +289,426 @@ img{ max-width:100%; display:block; }
   box-shadow: 0 0 0 4px rgba(10,116,218,.16);
 }
 
-@media(max-width:980px){
-  .vrb-hero-content h1{ font-size:30px; }
-  .vrb-search-box{ grid-template-columns:1fr; }
-}
-
-/* =========================
-   COMMON BUTTONS
-========================= */
-
+/* Buttons */
 .vrb-btn{
   border:none;
   cursor:pointer;
-  border-radius:14px;
-  padding:12px 16px;
-  font-weight:900;
-  transition:.2s ease;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-weight: 900;
+  height: 48px;
+  transition: 0.2s ease;
 }
 
 .vrb-btn-orange{
-  background: linear-gradient(135deg, var(--accent), #ff9a3c);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
   color:#fff;
-  box-shadow: 0 14px 30px rgba(255,111,0,.35);
+  box-shadow: 0 14px 30px rgba(255,111,0,.30);
 }
 
-.vrb-btn-primary{
-  background: linear-gradient(135deg, var(--accent), #ff9a3c);
-  color:#fff;
-  box-shadow: 0 14px 30px rgba(255,111,0,.35);
+.vrb-btn-orange:hover{ transform: translateY(-1px); }
+
+@media (max-width: 980px){
+  .vrb-hero-content h1{ font-size: 32px; }
+  .vrb-search-box{ grid-template-columns: 1fr; }
 }
 
-.vrb-btn-light{
-  background: rgba(15,23,42,.06);
-  color: var(--text);
-}
-
-/* =========================
-   MODERN RESORT CARDS
-========================= */
+/* ===========================
+   SECTION BASE
+   =========================== */
 
 .vrb-section{
-  padding: 100px 0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 80px 0;
 }
 
 .vrb-container{
-  width: min(1400px, 95%);
-  margin: auto;
+  width: min(1200px, 92%);
+  margin:auto;
 }
 
 .vrb-section-head{
-  text-align: center;
-  margin-bottom: 50px;
+  text-align:center;
+  margin-bottom: 28px;
 }
 
 .vrb-title{
-  font-size: 42px;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--brand), var(--brand2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 12px;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing:.2px;
 }
 
 .vrb-subtitle{
-  font-size: 18px;
+  margin-top: 10px;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 800;
 }
 
-/* Modern Filters */
+/* Filters */
 .vrb-filters{
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 30px 0 50px;
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap: 10px;
+  margin: 20px 0 35px;
 }
 
 .vrb-chip{
-  background: rgba(255,255,255,0.9);
-  border: 2px solid rgba(102,126,234,0.2);
-  padding: 12px 24px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(15,23,42,.12);
+  background: rgba(255,255,255,.7);
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor:pointer;
+  font-weight: 900;
+  color: var(--text);
+  transition: 0.2s ease;
 }
 
 .vrb-chip.active,
 .vrb-chip:hover{
-  background: linear-gradient(135deg, var(--brand), var(--brand2));
-  color: #fff;
+  background: linear-gradient(135deg,#0a74da,#1aa3ff);
+  color:#fff;
   border-color: transparent;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(102,126,234,0.3);
 }
 
-/* Premium Resort Grid */
+/* Grid container */
 .vrb-grid{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 30px;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
 }
 
-/* Ultra Modern Resort Cards */
-.vrb-card{
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-  transition: all 0.4s ease;
-  backdrop-filter: blur(20px);
-  position: relative;
-}
+/* ===========================================
+   ✅ IMPORTANT: Style existing resort cards
+   Your cards come from critical.js:
+   .resort-card .resort-gallery .resort-info etc.
+   =========================================== */
 
-.vrb-card::before{
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--brand), var(--brand2), var(--accent));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.vrb-card:hover{
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 30px 80px rgba(0,0,0,0.15);
-}
-
-.vrb-card:hover::before{
-  opacity: 1;
-}
-
-.vrb-img{
-  position: relative;
-  height: 240px;
-  overflow: hidden;
-}
-
-.vrb-img img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.vrb-card:hover .vrb-img img{
-  transform: scale(1.1);
-}
-
-.vrb-badge{
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(0,0,0,0.7);
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 14px;
-  backdrop-filter: blur(10px);
-}
-
-.vrb-body{
-  padding: 24px;
-}
-
-.vrb-body h3{
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--dark);
-}
-
-.vrb-meta{
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-
-.vrb-tags{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.vrb-tags span{
-  background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(0,168,255,0.1));
-  color: var(--brand);
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid rgba(102,126,234,0.2);
-}
-
-.vrb-bottom{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.vrb-price{
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--dark);
-}
-
-.vrb-price span{
-  font-size: 14px;
-  color: var(--muted);
-  font-weight: 600;
-}
-
-.vrb-small{
-  font-size: 12px;
-  color: #16a34a;
-  font-weight: 600;
-  margin-top: 4px;
-}
-
-.vrb-btn-primary{
-  background: linear-gradient(135deg, var(--accent), #ff8a65);
-  color: #fff;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 20px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(255,107,53,0.3);
-}
-
-.vrb-btn-primary:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(255,107,53,0.4);
-}
-
-@media (max-width: 768px){
-  .vrb-grid{
-    grid-template-columns: 1fr;
-  }
-  
-  .vrb-title{
-    font-size: 32px;
-  }
-  
-  .vrb-card{
-    margin: 0 10px;
-  }
-}
-
-/* =========================
-   WHY BOOK + LOCATIONS
-========================= */
-
-.vrb-soft-bg{
-  padding: 80px 0;
-}
-
-.vrb-wrap{
-  width: min(1100px, 92%);
-  margin: auto;
-  background: rgba(255,255,255,.75);
+.resort-card{
+  background: rgba(255,255,255,.92);
   border: 1px solid rgba(15,23,42,.08);
-  box-shadow: 0 18px 50px rgba(2,8,20,.08);
-  border-radius: 26px;
-  padding: 45px 30px;
-  position: relative;
+  border-radius: 22px;
   overflow:hidden;
+  box-shadow: 0 18px 55px rgba(2,8,20,.08);
+  transition: transform .25s ease, box-shadow .25s ease;
 }
 
-.vrb-wrap::before{
-  content:"";
-  position:absolute;
-  inset:-1px;
-  border-radius: 26px;
-  padding: 1px;
-  background: linear-gradient(135deg,
-    rgba(10,116,218,0.40),
-    rgba(255,111,0,0.25),
-    rgba(26,163,255,0.25)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events:none;
+.resort-card:hover{
+  transform: translateY(-7px);
+  box-shadow: 0 28px 75px rgba(2,8,20,.14);
 }
 
-.vrb-heading{
-  text-align:center;
-  font-size:26px;
-  font-weight:900;
-}
-
-.vrb-desc{
-  text-align:center;
-  margin-top:10px;
-  color: var(--muted);
-  font-weight:800;
-}
-
-.vrb-feature-grid{
-  margin-top:30px;
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap:18px;
-}
-
-.vrb-feature-card{
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(15,23,42,0.08);
-  border-radius: 22px;
-  padding: 22px;
-  box-shadow: 0 16px 45px rgba(2,8,20,0.06);
-  transition: 0.25s ease;
-}
-
-.vrb-feature-card:hover{
-  transform: translateY(-8px);
-  box-shadow: var(--shadow2);
-}
-
-.vrb-icon{
-  width:54px;
-  height:54px;
-  border-radius:18px;
-  background: rgba(10,116,218,0.10);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:26px;
-  margin-bottom:14px;
-  border: 1px solid rgba(10,116,218,0.14);
-}
-
-.vrb-feature-card h3{
-  font-size:17px;
-  font-weight:900;
-  margin-bottom:8px;
-}
-
-.vrb-feature-card p{
-  color: var(--muted);
-  font-weight:800;
-  line-height:1.6;
-  font-size:13px;
-}
-
-/* locations */
-.vrb-location-grid{
-  margin-top:30px;
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap:18px;
-}
-
-.vrb-location-card{
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(15,23,42,0.08);
-  border-radius: 22px;
-  padding: 22px;
-  box-shadow: 0 16px 45px rgba(2,8,20,0.06);
-  transition: 0.25s ease;
-}
-
-.vrb-location-card:hover{
-  transform: translateY(-6px);
-  box-shadow: var(--shadow2);
-}
-
-.vrb-location-card h3{
-  font-size:16px;
-  font-weight:900;
-}
-
-.vrb-location-card p{
-  margin-top:8px;
-  color: var(--muted);
-  font-weight:800;
-  font-size:13px;
-  line-height:1.6;
-}
-
-.vrb-mini-btn{
-  margin-top:14px;
-  border:none;
-  cursor:pointer;
-  padding:10px 14px;
-  border-radius: 14px;
-  font-weight:900;
-  background: rgba(10,116,218,0.10);
-  color: var(--brand);
-  border: 1px solid rgba(10,116,218,0.14);
-  transition:.2s ease;
-}
-
-.vrb-location-highlight{
-  background: linear-gradient(135deg, rgba(10,116,218,0.12), rgba(255,111,0,0.10));
-  border: 1px solid rgba(255,111,0,0.16);
-}
-
-/* =========================
-   BOOKING MODAL (PREMIUM)
-========================= */
-
-.vrb-modal{
-  position: fixed;
-  inset:0;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  padding: 20px;
-  background: rgba(0,0,0,.60);
-  z-index: 99999;
-}
-
-.vrb-modal.show{ display:flex; }
-
-.vrb-modal-card{
-  width: min(600px, 96%);
-  background: rgba(255,255,255,.97);
-  border-radius: 24px;
-  padding: 22px;
-  box-shadow: 0 30px 110px rgba(0,0,0,.28);
+.resort-gallery{
   position: relative;
-  animation: popIn .30s ease;
 }
 
-@keyframes popIn{
-  from{opacity:0; transform: translateY(20px) scale(.96);}
-  to{opacity:1; transform: translateY(0px) scale(1);}
+.resort-image{
+  width:100%;
+  height: 220px;
+  object-fit: cover;
+  display:block;
 }
 
-.vrb-close{
+/* ✅ Resort Name premium font */
+.resort-info h3{
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 16px 18px 6px;
+  letter-spacing: .2px;
+}
+
+/* ✅ Location */
+.resort-location{
+  margin: 0 18px;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+/* ✅ Price bigger & premium */
+.resort-price,
+.vrb-price-text{
+  margin: 10px 18px 0;
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--text);
+}
+
+/* Price badge look */
+.resort-price{
+  display:inline-block;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(255,111,0,.10);
+  border: 1px solid rgba(255,111,0,.22);
+}
+
+/* Description */
+.description-container{
+  margin: 12px 18px 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* ✅ View More button (small + premium light) */
+.view-more-btn,
+.view-more-desc{
   position:absolute;
-  top:14px;
-  right:14px;
-  width:40px;
-  height:40px;
-  border-radius:14px;
+  top: 14px;
+  left: 14px;
+
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.88);
+  color: var(--text);
+
+  font-weight: 900;
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  cursor:pointer;
+
+  box-shadow: 0 10px 25px rgba(2,8,20,.12);
+  transition: 0.2s ease;
+}
+
+.view-more-btn:hover{
+  transform: translateY(-1px);
+  background:#fff;
+}
+
+/* ✅ Amenities chips container */
+.resort-amenities{
+  margin: 14px 18px 0;
+}
+
+.resort-amenities h4{
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.amenities-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+}
+
+.amenity-tag,
+.vrb-chip-tag{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+
+  padding: 8px 10px;
+  border-radius: 999px;
+
+  background: rgba(10,116,218,.08);
+  border: 1px solid rgba(10,116,218,.18);
+
+  font-size: 12px;
+  font-weight: 900;
+  color: #0a74da;
+}
+
+/* ✅ Actions buttons row */
+.resort-actions{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 18px 18px;
+}
+
+/* ✅ Book Now = same orange as header */
+.book-btn{
   border:none;
   cursor:pointer;
-  background: rgba(15,23,42,.06);
-  font-weight:900;
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color:#fff;
+  box-shadow: 0 14px 28px rgba(255,111,0,.28);
+  transition: 0.2s ease;
 }
 
-.vrb-modal-head h2{
-  margin:0;
-  font-size:22px;
-  font-weight:900;
+.book-btn:hover{
+  transform: translateY(-1px);
 }
 
-.vrb-modal-head p{
-  margin-top:6px;
-  color: var(--muted);
-  font-weight:800;
-}
-
-.vrb-coupon-row{
-  margin-top:14px;
-  display:flex;
-  gap:10px;
-}
-
-.vrb-coupon-row input{
-  flex:1;
-  padding:12px 14px;
-  border-radius:14px;
+/* Review buttons = premium light */
+.review-btn,
+.view-reviews-btn{
   border: 1px solid rgba(15,23,42,.12);
-  font-weight:900;
+  background: rgba(255,255,255,.78);
+  color: var(--text);
+
+  cursor:pointer;
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  transition: 0.2s ease;
 }
 
-.vrb-price-box{
-  margin-top:14px;
-  padding:14px;
-  border-radius:18px;
-  border: 1px solid rgba(15,23,42,.10);
-  background: rgba(15,23,42,.03);
+.review-btn:hover,
+.view-reviews-btn:hover{
+  background:#fff;
+  transform: translateY(-1px);
 }
 
-.vrb-price-box .line{
+/* ===========================
+   ✅ OFFERS SLIDER UI
+   =========================== */
+
+.vrb-offers-wrap{
+  margin-top: 30px;
+  position: relative;
+}
+
+.vrb-offers-track{
   display:flex;
-  justify-content:space-between;
-  padding:6px 0;
-  font-weight:900;
+  gap: 16px;
+  overflow:hidden;
+  scroll-behavior:smooth;
+  padding: 10px 4px;
 }
 
-.vrb-price-box .total{
-  border-top: 1px solid rgba(15,23,42,.10);
-  margin-top:6px;
-  padding-top:10px;
-  font-size:16px;
+.vrb-coupon-card{
+  min-width: 320px;
+  max-width: 320px;
+  border-radius: 20px;
+  overflow:hidden;
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 18px 55px rgba(2,8,20,.08);
+  transition: 0.25s ease;
 }
 
-.green{ color:#16a34a; }
-
-.vrb-form{
-  margin-top:16px;
-  display:grid;
-  gap:10px;
+.vrb-coupon-card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 28px 75px rgba(2,8,20,.14);
 }
 
-.vrb-form input,
-.vrb-form select{
+.vrb-coupon-banner{
+  height: 140px;
   width:100%;
-  padding:12px 14px;
-  border-radius:14px;
-  border: 1px solid rgba(15,23,42,.12);
-  font-weight:900;
-  outline:none;
+  object-fit: cover;
+  display:block;
 }
 
-.vrb-form-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:10px;
+.vrb-coupon-body{
+  padding: 14px 16px 16px;
 }
 
-@media(max-width:900px){
-  .vrb-form-grid{ grid-template-columns:1fr; }
+.vrb-coupon-resort{
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--text);
+  font-family: "Playfair Display", serif;
 }
 
-/* =========================
-   FOOTER (PREMIUM CLEAN)
-========================= */
+.vrb-coupon-meta{
+  margin-top: 6px;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.vrb-coupon-code{
+  margin-top: 12px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+
+  border-radius: 16px;
+  background: rgba(255,111,0,.10);
+  border: 1px dashed rgba(255,111,0,.35);
+  padding: 10px 12px;
+}
+
+.vrb-coupon-code b{
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: .7px;
+}
+
+.vrb-copy-btn{
+  border:none;
+  cursor:pointer;
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(15,23,42,.10);
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-weight: 900;
+  transition:0.2s ease;
+}
+
+.vrb-copy-btn:hover{
+  background:#fff;
+  transform: translateY(-1px);
+}
+
+/* arrows */
+.vrb-offer-arrow{
+  position:absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  border:none;
+  cursor:pointer;
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(15,23,42,.10);
+  box-shadow: 0 18px 40px rgba(2,8,20,.14);
+  font-size: 18px;
+  font-weight: 900;
+  z-index: 10;
+}
+
+.vrb-offer-arrow.left{ left: -10px; }
+.vrb-offer-arrow.right{ right: -10px; }
+
+@media(max-width: 600px){
+  .vrb-coupon-card{
+    min-width: 86vw;
+    max-width: 86vw;
+  }
+
+  .vrb-offer-arrow.left{ left: 6px; }
+  .vrb-offer-arrow.right{ right: 6px; }
+}
+
+/* ===========================
+   POLICY BUTTON
+   =========================== */
+
+.vrb-policy-btn{
+  position: fixed;
+  left: 16px;
+  bottom: 18px;
+  z-index: 9999;
+
+  text-decoration:none;
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--text);
+
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: 18px;
+  padding: 12px 14px;
+
+  box-shadow: 0 18px 50px rgba(2,8,20,.14);
+}
+
+/* ===========================
+   PREMIUM FOOTER
+   =========================== */
 
 .vrb-footer{
   padding: 75px 0 25px;
@@ -860,32 +730,33 @@ img{ max-width:100%; display:block; }
 .vrb-footer-grid{
   display:grid;
   grid-template-columns: 2fr 1fr 1fr;
-  gap:30px;
+  gap: 30px;
   position: relative;
-  z-index:2;
+  z-index: 2;
 }
 
 .vrb-footer h3{
-  font-size:22px;
-  font-weight:900;
+  font-size: 22px;
+  font-weight: 900;
 }
 
 .vrb-footer p{
-  margin-top:10px;
-  opacity:.85;
-  line-height:1.7;
+  margin-top: 10px;
+  opacity: .85;
+  line-height: 1.7;
 }
 
 .vrb-footer h4{
-  font-weight:900;
-  margin-bottom:12px;
+  font-weight: 900;
+  margin-bottom: 12px;
 }
 
 .vrb-footer a{
   display:block;
-  margin:8px 0;
+  margin: 8px 0;
+  text-decoration:none;
   color: rgba(207,230,255,.92);
-  font-weight:900;
+  font-weight: 800;
 }
 
 .vrb-footer a:hover{
@@ -894,17 +765,17 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-footer-badges{
-  margin-top:14px;
+  margin-top: 14px;
   display:flex;
   flex-wrap:wrap;
-  gap:10px;
+  gap: 10px;
 }
 
 .vrb-footer-badges span{
-  font-weight:900;
-  font-size:12px;
+  font-weight: 900;
+  font-size: 12px;
   padding: 8px 12px;
-  border-radius:999px;
+  border-radius: 999px;
   background: rgba(255,255,255,.08);
   border: 1px solid rgba(255,255,255,.10);
 }
@@ -913,43 +784,22 @@ img{ max-width:100%; display:block; }
   width: min(1200px, 92%);
   margin: 28px auto 0;
   text-align:center;
-  opacity:.65;
-  font-weight:800;
-  font-size:13px;
+  opacity: .65;
+  font-weight: 800;
+  font-size: 13px;
   position: relative;
-  z-index:2;
+  z-index: 2;
 }
 
-@media(max-width:950px){
-  .vrb-footer-grid{ grid-template-columns:1fr; }
+@media(max-width: 950px){
+  .vrb-title{ font-size: 28px; }
+  .vrb-footer-grid{ grid-template-columns: 1fr; }
 }
 
-/* =========================
-   POLICY BUTTON
-========================= */
-
-.vrb-policy-btn{
-  position: fixed;
-  left: 18px;
-  bottom: 24px;
-  z-index: 9999;
-  background: rgba(255,255,255,.92);
-  border: 1px solid rgba(15,23,42,.12);
-  padding: 12px 16px;
-  border-radius: 999px;
-  font-weight: 900;
-  color: var(--text);
-  box-shadow: 0 16px 40px rgba(2,8,20,.14);
-  transition: .25s ease;
-}
-
-.vrb-policy-btn:hover{
-  transform: translateY(-3px);
-}
-
-/* =========================
+/* ===========================
    CHAT WIDGET
-========================= */
+   (keeps your existing UI)
+   =========================== */
 
 .vrb-chat-widget{
   position: fixed;
@@ -959,1895 +809,63 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-chat-fab{
-  width:62px;
-  height:62px;
-  border-radius:22px;
+  width: 62px;
+  height: 62px;
+  border-radius: 22px;
   border:none;
   cursor:pointer;
-  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  background: linear-gradient(135deg, rgba(10,116,218,1), rgba(26,163,255,1));
   box-shadow: 0 20px 50px rgba(2,8,20,.18);
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
-  transition:.25s ease;
+  transition: 0.25s ease;
 }
 
 .vrb-chat-fab img{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  object-fit:cover;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
 }
+
+.vrb-chat-fab:hover{ transform: translateY(-3px) scale(1.03); }
 
 .vrb-chat-box{
   position:absolute;
   right:0;
   bottom:78px;
-  width:340px;
+  width: 340px;
   max-width: calc(100vw - 30px);
   background: rgba(255,255,255,.97);
-  border-radius:22px;
+  border-radius: 22px;
   border: 1px solid rgba(15,23,42,.12);
   box-shadow: 0 28px 90px rgba(2,8,20,.22);
   overflow:hidden;
   transform: translateY(16px) scale(.98);
-  opacity:0;
+  opacity: 0;
   pointer-events:none;
-  transition:.25s ease;
+  transition: 0.25s ease;
 }
 
 .vrb-chat-box.open{
   opacity:1;
-  transform: translateY(0px) scale(1);
+  transform: translateY(0) scale(1);
   pointer-events:auto;
 }
 
-.vrb-chat-header{
-  padding:14px;
-  background: linear-gradient(135deg, var(--brand), var(--brand2));
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.vrb-chat-title{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.vrb-chat-title img{
-  width:40px;
-  height:40px;
-  border-radius:14px;
-  object-fit:cover;
-  background: rgba(255,255,255,.25);
-  padding:4px;
-}
-
-.vrb-chat-title h4{
-  margin:0;
-  font-size:15px;
-  font-weight:900;
-}
-
-.vrb-chat-title p{
-  margin:0;
-  font-size:12px;
-  opacity:.85;
-  font-weight:800;
-}
-
-.vrb-chat-close{
-  border:none;
-  background: rgba(255,255,255,.18);
-  width:34px;
-  height:34px;
-  border-radius:14px;
-  color:#fff;
-  font-weight:900;
-  cursor:pointer;
-}
-
-.vrb-chat-body{
-  padding:14px;
-  height:240px;
-  overflow-y:auto;
-  background: radial-gradient(circle at top, rgba(10,116,218,.06), transparent 40%);
-}
-
-.vrb-msg{
-  max-width:85%;
-  padding:10px 12px;
-  border-radius:16px;
-  margin-bottom:10px;
-  font-weight:800;
-  font-size:13px;
-  line-height:1.4;
-}
-
-.vrb-bot{
-  background: rgba(15,23,42,.06);
-  color: var(--text);
-  border: 1px solid rgba(15,23,42,.08);
-}
-
-.vrb-user{
-  background: linear-gradient(135deg, var(--accent), #ff9a3c);
-  color:#fff;
-  margin-left:auto;
-}
-
-.vrb-chat-footer{
-  display:flex;
-  gap:8px;
-  padding:12px;
-  border-top: 1px solid rgba(15,23,42,.10);
-}
-
-.vrb-chat-footer input{
-  flex:1;
-  border-radius:14px;
-  border: 1px solid rgba(15,23,42,.12);
-  padding:10px 12px;
-  font-weight:900;
-  outline:none;
-}
-
-.vrb-chat-send{
-  width:44px;
-  border:none;
-  cursor:pointer;
-  border-radius:14px;
-  font-weight:900;
-  background: linear-gradient(135deg, var(--accent), #ff9a3c);
-  color:#fff;
-}
-
-.vrb-chat-quick{
-  display:flex;
-  gap:8px;
-  padding:12px;
-  flex-wrap:wrap;
-  background: rgba(10,116,218,.05);
-  border-top: 1px solid rgba(15,23,42,.08);
-}
-
-.vrb-chat-quick button{
-  border:none;
-  cursor:pointer;
-  padding:8px 10px;
-  border-radius:999px;
-  font-weight:900;
-  background: rgba(255,255,255,.9);
-  border: 1px solid rgba(15,23,42,.10);
-  font-size:12px;
-}
-
-/* =========================
-   ANIMATIONS (Replay)
-========================= */
+/* ===========================
+   SCROLL ANIMATIONS (replay)
+   =========================== */
 
 .vrb-hide{
-  opacity:0;
+  opacity: 0;
   transform: translateY(35px) scale(0.98);
-  transition: all .8s ease;
+  transition: all 0.8s ease;
 }
+
 .vrb-show{
-  opacity:1;
+  opacity: 1;
   transform: translateY(0px) scale(1);
-}
-/* ==========================================
-   PREMIUM FIX FOR BELOW RESORT SECTION
-   (Why Book + Locations)
-========================================== */
-
-.vrb-soft-bg{
-  padding: 90px 0;
-  background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%);
-}
-
-/* This fixes the broken alignment + empty space */
-.vrb-premium-area{
-  width: min(1200px, 92%);
-  margin: auto;
-  display: grid;
-  gap: 26px;
-}
-
-/* Make both blocks look like premium clean cards */
-.vrb-wrap{
-  width: 100% !important;
-  margin: 0 !important;
-  border-radius: 28px;
-  background: rgba(255,255,255,0.85);
-  border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 22px 70px rgba(2,8,20,0.10);
-}
-
-/* ✅ Improve top heading spacing */
-.vrb-heading{
-  font-size: 28px;
-  font-weight: 900;
-  margin-bottom: 6px;
-}
-
-.vrb-desc{
-  font-size: 14px;
-  color: #475569;
-}
-
-/* ✅ Feature cards become 3 equal premium cards */
-.vrb-feature-grid{
-  margin-top: 26px;
-  grid-template-columns: repeat(3, 1fr);
-}
-
-/* ✅ Location cards look like proper grid */
-.vrb-location-grid{
-  margin-top: 26px;
-  grid-template-columns: repeat(3, 1fr);
-}
-
-/* Responsive */
-@media(max-width: 1000px){
-  .vrb-feature-grid,
-  .vrb-location-grid{
-    grid-template-columns: 1fr;
-  }
-
-  .vrb-wrap{
-    padding: 26px 16px !important;
-  }
-}
-
-/* =========================================
-   PREMIUM UI FOR OLD RESORT LISTING CARDS
-   (CSS ONLY - no HTML change required)
-========================================= */
-
-/* ✅ Main resort grid fix */
-.resort-container,
-.resorts-container,
-#resortsContainer,
-.resort-list,
-.resort-grid {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
-  gap: 22px !important;
-  align-items: stretch !important;
-  padding: 30px 0 !important;
-}
-
-/* ✅ Each resort card */
-.resort-card,
-.resort-item,
-.resort,
-.card {
-  background: rgba(255,255,255,0.92) !important;
-  border: 1px solid rgba(15,23,42,0.10) !important;
-  border-radius: 22px !important;
-  box-shadow: 0 16px 45px rgba(2,8,20,0.08) !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  transition: 0.25s ease !important;
-  position: relative !important;
-}
-
-/* Hover premium effect */
-.resort-card:hover,
-.resort-item:hover,
-.resort:hover,
-.card:hover {
-  transform: translateY(-8px) !important;
-  box-shadow: 0 26px 75px rgba(2,8,20,0.14) !important;
-}
-
-/* ✅ Resort Image */
-.resort-card img,
-.resort-item img,
-.card img,
-.resort img {
-  width: 100% !important;
-  height: 220px !important;
-  object-fit: cover !important;
-  display: block !important;
-  border-radius: 0 !important;
-  transition: 0.35s ease !important;
-}
-
-.resort-card:hover img,
-.resort-item:hover img,
-.card:hover img,
-.resort:hover img {
-  transform: scale(1.06) !important;
-}
-
-/* ✅ Make inside text padding nice */
-.resort-card > div,
-.resort-item > div,
-.resort > div,
-.card > div {
-  padding: 16px 18px !important;
-}
-
-/* ✅ Resort Title */
-.resort-card h3,
-.resort-item h3,
-.resort h3,
-.card h3,
-.resort-card strong,
-.resort-item strong {
-  font-size: 18px !important;
-  font-weight: 900 !important;
-  color: #0f172a !important;
-  margin-top: 10px !important;
-  margin-bottom: 8px !important;
-}
-
-/* ✅ Location / meta text */
-.resort-card p,
-.resort-item p,
-.resort p,
-.card p {
-  color: #475569 !important;
-  font-weight: 700 !important;
-  font-size: 13px !important;
-  line-height: 1.6 !important;
-}
-
-/* ✅ Price Highlight */
-.resort-card .price,
-.resort-item .price,
-.resort .price {
-  font-weight: 900 !important;
-  font-size: 16px !important;
-  color: #0f172a !important;
-}
-
-/* ✅ Amenities block - convert to badge style */
-.resort-card .amenities,
-.resort-item .amenities,
-.resort .amenities {
-  margin-top: 10px !important;
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-}
-
-.resort-card .amenities span,
-.resort-item .amenities span,
-.resort .amenities span {
-  padding: 6px 10px !important;
-  border-radius: 999px !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  background: #ffffff !important;
-  color: #0066ff !important;
-  border: 2px solid #0066ff !important;
-}
-
-/* Remove special amenity styling - all amenities use same style now */
-
-/* ✅ Buttons look premium */
-.resort-card button,
-.resort-item button,
-.resort button,
-.card button {
-  border: none !important;
-  cursor: pointer !important;
-  border-radius: 14px !important;
-  padding: 10px 14px !important;
-  font-weight: 900 !important;
-  font-size: 13px !important;
-  transition: 0.2s ease !important;
-}
-
-/* Book Now Premium */
-.resort-card .book-now,
-.resort-item .book-now,
-button.book-now {
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  box-shadow: 0 14px 30px rgba(255,111,0,0.32) !important;
-}
-
-.resort-card .book-now:hover,
-.resort-item .book-now:hover,
-button.book-now:hover {
-  transform: translateY(-2px) !important;
-}
-
-/* Secondary buttons */
-.resort-card .write-review,
-.resort-item .write-review,
-.resort-card .view-review,
-.resort-item .view-review {
-  background: rgba(15,23,42,0.06) !important;
-  color: #0f172a !important;
-}
-
-/* ✅ Improve small links like View Map / View More */
-.resort-card a,
-.resort-item a,
-.resort a {
-  color: #0a74da !important;
-  font-weight: 800 !important;
-  text-decoration: none !important;
-}
-
-.resort-card a:hover,
-.resort-item a:hover,
-.resort a:hover {
-  text-decoration: underline !important;
-}
-
-/* ✅ Mobile spacing */
-@media(max-width: 700px){
-  .resort-container,
-  .resorts-container,
-  #resortsContainer,
-  .resort-list,
-  .resort-grid{
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* =========================================
-   PREMIUM BUTTON UI FOR OLD RESORT CARDS
-========================================= */
-
-/* Resort Title UI */
-.resort-card h3,
-.resort-item h3,
-.card h3,
-.resort h3{
-  font-size: 18px !important;
-  font-weight: 900 !important;
-  color: #0f172a !important;
-  margin: 10px 0 6px !important;
-  letter-spacing: 0.2px;
-}
-
-/* All buttons inside resort card */
-.resort-card button,
-.resort-item button,
-.card button,
-.resort button{
-  border: none !important;
-  cursor: pointer !important;
-  border-radius: 999px !important;
-  padding: 10px 14px !important;
-  font-weight: 900 !important;
-  font-size: 13px !important;
-  transition: 0.2s ease !important;
-  background: rgba(15,23,42,0.06) !important;
-  color: #0f172a !important;
-}
-
-/* ✅ Buttons hover */
-.resort-card button:hover,
-.resort-item button:hover,
-.card button:hover,
-.resort button:hover{
-  transform: translateY(-2px) !important;
-  box-shadow: 0 12px 28px rgba(2,8,20,0.15) !important;
-}
-
-/* ✅ Book Now Primary */
-.resort-card button[onclick*="Book"],
-.resort-item button[onclick*="Book"],
-.card button[onclick*="Book"],
-.resort button[onclick*="Book"],
-.resort-card .book-now,
-.resort-item .book-now,
-button.book-now{
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  box-shadow: 0 14px 28px rgba(255,111,0,0.30) !important;
-}
-
-/* ✅ View More button premium */
-.resort-card button[onclick*="View"],
-.resort-item button[onclick*="View"],
-.card button[onclick*="View"],
-.resort button[onclick*="View"]{
-  background: rgba(10,116,218,0.10) !important;
-  border: 1px solid rgba(10,116,218,0.18) !important;
-  color: #0a74da !important;
-}
-
-/* ✅ Review buttons premium */
-.resort-card button[onclick*="Review"],
-.resort-item button[onclick*="Review"],
-.card button[onclick*="Review"],
-.resort button[onclick*="Review"]{
-  background: rgba(15,23,42,0.06) !important;
-  color: #0f172a !important;
-  border: 1px solid rgba(15,23,42,0.10) !important;
-}
-
-/* ✅ Arrange the action buttons nicely */
-.resort-card .button-group,
-.resort-item .button-group,
-.card .button-group,
-.resort .button-group{
-  display:flex !important;
-  flex-wrap: wrap !important;
-  gap: 10px !important;
-  margin-top: 12px !important;
-}
-
-/* If no group wrapper exists, style direct buttons */
-.resort-card button,
-.resort-item button,
-.card button,
-.resort button{
-  margin: 6px 6px 0 0 !important;
-}
-
-/* =========================================
-   PREMIUM HEADER FIX (Desktop + Mobile)
-========================================= */
-
-.vrb-navbar{
-  position: sticky;
-  top: 0;
-  z-index: 9999;
-  padding: 14px 0;
-  background: linear-gradient(135deg,
-    rgba(10,116,218,0.92),
-    rgba(26,163,255,0.82),
-    rgba(118,75,162,0.78)
-  ) !important;
-  backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(255,255,255,0.20);
-  box-shadow: 0 16px 50px rgba(2,8,20,0.18);
-}
-
-.vrb-nav-container{
-  width: min(1280px, 94%);
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-/* ✅ Logo + Brand */
-.vrb-logo{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  color: #fff;
-  font-weight: 950;
-  font-size: 22px;
-  letter-spacing: 0.3px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.vrb-logo img{
-  width: 46px;
-  height: 46px;
-  border-radius: 18px;
-  object-fit: cover;
-  border: 2px solid rgba(255,255,255,0.35);
-  box-shadow: 0 14px 30px rgba(0,0,0,0.24);
-}
-
-/* ✅ Nav links Premium */
-.vrb-nav-links{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  padding: 6px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.16);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
-}
-
-.vrb-nav-links a{
-  color: rgba(255,255,255,0.92);
-  text-decoration:none;
-  font-weight: 900;
-  font-size: 14px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  transition: 0.22s ease;
-}
-
-.vrb-nav-links a:hover{
-  background: rgba(255,255,255,0.16);
-  color:#fff;
-}
-
-.vrb-nav-links a.active{
-  background: rgba(255,255,255,0.22);
-  color:#fff;
-  box-shadow: 0 12px 22px rgba(0,0,0,0.14);
-}
-
-/* ✅ Right-side actions */
-.vrb-nav-actions{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-}
-
-.vrb-whatsapp{
-  background: rgba(255,255,255,0.12) !important;
-  border: 1px solid rgba(255,255,255,0.20) !important;
-  color: #fff !important;
-  font-weight: 900 !important;
-  padding: 10px 18px !important;
-  border-radius: 999px !important;
-  transition: 0.2s ease;
-}
-
-.vrb-whatsapp:hover{
-  background: rgba(255,255,255,0.18) !important;
-}
-
-.vrb-btn-nav{
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  font-weight: 950 !important;
-  padding: 10px 18px !important;
-  border-radius: 999px !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.35) !important;
-  transition: 0.2s ease;
-}
-
-.vrb-btn-nav:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 25px 60px rgba(255,111,0,0.45) !important;
-}
-
-/* ✅ Hamburger icon */
-.vrb-hamburger{
-  display:none;
-  border:none;
-  cursor:pointer;
-  font-size: 18px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.14);
-  color:#fff;
-  border: 1px solid rgba(255,255,255,0.20);
-}
-
-/* ===========================
-   MOBILE NAVBAR PREMIUM
-=========================== */
-@media(max-width: 950px){
-
-  .vrb-logo{
-    font-size: 18px;
-  }
-
-  .vrb-logo img{
-    width: 42px;
-    height: 42px;
-    border-radius: 16px;
-  }
-
-  .vrb-hamburger{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-  }
-
-  .vrb-nav-links{
-    position: absolute;
-    top: 74px;
-    left: 4%;
-    right: 4%;
-    display: none;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 14px;
-    border-radius: 20px;
-    background: rgba(10,116,218,0.92);
-    border: 1px solid rgba(255,255,255,0.16);
-    box-shadow: 0 18px 60px rgba(0,0,0,0.25);
-  }
-
-  .vrb-nav-links.open{
-    display:flex;
-  }
-
-  .vrb-nav-links a{
-    padding: 12px 14px;
-    border-radius: 16px;
-    font-size: 15px;
-    text-align:center;
-  }
-
-  .vrb-nav-actions{
-    gap: 8px;
-  }
-
-  .vrb-whatsapp{
-    display:none !important; /* optional: hide whatsapp to reduce clutter */
-  }
-
-  .vrb-btn-nav{
-    padding: 10px 14px !important;
-    font-size: 14px;
-  }
-}
-
-/* =========================================
-   FINAL OVERRIDE: Vibrant Resort Card Buttons
-   (Paste at bottom of premium-ui.css)
-========================================= */
-
-/* Target all buttons inside resort cards */
-.resort-card button,
-.resort-item button,
-.resort button,
-.card button{
-  border: none !important;
-  cursor: pointer !important;
-  border-radius: 999px !important;
-  padding: 11px 16px !important;
-  font-weight: 900 !important;
-  font-size: 13px !important;
-  letter-spacing: 0.2px !important;
-  transition: 0.25s ease !important;
-  box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
-  margin-top: 10px !important;
-}
-
-/* ✅ Default buttons = Blue gradient */
-.resort-card button{
-  background: linear-gradient(135deg, #0a74da, #1aa3ff) !important;
-  color: #fff !important;
-}
-
-/* ✅ Hover effect */
-.resort-card button:hover,
-.resort-item button:hover,
-.resort button:hover,
-.card button:hover{
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 22px 55px rgba(2,8,20,0.20) !important;
-}
-
-/* ===========================
-   Specific button colors based on text
-=========================== */
-
-/* ✅ BOOK NOW = Orange (Primary CTA) */
-.resort-card button:nth-of-type(1),
-.resort-item button:nth-of-type(1),
-.resort button:nth-of-type(1),
-.card button:nth-of-type(1){
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.35) !important;
-}
-
-/* ✅ Write a Review = Purple */
-.resort-card button:nth-of-type(2),
-.resort-item button:nth-of-type(2),
-.resort button:nth-of-type(2),
-.card button:nth-of-type(2){
-  background: linear-gradient(135deg, #7c3aed, #a855f7) !important;
-  color: #fff !important;
-  box-shadow: 0 18px 40px rgba(124,58,237,0.35) !important;
-}
-
-/* ✅ View Reviews = Green */
-.resort-card button:nth-of-type(3),
-.resort-item button:nth-of-type(3),
-.resort button:nth-of-type(3),
-.card button:nth-of-type(3){
-  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
-  color: #fff !important;
-  box-shadow: 0 18px 40px rgba(34,197,94,0.30) !important;
-}
-
-/* ✅ View More buttons = Dark / premium gray */
-.resort-card button:has(span),
-.resort-item button:has(span){
-  background: rgba(15,23,42,0.08) !important;
-  color: #0f172a !important;
-  box-shadow: none !important;
-  border: 1px solid rgba(15,23,42,0.14) !important;
-}
-
-/* Mobile spacing improvements */
-@media(max-width: 700px){
-  .resort-card button,
-  .resort-item button,
-  .resort button,
-  .card button{
-    width: auto !important;
-    padding: 10px 14px !important;
-    font-size: 12px !important;
-  }
-}
-
-/* =========================================
-   BOOKING MODAL FIX
-========================================= */
-
-.vrb-modal{
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: rgba(0,0,0,0.8) !important;
-  z-index: 99999 !important;
-  display: none !important;
-  justify-content: center !important;
-  align-items: center !important;
-  padding: 20px !important;
-}
-
-.vrb-modal.show{
-  display: flex !important;
-}
-
-.vrb-modal-card{
-  background: white !important;
-  border-radius: 20px !important;
-  padding: 30px !important;
-  max-width: 500px !important;
-  width: 100% !important;
-  max-height: 90vh !important;
-  overflow-y: auto !important;
-  position: relative !important;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.3) !important;
-  z-index: 100000 !important;
-}
-
-/* =========================================
-   PREMIUM BRAND TEXT STYLING
-========================================= */
-
-/* ✅ PREMIUM RESORT TEXT */
-.vrb-brand-top{
-  font-family: "Playfair Display", serif;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
-
-  /* Premium gradient text */
-  background: linear-gradient(90deg, #ffffff, #ffe6c7, #ffffff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-
-  /* Soft glow effect */
-  filter: drop-shadow(0 10px 24px rgba(0,0,0,0.25));
-  position: relative;
-  padding-bottom: 6px;
-}
-
-/* Premium underline */
-.vrb-brand-top::after{
-  content:"";
-  display:block;
-  width: 70px;
-  height: 3px;
-  margin: 10px auto 0;
-  border-radius: 99px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.25), #ff9a3c, rgba(255,255,255,0.25));
-  box-shadow: 0 10px 22px rgba(255,154,60,0.30);
-}
-
-.vrb-brand-bottom{
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-  font-size: 20px;
-  font-weight: 950;
-  letter-spacing: 1px;
-  color: #fff;
-  text-shadow: 0 14px 30px rgba(0,0,0,0.28);
-}
-
-/* Mobile Responsive */
-@media(max-width: 950px){
-  .vrb-brand-top{
-    font-size: 16px;
-    letter-spacing: 2px;
-  }
-
-  .vrb-brand-top::after{
-    width: 55px;
-  }
-
-  .vrb-brand-bottom{
-    font-size: 15px;
-  }
-}
-
-/* =========================================
-   FINAL PREMIUM RESORT BUTTONS (CLEAN LOOK)
-   - Book Now = Orange Only
-   - Other buttons = Soft Premium Neutral
-========================================= */
-
-/* Resort Title premium */
-.resort-card h3,
-.resort-item h3,
-.resort h3,
-.card h3{
-  font-size: 20px !important;
-  font-weight: 950 !important;
-  color: #0f172a !important;
-  letter-spacing: 0.2px !important;
-  margin: 12px 0 8px !important;
-  text-transform: none !important;
-}
-
-/* All buttons base premium */
-.resort-card button,
-.resort-item button,
-.resort button,
-.card button{
-  border: 1px solid rgba(15,23,42,0.12) !important;
-  cursor: pointer !important;
-  border-radius: 999px !important;
-  padding: 10px 16px !important;
-  font-weight: 900 !important;
-  font-size: 13px !important;
-  letter-spacing: 0.15px !important;
-  transition: 0.22s ease !important;
-
-  /* Premium neutral */
-  background: rgba(255,255,255,0.75) !important;
-  color: #0f172a !important;
-
-  /* Remove odd shadows */
-  box-shadow: none !important;
-}
-
-/* Hover premium effect */
-.resort-card button:hover,
-.resort-item button:hover,
-.resort button:hover,
-.card button:hover{
-  transform: translateY(-2px) !important;
-  box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
-  border-color: rgba(15,23,42,0.20) !important;
-}
-
-/* ✅ Book Now button = ORANGE (Only) */
-.resort-card button:nth-of-type(1),
-.resort-item button:nth-of-type(1),
-.resort button:nth-of-type(1),
-.card button:nth-of-type(1){
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 16px 30px rgba(255,111,0,0.28) !important;
-}
-
-.resort-card button:nth-of-type(1):hover,
-.resort-item button:nth-of-type(1):hover,
-.resort button:nth-of-type(1):hover,
-.card button:nth-of-type(1):hover{
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 22px 50px rgba(255,111,0,0.40) !important;
-}
-
-/* ✅ Write a Review = Premium outline */
-.resort-card button:nth-of-type(2),
-.resort-item button:nth-of-type(2),
-.resort button:nth-of-type(2),
-.card button:nth-of-type(2){
-  background: rgba(255,255,255,0.55) !important;
-  border: 1px solid rgba(10,116,218,0.25) !important;
-  color: #0a74da !important;
-}
-
-/* ✅ View Reviews = Premium dark neutral */
-.resort-card button:nth-of-type(3),
-.resort-item button:nth-of-type(3),
-.resort button:nth-of-type(3),
-.card button:nth-of-type(3){
-  background: rgba(15,23,42,0.06) !important;
-  border: 1px solid rgba(15,23,42,0.14) !important;
-  color: #0f172a !important;
-}
-
-/* ✅ View More buttons (keep subtle, not orange) */
-.resort-card button:first-child,
-.resort-item button:first-child{
-  background: rgba(255,255,255,0.65) !important;
-  color: #0f172a !important;
-  border: 1px solid rgba(15,23,42,0.12) !important;
-}
-
-/* ✅ Better spacing between buttons */
-.resort-card button,
-.resort-item button,
-.resort button,
-.card button{
-  margin: 8px 10px 0 0 !important;
-}
-
-/* Mobile: make buttons wrap clean */
-@media(max-width: 750px){
-  .resort-card button,
-  .resort-item button,
-  .resort button,
-  .card button{
-    width: auto !important;
-    padding: 10px 14px !important;
-    font-size: 12px !important;
-  }
-}
-
-/* =========================================
-   FINAL PREMIUM RESORT CARD TYPO + BUTTONS
-   - View More = Light
-   - Book Now = Orange
-   - Price = Bigger + premium highlight
-========================================= */
-
-/* ✅ Resort Name premium font style */
-.resort-card h3,
-.resort-item h3,
-.resort h3,
-.card h3{
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
-  font-size: 22px !important;
-  font-weight: 950 !important;
-  color: #0f172a !important;
-  letter-spacing: 0.2px !important;
-  margin: 12px 0 10px !important;
-  text-transform: none !important;
-}
-
-/* ✅ All buttons - default premium light */
-.resort-card button,
-.resort-item button,
-.resort button,
-.card button{
-  border: 1px solid rgba(15,23,42,0.14) !important;
-  cursor: pointer !important;
-  border-radius: 999px !important;
-  padding: 10px 16px !important;
-  font-weight: 900 !important;
-  font-size: 13px !important;
-  transition: 0.22s ease !important;
-
-  background: rgba(255,255,255,0.75) !important;
-  color: #0f172a !important;
-  box-shadow: none !important;
-}
-
-/* Hover effect */
-.resort-card button:hover,
-.resort-item button:hover,
-.resort button:hover,
-.card button:hover{
-  transform: translateY(-2px) !important;
-  box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
-}
-
-/* ✅ Book Now buttons - Orange (multiple selectors) */
-.resort-card button[onclick*="bookNow"],
-.resort-item button[onclick*="bookNow"],
-.resort button[onclick*="bookNow"],
-.card button[onclick*="bookNow"],
-.book-btn,
-.vrb-btn-booknow,
-button:contains("Book Now"),
-.resort-card button:first-child,
-.resort-item button:first-child{
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 16px 32px rgba(255,111,0,0.28) !important;
-}
-
-.resort-card button[onclick*="bookNow"]:hover,
-.resort-item button[onclick*="bookNow"]:hover,
-.book-btn:hover,
-.vrb-btn-booknow:hover{
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 22px 55px rgba(255,111,0,0.40) !important;
-}
-
-/* ✅ View More buttons (light gray) - including description toggles */
-.resort-card button[onclick*="openGallery"],
-.resort-item button[onclick*="openGallery"],
-.resort-card button[onclick*="toggleDescription"],
-.resort-item button[onclick*="toggleDescription"],
-.view-more-btn,
-.view-more-desc,
-.vrb-btn-viewmore{
-  background: rgba(15,23,42,0.06) !important;
-  border: 1px solid rgba(15,23,42,0.14) !important;
-  color: #0f172a !important;
-}
-
-/* ✅ Review buttons (blue outline) */
-.resort-card button[onclick*="Review"],
-.resort-item button[onclick*="Review"],
-.review-btn,
-.view-reviews-btn,
-.vrb-btn-review{
-  background: rgba(10,116,218,0.08) !important;
-  border: 1px solid rgba(10,116,218,0.22) !important;
-  color: #0a74da !important;
-}
-
-/* ✅ Price highlight style (bigger + premium) */
-.resort-price,
-.vrb-price-text,
-.price{
-  display: inline-block !important;
-  margin-top: 8px !important;
-  font-size: 18px !important;
-  font-weight: 950 !important;
-  color: #0f172a !important;
-  padding: 6px 12px !important;
-  border-radius: 14px !important;
-  background: rgba(255,111,0,0.08) !important;
-  border: 1px solid rgba(255,111,0,0.18) !important;
-}
-
-/* Mobile */
-@media(max-width: 750px){
-  .resort-card h3,
-  .resort-item h3,
-  .resort h3,
-  .card h3{
-    font-size: 18px !important;
-  }
-
-  .resort-price,
-  .vrb-price-text,
-  .price{
-    font-size: 16px !important;
-  }
-}
-/* =========================================================
-   FINAL RESORT CARD UI FIX (PREMIUM)
-   ✅ Book Now = Same orange as header CTA
-   ✅ View More = Small + lite
-   ✅ Amenities = chips/tags (modern)
-========================================================= */
-
-/* ✅ Resort name premium */
-.resort-card h3,
-.resort-item h3,
-.resort h3,
-.card h3{
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
-  font-size: 22px !important;
-  font-weight: 950 !important;
-  color: #0f172a !important;
-  letter-spacing: 0.2px !important;
-  margin: 12px 0 10px !important;
-  text-transform: none !important;
-}
-
-/* ✅ All resort buttons default */
-.resort-card button,
-.resort-item button,
-.resort button,
-.card button{
-  border: 1px solid rgba(15,23,42,0.14) !important;
-  cursor: pointer !important;
-  border-radius: 999px !important;
-  padding: 10px 16px !important;
-  font-weight: 900 !important;
-  font-size: 13px !important;
-  transition: 0.22s ease !important;
-
-  background: rgba(255,255,255,0.75) !important;
-  color: #0f172a !important;
-  box-shadow: none !important;
-  margin: 6px 8px 0 0 !important;
-}
-
-/* Hover */
-.resort-card button:hover,
-.resort-item button:hover,
-.resort button:hover,
-.card button:hover{
-  transform: translateY(-2px) !important;
-  box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
-}
-
-/* ✅ View More = smaller + lite */
-.vrb-btn-viewmore{
-  padding: 7px 12px !important;
-  font-size: 12px !important;
-  font-weight: 800 !important;
-  background: rgba(15,23,42,0.05) !important;
-  border: 1px solid rgba(15,23,42,0.12) !important;
-  color: #0f172a !important;
-  box-shadow: none !important;
-}
-
-.vrb-btn-viewmore:hover{
-  transform: translateY(-1px) !important;
-  box-shadow: 0 10px 22px rgba(2,8,20,0.12) !important;
-}
-
-/* ✅ Book Now = EXACT same orange as header Book Now */
-.vrb-btn-booknow{
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  padding: 11px 18px !important;
-  font-weight: 950 !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.32) !important;
-}
-
-.vrb-btn-booknow:hover{
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 26px 65px rgba(255,111,0,0.45) !important;
-}
-
-/* ✅ Review buttons = premium outline */
-.vrb-btn-review{
-  background: rgba(10,116,218,0.08) !important;
-  border: 1px solid rgba(10,116,218,0.22) !important;
-  color: #0a74da !important;
-}
-
-/* ✅ Price highlight (nice premium) */
-.vrb-price-text{
-  display: inline-block;
-  margin-top: 8px;
-  font-size: 18px !important;
-  font-weight: 950 !important;
-  color: #0f172a !important;
-  padding: 6px 12px;
-  border-radius: 14px;
-  background: rgba(255,111,0,0.08);
-  border: 1px solid rgba(255,111,0,0.18);
-}
-
-/* ==============================
-   AMENITIES AS PREMIUM CHIPS
-============================== */
-
-.vrb-amenities-box{
-  margin-top: 10px !important;
-  padding: 14px !important;
-  border-radius: 18px !important;
-  background: rgba(10,116,218,0.05) !important;
-  border: 1px solid rgba(10,116,218,0.14) !important;
-}
-
-/* chips layout */
-.vrb-amenities-chips{
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-  margin-top: 8px !important;
-}
-
-/* each chip */
-.vrb-chip-tag{
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  padding: 7px 10px !important;
-  border-radius: 999px !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  color: #0f172a !important;
-  background: rgba(255,255,255,0.85) !important;
-  border: 1px solid rgba(15,23,42,0.12) !important;
-  box-shadow: 0 10px 22px rgba(2,8,20,0.06) !important;
-  transition: 0.2s ease;
-}
-
-.vrb-chip-tag:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(2,8,20,0.10) !important;
-}
-
-/* icon */
-.vrb-chip-ico{
-  width: 18px;
-  height: 18px;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 900;
-  background: rgba(255,111,0,0.12);
-  color: #ff6f00;
-}
-
-/* Mobile */
-@media(max-width: 750px){
-  .resort-card h3,
-  .resort-item h3,
-  .resort h3,
-  .card h3{
-    font-size: 18px !important;
-  }
-
-  .vrb-price-text{
-    font-size: 16px !important;
-  }
-
-  .vrb-btn-viewmore{
-    font-size: 11px !important;
-    padding: 7px 10px !important;
-  }
-
-  .vrb-chip-tag{
-    font-size: 11px !important;
-    padding: 6px 9px !important;
-  }
-}
-/* =========================================================
-   ✅ FINAL FIX FOR RESORT CARDS (VIBRANT + PREMIUM)
-   Applies to HTML generated by critical.js
-   ---------------------------------------------------------
-   Buttons:
-   ✅ Book Now     -> Orange (same as header)
-   ✅ View More    -> small light (description)
-   ✅ View More 📸 -> premium glass
-   ✅ Reviews      -> premium blue
-   Amenities:
-   ✅ Chips already exist -> make them premium
-   Price:
-   ✅ Bigger + better look
-========================================================= */
-
-/* ✅ Resort Name Premium */
-.resort-card .resort-info h3{
-  font-family: "Playfair Display", serif !important;
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  color: #0f172a !important;
-  margin: 10px 0 8px !important;
-  letter-spacing: .2px;
-}
-
-/* ✅ Location */
-.resort-card .resort-location{
-  font-weight: 700 !important;
-  color: #334155 !important;
-  font-size: 13px !important;
-  margin-top: 4px;
-}
-
-/* ✅ Price Bigger + Premium */
-.resort-card .resort-price{
-  display: inline-flex !important;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px !important;
-  font-size: 20px !important;
-  font-weight: 950 !important;
-  color: #0f172a !important;
-  padding: 8px 14px !important;
-  border-radius: 16px !important;
-  background: rgba(255,111,0,0.10) !important;
-  border: 1px solid rgba(255,111,0,0.18) !important;
-}
-
-/* ✅ View More (description button) small + lite */
-.resort-card .view-more-desc{
-  margin-top: 8px !important;
-  display: inline-flex !important;
-  width: fit-content !important;
-  padding: 6px 10px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(15,23,42,0.12) !important;
-  background: rgba(15,23,42,0.05) !important;
-  color: #0f172a !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  transition: 0.22s ease !important;
-}
-
-.resort-card .view-more-desc:hover{
-  transform: translateY(-1px);
-  background: rgba(15,23,42,0.08) !important;
-}
-
-/* ✅ Gallery View More 📸 Button premium glass */
-.resort-card .view-more-btn{
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  padding: 8px 12px !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,0.35) !important;
-  background: rgba(0,0,0,0.45) !important;
-  color: white !important;
-  backdrop-filter: blur(12px);
-  cursor: pointer;
-  transition: 0.25s ease;
-}
-
-.resort-card .view-more-btn:hover{
-  background: rgba(0,0,0,0.65) !important;
-  transform: translateY(-1px);
-}
-
-/* ✅ Resort Action buttons container */
-.resort-card .resort-actions{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 14px;
-}
-
-/* ✅ Book Now Button (same orange as header) */
-.resort-card .book-btn{
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  padding: 10px 16px !important;
-  border-radius: 999px !important;
-  font-weight: 950 !important;
-  font-size: 13px !important;
-  cursor: pointer !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
-  transition: 0.22s ease !important;
-}
-
-.resort-card .book-btn:hover{
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 28px 70px rgba(255,111,0,0.42) !important;
-}
-
-/* ✅ Review button (Premium Blue) */
-.resort-card .review-btn{
-  background: rgba(10,116,218,0.10) !important;
-  color: #0a74da !important;
-  border: 1px solid rgba(10,116,218,0.22) !important;
-  padding: 10px 14px !important;
-  border-radius: 999px !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  transition: 0.2s ease !important;
-}
-
-.resort-card .review-btn:hover{
-  background: rgba(10,116,218,0.16) !important;
-  transform: translateY(-1px);
-}
-
-/* ✅ View Reviews button (Premium Dark outline) */
-.resort-card .view-reviews-btn{
-  background: rgba(15,23,42,0.05) !important;
-  color: #0f172a !important;
-  border: 1px solid rgba(15,23,42,0.14) !important;
-  padding: 10px 14px !important;
-  border-radius: 999px !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  transition: 0.2s ease !important;
-}
-
-.resort-card .view-reviews-btn:hover{
-  background: rgba(15,23,42,0.08) !important;
-  transform: translateY(-1px);
-}
-
-/* ✅ Amenities container premium */
-.resort-card .resort-amenities{
-  margin-top: 14px !important;
-  padding: 14px 14px !important;
-  border-radius: 18px !important;
-  background: rgba(10,116,218,0.05) !important;
-  border: 1px solid rgba(10,116,218,0.12) !important;
-}
-
-/* Amenities title */
-.resort-card .resort-amenities h4{
-  font-size: 14px !important;
-  font-weight: 950 !important;
-  margin-bottom: 10px !important;
-  color: #0f172a !important;
-}
-
-/* ✅ Amenities chips grid */
-.resort-card .amenities-list{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* ✅ Premium Amenities Chip */
-.resort-card .amenity-tag{
-  display: inline-flex !important;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 10px !important;
-  border-radius: 999px !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-
-  background: rgba(255,255,255,0.90) !important;
-  border: 1px solid rgba(15,23,42,0.12) !important;
-  color: #0f172a !important;
-
-  box-shadow: 0 10px 22px rgba(2,8,20,0.06) !important;
-  transition: 0.2s ease;
-}
-
-.resort-card .amenity-tag:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(2,8,20,0.10) !important;
-}
-
-/* ✅ Make resort card cleaner */
-.resort-card{
-  border-radius: 22px !important;
-  overflow: hidden !important;
-  border: 1px solid rgba(15,23,42,0.08) !important;
-  box-shadow: 0 16px 45px rgba(2,8,20,0.08) !important;
-}
-
-.resort-card:hover{
-  transform: translateY(-6px);
-  box-shadow: 0 26px 70px rgba(2,8,20,0.13) !important;
-}
-
-/* ✅ Mobile fix */
-@media(max-width: 768px){
-  .resort-card .resort-info h3{
-    font-size: 18px !important;
-  }
-  .resort-card .resort-price{
-    font-size: 16px !important;
-  }
-  .resort-card .book-btn,
-  .resort-card .review-btn,
-  .resort-card .view-reviews-btn{
-    width: 100%;
-    justify-content: center;
-  }
-}
-/* ✅ Move Gallery View More Button to Top-Right Corner */
-.resort-card .view-more-btn{
-  position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
-  bottom: auto !important;
-  padding: 4px 8px !important;
-  font-size: 10px !important;
-  font-weight: 900 !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,0.35) !important;
-  background: rgba(0,0,0,0.45) !important;
-  color: white !important;
-  backdrop-filter: blur(12px);
-  cursor: pointer;
-  transition: 0.25s ease;
-}
-
-.resort-card .view-more-btn:hover{
-  background: rgba(0,0,0,0.65) !important;
-  transform: translateY(-1px);
-}
-/* ✅ Wooden Background for Resort Names Only */
-.resort-card .resort-info h3{
-  background: linear-gradient(135deg, #8B4513, #A0522D, #CD853F) !important;
-  color: #fff !important;
-  padding: 8px 12px !important;
-  border-radius: 8px !important;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2) !important;
-}
-/* ✅ Force Book Now Button Orange Color */
-.resort-card button:contains("Book Now"),
-.resort-card .book-btn,
-.resort-card button[onclick*="bookNow"],
-.resort-card button[onclick*="Book"],
-.book-btn{
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
-}
-
-.resort-card button:contains("Book Now"):hover,
-.resort-card .book-btn:hover,
-.resort-card button[onclick*="bookNow"]:hover,
-.book-btn:hover{
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 28px 70px rgba(255,111,0,0.42) !important;
-}
-/* ✅ FORCE ALL BOOK NOW BUTTONS TO ORANGE - HIGHEST PRIORITY */
-.resort-card button,
-.resort-item button,
-.resort button,
-.card button,
-button {
-  /* Check if button text contains "Book" and force orange */
-}
-
-/* Target by class name */
-.book-btn,
-.book-now,
-.vrb-btn-booknow {
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
-}
-
-/* Target by onclick attribute */
-button[onclick*="bookNow"],
-button[onclick*="Book"],
-button[onclick*="book"] {
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
-}
-
-/* Target first button in resort cards (usually Book Now) */
-.resort-card button:first-of-type,
-.resort-item button:first-of-type,
-.resort button:first-of-type,
-.card button:first-of-type {
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
-}
-
-/* Override any existing button styles */
-.resort-card .resort-actions button:first-child,
-.resort-card .book-btn,
-.resort-card button.book-btn {
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
-}
-
-/* Hover effects */
-.book-btn:hover,
-.book-now:hover,
-.vrb-btn-booknow:hover,
-button[onclick*="bookNow"]:hover,
-button[onclick*="Book"]:hover,
-.resort-card button:first-of-type:hover {
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 28px 70px rgba(255,111,0,0.42) !important;
-}
-/* ✅ Booking Modal Button Colors */
-.vrb-modal .vrb-btn-primary,
-.vrb-modal button[type="submit"],
-.vrb-modal .book-btn {
-  background: #28a745 !important;
-  color: white !important;
-}
-
-.vrb-modal .vrb-btn-light,
-.vrb-modal button[onclick*="close"] {
-  background: #dc3545 !important;
-  color: white !important;
-}
-/* =========================================================
-   ✅ OFFERS & DEALS - PREMIUM COUPON SLIDER UI
-========================================================= */
-
-.vrb-coupon-slider-wrap{
-  position: relative;
-  margin-top: 28px;
-  padding: 18px;
-  border-radius: 26px;
-  background: rgba(255,255,255,0.70);
-  border: 1px solid rgba(15,23,42,0.07);
-  box-shadow: 0 18px 55px rgba(2,8,20,0.08);
-  backdrop-filter: blur(12px);
-}
-
-/* Slider */
-.vrb-coupon-slider{
-  display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding: 10px;
-  scrollbar-width: none;
-}
-
-.vrb-coupon-slider::-webkit-scrollbar{
-  display: none;
-}
-
-/* Card */
-.vrb-coupon-card{
-  flex: 0 0 310px;
-  scroll-snap-align: start;
-  border-radius: 22px;
-  overflow: hidden;
-  background: rgba(255,255,255,0.88);
-  border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 18px 45px rgba(2,8,20,0.08);
-  transition: 0.25s ease;
-}
-
-.vrb-coupon-card:hover{
-  transform: translateY(-6px);
-  box-shadow: 0 28px 75px rgba(2,8,20,0.14);
-}
-
-/* Image */
-.vrb-coupon-img{
-  position: relative;
-  height: 160px;
-  overflow: hidden;
-}
-
-.vrb-coupon-img img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.05);
-  transition: 0.35s ease;
-}
-
-.vrb-coupon-card:hover .vrb-coupon-img img{
-  transform: scale(1.12);
-}
-
-/* Discount badge */
-.vrb-coupon-badge{
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 900;
-  color: white;
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c);
-  box-shadow: 0 16px 36px rgba(255,111,0,0.30);
-}
-
-/* Body */
-.vrb-coupon-body{
-  padding: 16px;
-}
-
-.vrb-coupon-body h3{
-  font-size: 16px;
-  font-weight: 950;
-  color: #0f172a;
-  margin-bottom: 8px;
-}
-
-.vrb-coupon-day{
-  color: #334155;
-  font-weight: 700;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-/* Coupon code box */
-.vrb-coupon-code{
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(10,116,218,0.06);
-  border: 1px solid rgba(10,116,218,0.12);
-}
-
-.vrb-coupon-code .label{
-  display: block;
-  font-size: 11px;
-  font-weight: 900;
-  color: #475569;
-  margin-bottom: 8px;
-}
-
-.vrb-coupon-code .code-row{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.vrb-coupon-code code{
-  font-size: 14px;
-  font-weight: 950;
-  padding: 8px 12px;
-  border-radius: 14px;
-  background: rgba(15,23,42,0.06);
-  border: 1px solid rgba(15,23,42,0.12);
-  color: #0f172a;
-}
-
-.copy-btn{
-  border: none;
-  cursor: pointer;
-  padding: 9px 12px;
-  border-radius: 14px;
-  font-weight: 900;
-  font-size: 12px;
-  background: rgba(10,116,218,0.12);
-  color: #0a74da;
-  border: 1px solid rgba(10,116,218,0.18);
-  transition: 0.2s ease;
-}
-
-.copy-btn:hover{
-  background: rgba(10,116,218,0.18);
-  transform: translateY(-1px);
-}
-
-/* Loading / Empty */
-.vrb-coupon-loading,
-.vrb-coupon-empty{
-  width: 100%;
-  text-align: center;
-  padding: 30px 10px;
-  font-weight: 800;
-  color: #475569;
-}
-
-/* Controls */
-.vrb-coupon-controls{
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.vrb-coupon-nav{
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
-  border: 1px solid rgba(15,23,42,0.12);
-  background: rgba(255,255,255,0.85);
-  cursor: pointer;
-  font-size: 22px;
-  font-weight: 950;
-  color: #0f172a;
-  transition: 0.2s ease;
-}
-
-.vrb-coupon-nav:hover{
-  transform: translateY(-1px);
-  background: rgba(255,255,255,0.95);
-}
-
-/* Responsive */
-@media(max-width: 768px){
-  .vrb-coupon-card{
-    flex: 0 0 86%;
-  }
-}
-/* ✅ Make Offer Container Smaller */
-.vrb-coupon-slider-wrap{
-  margin-top: 20px !important;
-  padding: 12px !important;
-  border-radius: 18px !important;
-}
-
-.vrb-coupon-card{
-  flex: 0 0 260px !important;
-  border-radius: 16px !important;
-}
-
-.vrb-coupon-img{
-  height: 120px !important;
-}
-
-.vrb-coupon-body{
-  padding: 12px !important;
 }
