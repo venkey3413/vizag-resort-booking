@@ -2109,17 +2109,22 @@ document.addEventListener('DOMContentLoaded', function() {
         searchBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            const location = document.getElementById('locationSelect').value;
-            const checkIn = document.querySelector('#vrb-resort input[type="date"]:first-of-type').value;
-            const checkOut = document.querySelector('#vrb-resort input[type="date"]:last-of-type').value;
+            const locationSelect = document.getElementById('locationSelect');
+            const location = locationSelect.value;
+            const selectedText = locationSelect.options[locationSelect.selectedIndex].text;
             
-            console.log('Search clicked - Location value:', location);
+            console.log('Search clicked - Location value:', location, 'Selected text:', selectedText);
             
-            if (!location || location === '' || location === 'All Locations') {
-                // Show all resorts when All Locations selected or no location
-                renderResorts(window.resorts);
-                document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
-                showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
+            if (!location || location === '' || selectedText === 'All Locations') {
+                // Force show all resorts
+                console.log('Showing all resorts - total:', window.resorts?.length);
+                if (window.resorts) {
+                    renderResorts(window.resorts);
+                    document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
+                    showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
+                } else {
+                    showCriticalNotification('Please wait for resorts to load', 'error');
+                }
                 return;
             }
             
