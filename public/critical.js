@@ -229,7 +229,7 @@ function loadLocationsIntoHeroSearch(resorts) {
     // Add default option
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
-    defaultOption.textContent = 'Select Location';
+    defaultOption.textContent = 'All Locations';
     locationSelect.appendChild(defaultOption);
     
     // Add location options
@@ -2105,7 +2105,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const checkOut = document.querySelector('#vrb-resort input[type="date"]:last-of-type').value;
             
             if (!location) {
-                showCriticalNotification('Please select a location', 'error');
+                // Show all resorts if no location selected
+                renderResorts(window.resorts);
+                document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
+                showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
                 return;
             }
             

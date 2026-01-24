@@ -2641,3 +2641,194 @@ button[onclick*="Book"]:hover,
   background: #dc3545 !important;
   color: white !important;
 }
+/* =========================================================
+   ✅ OFFERS & DEALS - PREMIUM COUPON SLIDER UI
+========================================================= */
+
+.vrb-coupon-slider-wrap{
+  position: relative;
+  margin-top: 28px;
+  padding: 18px;
+  border-radius: 26px;
+  background: rgba(255,255,255,0.70);
+  border: 1px solid rgba(15,23,42,0.07);
+  box-shadow: 0 18px 55px rgba(2,8,20,0.08);
+  backdrop-filter: blur(12px);
+}
+
+/* Slider */
+.vrb-coupon-slider{
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 10px;
+  scrollbar-width: none;
+}
+
+.vrb-coupon-slider::-webkit-scrollbar{
+  display: none;
+}
+
+/* Card */
+.vrb-coupon-card{
+  flex: 0 0 310px;
+  scroll-snap-align: start;
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.88);
+  border: 1px solid rgba(15,23,42,0.08);
+  box-shadow: 0 18px 45px rgba(2,8,20,0.08);
+  transition: 0.25s ease;
+}
+
+.vrb-coupon-card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 28px 75px rgba(2,8,20,0.14);
+}
+
+/* Image */
+.vrb-coupon-img{
+  position: relative;
+  height: 160px;
+  overflow: hidden;
+}
+
+.vrb-coupon-img img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.05);
+  transition: 0.35s ease;
+}
+
+.vrb-coupon-card:hover .vrb-coupon-img img{
+  transform: scale(1.12);
+}
+
+/* Discount badge */
+.vrb-coupon-badge{
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  color: white;
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c);
+  box-shadow: 0 16px 36px rgba(255,111,0,0.30);
+}
+
+/* Body */
+.vrb-coupon-body{
+  padding: 16px;
+}
+
+.vrb-coupon-body h3{
+  font-size: 16px;
+  font-weight: 950;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.vrb-coupon-day{
+  color: #334155;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* Coupon code box */
+.vrb-coupon-code{
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(10,116,218,0.06);
+  border: 1px solid rgba(10,116,218,0.12);
+}
+
+.vrb-coupon-code .label{
+  display: block;
+  font-size: 11px;
+  font-weight: 900;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.vrb-coupon-code .code-row{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.vrb-coupon-code code{
+  font-size: 14px;
+  font-weight: 950;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.12);
+  color: #0f172a;
+}
+
+.copy-btn{
+  border: none;
+  cursor: pointer;
+  padding: 9px 12px;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 12px;
+  background: rgba(10,116,218,0.12);
+  color: #0a74da;
+  border: 1px solid rgba(10,116,218,0.18);
+  transition: 0.2s ease;
+}
+
+.copy-btn:hover{
+  background: rgba(10,116,218,0.18);
+  transform: translateY(-1px);
+}
+
+/* Loading / Empty */
+.vrb-coupon-loading,
+.vrb-coupon-empty{
+  width: 100%;
+  text-align: center;
+  padding: 30px 10px;
+  font-weight: 800;
+  color: #475569;
+}
+
+/* Controls */
+.vrb-coupon-controls{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vrb-coupon-nav{
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.85);
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 950;
+  color: #0f172a;
+  transition: 0.2s ease;
+}
+
+.vrb-coupon-nav:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.95);
+}
+
+/* Responsive */
+@media(max-width: 768px){
+  .vrb-coupon-card{
+    flex: 0 0 86%;
+  }
+}

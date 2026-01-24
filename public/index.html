@@ -230,13 +230,31 @@
     </div>
   </section>
 
-  <!-- ✅ OFFERS PLACEHOLDER -->
+  <!-- ✅ OFFERS SECTION (UPGRADED UI + COUPON SLIDER) -->
   <section id="offers" class="vrb-section">
     <div class="vrb-container vrb-anim">
+
       <div class="vrb-section-head">
         <h2 class="vrb-title">Offers & Deals</h2>
         <p class="vrb-subtitle">Apply coupon codes and save more on booking.</p>
       </div>
+
+      <!-- ✅ Premium Coupon Slider -->
+      <div class="vrb-coupon-slider-wrap">
+        <div class="vrb-coupon-slider" id="couponSlider">
+          <!-- Coupons will load dynamically -->
+          <div class="vrb-coupon-loading">
+            Loading coupons...
+          </div>
+        </div>
+
+        <!-- Slider Controls -->
+        <div class="vrb-coupon-controls">
+          <button class="vrb-coupon-nav" id="couponPrevBtn">‹</button>
+          <button class="vrb-coupon-nav" id="couponNextBtn">›</button>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -571,6 +589,145 @@
       el.classList.add("vrb-hide");
       observer.observe(el);
     });
+  </script>
+
+  <script>
+/* =========================================================
+   ✅ OFFERS & DEALS COUPON SLIDER (DB Driven)
+   - Fetches coupons from /api/coupons
+   - Shows each coupon in premium mini container
+   - Auto rotation slide + manual arrows
+========================================================= */
+
+async function loadOffersCoupons() {
+  const slider = document.getElementById("couponSlider");
+  if (!slider) return;
+
+  slider.innerHTML = `<div class="vrb-coupon-loading">Loading coupons...</div>`;
+
+  try {
+    // ✅ Fetch coupons
+    const couponsRes = await fetch("/api/coupons");
+    const coupons = await couponsRes.json();
+
+    if (!coupons || coupons.length === 0) {
+      slider.innerHTML = `<div class="vrb-coupon-empty">No offers available right now.</div>`;
+      return;
+    }
+
+    // ✅ Fetch resorts if available (already loaded in window.resorts by critical.js)
+    let resorts = window.resorts || [];
+    if (!resorts || resorts.length === 0) {
+      // fallback fetch resorts (if offers loads earlier)
+      const resortsRes = await fetch("/api/resorts");
+      resorts = await resortsRes.json();
+      window.resorts = resorts;
+    }
+
+    // ✅ Build coupon cards
+    slider.innerHTML = coupons.map(c => {
+      const resort = resorts.find(r => r.id == c.resort_id) || null;
+
+      const resortName = resort ? resort.name : "All Resorts";
+      const resortImg = resort?.image || "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200";
+
+      const discountText =
+        c.type === "percentage"
+          ? `${c.discount}% OFF`
+          : `₹${c.discount} OFF`;
+
+      const dayLabel =
+        c.day_type === "weekday" ? "Weekdays (Mon-Thu)" :
+        c.day_type === "friday" ? "Friday Only" :
+        c.day_type === "weekend" ? "Weekend (Sat-Sun)" :
+        "All Days";
+
+      return `
+        <div class="vrb-coupon-card">
+          <div class="vrb-coupon-img">
+            <img src="${resortImg}" alt="${resortName}">
+            <span class="vrb-coupon-badge">${discountText}</span>
+          </div>
+
+          <div class="vrb-coupon-body">
+            <h3>${resortName}</h3>
+            <p class="vrb-coupon-day">✅ Valid: <b>${dayLabel}</b></p>
+
+            <div class="vrb-coupon-code">
+              <span class="label">Coupon Code</span>
+              <div class="code-row">
+                <code>${c.code}</code>
+                <button class="copy-btn" onclick="copyCouponCode('${c.code}')">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // ✅ Initialize slider rotation after rendering
+    initCouponSlider();
+
+  } catch (err) {
+    console.error("❌ Coupons load failed:", err);
+    slider.innerHTML = `<div class="vrb-coupon-empty">Failed to load coupons. Please refresh.</div>`;
+  }
+}
+
+/* ✅ Copy coupon button */
+function copyCouponCode(code) {
+  navigator.clipboard.writeText(code);
+  alert("✅ Coupon copied: " + code);
+}
+
+/* ✅ Slider logic */
+let couponIndex = 0;
+let couponInterval;
+
+function initCouponSlider() {
+  const slider = document.getElementById("couponSlider");
+  const cards = slider?.querySelectorAll(".vrb-coupon-card");
+
+  if (!cards || cards.length === 0) return;
+
+  function showCoupon(i) {
+    couponIndex = i;
+    slider.scrollTo({
+      left: cards[i].offsetLeft - slider.offsetLeft,
+      behavior: "smooth"
+    });
+  }
+
+  function nextCoupon() {
+    couponIndex = (couponIndex + 1) % cards.length;
+    showCoupon(couponIndex);
+  }
+
+  function prevCoupon() {
+    couponIndex = (couponIndex - 1 + cards.length) % cards.length;
+    showCoupon(couponIndex);
+  }
+
+  // ✅ Auto rotate
+  clearInterval(couponInterval);
+  couponInterval = setInterval(nextCoupon, 4000);
+
+  // ✅ Buttons
+  const nextBtn = document.getElementById("couponNextBtn");
+  const prevBtn = document.getElementById("couponPrevBtn");
+
+  if (nextBtn) nextBtn.onclick = () => { nextCoupon(); };
+  if (prevBtn) prevBtn.onclick = () => { prevCoupon(); };
+
+  // ✅ Pause on hover
+  slider.addEventListener("mouseenter", () => clearInterval(couponInterval));
+  slider.addEventListener("mouseleave", () => {
+    couponInterval = setInterval(nextCoupon, 4000);
+  });
+}
+
+/* ✅ Load when page ready */
+document.addEventListener("DOMContentLoaded", loadOffersCoupons);
   </script>
 
 
