@@ -51,6 +51,42 @@ def get_resort_rules():
     )
 
 
+def get_active_coupons():
+    coupons = safe_get(f"{BASE_URL}/api/coupons") or []
+    resorts = safe_get(f"{BASE_URL}/api/resorts") or []
+    
+    if not coupons:
+        return "❌ No active coupons available at the moment."
+    
+    result = "🎫 **Active Coupons:**\n\n"
+    
+    for coupon in coupons:
+        # Find resort name
+        resort_name = "All Resorts"
+        if coupon.get("resort_id"):
+            resort = next((r for r in resorts if r["id"] == coupon["resort_id"]), None)
+            if resort:
+                resort_name = resort["name"]
+        
+        # Format discount
+        discount_text = f"{coupon['discount']}% OFF" if coupon['type'] == 'percentage' else f"₹{coupon['discount']} OFF"
+        
+        # Format day type
+        day_text = {
+            'weekday': 'Mon-Thu',
+            'friday': 'Friday',
+            'weekend': 'Sat-Sun',
+            'all': 'All Days'
+        }.get(coupon.get('day_type', 'all'), 'All Days')
+        
+        result += f"**{coupon['code']}** - {discount_text}\n"
+        result += f"📍 Resort: {resort_name}\n"
+        result += f"📅 Valid: {day_text}\n\n"
+    
+    result += "💡 Copy any coupon code and use it during booking!"
+    return result
+
+
 def check_resort_availability(resort_name: str, check_in: str, check_out: str):
     resorts = safe_get(f"{BASE_URL}/api/resorts")
     if not resorts:
@@ -81,28 +117,29 @@ def check_resort_availability(resort_name: str, check_in: str, check_out: str):
             return f"❌ {resort_name} is blocked on selected dates."
 
     for bk in bookings:
-    booking_resort_id = (
-        bk.get("resortId")
-        or bk.get("resort_id")
-        or bk.get("resort")
-    )
+        booking_resort_id = (
+            bk.get("resortId")
+            or bk.get("resort_id")
+            or bk.get("resort")
+        )
 
-    if booking_resort_id != resort_id:
-        continue
+        if booking_resort_id != resort_id:
+            continue
 
-    check_in_val = bk.get("checkIn") or bk.get("check_in")
-    check_out_val = bk.get("checkOut") or bk.get("check_out")
+        check_in_val = bk.get("checkIn") or bk.get("check_in")
+        check_out_val = bk.get("checkOut") or bk.get("check_out")
 
-    # 🚨 HARD SAFETY CHECKS
-    if not check_in_val or not check_out_val:
-        continue
+        if not check_in_val or not check_out_val:
+            continue
 
-    try:
-        bci = parse_date(check_in_val)
-        bco = parse_date(check_out_val)
-    except Exception:
-        continue  # skip malformed booking safely
+        try:
+            bci = parse_date(check_in_val)
+            bco = parse_date(check_out_val)
+        except Exception:
+            continue
 
-    if ci < bco and co > bci:
-        return f"❌ {resort_name} is already booked for the selected dates."
+        if ci < bco and co > bci:
+            return f"❌ {resort_name} is already booked for the selected dates."
+
+    return f"✅ {resort_name} is available from {check_in} to {check_out}!"
 

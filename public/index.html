@@ -260,6 +260,35 @@
         <h2 class="vrb-title">Events & Party Bookings</h2>
         <p class="vrb-subtitle">Birthday • Engagement • Corporate Parties</p>
       </div>
+      
+      <div class="events-slider">
+        <div class="events-track">
+          <div class="event-card">
+            <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=300" alt="Birthday Party">
+            <h4>Birthday Parties</h4>
+          </div>
+          <div class="event-card">
+            <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=300" alt="Wedding">
+            <h4>Weddings</h4>
+          </div>
+          <div class="event-card">
+            <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=300" alt="Corporate Event">
+            <h4>Corporate Events</h4>
+          </div>
+          <div class="event-card">
+            <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=300" alt="Engagement">
+            <h4>Engagements</h4>
+          </div>
+          <div class="event-card">
+            <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=300" alt="Pool Party">
+            <h4>Pool Parties</h4>
+          </div>
+          <div class="event-card">
+            <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=300" alt="Anniversary">
+            <h4>Anniversaries</h4>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -397,10 +426,11 @@
     </div>
   </div>
 
-  <!-- ✅ CHAT WIDGET -->
+  <!-- ✅ PREMIUM CHAT WIDGET -->
   <div class="vrb-chat-widget">
     <button class="vrb-chat-fab" id="vrbChatFab">
       <img src="logo.png" alt="Chat Logo">
+      <div class="chat-pulse"></div>
     </button>
 
     <div class="vrb-chat-box" id="vrbChatBox">
@@ -408,27 +438,41 @@
         <div class="vrb-chat-title">
           <img src="logo.png" alt="Logo">
           <div>
-            <h4>Vizag Support</h4>
-            <p>Online • Reply in minutes</p>
+            <h4>Vizag Resort AI</h4>
+            <p class="chat-status">🟢 Online • Instant replies</p>
           </div>
         </div>
         <button class="vrb-chat-close" id="vrbChatClose">✕</button>
       </div>
 
       <div class="vrb-chat-body" id="vrbChatBody">
-        <div class="vrb-msg vrb-bot">👋 Hi! Welcome to Vizag Resort Booking.</div>
-        <div class="vrb-msg vrb-bot">How can I help you today?</div>
+        <div class="vrb-msg vrb-bot">
+          <div class="bot-avatar">🤖</div>
+          <div class="msg-content">
+            <strong>Welcome to Vizag Resort Booking!</strong><br><br>
+            I can help you with:
+            <div class="mcp-tools-grid">
+              <button class="mcp-tool-btn" data-tool="refund">📋 Refund Policy</button>
+              <button class="mcp-tool-btn" data-tool="checkin">🏨 Check-in / Check-out</button>
+              <button class="mcp-tool-btn" data-tool="rules">📜 Resort Rules</button>
+              <button class="mcp-tool-btn" data-tool="availability">📅 Check Availability</button>
+              <button class="mcp-tool-btn" data-tool="coupons">🎫 Active Coupons</button>
+            </div>
+            Click any button above or type your question!
+          </div>
+        </div>
       </div>
 
       <div class="vrb-chat-footer">
-        <input id="vrbChatInput" type="text" placeholder="Type your message..." />
+        <input id="vrbChatInput" type="text" placeholder="Ask me anything about resorts..." />
         <button class="vrb-chat-send" id="vrbChatSend">➤</button>
       </div>
 
       <div class="vrb-chat-quick">
-        <button class="vrb-q" data-msg="I want to book resort">🏖 Book Resort</button>
-        <button class="vrb-q" data-msg="I want cab booking">🚖 Book Cab</button>
-        <button class="vrb-q" data-msg="I want event booking">🎉 Book Event</button>
+        <button class="vrb-q" data-msg="What is your refund policy?">📋 Refund Policy</button>
+        <button class="vrb-q" data-msg="Tell me about check-in and check-out">🏨 Check-in Info</button>
+        <button class="vrb-q" data-msg="What are the resort rules?">📜 Resort Rules</button>
+        <button class="vrb-q" data-msg="Check resort availability">📅 Check Availability</button>
       </div>
     </div>
   </div>
@@ -456,7 +500,7 @@
     }
 
     /* ======================================================
-       ✅ FIXED: Hero Location search with proper reset functionality
+       ✅ FIXED: Hero Location search with force reload functionality
        ====================================================== */
     function filterResortsByHeroLocation() {
       const locationSelect = document.getElementById("locationSelect");
@@ -467,10 +511,12 @@
       
       console.log('🔍 Hero search - Selected:', selectedLocation, 'Text:', selectedText);
 
-      // ✅ Show all resorts if "All Locations" is selected
+      // ✅ Force reload all resorts from server if "All Locations" is selected
       if (!selectedLocation || selectedLocation === "All Locations" || selectedText === "All Locations") {
-        console.log('📍 Showing all resorts');
-        if (window.resorts && typeof renderResorts === "function") {
+        console.log('📍 Force reloading all resorts from server');
+        if (typeof forceReloadAllResorts === "function") {
+          forceReloadAllResorts();
+        } else if (window.resorts && typeof renderResorts === "function") {
           renderResorts(window.resorts);
           showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
         }

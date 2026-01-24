@@ -167,25 +167,32 @@ const resortsPromise = fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHtt
 // Mobile-optimized resort rendering with lazy loading
 function renderResorts(resorts) {
     console.log('🏨 Resorts loaded:', resorts.length, 'resorts');
-    window.resorts=resorts;
+    
+    // ✅ CRITICAL FIX: Always update global resorts array
+    window.resorts = resorts;
     
     // Load unique locations into hero search dropdown
     loadLocationsIntoHeroSearch(resorts);
     
-    const grid=document.getElementById('resortsGrid');
-    if(!grid){
+    const grid = document.getElementById('resortsGrid');
+    if (!grid) {
         console.error('❌ Resort grid element not found');
         return;
     }
-    if(!resorts||resorts.length===0){
-        grid.innerHTML='<p style="text-align:center;padding:2rem;color:#666;">No resorts available at the moment.</p>';
+    
+    if (!resorts || resorts.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;padding:2rem;color:#666;">No resorts available at the moment.</p>';
         return;
     }
     
     const isMobile = window.innerWidth <= 768;
-    const sanitize=s=>{if(!s)return '';const str=String(s);return str.replace(/[<>"'&\/]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;','/':'&#x2F;'}[m]||m));};
+    const sanitize = s => {
+        if (!s) return '';
+        const str = String(s);
+        return str.replace(/[<>"'&\/]/g, m => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;','/':'&#x2F;'}[m] || m));
+    };
     
-    if(isMobile) {
+    if (isMobile) {
         // Mobile-optimized rendering with progressive loading
         grid.innerHTML = '';
         
@@ -207,9 +214,10 @@ function renderResorts(resorts) {
         });
     } else {
         // Desktop rendering (existing logic)
-        grid.innerHTML=resorts.map(r=>createDesktopResortHTML(r, sanitize)).join('');
+        grid.innerHTML = resorts.map(r => createDesktopResortHTML(r, sanitize)).join('');
     }
-    console.log('✅ Resorts displayed successfully');
+    
+    console.log('✅ Resorts displayed successfully - Total:', resorts.length);
     
     // Add structured data for SEO
     addResortStructuredData(resorts);
@@ -2123,16 +2131,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('🔍 Hero search clicked - Value:', selectedValue, 'Text:', selectedText);
             
-            // Show all resorts if "All Locations" is selected
+            // ✅ CRITICAL FIX: Force reload all resorts from server first
             if (!selectedValue || selectedValue === 'All Locations' || selectedText === 'All Locations') {
-                console.log('📍 Showing all resorts - total:', window.resorts?.length);
-                if (window.resorts) {
-                    renderResorts(window.resorts);
-                    document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
-                    showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
-                } else {
-                    showCriticalNotification('Please wait for resorts to load', 'error');
-                }
+                console.log('📍 Forcing reload of ALL resorts from server');
+                forceReloadAllResorts();
                 return;
             }
             
@@ -2176,11 +2178,193 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Auto-filter when "All Locations" is selected
             if (selectedValue === 'All Locations') {
-                if (window.resorts) {
-                    renderResorts(window.resorts);
-                    console.log('📍 Auto-showing all resorts from dropdown change');
-                }
+                console.log('📍 Auto-reloading all resorts from dropdown change');
+                forceReloadAllResorts();
             }
         });
     }
+    
+    // ✅ Initialize premium chat widget
+    initializePremiumChatWidget();
 });
+
+// ✅ NEW: Force reload all resorts from server
+async function forceReloadAllResorts() {
+    try {
+        console.log('🔄 Force reloading all resorts from server...');
+        
+        // Add cache-busting parameter
+        const cacheBuster = Date.now();
+        const response = await fetch(`/api/resorts?_cb=${cacheBuster}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const allResorts = await response.json();
+        console.log('✅ Reloaded', allResorts.length, 'resorts from server');
+        
+        // Update global resorts and render
+        window.resorts = allResorts;
+        renderResorts(allResorts);
+        
+        // Scroll to resorts section
+        document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
+        
+        showCriticalNotification(`Showing all ${allResorts.length} resorts`, 'success');
+        
+    } catch (error) {
+        console.error('❌ Failed to reload resorts:', error);
+        showCriticalNotification('Failed to load resorts. Please refresh the page.', 'error');
+    }
+}
+
+// ✅ Premium Chat Widget Integration with MCP Server
+function initializePremiumChatWidget() {
+    const chatFab = document.getElementById('vrbChatFab');
+    const chatBox = document.getElementById('vrbChatBox');
+    const chatClose = document.getElementById('vrbChatClose');
+    const chatSend = document.getElementById('vrbChatSend');
+    const chatInput = document.getElementById('vrbChatInput');
+    const chatBody = document.getElementById('vrbChatBody');
+    
+    if (!chatFab || !chatBox) return;
+    
+    let isOpen = false;
+    let sessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+    
+    // Toggle chat
+    chatFab.addEventListener('click', () => {
+        isOpen = !isOpen;
+        chatBox.classList.toggle('open', isOpen);
+    });
+    
+    // Close chat
+    if (chatClose) {
+        chatClose.addEventListener('click', () => {
+            isOpen = false;
+            chatBox.classList.remove('open');
+        });
+    }
+    
+    // Send message
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        addMessage(message, 'user');
+        chatInput.value = '';
+        
+        try {
+            // Send to your MCP server
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    message: message
+                })
+            });
+            
+            const data = await response.json();
+            addMessage(data.answer || 'Sorry, I could not process your request.', 'bot');
+            
+        } catch (error) {
+            console.error('Chat error:', error);
+            addMessage('❌ Unable to connect to support. Please try again later.', 'bot');
+        }
+    }
+    
+    // Add message to chat
+    function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `vrb-msg vrb-${sender}`;
+        
+        if (sender === 'bot') {
+            messageDiv.innerHTML = `
+                <div class="bot-avatar">🤖</div>
+                <div class="msg-content">${text}</div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="msg-content">${text}</div>
+            `;
+        }
+        
+        chatBody.appendChild(messageDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    
+    // Send button click
+    if (chatSend) {
+        chatSend.addEventListener('click', sendMessage);
+    }
+    
+    // Enter key to send
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
+    
+    // MCP tool buttons
+    const mcpToolButtons = document.querySelectorAll('.mcp-tool-btn');
+    mcpToolButtons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const tool = btn.getAttribute('data-tool');
+            let message = '';
+            
+            switch(tool) {
+                case 'refund':
+                    message = 'What is your refund policy?';
+                    break;
+                case 'checkin':
+                    message = 'Tell me about check-in and check-out';
+                    break;
+                case 'rules':
+                    message = 'What are the resort rules?';
+                    break;
+                case 'availability':
+                    message = 'Check resort availability';
+                    break;
+                case 'coupons':
+                    message = 'Show me active coupons';
+                    break;
+            }
+            
+            if (message) {
+                addMessage(message, 'user');
+                
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            session_id: sessionId,
+                            message: message
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    addMessage(data.answer || 'Sorry, I could not process your request.', 'bot');
+                    
+                } catch (error) {
+                    addMessage('❌ Unable to connect. Please try again.', 'bot');
+                }
+            }
+        });
+    });
+    
+    console.log('✅ Premium chat widget initialized with MCP server integration');
+}

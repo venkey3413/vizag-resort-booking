@@ -91,7 +91,13 @@ async def chat(req: ChatRequest):
         }
 
     # ------------------------------------------------
-    # 5️⃣ STATIC POLICY TOOLS
+    # 5️⃣ COUPONS TOOL
+    # ------------------------------------------------
+    if "coupon" in text or "coupons" in text or "discount" in text:
+        return {"answer": get_active_coupons(), "handover": False}
+
+    # ------------------------------------------------
+    # 6️⃣ STATIC POLICY TOOLS
     # ------------------------------------------------
     if "refund" in text:
         return {"answer": get_refund_policy(), "handover": False}
