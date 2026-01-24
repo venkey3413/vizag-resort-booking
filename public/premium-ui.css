@@ -2113,3 +2113,181 @@ button:contains("Book Now"),
     font-size: 16px !important;
   }
 }
+/* =========================================================
+   FINAL RESORT CARD UI FIX (PREMIUM)
+   ✅ Book Now = Same orange as header CTA
+   ✅ View More = Small + lite
+   ✅ Amenities = chips/tags (modern)
+========================================================= */
+
+/* ✅ Resort name premium */
+.resort-card h3,
+.resort-item h3,
+.resort h3,
+.card h3{
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 950 !important;
+  color: #0f172a !important;
+  letter-spacing: 0.2px !important;
+  margin: 12px 0 10px !important;
+  text-transform: none !important;
+}
+
+/* ✅ All resort buttons default */
+.resort-card button,
+.resort-item button,
+.resort button,
+.card button{
+  border: 1px solid rgba(15,23,42,0.14) !important;
+  cursor: pointer !important;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  transition: 0.22s ease !important;
+
+  background: rgba(255,255,255,0.75) !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+  margin: 6px 8px 0 0 !important;
+}
+
+/* Hover */
+.resort-card button:hover,
+.resort-item button:hover,
+.resort button:hover,
+.card button:hover{
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 28px rgba(2,8,20,0.14) !important;
+}
+
+/* ✅ View More = smaller + lite */
+.vrb-btn-viewmore{
+  padding: 7px 12px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  background: rgba(15,23,42,0.05) !important;
+  border: 1px solid rgba(15,23,42,0.12) !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+.vrb-btn-viewmore:hover{
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 22px rgba(2,8,20,0.12) !important;
+}
+
+/* ✅ Book Now = EXACT same orange as header Book Now */
+.vrb-btn-booknow{
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 11px 18px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 18px 40px rgba(255,111,0,0.32) !important;
+}
+
+.vrb-btn-booknow:hover{
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 26px 65px rgba(255,111,0,0.45) !important;
+}
+
+/* ✅ Review buttons = premium outline */
+.vrb-btn-review{
+  background: rgba(10,116,218,0.08) !important;
+  border: 1px solid rgba(10,116,218,0.22) !important;
+  color: #0a74da !important;
+}
+
+/* ✅ Price highlight (nice premium) */
+.vrb-price-text{
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  color: #0f172a !important;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: rgba(255,111,0,0.08);
+  border: 1px solid rgba(255,111,0,0.18);
+}
+
+/* ==============================
+   AMENITIES AS PREMIUM CHIPS
+============================== */
+
+.vrb-amenities-box{
+  margin-top: 10px !important;
+  padding: 14px !important;
+  border-radius: 18px !important;
+  background: rgba(10,116,218,0.05) !important;
+  border: 1px solid rgba(10,116,218,0.14) !important;
+}
+
+/* chips layout */
+.vrb-amenities-chips{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 8px !important;
+}
+
+/* each chip */
+.vrb-chip-tag{
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 7px 10px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+  background: rgba(255,255,255,0.85) !important;
+  border: 1px solid rgba(15,23,42,0.12) !important;
+  box-shadow: 0 10px 22px rgba(2,8,20,0.06) !important;
+  transition: 0.2s ease;
+}
+
+.vrb-chip-tag:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(2,8,20,0.10) !important;
+}
+
+/* icon */
+.vrb-chip-ico{
+  width: 18px;
+  height: 18px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  background: rgba(255,111,0,0.12);
+  color: #ff6f00;
+}
+
+/* Mobile */
+@media(max-width: 750px){
+  .resort-card h3,
+  .resort-item h3,
+  .resort h3,
+  .card h3{
+    font-size: 18px !important;
+  }
+
+  .vrb-price-text{
+    font-size: 16px !important;
+  }
+
+  .vrb-btn-viewmore{
+    font-size: 11px !important;
+    padding: 7px 10px !important;
+  }
+
+  .vrb-chip-tag{
+    font-size: 11px !important;
+    padding: 6px 9px !important;
+  }
+}

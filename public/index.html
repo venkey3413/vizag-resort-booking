@@ -670,5 +670,123 @@
     observer.observe(document.body, { childList: true, subtree: true });
   </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* -----------------------------
+     1) BUTTON STYLES BY TEXT
+  ----------------------------- */
+  document.querySelectorAll(".resort-card button, .resort-item button, .resort button, .card button")
+    .forEach(btn => {
+
+      const t = (btn.innerText || "").trim().toLowerCase();
+
+      // remove old classes
+      btn.classList.remove("vrb-btn-booknow", "vrb-btn-review", "vrb-btn-viewmore");
+
+      // assign by text
+      if(t.includes("book now")){
+        btn.classList.add("vrb-btn-booknow");
+      } 
+      else if(t.includes("view more") || t.includes("view less")){
+        btn.classList.add("vrb-btn-viewmore");
+      }
+      else if(t.includes("review")){
+        btn.classList.add("vrb-btn-review");
+      }
+    });
+
+
+  /* -----------------------------
+     2) PRICE HIGHLIGHT BADGE
+  ----------------------------- */
+  document.querySelectorAll(".resort-card, .resort-item, .resort, .card").forEach(card => {
+
+    card.querySelectorAll("p, div, span").forEach(el => {
+      const txt = (el.innerText || "").trim();
+
+      // detect price formats
+      if(
+        txt.includes("₹") &&
+        (
+          txt.includes("/night") ||
+          txt.toLowerCase().includes("from ₹")
+        )
+      ){
+        el.classList.add("vrb-price-text");
+      }
+    });
+
+  });
+
+
+  /* -----------------------------
+     3) AMENITIES -> CHIPS/TAGS
+  ----------------------------- */
+
+  function splitAmenities(text){
+    if(!text) return [];
+
+    let cleaned = text
+      .replace(/Wi-?Fi/gi, "Wi-Fi")
+      .replace(/Swimming\s*Pool/gi, "Swimming Pool")
+      .replace(/Private\s*swimming\s*pool/gi, "Private Swimming Pool");
+
+    // add separator when words stick together (ParkingWi-Fi)
+    cleaned = cleaned
+      .replace(/([a-z])([A-Z])/g, "$1|$2")
+      .replace(/\s*\|\s*/g, "|")
+      .replace(/\s{2,}/g, " ");
+
+    let parts = cleaned.split("|").map(x => x.trim()).filter(Boolean);
+
+    // remove duplicates
+    return [...new Set(parts)];
+  }
+
+  document.querySelectorAll(".resort-card, .resort-item, .resort, .card").forEach(card => {
+
+    // Find "Amenities:"
+    const labels = [...card.querySelectorAll("p, div, span")]
+      .filter(el => (el.innerText || "").trim().toLowerCase() === "amenities:");
+
+    if(labels.length === 0) return;
+
+    labels.forEach(labelEl => {
+
+      const next = labelEl.nextElementSibling;
+      if(!next) return;
+
+      // avoid running twice
+      if(next.classList.contains("vrb-amenities-box")) return;
+
+      const rawAmenities = (next.innerText || "").trim();
+      const list = splitAmenities(rawAmenities);
+
+      // style amenities block
+      next.classList.add("vrb-amenities-box");
+
+      // create chips container
+      const chips = document.createElement("div");
+      chips.className = "vrb-amenities-chips";
+
+      list.forEach(item => {
+        const chip = document.createElement("span");
+        chip.className = "vrb-chip-tag";
+        chip.innerHTML = `
+          <span class="vrb-chip-ico">✓</span>
+          <span>${item}</span>
+        `;
+        chips.appendChild(chip);
+      });
+
+      next.innerHTML = "";
+      next.appendChild(chips);
+    });
+  });
+
+});
+  </script>
+
 </body>
 </html>
