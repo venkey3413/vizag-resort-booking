@@ -474,8 +474,9 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('checkIn').min = today;
             document.getElementById('checkOut').min = tomorrow.toISOString().split('T')[0];
             
-            document.getElementById('checkIn').value=today;
-            document.getElementById('checkOut').value=tomorrow.toISOString().split('T')[0];
+            // Don't set hardcoded dates - let user select
+            document.getElementById('checkIn').value='';
+            document.getElementById('checkOut').value='';
             
             // Load blocked dates for this resort
             fetch(`/api/blocked-dates/${resortId}`).then(r=>r.json()).then(blockedDates=>{
@@ -506,20 +507,16 @@ window.bookNow=function(resortId,resortName){
                 // Show dynamic pricing for selected date
                 showDynamicPriceForDate(selectedDate);
                 
-                // Update pricing immediately
+                // Update pricing when dates change
                 setTimeout(() => {
                     updatePricing();
-                    loadBookingModalCoupons();
-                    showAvailableCouponsForDate();
                 }, 100);
             });
             
             checkOutInput.addEventListener('change', function(){
-                // Update pricing immediately
+                // Update pricing when dates change
                 setTimeout(() => {
                     updatePricing();
-                    loadBookingModalCoupons();
-                    showAvailableCouponsForDate();
                 }, 100);
             });
             
@@ -548,25 +545,18 @@ window.bookNow=function(resortId,resortName){
             
             // Load coupons for booking modal with resort filter
             const loadBookingModalCoupons = () => {
-                const checkIn = document.getElementById('checkIn').value;
                 let url = '/api/coupons';
                 const params = new URLSearchParams();
                 if (resortId) params.append('resortId', resortId);
                 if (params.toString()) url += '?' + params.toString();
                 
-                console.log('🎫 Loading coupons for resort', resortId, 'URL:', url);
-                
                 fetch(url).then(r=>r.json()).then(coupons=>{
-                    console.log('🎫 Raw coupons received:', coupons);
                     window.bookingModalCoupons = {};
                     window.allCoupons = coupons;
                     
-                    // Filter coupons for this specific resort (null resort_id means global)
                     const filteredCoupons = coupons.filter(c => 
                         c.resort_id === null || c.resort_id == resortId
                     );
-                    
-                    console.log('🎫 Filtered coupons for resort', resortId, ':', filteredCoupons);
                     
                     filteredCoupons.forEach(c => {
                         window.bookingModalCoupons[c.code] = {
@@ -576,15 +566,9 @@ window.bookNow=function(resortId,resortName){
                             resort_id: c.resort_id
                         };
                     });
-                    
-                    console.log('✅ Booking modal coupons loaded:', window.bookingModalCoupons);
-                    
-                    // Auto-show available coupons
-                    showAvailableCouponsForDate();
-                }).catch(e=>console.log('❌ Booking modal coupon load failed:', e));
+                }).catch(e=>console.log('❌ Coupon load failed:', e));
             };
             
-            // Initial load
             loadBookingModalCoupons();
             
             // Setup coupon application in booking modal
@@ -791,11 +775,7 @@ window.bookNow=function(resortId,resortName){
                 }
             }
             
-            // Initial pricing calculation - call immediately and after DOM updates
-            updatePricing();
-            setTimeout(() => {
-                updatePricing();
-            }, 100);
+            // Don't calculate pricing until dates are selected
             
             // Function to show dynamic pricing for selected date
             window.showDynamicPriceForDate = function(selectedDate) {
@@ -1467,8 +1447,8 @@ function openGallery(resortId){
                 <h2 style="margin-bottom:20px;color:#333;">${resort.name}</h2>
                 <div style="text-align:center;margin-bottom:20px;position:relative;">
                     ${galleryItems[currentIndex].type==='video'?
-                        `<video controls style="max-width:100%;max-height:400px;border-radius:8px;" src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" title="${resort.name} resort video - ${resort.location}, Vizag"></video>`:
-                        `<img src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" alt="${resort.name} - Best resorts in Vizag ${resort.location} with private pool, swimming pool. Top vizag resorts near beach for family vacation" title="${resort.name} Gallery - Best resort in Vizag with private pool | Nearby resorts ${resort.location}" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;">`
+                        `<video controls style="width:100%;height:70vh;object-fit:cover;border-radius:8px;" src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" title="${resort.name} resort video - ${resort.location}, Vizag"></video>`:
+                        `<img src="${galleryItems[currentIndex].src.replace(/[<>"'&]/g,m=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]))}" alt="${resort.name} - Best resorts in Vizag ${resort.location} with private pool, swimming pool. Top vizag resorts near beach for family vacation" title="${resort.name} Gallery - Best resort in Vizag with private pool | Nearby resorts ${resort.location}" style="width:100%;height:70vh;object-fit:cover;border-radius:8px;">`
                     }
                     ${galleryItems.length>1?`
                         <button onclick="prevImage()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.7);color:white;border:none;padding:10px 15px;border-radius:50%;cursor:pointer;font-size:18px;">&lt;</button>

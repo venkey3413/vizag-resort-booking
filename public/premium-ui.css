@@ -2518,3 +2518,25 @@ button:contains("Book Now"),
     justify-content: center;
   }
 }
+/* ✅ Move Gallery View More Button to Top-Right Corner */
+.resort-card .view-more-btn{
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  bottom: auto !important;
+  padding: 4px 8px !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,0.35) !important;
+  background: rgba(0,0,0,0.45) !important;
+  color: white !important;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.resort-card .view-more-btn:hover{
+  background: rgba(0,0,0,0.65) !important;
+  transform: translateY(-1px);
+}
