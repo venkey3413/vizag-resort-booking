@@ -2347,6 +2347,9 @@ function initializePremiumChatWidget() {
                 addMessage(message, 'user');
                 
                 try {
+                    // Generate new session ID to clear conversation context
+                    sessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+                    
                     const response = await fetch('/api/chat', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
