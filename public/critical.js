@@ -474,6 +474,12 @@ window.bookNow=function(resortId,resortName){
             document.getElementById('checkIn').min = today;
             document.getElementById('checkOut').min = tomorrow.toISOString().split('T')[0];
             
+            // Reset ALL form data when opening new booking
+            document.getElementById('guestName').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('phone').value = '+91';
+            document.getElementById('guests').value = '2';
+            
             // Don't set hardcoded dates - let user select
             document.getElementById('checkIn').value='';
             document.getElementById('checkOut').value='';
@@ -507,16 +513,18 @@ window.bookNow=function(resortId,resortName){
                 // Show dynamic pricing for selected date
                 showDynamicPriceForDate(selectedDate);
                 
-                // Update pricing when dates change
+                // Update pricing and show available coupons
                 setTimeout(() => {
                     updatePricing();
+                    showAvailableCouponsForDate();
                 }, 100);
             });
             
             checkOutInput.addEventListener('change', function(){
-                // Update pricing when dates change
+                // Update pricing and show available coupons
                 setTimeout(() => {
                     updatePricing();
+                    showAvailableCouponsForDate();
                 }, 100);
             });
             
@@ -775,7 +783,10 @@ window.bookNow=function(resortId,resortName){
                 }
             }
             
-            // Don't calculate pricing until dates are selected
+            // Reset pricing display to default
+            document.getElementById('baseAmount').textContent = `₹${resort.price.toLocaleString()}`;
+            document.getElementById('platformFee').textContent = `₹${Math.round(resort.price * 0.015).toLocaleString()}`;
+            document.getElementById('totalAmount').textContent = `₹${(resort.price + Math.round(resort.price * 0.015)).toLocaleString()}`;
             
             // Function to show dynamic pricing for selected date
             window.showDynamicPriceForDate = function(selectedDate) {

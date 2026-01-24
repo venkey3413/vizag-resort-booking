@@ -2568,3 +2568,63 @@ button:contains("Book Now"),
   transform: translateY(-2px) scale(1.02) !important;
   box-shadow: 0 28px 70px rgba(255,111,0,0.42) !important;
 }
+/* ✅ FORCE ALL BOOK NOW BUTTONS TO ORANGE - HIGHEST PRIORITY */
+.resort-card button,
+.resort-item button,
+.resort button,
+.card button,
+button {
+  /* Check if button text contains "Book" and force orange */
+}
+
+/* Target by class name */
+.book-btn,
+.book-now,
+.vrb-btn-booknow {
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
+}
+
+/* Target by onclick attribute */
+button[onclick*="bookNow"],
+button[onclick*="Book"],
+button[onclick*="book"] {
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
+}
+
+/* Target first button in resort cards (usually Book Now) */
+.resort-card button:first-of-type,
+.resort-item button:first-of-type,
+.resort button:first-of-type,
+.card button:first-of-type {
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
+}
+
+/* Override any existing button styles */
+.resort-card .resort-actions button:first-child,
+.resort-card .book-btn,
+.resort-card button.book-btn {
+  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 18px 40px rgba(255,111,0,0.30) !important;
+}
+
+/* Hover effects */
+.book-btn:hover,
+.book-now:hover,
+.vrb-btn-booknow:hover,
+button[onclick*="bookNow"]:hover,
+button[onclick*="Book"]:hover,
+.resort-card button:first-of-type:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 28px 70px rgba(255,111,0,0.42) !important;
+}
