@@ -241,17 +241,19 @@ function loadLocationsIntoHeroSearch(resorts) {
     const locationSelect = document.getElementById('locationSelect');
     if (!locationSelect || !resorts) return;
     
+    // Store current selection
+    const currentSelection = locationSelect.value;
+    
     // Get unique locations from resorts
     const uniqueLocations = [...new Set(resorts.map(r => r.location).filter(Boolean))].sort();
     
     // Clear existing options
     locationSelect.innerHTML = '';
     
-    // ✅ Add "All Locations" option as default (IMPORTANT FIX)
+    // Add "All Locations" option
     const allOption = document.createElement('option');
     allOption.value = 'All Locations';
     allOption.textContent = 'All Locations';
-    allOption.selected = true; // Make it selected by default
     locationSelect.appendChild(allOption);
     
     // Add location options
@@ -262,8 +264,15 @@ function loadLocationsIntoHeroSearch(resorts) {
         locationSelect.appendChild(option);
     });
     
+    // Restore previous selection if it exists, otherwise default to All Locations
+    if (currentSelection && [...locationSelect.options].some(opt => opt.value === currentSelection)) {
+        locationSelect.value = currentSelection;
+    } else {
+        locationSelect.value = 'All Locations';
+    }
+    
     console.log('📍 Loaded', uniqueLocations.length, 'locations into hero search:', uniqueLocations);
-    console.log('📍 Default selection: All Locations');
+    console.log('📍 Current selection:', locationSelect.value);
 }
 
 // Add structured data for individual resorts for better SEO
