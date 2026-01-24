@@ -2248,7 +2248,13 @@ function initializePremiumChatWidget() {
             });
             
             const data = await response.json();
-            addMessage(data.answer || 'Sorry, I could not process your request.', 'bot');
+            const botResponse = data.answer || 'Sorry, I could not process your request.';
+            addMessage(botResponse, 'bot');
+            
+            // Always show resort buttons after any bot response in availability flow
+            if (message === 'Check resort availability') {
+                setTimeout(() => addResortSelectionButtons(), 1000);
+            }
             
         } catch (error) {
             console.error('Chat error:', error);
@@ -2389,9 +2395,14 @@ function initializePremiumChatWidget() {
                     const botResponse = data.answer || 'Sorry, I could not process your request.';
                     addMessage(botResponse, 'bot');
                     
-                    // Check if we should show resort selection buttons
-                    if (botResponse.includes('resort name') || botResponse.includes('which resort') || botResponse.includes('select a resort')) {
-                        addResortSelectionButtons();
+                    // Check if we should show resort selection buttons - broader detection
+                    if (botResponse.toLowerCase().includes('resort') && 
+                        (botResponse.toLowerCase().includes('name') || 
+                         botResponse.toLowerCase().includes('which') || 
+                         botResponse.toLowerCase().includes('select') ||
+                         botResponse.toLowerCase().includes('choose') ||
+                         botResponse.toLowerCase().includes('enter'))) {
+                        setTimeout(() => addResortSelectionButtons(), 500);
                     }
                     
                 } catch (error) {
