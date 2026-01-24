@@ -2113,8 +2113,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const checkIn = document.querySelector('#vrb-resort input[type="date"]:first-of-type').value;
             const checkOut = document.querySelector('#vrb-resort input[type="date"]:last-of-type').value;
             
-            if (!location) {
-                // Show all resorts when "All Locations" selected
+            console.log('Search clicked - Location value:', location);
+            
+            if (!location || location === '' || location === 'All Locations') {
+                // Show all resorts when All Locations selected or no location
                 renderResorts(window.resorts);
                 document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
                 showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
