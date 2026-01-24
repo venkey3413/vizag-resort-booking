@@ -2208,6 +2208,11 @@ function initializePremiumChatWidget() {
     chatFab.addEventListener('click', () => {
         isOpen = !isOpen;
         chatBox.classList.toggle('open', isOpen);
+        
+        // Add tool buttons when chat opens if they don't exist
+        if (isOpen && !chatBody.querySelector('.vrb-chat-tools')) {
+            setTimeout(() => addToolButtons(), 100);
+        }
     });
     
     // Close chat
@@ -2274,9 +2279,9 @@ function initializePremiumChatWidget() {
         chatBody.appendChild(messageDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
         
-        // Add tool buttons after welcome message
-        if (sender === 'bot' && text.includes('Welcome to Vizag Resort Booking!')) {
-            addToolButtons();
+        // Add tool buttons after welcome message (but only if not already added)
+        if (sender === 'bot' && text.includes('Welcome to Vizag Resort Booking!') && !chatBody.querySelector('.vrb-chat-tools')) {
+            setTimeout(() => addToolButtons(), 100);
         }
     }
     
@@ -2314,11 +2319,10 @@ function initializePremiumChatWidget() {
         });
     }
     
-    // MCP tool buttons
-    const mcpToolButtons = document.querySelectorAll('.mcp-tool-btn');
-    mcpToolButtons.forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const tool = btn.getAttribute('data-tool');
+    // MCP tool buttons - use event delegation for dynamically added buttons
+    chatBody.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('mcp-tool-btn')) {
+            const tool = e.target.getAttribute('data-tool');
             let message = '';
             
             switch(tool) {
@@ -2359,11 +2363,9 @@ function initializePremiumChatWidget() {
                     addMessage('❌ Unable to connect. Please try again.', 'bot');
                 }
             }
-        });
-    });
-    
-    // Resort selection buttons (dynamic)
-    chatBody.addEventListener('click', async (e) => {
+        }
+        
+        // Resort selection buttons (dynamic)
         if (e.target.classList.contains('resort-select-btn')) {
             const resortName = e.target.getAttribute('data-resort') || '';
             // Sanitize resort name before using
