@@ -1616,6 +1616,15 @@ function setupMainWebsiteRedisSync() {
                         })
                         .catch(e => console.error('❌ Resort reload failed:', e));
                     }
+                    
+                    // Handle coupon-related events
+                    if (data.type && data.type.startsWith('coupon.')) {
+                        console.log('🎫 Coupon event detected:', data.type, '- reloading coupons!');
+                        // Reload coupons in offers section
+                        if (typeof loadOffersCoupons === 'function') {
+                            loadOffersCoupons();
+                        }
+                    }
                 } catch (error) {
                     // Ignore ping messages
                 }
@@ -2105,7 +2114,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const checkOut = document.querySelector('#vrb-resort input[type="date"]:last-of-type').value;
             
             if (!location) {
-                // Show all resorts if no location selected
+                // Show all resorts if no location selected or "All Locations" selected
                 renderResorts(window.resorts);
                 document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
                 showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
