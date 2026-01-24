@@ -8,6 +8,7 @@ from mcp_server.server import (
     get_checkin_checkout_policy,
     get_resort_rules,
     check_resort_availability,
+    get_active_coupons,
 )
 
 app = FastAPI()
@@ -93,7 +94,7 @@ async def chat(req: ChatRequest):
     # ------------------------------------------------
     # 5️⃣ COUPONS TOOL
     # ------------------------------------------------
-    if "coupon" in text or "coupons" in text or "discount" in text:
+    if "coupon" in text or "coupons" in text or "discount" in text or "active coupons" in text:
         return {"answer": get_active_coupons(), "handover": False}
 
     # ------------------------------------------------

@@ -406,8 +406,8 @@ img{ max-width:100%; display:block; }
 /* Premium Resort Grid */
 .vrb-grid{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
 /* Ultra Modern Resort Cards */
@@ -445,7 +445,7 @@ img{ max-width:100%; display:block; }
 
 .vrb-img{
   position: relative;
-  height: 240px;
+  height: 200px;
   overflow: hidden;
 }
 
@@ -474,7 +474,7 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-body{
-  padding: 24px;
+  padding: 18px;
 }
 
 .vrb-body h3{
@@ -3026,7 +3026,7 @@ button[onclick*="Book"]:hover,
 }
 
 .vrb-coupon-card{
-  flex: 0 0 260px !important;
+  flex: 0 0 200px !important;
   border-radius: 16px !important;
 }
 
@@ -3060,29 +3060,29 @@ button[onclick*="Book"]:hover,
 }
 
 .event-card{
-  flex: 0 0 200px;
+  flex: 0 0 150px;
   background: white;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
   text-align: center;
   transition: transform 0.3s ease;
 }
 
 .event-card:hover{
-  transform: translateY(-5px);
+  transform: translateY(-3px);
 }
 
 .event-card img{
   width: 100%;
-  height: 120px;
+  height: 90px;
   object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
 }
 
 .event-card h4{
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;

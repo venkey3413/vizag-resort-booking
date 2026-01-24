@@ -2163,7 +2163,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     locationSelect.value = 'All Locations';
                     console.log('🔄 Reset dropdown to All Locations after search');
-                }, 1500);
+                }, 3000);
             } else {
                 showCriticalNotification('Please wait for resorts to load', 'error');
             }
