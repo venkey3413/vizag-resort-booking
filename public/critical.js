@@ -168,6 +168,10 @@ const resortsPromise = fetch('/api/resorts',{headers:{'X-Requested-With':'XMLHtt
 function renderResorts(resorts) {
     console.log('🏨 Resorts loaded:', resorts.length, 'resorts');
     window.resorts=resorts;
+    
+    // Load unique locations into hero search dropdown
+    loadLocationsIntoHeroSearch(resorts);
+    
     const grid=document.getElementById('resortsGrid');
     if(!grid){
         console.error('❌ Resort grid element not found');
@@ -209,6 +213,34 @@ function renderResorts(resorts) {
     
     // Add structured data for SEO
     addResortStructuredData(resorts);
+}
+
+// Load unique locations from resorts into hero search
+function loadLocationsIntoHeroSearch(resorts) {
+    const locationSelect = document.getElementById('locationSelect');
+    if (!locationSelect || !resorts) return;
+    
+    // Get unique locations from resorts
+    const uniqueLocations = [...new Set(resorts.map(r => r.location))].sort();
+    
+    // Clear existing options
+    locationSelect.innerHTML = '';
+    
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select Location';
+    locationSelect.appendChild(defaultOption);
+    
+    // Add location options
+    uniqueLocations.forEach(location => {
+        const option = document.createElement('option');
+        option.value = location;
+        option.textContent = location;
+        locationSelect.appendChild(option);
+    });
+    
+    console.log('📍 Loaded', uniqueLocations.length, 'locations into hero search:', uniqueLocations);
 }
 
 // Add structured data for individual resorts for better SEO
