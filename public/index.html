@@ -10,11 +10,10 @@
   <!-- ✅ Premium Font -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
 
-  <!-- ✅ Load your premium UI -->
+  <!-- ✅ Premium UI -->
   <link rel="stylesheet" href="premium-ui.css" />
 
   <style>
-    /* Small fallback */
     html { scroll-behavior: smooth; }
   </style>
 </head>
@@ -68,7 +67,7 @@
         <div class="vrb-field">
           <label>Location</label>
           <select id="locationSelect">
-            <option>Loading locations...</option>
+            <option value="all">Loading locations...</option>
           </select>
         </div>
 
@@ -125,6 +124,7 @@
 
         <button class="vrb-btn vrb-btn-orange">Order Food</button>
       </div>
+
     </div>
   </section>
 
@@ -133,9 +133,7 @@
     <div class="vrb-container">
       <div class="vrb-section-head vrb-anim">
         <h2 class="vrb-title">Popular Resorts in Vizag</h2>
-        <p class="vrb-subtitle">
-          Verified listings • Best prices • Instant booking
-        </p>
+        <p class="vrb-subtitle">Verified listings • Best prices • Instant booking</p>
       </div>
 
       <div class="vrb-filters vrb-anim">
@@ -148,7 +146,6 @@
       </div>
 
       <div class="vrb-grid" id="resortsGrid">
-        <!-- Resorts will be loaded dynamically from database -->
         <div style="text-align:center;padding:2rem;color:#666;">
           Loading resorts...
         </div>
@@ -158,107 +155,91 @@
 
   <!-- ✅ WHY BOOK + LOCATIONS -->
   <section class="vrb-section vrb-soft-bg">
-  <div class="vrb-premium-area">
-    <!-- keep your existing vrb-wrap blocks here -->
+    <div class="vrb-premium-area">
 
-    <div class="vrb-wrap vrb-anim">
-      <h2 class="vrb-heading">Why Book Resorts with Vizag Resort Booking?</h2>
-      <p class="vrb-desc">Premium stays • Verified listings • Instant support</p>
+      <div class="vrb-wrap vrb-anim">
+        <h2 class="vrb-heading">Why Book Resorts with Vizag Resort Booking?</h2>
+        <p class="vrb-desc">Premium stays • Verified listings • Instant support</p>
 
-      <div class="vrb-feature-grid">
-        <div class="vrb-feature-card">
-          <div class="vrb-icon">🏖</div>
-          <h3>Beach Resorts</h3>
-          <p>Best beach stays near RK Beach, Rushikonda, Yarada and more.</p>
-        </div>
+        <div class="vrb-feature-grid">
+          <div class="vrb-feature-card">
+            <div class="vrb-icon">🏖</div>
+            <h3>Beach Resorts</h3>
+            <p>Best beach stays near RK Beach, Rushikonda, Yarada and more.</p>
+          </div>
 
-        <div class="vrb-feature-card">
-          <div class="vrb-icon">👨‍👩‍👧‍👦</div>
-          <h3>Family Friendly</h3>
-          <p>Safe and comfortable resorts perfect for families with kids.</p>
-        </div>
+          <div class="vrb-feature-card">
+            <div class="vrb-icon">👨‍👩‍👧‍👦</div>
+            <h3>Family Friendly</h3>
+            <p>Safe and comfortable resorts perfect for families with kids.</p>
+          </div>
 
-        <div class="vrb-feature-card">
-          <div class="vrb-icon">🏢</div>
-          <h3>Corporate Stays</h3>
-          <p>Conference-friendly resorts for meetings, offsites & team outings.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
-      <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
-      <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
-
-      <div class="vrb-location-grid">
-        <div class="vrb-location-card">
-          <h3>S.R Puram Resorts</h3>
-          <p>Premium resorts in S.R Puram area with modern amenities.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card">
-          <h3>S Kota Resort</h3>
-          <p>Beachside resorts in S Kota with stunning sea views.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card">
-          <h3>Narava Resort</h3>
-          <p>Peaceful retreat in Narava with natural surroundings.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card">
-          <h3>Pinagadi Resort</h3>
-          <p>Best resorts near Araku & hill route for weekend stay.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card">
-          <h3>Pendurthi Resort</h3>
-          <p>Comfort stay resorts with family-friendly amenities.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card vrb-location-highlight">
-          <h3>All Resorts in Vizag</h3>
-          <p>Browse all available resorts in Vizag at best prices.</p>
-          <button class="vrb-mini-btn vrb-mini-btn-accent">View All →</button>
+          <div class="vrb-feature-card">
+            <div class="vrb-icon">🏢</div>
+            <h3>Corporate Stays</h3>
+            <p>Conference-friendly resorts for meetings, offsites & team outings.</p>
+          </div>
         </div>
       </div>
+
+      <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
+        <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
+        <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
+
+        <div class="vrb-location-grid">
+          <div class="vrb-location-card">
+            <h3>S.R Puram Resorts</h3>
+            <p>Premium resorts in S.R Puram area with modern amenities.</p>
+            <button class="vrb-mini-btn">Explore →</button>
+          </div>
+
+          <div class="vrb-location-card">
+            <h3>S Kota Resort</h3>
+            <p>Beachside resorts in S Kota with stunning sea views.</p>
+            <button class="vrb-mini-btn">Explore →</button>
+          </div>
+
+          <div class="vrb-location-card">
+            <h3>Narava Resort</h3>
+            <p>Peaceful retreat in Narava with natural surroundings.</p>
+            <button class="vrb-mini-btn">Explore →</button>
+          </div>
+
+          <div class="vrb-location-card">
+            <h3>Pinagadi Resort</h3>
+            <p>Best resorts near Araku & hill route for weekend stay.</p>
+            <button class="vrb-mini-btn">Explore →</button>
+          </div>
+
+          <div class="vrb-location-card">
+            <h3>Pendurthi Resort</h3>
+            <p>Comfort stay resorts with family-friendly amenities.</p>
+            <button class="vrb-mini-btn">Explore →</button>
+          </div>
+
+          <div class="vrb-location-card vrb-location-highlight">
+            <h3>All Resorts in Vizag</h3>
+            <p>Browse all available resorts in Vizag at best prices.</p>
+            <button class="vrb-mini-btn vrb-mini-btn-accent">View All →</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
-  <!-- ✅ OFFERS SECTION (UPGRADED UI + COUPON SLIDER) -->
+  <!-- ✅ OFFERS SECTION -->
   <section id="offers" class="vrb-section">
     <div class="vrb-container vrb-anim">
-
       <div class="vrb-section-head">
         <h2 class="vrb-title">Offers & Deals</h2>
         <p class="vrb-subtitle">Apply coupon codes and save more on booking.</p>
       </div>
-
-      <!-- ✅ Premium Coupon Slider -->
-      <div class="vrb-coupon-slider-wrap">
-        <div class="vrb-coupon-slider" id="couponSlider">
-          <!-- Coupons will load dynamically -->
-          <div class="vrb-coupon-loading">
-            Loading coupons...
-          </div>
-        </div>
-
-        <!-- Slider Controls -->
-        <div class="vrb-coupon-controls">
-          <button class="vrb-coupon-nav" id="couponPrevBtn">‹</button>
-          <button class="vrb-coupon-nav" id="couponNextBtn">›</button>
-        </div>
-      </div>
-
+      <!-- ✅ Offers slider will be auto injected by critical.js -->
     </div>
   </section>
 
-  <!-- ✅ EVENTS PLACEHOLDER -->
+  <!-- ✅ EVENTS -->
   <section id="events" class="vrb-section">
     <div class="vrb-container vrb-anim">
       <div class="vrb-section-head">
@@ -268,7 +249,7 @@
     </div>
   </section>
 
-  <!-- ✅ FOOD PLACEHOLDER -->
+  <!-- ✅ FOOD -->
   <section id="food" class="vrb-section">
     <div class="vrb-container vrb-anim">
       <div class="vrb-section-head">
@@ -278,7 +259,7 @@
     </div>
   </section>
 
-  <!-- ✅ PREMIUM FOOTER -->
+  <!-- ✅ FOOTER -->
   <footer id="contact" class="vrb-footer">
     <div class="vrb-container vrb-footer-grid vrb-anim">
 
@@ -349,6 +330,7 @@
         <input id="couponCode" type="text" placeholder="Enter Coupon Code" />
         <button class="vrb-btn vrb-btn-light" id="applyCouponBtn">Apply</button>
       </div>
+
       <div id="couponMessage"></div>
       <div id="availableCoupons" style="display:none;"></div>
 
@@ -374,7 +356,7 @@
       <form id="bookingForm" class="vrb-form">
         <input type="hidden" id="resortId" />
         <input type="hidden" id="resortPrice" />
-        
+
         <input id="guestName" type="text" placeholder="Full Name" required />
         <input id="email" type="email" placeholder="Email Address" required />
         <input id="phone" type="tel" placeholder="Phone Number" required />
@@ -386,7 +368,9 @@
 
         <label id="guestsLabel">Number of Guests:</label>
         <input id="guests" type="number" min="1" max="20" value="2" required />
-        <div id="guestWarning" style="display:none;color:#dc3545;font-size:0.9rem;">⚠️ Guest count exceeds maximum capacity</div>
+        <div id="guestWarning" style="display:none;color:#dc3545;font-size:0.9rem;">
+          ⚠️ Guest count exceeds maximum capacity
+        </div>
 
         <button type="submit" class="vrb-btn vrb-btn-primary book-btn">
           Proceed to Payment
@@ -439,8 +423,10 @@
     </div>
   </div>
 
-  <!-- ✅ SCRIPTS -->
+  <!-- ✅ Scripts -->
   <script src="critical.js"></script>
+
+  <!-- ✅ only UI tab toggle scripts (safe) -->
   <script>
     function vrbToggleMenu() {
       document.getElementById("vrbNavLinks").classList.toggle("open");
@@ -453,288 +439,12 @@
       if (type === "resort") {
         document.querySelectorAll(".vrb-tab-btn")[0].classList.add("active");
         document.getElementById("vrb-resort").classList.add("active");
-      } 
-      else if (type === "food") {
+      } else {
         document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
         document.getElementById("vrb-food").classList.add("active");
       }
     }
-
-    function openBookingPopup(name, location, price) {
-      // Always use the advanced booking system from critical.js for database-driven functionality
-      if (typeof bookNow === 'function' && window.resorts) {
-        // Find resort by name to get ID and use database pricing
-        const resort = window.resorts.find(r => r.name === name);
-        if (resort) {
-          bookNow(resort.id, name);
-          return;
-        }
-      }
-      
-      // If critical.js not loaded, show message
-      alert('Please wait for the booking system to load completely.');
-    }
-    
-    // Make openBookingModal available globally for critical.js compatibility
-    window.openBookingModal = function(resortId) {
-      if (typeof bookNow === 'function') {
-        const resort = window.resorts?.find(r => r.id == resortId);
-        if (resort) {
-          bookNow(resortId, resort.name);
-        }
-      }
-    };
-    
-    // Make openBookingPopup available globally
-    window.openBookingPopup = openBookingPopup;
-
-    function closeBookingModal() {
-      const modal = document.getElementById("bookingModal");
-      if (modal) {
-        modal.classList.remove("show");
-        modal.style.display = "none";
-        document.body.style.overflow = "auto";
-      }
-    }
-    
-    // Alias for compatibility
-    window.closeBookingPopup = closeBookingModal;
-
-    function applyCouponCode(){
-      // Remove hardcoded coupon validation - use database coupons only
-      const code = document.getElementById("couponCode").value.trim().toUpperCase();
-      
-      if (!code) {
-        document.getElementById("couponMessage").innerHTML = '<span style="color:#dc3545;">Enter coupon code</span>';
-        return;
-      }
-      
-      // Use the advanced coupon system from critical.js if available
-      if (typeof window.bookingModalCoupons !== 'undefined' && window.bookingModalCoupons[code]) {
-        const applyCouponBtn = document.getElementById('applyCouponBtn');
-        if (applyCouponBtn && applyCouponBtn.onclick) {
-          applyCouponBtn.onclick();
-          return;
-        }
-      }
-      
-      // Fallback - no hardcoded validation
-      document.getElementById("couponMessage").innerHTML = '<span style="color:#dc3545;">Coupon validation requires database connection</span>';
-    }
-
-    document.getElementById("bookingForm").addEventListener("submit", function(e){
-      e.preventDefault();
-      
-      // Use advanced booking system if available
-      if (typeof handleBookingSubmit === 'function') {
-        handleBookingSubmit(e);
-        return;
-      }
-      
-      // Fallback alert
-      alert("✅ Booking system loading... Please wait and try again.");
-    });
-    
-    // Setup coupon button event
-    document.getElementById("applyCouponBtn").addEventListener("click", applyCouponCode);
-
-    // Chat widget
-    const chatFab = document.getElementById("vrbChatFab");
-    const chatBox = document.getElementById("vrbChatBox");
-    const chatClose = document.getElementById("vrbChatClose");
-    const chatSend = document.getElementById("vrbChatSend");
-    const chatInput = document.getElementById("vrbChatInput");
-    const chatBody = document.getElementById("vrbChatBody");
-
-    function toggleChat(){ chatBox.classList.toggle("open"); }
-    chatFab.addEventListener("click", toggleChat);
-    chatClose.addEventListener("click", toggleChat);
-
-    function addMsg(text, type){
-      const div = document.createElement("div");
-      div.className = "vrb-msg " + type;
-      div.innerText = text;
-      chatBody.appendChild(div);
-      chatBody.scrollTop = chatBody.scrollHeight;
-    }
-
-    function sendMsg(){
-      const msg = chatInput.value.trim();
-      if(!msg) return;
-      addMsg(msg, "vrb-user");
-      chatInput.value = "";
-      setTimeout(()=> addMsg("✅ Thanks! Please share check-in date, guests & budget.", "vrb-bot"), 500);
-    }
-
-    chatSend.addEventListener("click", sendMsg);
-    chatInput.addEventListener("keypress", (e)=>{ if(e.key==="Enter") sendMsg(); });
-
-    document.querySelectorAll(".vrb-q").forEach((btn)=>{
-      btn.addEventListener("click", ()=>{
-        chatInput.value = btn.getAttribute("data-msg");
-        sendMsg();
-      });
-    });
-
-    // ✅ Scroll animation replay (up/down)
-    const items = document.querySelectorAll(".vrb-anim");
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add("vrb-show");
-        else entry.target.classList.remove("vrb-show");
-      });
-    }, { threshold: 0.15 });
-
-    items.forEach((el) => {
-      el.classList.add("vrb-hide");
-      observer.observe(el);
-    });
   </script>
-
-  <script>
-/* =========================================================
-   ✅ OFFERS & DEALS COUPON SLIDER (DB Driven)
-   - Fetches coupons from /api/coupons
-   - Shows each coupon in premium mini container
-   - Auto rotation slide + manual arrows
-========================================================= */
-
-async function loadOffersCoupons() {
-  const slider = document.getElementById("couponSlider");
-  if (!slider) return;
-
-  slider.innerHTML = `<div class="vrb-coupon-loading">Loading coupons...</div>`;
-
-  try {
-    // ✅ Fetch coupons
-    const couponsRes = await fetch("/api/coupons");
-    const coupons = await couponsRes.json();
-
-    if (!coupons || coupons.length === 0) {
-      slider.innerHTML = `<div class="vrb-coupon-empty">No offers available right now.</div>`;
-      return;
-    }
-
-    // ✅ Fetch resorts if available (already loaded in window.resorts by critical.js)
-    let resorts = window.resorts || [];
-    if (!resorts || resorts.length === 0) {
-      // fallback fetch resorts (if offers loads earlier)
-      const resortsRes = await fetch("/api/resorts");
-      resorts = await resortsRes.json();
-      window.resorts = resorts;
-    }
-
-    // ✅ Build coupon cards
-    slider.innerHTML = coupons.map(c => {
-      const resort = resorts.find(r => r.id == c.resort_id) || null;
-
-      const resortName = resort ? resort.name : "All Resorts";
-      const resortImg = resort?.image || "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200";
-
-      const discountText =
-        c.type === "percentage"
-          ? `${c.discount}% OFF`
-          : `₹${c.discount} OFF`;
-
-      const dayLabel =
-        c.day_type === "weekday" ? "Weekdays (Mon-Thu)" :
-        c.day_type === "friday" ? "Friday Only" :
-        c.day_type === "weekend" ? "Weekend (Sat-Sun)" :
-        "All Days";
-
-      return `
-        <div class="vrb-coupon-card">
-          <div class="vrb-coupon-img">
-            <img src="${resortImg}" alt="${resortName}">
-            <span class="vrb-coupon-badge">${discountText}</span>
-          </div>
-
-          <div class="vrb-coupon-body">
-            <h3>${resortName}</h3>
-            <p class="vrb-coupon-day">✅ Valid: <b>${dayLabel}</b></p>
-
-            <div class="vrb-coupon-code">
-              <span class="label">Coupon Code</span>
-              <div class="code-row">
-                <code>${c.code}</code>
-                <button class="copy-btn" onclick="copyCouponCode('${c.code}')">Copy</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    // ✅ Initialize slider rotation after rendering
-    initCouponSlider();
-
-  } catch (err) {
-    console.error("❌ Coupons load failed:", err);
-    slider.innerHTML = `<div class="vrb-coupon-empty">Failed to load coupons. Please refresh.</div>`;
-  }
-}
-
-/* ✅ Copy coupon button */
-function copyCouponCode(code) {
-  navigator.clipboard.writeText(code);
-  alert("✅ Coupon copied: " + code);
-}
-
-/* ✅ Slider logic */
-let couponIndex = 0;
-let couponInterval;
-
-function initCouponSlider() {
-  const slider = document.getElementById("couponSlider");
-  const cards = slider?.querySelectorAll(".vrb-coupon-card");
-
-  if (!cards || cards.length === 0) return;
-
-  function showCoupon(i) {
-    couponIndex = i;
-    slider.scrollTo({
-      left: cards[i].offsetLeft - slider.offsetLeft,
-      behavior: "smooth"
-    });
-  }
-
-  function nextCoupon() {
-    couponIndex = (couponIndex + 1) % cards.length;
-    showCoupon(couponIndex);
-  }
-
-  function prevCoupon() {
-    couponIndex = (couponIndex - 1 + cards.length) % cards.length;
-    showCoupon(couponIndex);
-  }
-
-  // ✅ Auto rotate
-  clearInterval(couponInterval);
-  couponInterval = setInterval(nextCoupon, 4000);
-
-  // ✅ Buttons
-  const nextBtn = document.getElementById("couponNextBtn");
-  const prevBtn = document.getElementById("couponPrevBtn");
-
-  if (nextBtn) nextBtn.onclick = () => { nextCoupon(); };
-  if (prevBtn) prevBtn.onclick = () => { prevCoupon(); };
-
-  // ✅ Pause on hover
-  slider.addEventListener("mouseenter", () => clearInterval(couponInterval));
-  slider.addEventListener("mouseleave", () => {
-    couponInterval = setInterval(nextCoupon, 4000);
-  });
-}
-
-/* ✅ Load when page ready */
-document.addEventListener("DOMContentLoaded", loadOffersCoupons);
-  </script>
-
-
-
-
-
-
 
 </body>
 </html>
