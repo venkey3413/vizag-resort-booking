@@ -2114,7 +2114,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const checkOut = document.querySelector('#vrb-resort input[type="date"]:last-of-type').value;
             
             if (!location) {
-                // Show all resorts if no location selected or "All Locations" selected
+                // Show all resorts when "All Locations" selected
                 renderResorts(window.resorts);
                 document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
                 showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
