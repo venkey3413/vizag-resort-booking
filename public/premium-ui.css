@@ -2628,3 +2628,16 @@ button[onclick*="Book"]:hover,
   transform: translateY(-2px) scale(1.02) !important;
   box-shadow: 0 28px 70px rgba(255,111,0,0.42) !important;
 }
+/* ✅ Booking Modal Button Colors */
+.vrb-modal .vrb-btn-primary,
+.vrb-modal button[type="submit"],
+.vrb-modal .book-btn {
+  background: #28a745 !important;
+  color: white !important;
+}
+
+.vrb-modal .vrb-btn-light,
+.vrb-modal button[onclick*="close"] {
+  background: #dc3545 !important;
+  color: white !important;
+}

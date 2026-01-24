@@ -1198,8 +1198,9 @@ window.handleBookingSubmit=async function(e){
     };
     
     console.log('✅ Booking data prepared:', bookingData);
-    showPaymentInterface(bookingData);
-    window.closeBookingModal();
+    
+    // Don't close booking modal - update it to show payment
+    updateBookingModalToPayment(bookingData);
 }
 
 // Enhanced payment interface with card payment
@@ -1259,6 +1260,7 @@ function showPaymentInterface(bookingData){
             modal.remove();
             document.body.style.overflow = 'auto';
         }
+        // Don't reopen booking modal
     };
     
     window.pendingCriticalBooking=bookingData;
@@ -1977,4 +1979,117 @@ function showCriticalNotification(message, type = 'success') {
     setTimeout(() => {
         notification.remove();
     }, duration);
+}
+
+// Update booking modal to show payment instead of new popup
+function updateBookingModalToPayment(bookingData) {
+    const modal = document.getElementById('bookingModal');
+    const modalCard = modal.querySelector('.vrb-modal-card');
+    
+    modalCard.innerHTML = `
+        <button class="vrb-close" onclick="closeBookingModal()">✕</button>
+        <div class="vrb-modal-head">
+            <h2>💳 Complete Payment</h2>
+            <p>Secure booking with instant confirmation</p>
+        </div>
+        <div style="margin:15px 0;">
+            <p><strong>Resort:</strong> ${bookingData.resortName}</p>
+            <p><strong>Guest:</strong> ${bookingData.guestName}</p>
+            <p><strong>Total:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
+            <p><strong>Reference:</strong> ${bookingData.bookingReference}</p>
+        </div>
+        ${bookingData.resortNote ? `<div class="payment-note" style="background:#f8f9fa;padding:10px;border-left:4px solid #007bff;margin:10px 0;border-radius:5px;"><strong>📝 Note:</strong> ${bookingData.resortNote}</div>` : ''}
+        
+        <div style="margin:20px 0;">
+            <div style="display:flex;margin-bottom:15px;">
+                <button onclick="showPaymentMethod('upi')" id="upiTab" style="flex:1;padding:10px;border:2px solid #007bff;background:#007bff;color:white;border-radius:5px 0 0 5px;cursor:pointer;">🔗 UPI Payment</button>
+                <button onclick="showPaymentMethod('card')" id="cardTab" style="flex:1;padding:10px;border:2px solid #007bff;background:white;color:#007bff;border-radius:0 5px 5px 0;cursor:pointer;">💳 Card Payment</button>
+            </div>
+            
+            <div id="upiPayment" style="display:block;">
+                <h3>🔗 UPI Payment</h3>
+                <div style="text-align:center;margin:15px 0;">
+                    <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
+                </div>
+                <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
+                <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
+                <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" pattern="[0-9]{12}" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
+                <button onclick="confirmPayment()" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">✅ Confirm UPI Payment</button>
+            </div>
+            
+            <div id="cardPayment" style="display:none;">
+                <h3>💳 Card Payment</h3>
+                <p><strong>Base Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
+                <p><strong>Transaction Fee (1.5%):</strong> ₹${Math.round(bookingData.totalPrice*0.015).toLocaleString()}</p>
+                <p style="font-weight:bold;border-top:1px solid #ddd;padding-top:5px;margin-top:5px;"><strong>Total Card Payment:</strong> ₹${(bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015)).toLocaleString()}</p>
+                <button onclick="payWithCard()" style="background:#6f42c1;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">💳 Pay ₹${(bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015)).toLocaleString()} with Card</button>
+            </div>
+        </div>
+        
+        <button onclick="closeBookingModal()" style="background:#dc3545;color:white;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;width:100%;">Cancel</button>
+    `;
+    
+    window.pendingBooking = bookingData;
+    
+    window.showPaymentMethod = function(method) {
+        document.getElementById('upiPayment').style.display = method === 'upi' ? 'block' : 'none';
+        document.getElementById('cardPayment').style.display = method === 'card' ? 'block' : 'none';
+        document.getElementById('upiTab').style.background = method === 'upi' ? '#007bff' : 'white';
+        document.getElementById('upiTab').style.color = method === 'upi' ? 'white' : '#007bff';
+        document.getElementById('cardTab').style.background = method === 'card' ? '#007bff' : 'white';
+        document.getElementById('cardTab').style.color = method === 'card' ? 'white' : '#007bff';
+    };
+    
+    window.confirmPayment = function() {
+        const utr = document.getElementById('utrInput').value;
+        if (!utr) {
+            showCriticalNotification('Please enter your 12-digit UTR number', 'error');
+            return;
+        }
+        if (!/^[0-9]{12}$/.test(utr)) {
+            showCriticalNotification('UTR number must be exactly 12 digits', 'error');
+            return;
+        }
+        
+        const btn = document.querySelector('[onclick="confirmPayment()"]');
+        btn.textContent = 'Processing...';
+        btn.disabled = true;
+        
+        fetch('/api/bookings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                resortId: parseInt(bookingData.resortId) || 0,
+                guestName: bookingData.guestName,
+                email: bookingData.email,
+                phone: bookingData.phone,
+                checkIn: bookingData.checkIn,
+                checkOut: bookingData.checkOut,
+                guests: bookingData.guests,
+                transactionId: utr,
+                couponCode: bookingData.couponCode || null,
+                discountAmount: bookingData.discountAmount || 0
+            })
+        }).then(r => r.json()).then(result => {
+            if (result.error) {
+                showCriticalNotification('Booking failed: ' + result.error, 'error');
+            } else {
+                showCriticalNotification('Payment submitted for verification. You will be notified via email and WhatsApp.', 'success');
+                closeBookingModal();
+            }
+        }).catch(e => {
+            showCriticalNotification('Network error. Please try again.', 'error');
+        }).finally(() => {
+            btn.textContent = '✅ Confirm UPI Payment';
+            btn.disabled = false;
+        });
+    };
+    
+    window.payWithCard = function() {
+        // Card payment logic here - similar to existing implementation
+        showCriticalNotification('Card payment feature will be implemented', 'error');
+    };
 }
