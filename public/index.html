@@ -563,11 +563,7 @@
         document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
         showCriticalNotification(`Found ${filtered.length} resorts in ${selectedLocation}`, 'success');
         
-        // ✅ Reset dropdown to "All Locations" after search
-        setTimeout(() => {
-          locationSelect.value = "All Locations";
-          console.log('🔄 Reset dropdown to All Locations');
-        }, 3000);
+        // ✅ REMOVED: No auto-reset - keep selected location
       }
     }
 

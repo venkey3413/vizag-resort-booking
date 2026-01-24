@@ -1005,8 +1005,10 @@ img{ max-width:100%; display:block; }
   position: absolute;
   bottom: 80px;
   right: 0;
-  width: 380px;
-  height: 550px;
+  width: 350px;
+  height: 500px;
+  max-width: calc(100vw - 50px);
+  max-height: calc(100vh - 150px);
   background: var(--glass);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border);
@@ -1219,6 +1221,31 @@ img{ max-width:100%; display:block; }
 .mcp-tool-btn:hover{
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+}
+
+.resort-buttons{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.resort-select-btn{
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.resort-select-btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .vrb-chat-footer{

@@ -1,3 +1,16 @@
+// CSRF token management
+function getCSRFToken() {
+    let token = sessionStorage.getItem('csrf-token');
+    if (!token) {
+        token = 'csrf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+        sessionStorage.setItem('csrf-token', token);
+    }
+    return token;
+}
+
+// Initialize CSRF token on page load
+getCSRFToken();
+
 // Critical JavaScript - only essential functions
 function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
 
@@ -1309,7 +1322,7 @@ function showPaymentInterface(bookingData){
             headers:{
                 'Content-Type':'application/json',
                 'X-Requested-With':'XMLHttpRequest',
-                'X-CSRF-Token':sessionStorage.getItem('csrf-token')||''
+                'X-CSRF-Token':getCSRFToken()
             },
             body:JSON.stringify({
                 resortId:parseInt(bookingData.resortId)||0,
@@ -1364,7 +1377,7 @@ function showPaymentInterface(bookingData){
             headers:{
                 'Content-Type':'application/json',
                 'X-Requested-With':'XMLHttpRequest',
-                'X-CSRF-Token':sessionStorage.getItem('csrf-token')||''
+                'X-CSRF-Token':getCSRFToken()
             },
             body:JSON.stringify({
                 resortId:parseInt(bookingData.resortId)||0,
@@ -2078,7 +2091,8 @@ function updateBookingModalToPayment(bookingData) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': getCSRFToken()
             },
             body: JSON.stringify({
                 resortId: parseInt(bookingData.resortId) || 0,
@@ -2151,7 +2165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                // Update the grid with filtered resorts
+                // Filter resorts by selected location
                 renderResorts(filteredResorts);
                 
                 // Scroll to resorts section
@@ -2159,11 +2173,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 showCriticalNotification(`Found ${filteredResorts.length} resorts in ${selectedValue}`, 'success');
                 
-                // ✅ Reset dropdown to "All Locations" after search
-                setTimeout(() => {
-                    locationSelect.value = 'All Locations';
-                    console.log('🔄 Reset dropdown to All Locations after search');
-                }, 3000);
+                // ✅ REMOVED: No auto-reset - keep selected location
             } else {
                 showCriticalNotification('Please wait for resorts to load', 'error');
             }
@@ -2289,14 +2299,20 @@ function initializePremiumChatWidget() {
         const messageDiv = document.createElement('div');
         messageDiv.className = `vrb-msg vrb-${sender}`;
         
+        // Sanitize text to prevent XSS
+        const sanitizedText = text.replace(/[<>"'&]/g, function(match) {
+            const map = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;'};
+            return map[match];
+        });
+        
         if (sender === 'bot') {
             messageDiv.innerHTML = `
                 <div class="bot-avatar">🤖</div>
-                <div class="msg-content">${text}</div>
+                <div class="msg-content">${sanitizedText}</div>
             `;
         } else {
             messageDiv.innerHTML = `
-                <div class="msg-content">${text}</div>
+                <div class="msg-content">${sanitizedText}</div>
             `;
         }
         
@@ -2364,6 +2380,36 @@ function initializePremiumChatWidget() {
                 }
             }
         });
+    });
+    
+    // Resort selection buttons (dynamic)
+    chatBody.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('resort-select-btn')) {
+            const resortName = e.target.getAttribute('data-resort') || '';
+            // Sanitize resort name before using
+            const sanitizedResortName = resortName.replace(/[<>"'&]/g, function(match) {
+                const map = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;'};
+                return map[match];
+            });
+            addMessage(sanitizedResortName, 'user');
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        message: resortName
+                    })
+                });
+                
+                const data = await response.json();
+                addMessage(data.answer || 'Sorry, I could not process your request.', 'bot');
+                
+            } catch (error) {
+                addMessage('❌ Unable to connect. Please try again.', 'bot');
+            }
+        }
     });
     
     console.log('✅ Premium chat widget initialized with MCP server integration');

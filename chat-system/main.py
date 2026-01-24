@@ -9,6 +9,7 @@ from mcp_server.server import (
     get_resort_rules,
     check_resort_availability,
     get_active_coupons,
+    safe_get,
 )
 
 app = FastAPI()
@@ -62,8 +63,22 @@ async def chat(req: ChatRequest):
         try:
             datetime.strptime(msg, "%Y-%m-%d")
             update_state(session_id, {"check_out": msg})
+            
+            # Get resort options from database
+            resorts = safe_get(f"{BASE_URL}/api/resorts") or []
+            if not resorts:
+                return {
+                    "answer": "⚠️ Unable to fetch resort data. Please try again later.",
+                    "handover": False
+                }
+            
+            resort_buttons = "".join([
+                f'<button class="resort-select-btn" data-resort="{resort["name"]}">{resort["name"]}</button>'
+                for resort in resorts
+            ])
+            
             return {
-                "answer": "🏨 Please enter the resort name",
+                "answer": f"🏨 Please select a resort:<br><div class='resort-buttons'>{resort_buttons}</div>",
                 "handover": False
             }
         except ValueError:
@@ -95,18 +110,22 @@ async def chat(req: ChatRequest):
     # 5️⃣ COUPONS TOOL
     # ------------------------------------------------
     if "coupon" in text or "coupons" in text or "discount" in text or "active coupons" in text:
+        clear_state(session_id)  # Clear any ongoing flow
         return {"answer": get_active_coupons(), "handover": False}
 
     # ------------------------------------------------
     # 6️⃣ STATIC POLICY TOOLS
     # ------------------------------------------------
     if "refund" in text:
+        clear_state(session_id)  # Clear any ongoing flow
         return {"answer": get_refund_policy(), "handover": False}
 
     if "checkin" in text or "checkout" in text:
+        clear_state(session_id)  # Clear any ongoing flow
         return {"answer": get_checkin_checkout_policy(), "handover": False}
 
     if "rules" in text:
+        clear_state(session_id)  # Clear any ongoing flow
         return {"answer": get_resort_rules(), "handover": False}
 
     # ------------------------------------------------
