@@ -10,7 +10,7 @@
   <!-- ✅ Premium Font -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
 
-  <!-- ✅ Premium UI -->
+  <!-- ✅ Load your premium UI -->
   <link rel="stylesheet" href="premium-ui.css" />
 
   <style>
@@ -67,7 +67,7 @@
         <div class="vrb-field">
           <label>Location</label>
           <select id="locationSelect">
-            <option value="all">Loading locations...</option>
+            <option>Loading locations...</option>
           </select>
         </div>
 
@@ -91,7 +91,8 @@
           </select>
         </div>
 
-        <button class="vrb-btn vrb-btn-orange">Search Resorts</button>
+        <!-- ✅ Added ID to button -->
+        <button class="vrb-btn vrb-btn-orange" id="heroSearchBtn">Search Resorts</button>
       </div>
 
       <!-- Food Ordering Form -->
@@ -124,7 +125,6 @@
 
         <button class="vrb-btn vrb-btn-orange">Order Food</button>
       </div>
-
     </div>
   </section>
 
@@ -133,7 +133,9 @@
     <div class="vrb-container">
       <div class="vrb-section-head vrb-anim">
         <h2 class="vrb-title">Popular Resorts in Vizag</h2>
-        <p class="vrb-subtitle">Verified listings • Best prices • Instant booking</p>
+        <p class="vrb-subtitle">
+          Verified listings • Best prices • Instant booking
+        </p>
       </div>
 
       <div class="vrb-filters vrb-anim">
@@ -169,7 +171,7 @@
           </div>
 
           <div class="vrb-feature-card">
-            <div class="vrb-icon">👨‍👩‍👧‍👦</div>
+            <div class="vrb-icon">👨👩👧👦</div>
             <h3>Family Friendly</h3>
             <p>Safe and comfortable resorts perfect for families with kids.</p>
           </div>
@@ -235,7 +237,19 @@
         <h2 class="vrb-title">Offers & Deals</h2>
         <p class="vrb-subtitle">Apply coupon codes and save more on booking.</p>
       </div>
-      <!-- ✅ Offers slider will be auto injected by critical.js -->
+
+      <div class="vrb-coupon-slider-wrap">
+        <div class="vrb-coupon-slider" id="couponSlider">
+          <div class="vrb-coupon-loading">
+            Loading coupons...
+          </div>
+        </div>
+
+        <div class="vrb-coupon-controls">
+          <button class="vrb-coupon-nav" id="couponPrevBtn">‹</button>
+          <button class="vrb-coupon-nav" id="couponNextBtn">›</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -300,7 +314,6 @@
     </div>
   </footer>
 
-  <!-- ✅ POLICY BUTTON -->
   <a class="vrb-policy-btn" href="Cancellation & terms and conditions (1).pdf" target="_blank">
     📄 Policy
   </a>
@@ -330,7 +343,6 @@
         <input id="couponCode" type="text" placeholder="Enter Coupon Code" />
         <button class="vrb-btn vrb-btn-light" id="applyCouponBtn">Apply</button>
       </div>
-
       <div id="couponMessage"></div>
       <div id="availableCoupons" style="display:none;"></div>
 
@@ -368,9 +380,7 @@
 
         <label id="guestsLabel">Number of Guests:</label>
         <input id="guests" type="number" min="1" max="20" value="2" required />
-        <div id="guestWarning" style="display:none;color:#dc3545;font-size:0.9rem;">
-          ⚠️ Guest count exceeds maximum capacity
-        </div>
+        <div id="guestWarning" style="display:none;color:#dc3545;font-size:0.9rem;">⚠️ Guest count exceeds maximum capacity</div>
 
         <button type="submit" class="vrb-btn vrb-btn-primary book-btn">
           Proceed to Payment
@@ -423,10 +433,9 @@
     </div>
   </div>
 
-  <!-- ✅ Scripts -->
+  <!-- ✅ SCRIPTS -->
   <script src="critical.js"></script>
 
-  <!-- ✅ only UI tab toggle scripts (safe) -->
   <script>
     function vrbToggleMenu() {
       document.getElementById("vrbNavLinks").classList.toggle("open");
@@ -439,11 +448,48 @@
       if (type === "resort") {
         document.querySelectorAll(".vrb-tab-btn")[0].classList.add("active");
         document.getElementById("vrb-resort").classList.add("active");
-      } else {
+      } 
+      else if (type === "food") {
         document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
         document.getElementById("vrb-food").classList.add("active");
       }
     }
+
+    /* ======================================================
+       ✅ FIX: Hero Location search should reset to ALL resorts
+       ====================================================== */
+    function filterResortsByHeroLocation() {
+      const selectedLocation = (document.getElementById("locationSelect")?.value || "").trim();
+
+      // ✅ If user selects empty / "Select Location" / "All Locations"
+      if (!selectedLocation || selectedLocation.toLowerCase() === "select location" || selectedLocation.toLowerCase() === "all locations") {
+        if (window.resorts && typeof renderResorts === "function") {
+          renderResorts(window.resorts); // ✅ show ALL resorts again
+        }
+        return;
+      }
+
+      // ✅ Otherwise filter location wise
+      if (window.resorts && typeof renderResorts === "function") {
+        const filtered = window.resorts.filter(r => (r.location || "").trim() === selectedLocation);
+        renderResorts(filtered);
+        document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const heroBtn = document.getElementById("heroSearchBtn");
+      const locationSelect = document.getElementById("locationSelect");
+
+      if (heroBtn) heroBtn.addEventListener("click", filterResortsByHeroLocation);
+
+      // ✅ Important: When dropdown changes back to Select / All -> show ALL
+      if (locationSelect) {
+        locationSelect.addEventListener("change", () => {
+          filterResortsByHeroLocation();
+        });
+      }
+    });
   </script>
 
 </body>
