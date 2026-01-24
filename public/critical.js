@@ -226,10 +226,11 @@ function loadLocationsIntoHeroSearch(resorts) {
     // Clear existing options
     locationSelect.innerHTML = '';
     
-    // ✅ Add "All Locations" option (IMPORTANT FIX)
+    // ✅ Add "All Locations" option as default (IMPORTANT FIX)
     const allOption = document.createElement('option');
     allOption.value = 'All Locations';
     allOption.textContent = 'All Locations';
+    allOption.selected = true; // Make it selected by default
     locationSelect.appendChild(allOption);
     
     // Add location options
@@ -241,6 +242,7 @@ function loadLocationsIntoHeroSearch(resorts) {
     });
     
     console.log('📍 Loaded', uniqueLocations.length, 'locations into hero search:', uniqueLocations);
+    console.log('📍 Default selection: All Locations');
 }
 
 // Add structured data for individual resorts for better SEO
@@ -2102,22 +2104,28 @@ function updateBookingModalToPayment(bookingData) {
         showCriticalNotification('Card payment feature will be implemented', 'error');
     };
 }
-// Hero search functionality
+// ✅ Enhanced Hero search functionality with proper reset
 document.addEventListener('DOMContentLoaded', function() {
     const searchBtn = document.querySelector('.vrb-search-box .vrb-btn-orange');
+    const locationSelect = document.getElementById('locationSelect');
+    
     if (searchBtn) {
         searchBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            const locationSelect = document.getElementById('locationSelect');
-            const location = locationSelect.value;
+            if (!locationSelect) {
+                showCriticalNotification('Location selector not found', 'error');
+                return;
+            }
+            
+            const selectedValue = locationSelect.value;
             const selectedText = locationSelect.options[locationSelect.selectedIndex].text;
             
-            console.log('Search clicked - Location value:', location, 'Selected text:', selectedText);
+            console.log('🔍 Hero search clicked - Value:', selectedValue, 'Text:', selectedText);
             
-            if (!location || location === '' || selectedText === 'All Locations') {
-                // Force show all resorts
-                console.log('Showing all resorts - total:', window.resorts?.length);
+            // Show all resorts if "All Locations" is selected
+            if (!selectedValue || selectedValue === 'All Locations' || selectedText === 'All Locations') {
+                console.log('📍 Showing all resorts - total:', window.resorts?.length);
                 if (window.resorts) {
                     renderResorts(window.resorts);
                     document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
@@ -2128,14 +2136,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Filter resorts by location
+            // Filter resorts by selected location
             if (window.resorts) {
                 const filteredResorts = window.resorts.filter(resort => 
-                    resort.location.toLowerCase().includes(location.toLowerCase())
+                    resort.location && resort.location.trim().toLowerCase() === selectedValue.toLowerCase()
                 );
                 
+                console.log('📍 Filtered resorts:', filteredResorts.length, 'for location:', selectedValue);
+                
                 if (filteredResorts.length === 0) {
-                    showCriticalNotification(`No resorts found in ${location}`, 'error');
+                    showCriticalNotification(`No resorts found in ${selectedValue}`, 'error');
                     return;
                 }
                 
@@ -2145,9 +2155,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Scroll to resorts section
                 document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
                 
-                showCriticalNotification(`Found ${filteredResorts.length} resorts in ${location}`, 'success');
+                showCriticalNotification(`Found ${filteredResorts.length} resorts in ${selectedValue}`, 'success');
+                
+                // ✅ Reset dropdown to "All Locations" after search
+                setTimeout(() => {
+                    locationSelect.value = 'All Locations';
+                    console.log('🔄 Reset dropdown to All Locations after search');
+                }, 1500);
             } else {
                 showCriticalNotification('Please wait for resorts to load', 'error');
+            }
+        });
+    }
+    
+    // ✅ Handle dropdown changes for immediate filtering
+    if (locationSelect) {
+        locationSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            console.log('📍 Dropdown changed to:', selectedValue);
+            
+            // Auto-filter when "All Locations" is selected
+            if (selectedValue === 'All Locations') {
+                if (window.resorts) {
+                    renderResorts(window.resorts);
+                    console.log('📍 Auto-showing all resorts from dropdown change');
+                }
             }
         });
     }

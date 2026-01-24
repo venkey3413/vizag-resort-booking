@@ -456,24 +456,48 @@
     }
 
     /* ======================================================
-       ✅ FIX: Hero Location search should reset to ALL resorts
+       ✅ FIXED: Hero Location search with proper reset functionality
        ====================================================== */
     function filterResortsByHeroLocation() {
-      const selectedLocation = (document.getElementById("locationSelect")?.value || "").trim();
+      const locationSelect = document.getElementById("locationSelect");
+      if (!locationSelect) return;
+      
+      const selectedLocation = locationSelect.value.trim();
+      const selectedText = locationSelect.options[locationSelect.selectedIndex].text;
+      
+      console.log('🔍 Hero search - Selected:', selectedLocation, 'Text:', selectedText);
 
-      // ✅ If user selects empty / "Select Location" / "All Locations"
-      if (!selectedLocation || selectedLocation.toLowerCase() === "select location" || selectedLocation.toLowerCase() === "all locations") {
+      // ✅ Show all resorts if "All Locations" is selected
+      if (!selectedLocation || selectedLocation === "All Locations" || selectedText === "All Locations") {
+        console.log('📍 Showing all resorts');
         if (window.resorts && typeof renderResorts === "function") {
-          renderResorts(window.resorts); // ✅ show ALL resorts again
+          renderResorts(window.resorts);
+          showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
         }
         return;
       }
 
-      // ✅ Otherwise filter location wise
+      // ✅ Filter by selected location
       if (window.resorts && typeof renderResorts === "function") {
-        const filtered = window.resorts.filter(r => (r.location || "").trim() === selectedLocation);
+        const filtered = window.resorts.filter(r => 
+          r.location && r.location.trim().toLowerCase() === selectedLocation.toLowerCase()
+        );
+        console.log('📍 Filtered resorts:', filtered.length, 'for location:', selectedLocation);
+        
+        if (filtered.length === 0) {
+          showCriticalNotification(`No resorts found in ${selectedLocation}`, 'error');
+          return;
+        }
+        
         renderResorts(filtered);
         document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
+        showCriticalNotification(`Found ${filtered.length} resorts in ${selectedLocation}`, 'success');
+        
+        // ✅ Reset dropdown to "All Locations" after search
+        setTimeout(() => {
+          locationSelect.value = "All Locations";
+          console.log('🔄 Reset dropdown to All Locations');
+        }, 1000);
       }
     }
 
@@ -481,12 +505,23 @@
       const heroBtn = document.getElementById("heroSearchBtn");
       const locationSelect = document.getElementById("locationSelect");
 
-      if (heroBtn) heroBtn.addEventListener("click", filterResortsByHeroLocation);
+      if (heroBtn) {
+        heroBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          filterResortsByHeroLocation();
+        });
+      }
 
-      // ✅ Important: When dropdown changes back to Select / All -> show ALL
+      // ✅ Handle dropdown changes
       if (locationSelect) {
         locationSelect.addEventListener("change", () => {
-          filterResortsByHeroLocation();
+          const selectedValue = locationSelect.value;
+          console.log('📍 Dropdown changed to:', selectedValue);
+          
+          // Only auto-filter if "All Locations" is selected
+          if (selectedValue === "All Locations") {
+            filterResortsByHeroLocation();
+          }
         });
       }
     });
@@ -494,3 +529,141 @@
 
 </body>
 </html>
+  <script>
+/* =========================================================
+   ✅ OFFERS & DEALS COUPON SLIDER (DB Driven)
+   - Fetches coupons from /api/coupons
+   - Shows each coupon in premium mini container
+   - Auto rotation slide + manual arrows
+========================================================= */
+
+async function loadOffersCoupons() {
+  const slider = document.getElementById("couponSlider");
+  if (!slider) return;
+
+  slider.innerHTML = `<div class="vrb-coupon-loading">Loading coupons...</div>`;
+
+  try {
+    // ✅ Fetch coupons
+    const couponsRes = await fetch("/api/coupons");
+    const coupons = await couponsRes.json();
+
+    if (!coupons || coupons.length === 0) {
+      slider.innerHTML = `<div class="vrb-coupon-empty">No offers available right now.</div>`;
+      return;
+    }
+
+    // ✅ Fetch resorts if available (already loaded in window.resorts by critical.js)
+    let resorts = window.resorts || [];
+    if (!resorts || resorts.length === 0) {
+      // fallback fetch resorts (if offers loads earlier)
+      const resortsRes = await fetch("/api/resorts");
+      resorts = await resortsRes.json();
+      window.resorts = resorts;
+    }
+
+    // ✅ Build coupon cards
+    slider.innerHTML = coupons.map(c => {
+      const resort = resorts.find(r => r.id == c.resort_id) || null;
+
+      const resortName = resort ? resort.name : "All Resorts";
+      const resortImg = resort?.image || "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200";
+
+      const discountText =
+        c.type === "percentage"
+          ? `${c.discount}% OFF`
+          : `₹${c.discount} OFF`;
+
+      const dayLabel =
+        c.day_type === "weekday" ? "Weekdays (Mon-Thu)" :
+        c.day_type === "friday" ? "Friday Only" :
+        c.day_type === "weekend" ? "Weekend (Sat-Sun)" :
+        "All Days";
+
+      return `
+        <div class="vrb-coupon-card">
+          <div class="vrb-coupon-img">
+            <img src="${resortImg}" alt="${resortName}">
+            <span class="vrb-coupon-badge">${discountText}</span>
+          </div>
+
+          <div class="vrb-coupon-body">
+            <h3>${resortName}</h3>
+            <p class="vrb-coupon-day">✅ Valid: <b>${dayLabel}</b></p>
+
+            <div class="vrb-coupon-code">
+              <span class="label">Coupon Code</span>
+              <div class="code-row">
+                <code>${c.code}</code>
+                <button class="copy-btn" onclick="copyCouponCode('${c.code}')">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // ✅ Initialize slider rotation after rendering
+    initCouponSlider();
+
+  } catch (err) {
+    console.error("❌ Coupons load failed:", err);
+    slider.innerHTML = `<div class="vrb-coupon-empty">Failed to load coupons. Please refresh.</div>`;
+  }
+}
+
+/* ✅ Copy coupon button */
+function copyCouponCode(code) {
+  navigator.clipboard.writeText(code);
+  alert("✅ Coupon copied: " + code);
+}
+
+/* ✅ Slider logic */
+let couponIndex = 0;
+let couponInterval;
+
+function initCouponSlider() {
+  const slider = document.getElementById("couponSlider");
+  const cards = slider?.querySelectorAll(".vrb-coupon-card");
+
+  if (!cards || cards.length === 0) return;
+
+  function showCoupon(i) {
+    couponIndex = i;
+    slider.scrollTo({
+      left: cards[i].offsetLeft - slider.offsetLeft,
+      behavior: "smooth"
+    });
+  }
+
+  function nextCoupon() {
+    couponIndex = (couponIndex + 1) % cards.length;
+    showCoupon(couponIndex);
+  }
+
+  function prevCoupon() {
+    couponIndex = (couponIndex - 1 + cards.length) % cards.length;
+    showCoupon(couponIndex);
+  }
+
+  // ✅ Auto rotate
+  clearInterval(couponInterval);
+  couponInterval = setInterval(nextCoupon, 4000);
+
+  // ✅ Buttons
+  const nextBtn = document.getElementById("couponNextBtn");
+  const prevBtn = document.getElementById("couponPrevBtn");
+
+  if (nextBtn) nextBtn.onclick = () => { nextCoupon(); };
+  if (prevBtn) prevBtn.onclick = () => { prevCoupon(); };
+
+  // ✅ Pause on hover
+  slider.addEventListener("mouseenter", () => clearInterval(couponInterval));
+  slider.addEventListener("mouseleave", () => {
+    couponInterval = setInterval(nextCoupon, 4000);
+  });
+}
+
+/* ✅ Load when page ready */
+document.addEventListener("DOMContentLoaded", loadOffersCoupons);
+  </script>
