@@ -221,16 +221,16 @@ function loadLocationsIntoHeroSearch(resorts) {
     if (!locationSelect || !resorts) return;
     
     // Get unique locations from resorts
-    const uniqueLocations = [...new Set(resorts.map(r => r.location))].sort();
+    const uniqueLocations = [...new Set(resorts.map(r => r.location).filter(Boolean))].sort();
     
     // Clear existing options
     locationSelect.innerHTML = '';
     
-    // Add default option
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'All Locations';
-    locationSelect.appendChild(defaultOption);
+    // ✅ Add "All Locations" option (IMPORTANT FIX)
+    const allOption = document.createElement('option');
+    allOption.value = 'All Locations';
+    allOption.textContent = 'All Locations';
+    locationSelect.appendChild(allOption);
     
     // Add location options
     uniqueLocations.forEach(location => {
