@@ -1336,17 +1336,18 @@ img{ max-width:100%; display:block; }
 /* Mobile Responsive */
 @media (max-width: 768px){
   .vrb-chat-box{
-    width: calc(100vw - 40px);
-    height: calc(100vh - 120px);
-    bottom: 80px;
-    right: 20px;
-    left: 20px;
-    max-width: none;
+    width: calc(100vw - 20px) !important;
+    height: calc(100vh - 100px) !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    left: 10px !important;
+    max-width: none !important;
+    position: fixed !important;
   }
   
   .vrb-chat-fab{
-    bottom: 20px;
-    right: 20px;
+    bottom: 20px !important;
+    right: 20px !important;
   }
 }
 
@@ -1878,17 +1879,26 @@ button.book-now{
     background: rgba(10,116,218,0.92);
     border: 1px solid rgba(255,255,255,0.16);
     box-shadow: 0 18px 60px rgba(0,0,0,0.25);
+    z-index: 9999;
   }
 
   .vrb-nav-links.open{
     display:flex;
   }
 
+  .vrb-nav-links ul{
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+  }
+
   .vrb-nav-links a{
     padding: 12px 14px;
     border-radius: 16px;
     font-size: 15px;
-    text-align:center;
+    text-align: center;
+    display: block;
+    width: 100%;
   }
 
   .vrb-nav-actions{
