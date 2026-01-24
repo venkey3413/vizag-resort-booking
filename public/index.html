@@ -93,7 +93,10 @@
 
         <!-- ✅ Added ID to button -->
         <button class="vrb-btn vrb-btn-orange" id="heroSearchBtn">Search Resorts</button>
-        <button class="vrb-btn vrb-btn-light" id="heroClearBtn" style="margin-left: 10px;">Clear Search</button>
+      </div>
+      
+      <div style="text-align: center; margin-top: 10px;">
+        <button class="vrb-btn vrb-btn-light" id="heroClearBtn" style="font-size: 12px; padding: 8px 12px;">Clear Search</button>
       </div>
 
       <!-- Food Ordering Form -->
@@ -565,6 +568,9 @@
         renderResorts(window.resorts);
         document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
         showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
+      } else {
+        // Force reload if resorts not available
+        location.reload();
       }
     }
 
