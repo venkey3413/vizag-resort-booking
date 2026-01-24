@@ -93,6 +93,7 @@
 
         <!-- ✅ Added ID to button -->
         <button class="vrb-btn vrb-btn-orange" id="heroSearchBtn">Search Resorts</button>
+        <button class="vrb-btn vrb-btn-light" id="heroClearBtn" style="margin-left: 10px;">Clear Search</button>
       </div>
 
       <!-- Food Ordering Form -->
@@ -513,7 +514,7 @@
     }
 
     /* ======================================================
-       ✅ FIXED: Hero Location search with force reload functionality
+       ✅ FIXED: Hero Location search with clear functionality
        ====================================================== */
     function filterResortsByHeroLocation() {
       const locationSelect = document.getElementById("locationSelect");
@@ -524,19 +525,18 @@
       
       console.log('🔍 Hero search - Selected:', selectedLocation, 'Text:', selectedText);
 
-      // ✅ Force reload all resorts from server if "All Locations" is selected
+      // Handle "All Locations" selection
       if (!selectedLocation || selectedLocation === "All Locations" || selectedText === "All Locations") {
-        console.log('📍 Force reloading all resorts from server');
-        if (typeof forceReloadAllResorts === "function") {
-          forceReloadAllResorts();
-        } else if (window.resorts && typeof renderResorts === "function") {
+        console.log('📍 Showing all resorts');
+        if (window.resorts && typeof renderResorts === "function") {
           renderResorts(window.resorts);
+          document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
           showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
         }
         return;
       }
 
-      // ✅ Filter by selected location
+      // Filter by selected location
       if (window.resorts && typeof renderResorts === "function") {
         const filtered = window.resorts.filter(r => 
           r.location && r.location.trim().toLowerCase() === selectedLocation.toLowerCase()
@@ -551,13 +551,26 @@
         renderResorts(filtered);
         document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
         showCriticalNotification(`Found ${filtered.length} resorts in ${selectedLocation}`, 'success');
-        
-        // ✅ REMOVED: No auto-reset - keep selected location
+      }
+    }
+
+    function clearHeroSearch() {
+      const locationSelect = document.getElementById("locationSelect");
+      if (locationSelect) {
+        locationSelect.value = "All Locations";
+      }
+      
+      // Show all resorts
+      if (window.resorts && typeof renderResorts === "function") {
+        renderResorts(window.resorts);
+        document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
+        showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
       }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       const heroBtn = document.getElementById("heroSearchBtn");
+      const clearBtn = document.getElementById("heroClearBtn");
       const locationSelect = document.getElementById("locationSelect");
 
       if (heroBtn) {
@@ -567,18 +580,15 @@
         });
       }
 
-      // ✅ Handle dropdown changes
-      if (locationSelect) {
-        locationSelect.addEventListener("change", () => {
-          const selectedValue = locationSelect.value;
-          console.log('📍 Dropdown changed to:', selectedValue);
-          
-          // Only auto-filter if "All Locations" is selected
-          if (selectedValue === "All Locations") {
-            filterResortsByHeroLocation();
-          }
+      if (clearBtn) {
+        clearBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          clearHeroSearch();
         });
       }
+
+      // Remove auto-filter on dropdown change
+      // Location will only filter when Search button is clicked
     });
   </script>
 

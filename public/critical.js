@@ -2148,9 +2148,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Handle "All Locations" selection
             if (!selectedValue || selectedValue === 'All Locations' || selectedText === 'All Locations') {
                 console.log('📍 Showing all resorts');
-                renderResorts(window.resorts || []);
-                document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
-                showCriticalNotification(`Showing all resorts`, 'success');
+                if (window.resorts) {
+                    renderResorts(window.resorts);
+                    document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
+                    showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
+                }
                 return;
             }
             
