@@ -2093,3 +2093,43 @@ function updateBookingModalToPayment(bookingData) {
         showCriticalNotification('Card payment feature will be implemented', 'error');
     };
 }
+// Hero search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchBtn = document.querySelector('.vrb-search-box .vrb-btn-orange');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const location = document.getElementById('locationSelect').value;
+            const checkIn = document.querySelector('#vrb-resort input[type="date"]:first-of-type').value;
+            const checkOut = document.querySelector('#vrb-resort input[type="date"]:last-of-type').value;
+            
+            if (!location) {
+                showCriticalNotification('Please select a location', 'error');
+                return;
+            }
+            
+            // Filter resorts by location
+            if (window.resorts) {
+                const filteredResorts = window.resorts.filter(resort => 
+                    resort.location.toLowerCase().includes(location.toLowerCase())
+                );
+                
+                if (filteredResorts.length === 0) {
+                    showCriticalNotification(`No resorts found in ${location}`, 'error');
+                    return;
+                }
+                
+                // Update the grid with filtered resorts
+                renderResorts(filteredResorts);
+                
+                // Scroll to resorts section
+                document.getElementById('resorts').scrollIntoView({ behavior: 'smooth' });
+                
+                showCriticalNotification(`Found ${filteredResorts.length} resorts in ${location}`, 'success');
+            } else {
+                showCriticalNotification('Please wait for resorts to load', 'error');
+            }
+        });
+    }
+});
