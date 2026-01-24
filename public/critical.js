@@ -2307,6 +2307,30 @@ function initializePremiumChatWidget() {
         chatBody.scrollTop = chatBody.scrollHeight;
     }
     
+    // Add resort selection buttons
+    function addResortSelectionButtons() {
+        if (!window.resorts || window.resorts.length === 0) return;
+        
+        const resortButtonsDiv = document.createElement('div');
+        resortButtonsDiv.className = 'vrb-msg vrb-bot';
+        
+        const resortButtons = window.resorts.slice(0, 5).map(resort => 
+            `<button class="resort-select-btn" data-resort="${resort.name}">${resort.name}</button>`
+        ).join('');
+        
+        resortButtonsDiv.innerHTML = `
+            <div class="bot-avatar">🤖</div>
+            <div class="msg-content">
+                <div class="resort-buttons">
+                    ${resortButtons}
+                </div>
+            </div>
+        `;
+        
+        chatBody.appendChild(resortButtonsDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    
     // Send button click
     if (chatSend) {
         chatSend.addEventListener('click', sendMessage);
@@ -2362,7 +2386,13 @@ function initializePremiumChatWidget() {
                     });
                     
                     const data = await response.json();
-                    addMessage(data.answer || 'Sorry, I could not process your request.', 'bot');
+                    const botResponse = data.answer || 'Sorry, I could not process your request.';
+                    addMessage(botResponse, 'bot');
+                    
+                    // Check if we should show resort selection buttons
+                    if (botResponse.includes('resort name') || botResponse.includes('which resort') || botResponse.includes('select a resort')) {
+                        addResortSelectionButtons();
+                    }
                     
                 } catch (error) {
                     addMessage('❌ Unable to connect. Please try again.', 'bot');
