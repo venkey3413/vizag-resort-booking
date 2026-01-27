@@ -6,11 +6,12 @@ from dashboard import dashboard_app
 
 app = FastAPI()
 
-# MCP chat API
-app.mount("/", mcp_app)
+# MCP Chat API → /api/chat
+app.mount("/api", mcp_app)
 
-# Human dashboard
+# Human Agent Dashboard
 app.mount("/dashboard", dashboard_app)
+app.mount("/agent", dashboard_app)  # optional alias
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
