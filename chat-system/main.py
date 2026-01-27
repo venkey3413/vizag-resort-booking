@@ -10,21 +10,16 @@ from mcp_server.server import (
     check_resort_availability,
 )
 
-# ✅ IMPORT DASHBOARD APP
-from dashboard import dashboard_app, chat_manager
+from dashboard import chat_manager
 
-# ✅ MAIN APP
+# ✅ MCP CHAT API ONLY
 app = FastAPI(title="Vizag Resort Booking Chat API")
-
-# ✅ MOUNT HUMAN AGENT DASHBOARD
-app.mount("/dashboard", dashboard_app)
-app.mount("/agent", dashboard_app)   # optional alias
 
 class ChatRequest(BaseModel):
     session_id: str
     message: str
 
-@app.post("/api/chat")
+@app.post("/chat")
 async def chat(req: ChatRequest):
     msg = req.message.strip()
     text = msg.lower()
@@ -32,7 +27,7 @@ async def chat(req: ChatRequest):
     state = get_state(session_id)
 
     # -----------------------------
-    # 1️⃣ Resort availability flow
+    # 1️⃣ Availability flow
     # -----------------------------
     if "availability" in text:
         update_state(session_id, {"intent": "availability"})
@@ -61,18 +56,16 @@ async def chat(req: ChatRequest):
 
     if "check_out" in state and "resort_name" not in state:
         update_state(session_id, {"resort_name": msg})
-
         result = check_resort_availability(
             msg,
             state["check_in"],
             state["check_out"]
         )
-
         clear_state(session_id)
         return {"answer": result, "handover": False}
 
     # -----------------------------
-    # 2️⃣ Static policies
+    # 2️⃣ Static MCP tools
     # -----------------------------
     if "refund" in text:
         return {"answer": get_refund_policy(), "handover": False}
@@ -84,11 +77,11 @@ async def chat(req: ChatRequest):
         return {"answer": get_resort_rules(), "handover": False}
 
     # -----------------------------
-    # 3️⃣ Human fallback (FINAL)
+    # 3️⃣ Human escalation
     # -----------------------------
     await chat_manager.add_chat(session_id, msg)
 
     return {
-        "answer": "👩💼 Connecting you to a human support agent...",
+        "answer": "👩‍💼 Connecting you to a human support agent...",
         "handover": True
     }
