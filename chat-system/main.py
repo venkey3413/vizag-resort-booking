@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
+import json
 
 from conversation_state import get_state, update_state, clear_state
 from mcp_server.server import (
@@ -24,6 +25,21 @@ async def chat(req: ChatRequest):
     session_id = req.session_id
     msg = req.message.strip()
     text = msg.lower()
+
+    # Human handover trigger
+    if "human" in text:
+        from run import redis_client, active_agents
+        redis_client.set(f"chat:{session_id}:handover", "true")
+
+        # notify agents
+        for agent in active_agents:
+            await agent.send_text(json.dumps({
+                "type": "handover",
+                "chat_id": session_id,
+                "message": msg
+            }))
+
+        return {"answer": "Connecting you to a human agent 👩💻", "handover": False}
 
     state = get_state(session_id)
 

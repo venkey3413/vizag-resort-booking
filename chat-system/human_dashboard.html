@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Human Agent Dashboard</title>
+  <style>
+    body { font-family: Arial; background:#f4f6fb; }
+    #chatList { width:30%; float:left; padding:10px; }
+    #chatBox { width:65%; float:right; padding:10px; }
+    .chat { padding:8px; background:#fff; margin-bottom:8px; cursor:pointer; }
+  </style>
+</head>
+<body>
+
+<h2>🧑💻 Human Agent Dashboard</h2>
+
+<div id="chatList"></div>
+
+<div id="chatBox">
+  <h3 id="activeChat">Select a chat</h3>
+  <div id="messages"></div>
+  <input id="msg" placeholder="Type reply..." />
+  <button onclick="send()">Send</button>
+</div>
+
+<script src="/static/agent.js"></script>
+</body>
+</html>
