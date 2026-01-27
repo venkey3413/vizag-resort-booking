@@ -424,6 +424,21 @@ async def agent_websocket(websocket: WebSocket):
     except WebSocketDisconnect:
         del chat_manager.agents[agent_id]
 
+@dashboard_app.websocket("/ws/user/{session_id}")
+async def user_websocket(websocket: WebSocket, session_id: str):
+    await websocket.accept()
+    chat_manager.user_connections[session_id] = websocket
+    
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message_data = json.loads(data)
+            # Handle user messages if needed
+            await chat_manager.add_message(session_id, message_data.get("message", ""), "user")
+    except WebSocketDisconnect:
+        if session_id in chat_manager.user_connections:
+            del chat_manager.user_connections[session_id]
+
 @dashboard_app.get("/api/chats")
 async def get_chats():
     try:

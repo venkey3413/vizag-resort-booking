@@ -2258,6 +2258,13 @@ function initializePremiumChatWidget() {
             
             const data = await response.json();
             const botResponse = data.answer || 'Sorry, I could not process your request.';
+            
+            // Check for human handover
+            if (data.handover === true) {
+                startHumanChat(sessionId);
+                return;
+            }
+            
             addMessage(botResponse, 'bot');
             
             // Always show resort buttons after any bot response in availability flow
@@ -2402,6 +2409,13 @@ function initializePremiumChatWidget() {
                     
                     const data = await response.json();
                     const botResponse = data.answer || 'Sorry, I could not process your request.';
+                    
+                    // Check for human handover
+                    if (data.handover === true) {
+                        startHumanChat(sessionId);
+                        return;
+                    }
+                    
                     addMessage(botResponse, 'bot');
                     
                     // Check if we should show resort selection buttons - broader detection
@@ -2441,6 +2455,13 @@ function initializePremiumChatWidget() {
                 });
                 
                 const data = await response.json();
+                
+                // Check for human handover
+                if (data.handover === true) {
+                    startHumanChat(sessionId);
+                    return;
+                }
+                
                 addMessage(data.answer || 'Sorry, I could not process your request.', 'bot');
                 
             } catch (error) {
@@ -2450,4 +2471,50 @@ function initializePremiumChatWidget() {
     });
     
     console.log('✅ Premium chat widget initialized with MCP server integration');
+}
+
+// Human chat functionality
+let humanSocket = null;
+
+function startHumanChat(sessionId) {
+    addMessage('👩💼 You are now connected to a human agent.', 'bot');
+
+    humanSocket = new WebSocket(
+        `ws://${window.location.hostname}:8000/dashboard/ws/user/${sessionId}`
+    );
+
+    humanSocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'agent_message') {
+            addAgentMessage(data.message);
+        }
+    };
+
+    humanSocket.onopen = () => {
+        console.log('✅ Connected to human agent');
+    };
+
+    humanSocket.onclose = () => {
+        addMessage('❌ Human agent disconnected.', 'bot');
+    };
+}
+
+function addAgentMessage(message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'vrb-msg vrb-bot';
+    
+    // Sanitize message
+    const sanitizedMessage = message.replace(/[<>"'&]/g, function(match) {
+        const map = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;'};
+        return map[match];
+    });
+    
+    messageDiv.innerHTML = `
+        <div class="bot-avatar">👩💼</div>
+        <div class="msg-content">${sanitizedMessage}</div>
+    `;
+    
+    const chatBody = document.getElementById('vrbChatBody');
+    chatBody.appendChild(messageDiv);
+    chatBody.scrollTop = chatBody.scrollHeight;
 }

@@ -11,7 +11,7 @@ from mcp_server.server import (
 )
 
 # ✅ IMPORT DASHBOARD APP
-from dashboard import dashboard_app
+from dashboard import dashboard_app, chat_manager
 
 # ✅ MAIN APP
 app = FastAPI(title="Vizag Resort Booking Chat API")
@@ -84,9 +84,11 @@ async def chat(req: ChatRequest):
         return {"answer": get_resort_rules(), "handover": False}
 
     # -----------------------------
-    # 3️⃣ HUMAN HANDOVER (MCP → AGENT)
+    # 3️⃣ Human fallback (FINAL)
     # -----------------------------
+    await chat_manager.add_chat(session_id, msg)
+
     return {
-        "answer": "I am connecting you to human support.",
+        "answer": "👩💼 Connecting you to a human support agent...",
         "handover": True
     }
