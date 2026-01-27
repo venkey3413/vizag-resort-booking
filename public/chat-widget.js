@@ -3,7 +3,7 @@ class ResortChatWidget {
     this.isOpen = false;
     this.sessionId = this.generateSessionId();
 
-    // 🔐 Backend base URL
+    // 🔐 BACKEND CONFIG
     this.apiUrl = "https://vizagresortbooking.in:8000";
     this.wsUrl = "wss://vizagresortbooking.in:8000/ws/user";
 
@@ -22,6 +22,9 @@ class ResortChatWidget {
     this.attachStyles();
   }
 
+  // ==========================
+  // 🧱 UI
+  // ==========================
   createWidget() {
     const widget = document.createElement("div");
     widget.innerHTML = `
@@ -44,8 +47,12 @@ class ResortChatWidget {
               • Check-in / Check-out<br>
               • Resort rules<br>
               • Availability<br><br>
-              Type your question below 👇
+              Or talk to a human agent anytime 👇
             </div>
+          </div>
+
+          <div class="chat-actions">
+            <button id="humanBtn" class="human-btn">👩‍💼 Talk to Human</button>
           </div>
 
           <div class="chat-input">
@@ -66,6 +73,32 @@ class ResortChatWidget {
     document.getElementById("chat-input").onkeypress = (e) => {
       if (e.key === "Enter") this.sendMessage();
     };
+
+    // 👩‍💼 HUMAN BUTTON
+    document.getElementById("humanBtn").onclick = async () => {
+      this.addMessage("👩‍💼 Connecting you to a human agent...", "bot");
+
+      try {
+        const res = await fetch(`${this.apiUrl}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: this.sessionId,
+            message: "__HUMAN__"
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.handover === true) {
+          this.startHumanChat();
+        } else {
+          this.whatsAppFallback();
+        }
+      } catch (err) {
+        this.whatsAppFallback();
+      }
+    };
   }
 
   toggleWidget() {
@@ -78,6 +111,9 @@ class ResortChatWidget {
     document.getElementById("chat-window").classList.remove("open");
   }
 
+  // ==========================
+  // 🤖 BOT FLOW
+  // ==========================
   async sendMessage() {
     const input = document.getElementById("chat-input");
     const message = input.value.trim();
@@ -86,7 +122,7 @@ class ResortChatWidget {
     this.addMessage(message, "user");
     input.value = "";
 
-    // ✅ If human takeover active → send via websocket
+    // 👩‍💼 If human already connected → websocket
     if (this.handoverActive && this.socket) {
       this.socket.send(JSON.stringify({
         session_id: this.sessionId,
@@ -96,7 +132,6 @@ class ResortChatWidget {
       return;
     }
 
-    // 🤖 Bot / MCP request
     try {
       const res = await fetch(`${this.apiUrl}/api/chat`, {
         method: "POST",
@@ -109,12 +144,11 @@ class ResortChatWidget {
 
       const data = await res.json();
 
-      // ✅ Always show answer
       if (data.answer) {
         this.addMessage(data.answer, "bot");
       }
 
-      // 🔁 MCP → Human handover
+      // 🔁 AUTO HANDOVER FROM MCP
       if (data.handover === true) {
         this.startHumanChat();
       }
@@ -124,16 +158,13 @@ class ResortChatWidget {
     }
   }
 
-  // ============================
-  // 👩‍💼 HUMAN HANDOVER
-  // ============================
-
+  // ==========================
+  // 👩‍💼 HUMAN CHAT
+  // ==========================
   startHumanChat() {
     if (this.handoverActive) return;
 
     this.handoverActive = true;
-    this.addMessage("👩‍💼 Connecting you to a human support agent...", "bot");
-
     this.socket = new WebSocket(`${this.wsUrl}/${this.sessionId}`);
 
     this.socket.onopen = () => {
@@ -148,7 +179,7 @@ class ResortChatWidget {
     };
 
     this.socket.onerror = () => {
-      this.addMessage("⚠️ Human support unavailable. Please try later.", "bot");
+      this.whatsAppFallback();
     };
 
     this.socket.onclose = () => {
@@ -157,6 +188,16 @@ class ResortChatWidget {
     };
   }
 
+  whatsAppFallback() {
+    this.addMessage(
+      "⚠️ Agents are offline.<br>Chat on WhatsApp 👉 <a href='https://wa.me/918341674465' target='_blank'>WhatsApp Support</a>",
+      "bot"
+    );
+  }
+
+  // ==========================
+  // 💬 UI HELPERS
+  // ==========================
   addMessage(text, sender) {
     const container = document.getElementById("chat-messages");
     const div = document.createElement("div");
@@ -167,7 +208,24 @@ class ResortChatWidget {
   }
 
   attachStyles() {
-    /* keep your existing CSS exactly as-is */
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 99999; }
+      .chat-toggle { width: 60px; height: 60px; background:#667eea; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+      .chat-logo { width:36px; height:36px; border-radius:50%; }
+      .chat-window { display:none; width:360px; height:520px; background:#fff; border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,.3); flex-direction:column; }
+      .chat-window.open { display:flex; }
+      .chat-header { background:#667eea; color:#fff; padding:14px; display:flex; justify-content:space-between; }
+      .chat-messages { flex:1; padding:14px; overflow-y:auto; background:#f7f7f7; }
+      .bot-message { background:#fff; padding:10px; border-radius:10px; margin-bottom:8px; }
+      .user-message { background:#667eea; color:#fff; padding:10px; border-radius:10px; margin-bottom:8px; text-align:right; }
+      .chat-input { display:flex; gap:8px; padding:10px; border-top:1px solid #ddd; }
+      .chat-input input { flex:1; padding:8px; border-radius:20px; border:1px solid #ccc; }
+      .chat-input button { padding:8px 14px; border-radius:20px; background:#667eea; color:#fff; border:none; }
+      .chat-actions { padding:10px; }
+      .human-btn { width:100%; padding:10px; border:none; border-radius:20px; background:linear-gradient(135deg,#ff9800,#ff5722); color:#fff; font-weight:bold; cursor:pointer; }
+    `;
+    document.head.appendChild(style);
   }
 }
 
