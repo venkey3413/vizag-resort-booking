@@ -4,12 +4,28 @@ class ResortChatWidget {
     this.isOpen = false;
     this.sessionId = "chat_" + Date.now();
     this.apiUrl = "https://vizagresortbooking.in:8000";
+    this.ws = new WebSocket("ws://localhost:8000/ws/chat");
     this.init();
   }
 
   init() {
     this.createWidget();
     this.attachStyles();
+    this.setupWebSocket();
+  }
+
+  setupWebSocket() {
+    this.ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      this.addMessage(data.message, data.sender === "human" ? "bot" : "bot");
+    };
+  }
+
+  connectHuman(message) {
+    this.ws.send(JSON.stringify({
+      type: "connect_human",
+      message: message
+    }));
   }
 
   createWidget() {
@@ -106,14 +122,14 @@ class ResortChatWidget {
 
   sendHumanRequest() {
     this.addMessage("🎧 Talk to human agent", "user");
-    this.sendToAPI("I want to talk to a human agent");
+    this.connectHuman("I want to talk to a human agent");
   }
 
   async sendMessage() {
     const input = document.getElementById("chat-input");
     if (!input.value.trim()) return;
     this.addMessage(input.value, "user");
-    this.sendToAPI(input.value);
+    this.ws.send(JSON.stringify({type: "message", message: input.value}));
     input.value = "";
   }
 

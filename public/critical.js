@@ -2530,35 +2530,98 @@ function initializePremiumChatWidget() {
 
 // Human chat functionality
 let humanSocket = null;
+let humanChatActive = false;
+let connectionAttempts = 0;
+const maxRetries = 3;
 
 function startHumanChat(sessionId) {
-    addMessage('👩💼 You are now connected to a human agent.', 'bot');
+    if (humanChatActive) {
+        console.log('Human chat already active');
+        return;
+    }
+    
+    addMessage('👩💼 Connecting to human agent...', 'bot');
+    humanChatActive = true;
+    connectionAttempts = 0;
+    
+    connectToHumanAgent(sessionId);
+}
 
+function connectToHumanAgent(sessionId) {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//35.154.92.5:8000/dashboard/ws/user/${sessionId}`;
     
-    humanSocket = new WebSocket(wsUrl);
+    try {
+        humanSocket = new WebSocket(wsUrl);
 
-    humanSocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.message) {
-            addAgentMessage(data.message);
-        }
-    };
+        humanSocket.onopen = () => {
+            console.log('✅ Connected to human agent');
+            connectionAttempts = 0;
+            addMessage('👩💼 Connected to human agent! Please wait for a response...', 'bot');
+        };
 
-    humanSocket.onopen = () => {
-        console.log('✅ Connected to human agent');
-        addMessage('👩💼 Connected to human agent!', 'bot');
-    };
+        humanSocket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.message) {
+                    addAgentMessage(data.message);
+                }
+            } catch (e) {
+                console.error('Error parsing agent message:', e);
+            }
+        };
 
-    humanSocket.onerror = (error) => {
-        console.error('Human chat WebSocket error:', error);
-        addMessage('❌ Unable to connect to agent. Please try again later.', 'bot');
-    };
+        humanSocket.onerror = (error) => {
+            console.error('Human chat WebSocket error:', error);
+            handleHumanChatError(sessionId);
+        };
 
-    humanSocket.onclose = () => {
-        addMessage('ℹ️ Human agent disconnected.', 'bot');
-    };
+        humanSocket.onclose = (event) => {
+            console.log('WebSocket closed:', event.code, event.reason);
+            
+            if (humanChatActive) {
+                if (event.code === 1000) {
+                    // Normal closure
+                    addMessage('ℹ️ Human chat ended.', 'bot');
+                    humanChatActive = false;
+                } else {
+                    // Unexpected closure - try to reconnect
+                    handleHumanChatError(sessionId);
+                }
+            }
+        };
+        
+        // Connection timeout
+        setTimeout(() => {
+            if (humanSocket && humanSocket.readyState === WebSocket.CONNECTING) {
+                console.log('WebSocket connection timeout');
+                humanSocket.close();
+                handleHumanChatError(sessionId);
+            }
+        }, 10000);
+        
+    } catch (error) {
+        console.error('WebSocket creation error:', error);
+        handleHumanChatError(sessionId);
+    }
+}
+
+function handleHumanChatError(sessionId) {
+    connectionAttempts++;
+    
+    if (connectionAttempts < maxRetries) {
+        console.log(`Retrying human chat connection (${connectionAttempts}/${maxRetries})`);
+        addMessage(`🔄 Connection lost. Retrying... (${connectionAttempts}/${maxRetries})`, 'bot');
+        
+        setTimeout(() => {
+            connectToHumanAgent(sessionId);
+        }, 2000 * connectionAttempts);
+    } else {
+        console.log('Max human chat connection attempts reached');
+        addMessage('❌ Unable to connect to human agent. Please try again later.', 'bot');
+        humanChatActive = false;
+        humanSocket = null;
+    }
 }
 
 function addAgentMessage(message) {

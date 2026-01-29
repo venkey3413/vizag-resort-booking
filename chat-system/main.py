@@ -1,119 +1,60 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import re
+import json
 import redis
-import logging
+import asyncio
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from conversation_state import get_state, update_state, clear_state
-from mcp_server.server import (
-    get_refund_policy,
-    get_checkin_checkout_policy,
-    get_resort_rules,
-    check_resort_availability,
-    get_active_coupons,
-)
+app = FastAPI()
 
-from dashboard import dashboard_app, chat_manager
+redis_pub = redis.Redis(decode_responses=True)
+redis_sub = redis.Redis(decode_responses=True)
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+USER_TO_AGENT = "user_to_agent"
+AGENT_TO_USER = "agent_to_user"
 
-app = FastAPI(title="Vizag Resort Booking Chat API")
+connections = {}  # chat_id → WebSocket
 
-# Mount dashboard
-app.mount("/dashboard", dashboard_app)
+@app.on_event("startup")
+async def startup():
+    asyncio.create_task(redis_listener())
 
-# Redis client with fallback
-try:
-    redis_client = redis.Redis(host='redis', port=6379, decode_responses=True, socket_timeout=5)
-    redis_client.ping()
-    logger.info("✅ Connected to Redis at redis:6379")
-except:
+async def redis_listener():
+    pubsub = redis_sub.pubsub()
+    pubsub.subscribe(AGENT_TO_USER)
+
+    while True:
+        message = pubsub.get_message(ignore_subscribe_messages=True)
+        if message:
+            data = json.loads(message["data"])
+            chat_id = data["chat_id"]
+
+            if chat_id in connections:
+                await connections[chat_id].send_text(json.dumps({
+                    "sender": "human",
+                    "message": data["message"]
+                }))
+        await asyncio.sleep(0.01)
+
+@app.websocket("/ws/chat")
+async def chat_ws(ws: WebSocket):
+    await ws.accept()
+    chat_id = str(id(ws))
+    connections[chat_id] = ws
+
     try:
-        redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True, socket_timeout=5)
-        redis_client.ping()
-        logger.info("✅ Connected to Redis at localhost:6379")
-    except Exception as e:
-        logger.error(f"❌ Redis connection failed: {e}")
-        redis_client = None
+        while True:
+            data = json.loads(await ws.receive_text())
 
-class ChatRequest(BaseModel):
-    session_id: str
-    message: str
+            if data["type"] == "connect_human":
+                redis_pub.publish(USER_TO_AGENT, json.dumps({
+                    "chat_id": chat_id,
+                    "message": data["message"]
+                }))
 
-@app.post("/api/chat")
-async def chat(req: ChatRequest):
-    msg = req.message.strip()
-    text = msg.lower()
-    session_id = req.session_id
-    state = get_state(session_id)
-    
-    logger.info(f"💬 Chat request from {session_id}: {msg}")
+            else:
+                await ws.send_text(json.dumps({
+                    "sender": "bot",
+                    "message": "Please click Connect to Human for live support."
+                }))
 
-    # HUMAN HANDOVER TRIGGER
-    if msg == "__HUMAN__" or "human" in text or "agent" in text:
-        logger.info(f"👩💼 Human handover requested for {session_id}")
-        await chat_manager.add_chat(session_id, "User requested human agent")
-        return {
-            "answer": "👩💼 Connecting you to a live agent...",
-            "handover": True
-        }
-
-    # MCP TOOLS
-    if "refund" in text:
-        return {"answer": get_refund_policy(), "handover": False}
-
-    if "check-in" in text or "checkout" in text:
-        return {"answer": get_checkin_checkout_policy(), "handover": False}
-
-    if "rules" in text:
-        return {"answer": get_resort_rules(), "handover": False}
-        
-    if "coupon" in text or "discount" in text or "offer" in text:
-        return {"answer": get_active_coupons(), "handover": False}
-
-    # AVAILABILITY FLOW
-    if "availability" in text:
-        update_state(session_id, {"intent": "availability"})
-        return {"answer": "📅 Enter check-in date (YYYY-MM-DD)", "handover": False}
-
-    if state.get("intent") == "availability" and "check_in" not in state:
-        if re.match(r"\d{4}-\d{2}-\d{2}", msg):
-            update_state(session_id, {"check_in": msg})
-            return {"answer": "📅 Enter check-out date", "handover": False}
-        return {"answer": "❗ Invalid date format", "handover": False}
-
-    if "check_in" in state and "check_out" not in state:
-        if re.match(r"\d{4}-\d{2}-\d{2}", msg):
-            update_state(session_id, {"check_out": msg})
-            return {"answer": "🏨 Enter resort name", "handover": False}
-        return {"answer": "❗ Invalid date", "handover": False}
-
-    if "check_out" in state and "resort_name" not in state:
-        update_state(session_id, {"resort_name": msg})
-        result = check_resort_availability(
-            msg,
-            state["check_in"],
-            state["check_out"]
-        )
-        clear_state(session_id)
-        return {"answer": result, "handover": False}
-
-    # DEFAULT: HUMAN HANDOVER FOR UNHANDLED MESSAGES
-    logger.info(f"🤖 Unhandled message, triggering human handover for {session_id}")
-    await chat_manager.add_chat(session_id, msg)
-    
-    return {
-        "answer": "👩💼 Let me connect you to a human agent who can better assist you...",
-        "handover": True
-    }
-
-@app.get("/health")
-async def health_check():
-    redis_status = "connected" if redis_client else "disconnected"
-    return {
-        "status": "healthy",
-        "redis": redis_status,
-        "chat_manager": "active"
-    }
+    except WebSocketDisconnect:
+        connections.pop(chat_id, None)

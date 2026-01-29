@@ -9,8 +9,6 @@ class ResortChatWidget {
 
     this.socket = null;
     this.handoverActive = false;
-    this.connectionAttempts = 0;
-    this.maxRetries = 3;
 
     this.init();
   }
@@ -54,7 +52,7 @@ class ResortChatWidget {
           </div>
 
           <div class="chat-actions">
-            <button id="humanBtn" class="human-btn">👩💼 Talk to Human</button>
+            <button id="humanBtn" class="human-btn">👩‍💼 Talk to Human</button>
           </div>
 
           <div class="chat-input">
@@ -76,9 +74,30 @@ class ResortChatWidget {
       if (e.key === "Enter") this.sendMessage();
     };
 
-    // 👩💼 HUMAN BUTTON
+    // 👩‍💼 HUMAN BUTTON
     document.getElementById("humanBtn").onclick = async () => {
-      this.requestHumanAgent();
+      this.addMessage("👩‍💼 Connecting you to a human agent...", "bot");
+
+      try {
+        const res = await fetch(`${this.apiUrl}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: this.sessionId,
+            message: "__HUMAN__"
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.handover === true) {
+          this.startHumanChat();
+        } else {
+          this.whatsAppFallback();
+        }
+      } catch (err) {
+        this.whatsAppFallback();
+      }
     };
   }
 
@@ -103,8 +122,8 @@ class ResortChatWidget {
     this.addMessage(message, "user");
     input.value = "";
 
-    // 👩💼 If human already connected → websocket
-    if (this.handoverActive && this.socket && this.socket.readyState === WebSocket.OPEN) {
+    // 👩‍💼 If human already connected → websocket
+    if (this.handoverActive && this.socket) {
       this.socket.send(JSON.stringify({
         message: message
       }));
@@ -121,10 +140,6 @@ class ResortChatWidget {
         })
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-
       const data = await res.json();
 
       if (data.answer) {
@@ -137,130 +152,63 @@ class ResortChatWidget {
       }
 
     } catch (err) {
-      console.error("Chat API error:", err);
       this.addMessage("❌ Unable to connect. Please try again later.", "bot");
     }
   }
 
   // ==========================
-  // 👩💼 HUMAN CHAT
+  // 👩‍💼 HUMAN CHAT
   // ==========================
-  async requestHumanAgent() {
-    this.addMessage("👩💼 Connecting you to a human agent...", "bot");
-
-    try {
-      const res = await fetch(`${this.apiUrl}/api/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: this.sessionId,
-          message: "__HUMAN__"
-        })
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-
-      if (data.handover === true) {
-        this.startHumanChat();
-      } else {
-        this.addMessage("❌ Unable to connect to agent right now. Please try again in a moment.", "bot");
-      }
-    } catch (err) {
-      console.error("Human request error:", err);
-      this.addMessage("❌ Unable to connect to agent. Please try again later.", "bot");
-    }
-  }
-
   startHumanChat() {
-    if (this.handoverActive) {
-      console.log("Human chat already active");
-      return;
-    }
+    if (this.handoverActive) return;
 
     console.log('Starting human chat with URL:', `${this.wsUrl}/${this.sessionId}`);
     this.handoverActive = true;
-    this.connectionAttempts = 0;
-    
-    this.connectWebSocket();
-  }
+    this.socket = new WebSocket(`${this.wsUrl}/${this.sessionId}`);
 
-  connectWebSocket() {
-    try {
-      this.socket = new WebSocket(`${this.wsUrl}/${this.sessionId}`);
+    this.socket.onopen = () => {
+      console.log("✅ Connected to human dashboard");
+      this.addMessage("👩💼 Connected to human agent. Please wait...", "bot");
+    };
 
-      this.socket.onopen = () => {
-        console.log("✅ Connected to human dashboard");
-        this.connectionAttempts = 0;
-        this.addMessage("👩💼 Connected to human agent! Please wait for a response...", "bot");
-      };
+    this.socket.onmessage = (event) => {
+      console.log('Received from agent:', event.data);
+      const data = JSON.parse(event.data);
+      if (data.message) {
+        this.addMessage(`👩💼 Agent: ${data.message}`, "bot");
+      }
+    };
 
-      this.socket.onmessage = (event) => {
-        console.log('Received from agent:', event.data);
-        try {
-          const data = JSON.parse(event.data);
-          if (data.message) {
-            this.addMessage(`👩💼 Agent: ${data.message}`, "bot");
-          }
-        } catch (e) {
-          console.error("Error parsing agent message:", e);
-        }
-      };
+    this.socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      this.addMessage("❌ Connection failed. Please try again later.", "bot");
+    };
 
-      this.socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        this.handleConnectionError();
-      };
-
-      this.socket.onclose = (event) => {
-        console.log("WebSocket closed:", event.code, event.reason);
-        
-        if (this.handoverActive) {
-          if (event.code === 1000) {
-            // Normal closure
-            this.addMessage("ℹ️ Human chat ended.", "bot");
-            this.handoverActive = false;
-          } else {
-            // Unexpected closure - try to reconnect
-            this.handleConnectionError();
-          }
-        }
-      };
-
-      // Connection timeout
-      setTimeout(() => {
-        if (this.socket && this.socket.readyState === WebSocket.CONNECTING) {
-          console.log('WebSocket connection timeout');
-          this.socket.close();
-          this.handleConnectionError();
-        }
-      }, 10000);
-
-    } catch (error) {
-      console.error("WebSocket creation error:", error);
-      this.handleConnectionError();
-    }
-  }
-
-  handleConnectionError() {
-    this.connectionAttempts++;
-    
-    if (this.connectionAttempts < this.maxRetries) {
-      console.log(`Retrying connection (${this.connectionAttempts}/${this.maxRetries})`);
-      this.addMessage(`🔄 Connection lost. Retrying... (${this.connectionAttempts}/${this.maxRetries})`, "bot");
-      
-      setTimeout(() => {
-        this.connectWebSocket();
-      }, 2000 * this.connectionAttempts);
-    } else {
-      console.log("Max connection attempts reached");
-      this.addMessage("❌ Unable to connect to human agent. Please try again later.", "bot");
+    this.socket.onclose = (event) => {
+      console.log("WebSocket closed:", event.code, event.reason);
+      if (!event.wasClean) {
+        this.addMessage("❌ Connection lost. Please try again later.", "bot");
+      } else {
+        this.addMessage("ℹ️ Human chat ended.", "bot");
+      }
       this.handoverActive = false;
-      this.socket = null;
-    }
+    };
+
+    // Timeout fallback
+    setTimeout(() => {
+      if (this.socket && this.socket.readyState !== WebSocket.OPEN) {
+        console.log('WebSocket connection timeout');
+        this.addMessage("❌ Unable to connect to agent. Please try again.", "bot");
+      }
+    }, 5000);
+  }
+
+  whatsAppFallback() {
+    this.addMessage(
+      "❌ Unable to connect to agent. Please try again later.",
+      "bot"
+    );
+    this.handoverActive = false;
   }
 
   // ==========================
@@ -292,11 +240,6 @@ class ResortChatWidget {
       .chat-input button { padding:8px 14px; border-radius:20px; background:#667eea; color:#fff; border:none; }
       .chat-actions { padding:10px; }
       .human-btn { width:100%; padding:10px; border:none; border-radius:20px; background:linear-gradient(135deg,#ff9800,#ff5722); color:#fff; font-weight:bold; cursor:pointer; }
-      
-      @media (max-width: 768px) {
-        .chat-widget { bottom: 10px; right: 10px; }
-        .chat-window { width: calc(100vw - 20px); height: calc(100vh - 100px); max-width: 360px; max-height: 520px; }
-      }
     `;
     document.head.appendChild(style);
   }

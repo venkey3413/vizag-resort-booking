@@ -2,10 +2,14 @@ class ResortChatWidget {
   constructor() {
     this.isOpen = false;
     this.sessionId = this.generateSessionId();
+
+    // 🔐 BACKEND CONFIG
     this.apiUrl = "http://35.154.92.5:8000";
-    this.wsUrl = "ws://35.154.92.5:8000/dashboard/ws/user";
+    this.wsUrl = "ws://35.154.92.5:8000/ws/chat";
+
     this.socket = null;
     this.handoverActive = false;
+
     this.init();
   }
 
@@ -16,8 +20,12 @@ class ResortChatWidget {
   init() {
     this.createWidget();
     this.attachStyles();
+    this.connectWebSocket();
   }
 
+  // ==========================
+  // 🧱 UI
+  // ==========================
   createWidget() {
     const widget = document.createElement("div");
     widget.innerHTML = `
@@ -67,9 +75,9 @@ class ResortChatWidget {
       if (e.key === "Enter") this.sendMessage();
     };
 
-    document.getElementById("humanBtn").onclick = async () => {
-      this.addMessage("👩💼 Connecting you to a human agent...", "bot");
-      this.startHumanChat();
+    // 👩💼 HUMAN BUTTON
+    document.getElementById("humanBtn").onclick = () => {
+      this.requestHumanAgent();
     };
   }
 
@@ -83,7 +91,46 @@ class ResortChatWidget {
     document.getElementById("chat-window").classList.remove("open");
   }
 
-  async sendMessage() {
+  // ==========================
+  // 🔌 WEBSOCKET CONNECTION
+  // ==========================
+  connectWebSocket() {
+    try {
+      this.socket = new WebSocket(this.wsUrl);
+
+      this.socket.onopen = () => {
+        console.log("✅ Connected to chat server");
+      };
+
+      this.socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.sender === "bot") {
+          this.addMessage(data.message, "bot");
+        } else if (data.sender === "human") {
+          this.addMessage(`👩💼 Agent: ${data.message}`, "bot");
+        }
+      };
+
+      this.socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        this.addMessage("❌ Connection error. Please refresh the page.", "bot");
+      };
+
+      this.socket.onclose = () => {
+        console.log("WebSocket closed");
+        setTimeout(() => this.connectWebSocket(), 3000);
+      };
+
+    } catch (error) {
+      console.error("WebSocket creation error:", error);
+    }
+  }
+
+  // ==========================
+  // 💬 MESSAGING
+  // ==========================
+  sendMessage() {
     const input = document.getElementById("chat-input");
     const message = input.value.trim();
     if (!message) return;
@@ -91,99 +138,34 @@ class ResortChatWidget {
     this.addMessage(message, "user");
     input.value = "";
 
-    // If human chat is active, send via WebSocket
-    if (this.handoverActive && this.socket && this.socket.readyState === WebSocket.OPEN) {
+    if (this.handoverActive) {
+      // Send to human agent
       this.socket.send(JSON.stringify({
+        type: "connect_human",
         message: message
       }));
-      return;
-    }
-
-    // Otherwise, use MCP API
-    try {
-      const res = await fetch(`${this.apiUrl}/api/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: this.sessionId,
-          message: message
-        })
-      });
-
-      const data = await res.json();
-
-      if (data.answer) {
-        this.addMessage(data.answer, "bot");
-      }
-
-      if (data.handover === true) {
-        this.startHumanChat();
-      }
-
-    } catch (err) {
-      this.addMessage("❌ Unable to connect. Please try again later.", "bot");
+    } else {
+      // Send to bot
+      this.socket.send(JSON.stringify({
+        type: "bot",
+        message: message
+      }));
     }
   }
 
-  startHumanChat() {
-    if (this.handoverActive) return;
-
-    console.log('Starting Redis-based human chat');
+  requestHumanAgent() {
+    this.addMessage("👩💼 Connecting you to a human agent...", "bot");
     this.handoverActive = true;
     
-    // Connect to Redis-backed WebSocket
-    this.socket = new WebSocket(`${this.wsUrl}/${this.sessionId}`);
-
-    this.socket.onopen = () => {
-      console.log("✅ Connected to Redis chat system");
-      this.addMessage("👩💼 Connected to human agent!", "bot");
-    };
-
-    this.socket.onmessage = (event) => {
-      console.log('Received from Redis:', event.data);
-      try {
-        const data = JSON.parse(event.data);
-        if (data.message) {
-          this.addMessage(`👩💼 Agent: ${data.message}`, "bot");
-        }
-      } catch (e) {
-        console.error('Error parsing message:', e);
-      }
-    };
-
-    this.socket.onerror = (error) => {
-      console.error("Redis WebSocket error:", error);
-      this.addMessage("❌ Connection failed. Trying WhatsApp...", "bot");
-      this.whatsAppFallback();
-    };
-
-    this.socket.onclose = (event) => {
-      console.log("Redis WebSocket closed:", event.code);
-      if (!event.wasClean) {
-        this.whatsAppFallback();
-      } else {
-        this.addMessage("ℹ️ Human chat ended.", "bot");
-      }
-      this.handoverActive = false;
-    };
-
-    // Connection timeout
-    setTimeout(() => {
-      if (this.socket && this.socket.readyState !== WebSocket.OPEN) {
-        console.log('Redis connection timeout');
-        this.whatsAppFallback();
-      }
-    }, 5000);
+    this.socket.send(JSON.stringify({
+      type: "connect_human",
+      message: "User requested human agent"
+    }));
   }
 
-  whatsAppFallback() {
-    this.addMessage(
-      "⚠️ Agents are offline.<br>Chat on WhatsApp 👉 <a href='https://wa.me/918341674465' target='_blank'>WhatsApp Support</a>",
-      "bot"
-    );
-    this.handoverActive = false;
-  }
-
+  // ==========================
+  // 💬 UI HELPERS
+  // ==========================
   addMessage(text, sender) {
     const container = document.getElementById("chat-messages");
     const div = document.createElement("div");
@@ -210,11 +192,17 @@ class ResortChatWidget {
       .chat-input button { padding:8px 14px; border-radius:20px; background:#667eea; color:#fff; border:none; }
       .chat-actions { padding:10px; }
       .human-btn { width:100%; padding:10px; border:none; border-radius:20px; background:linear-gradient(135deg,#ff9800,#ff5722); color:#fff; font-weight:bold; cursor:pointer; }
+      
+      @media (max-width: 768px) {
+        .chat-widget { bottom: 10px; right: 10px; }
+        .chat-window { width: calc(100vw - 20px); height: calc(100vh - 100px); max-width: 360px; max-height: 520px; }
+      }
     `;
     document.head.appendChild(style);
   }
 }
 
+// 🚀 INIT
 document.addEventListener("DOMContentLoaded", () => {
   new ResortChatWidget();
 });
