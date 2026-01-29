@@ -1,5 +1,6 @@
 import json, asyncio, redis
 from fastapi import FastAPI, WebSocket
+from fastapi.responses import FileResponse
 from sla import stop as sla_stop
 from db import save
 
@@ -7,6 +8,14 @@ r = redis.Redis(host="redis", decode_responses=True)
 app = FastAPI()
 agents = []
 assigned = {}
+
+@app.get("/dashboard.html")
+def get_dashboard():
+    return FileResponse("dashboard.html")
+
+@app.get("/dashboard.js")
+def get_dashboard_js():
+    return FileResponse("dashboard.js")
 
 @app.websocket("/ws/agent")
 async def agent(ws: WebSocket):

@@ -1,5 +1,6 @@
 import json, time, asyncio, redis
 from fastapi import FastAPI, WebSocket
+from fastapi.responses import FileResponse
 from tool_registry import run_tools
 from db import init_db, save, load_history
 from sla import start as sla_start
@@ -7,6 +8,14 @@ from sla import start as sla_start
 r = redis.Redis(host="redis", decode_responses=True)
 app = FastAPI()
 clients = {}
+
+@app.get("/widget.html")
+def get_widget():
+    return FileResponse("widget.html")
+
+@app.get("/widget.js")
+def get_widget_js():
+    return FileResponse("widget.js")
 
 @app.on_event("startup")
 def startup():
