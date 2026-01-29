@@ -21,6 +21,15 @@ class ChatManager:
                 {"from": "user", "text": message, "time": datetime.now().isoformat()}
             ]
         }
+        # Notify all agents
+        await self.notify_agents()
+
+    async def notify_agents(self):
+        for agent_ws in self.agent_connections.values():
+            try:
+                await agent_ws.send_text(json.dumps({"type": "new_chat"}))
+            except:
+                pass
 
     async def add_message(self, session_id, sender, message):
         chat = self.pending_chats.get(session_id) or self.active_chats.get(session_id)
@@ -37,6 +46,9 @@ class ChatManager:
             await self.user_connections[session_id].send_text(
                 json.dumps({"message": message})
             )
+        
+        # Notify agents of message updates
+        await self.notify_agents()
 
 chat_manager = ChatManager()
 
@@ -82,7 +94,13 @@ let currentSession = null;
 const agentId = "agent_1";
 const socket = new WebSocket(`ws://${location.host}/dashboard/ws/agent/${agentId}`);
 
+socket.onopen = () => {
+  console.log('Agent connected');
+  loadChats();
+};
+
 socket.onmessage = (e) => {
+  console.log('Agent received:', e.data);
   loadChats();
 };
 
