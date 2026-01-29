@@ -169,23 +169,33 @@ class ResortChatWidget {
 
     this.socket.onopen = () => {
       console.log("✅ Connected to human dashboard");
+      this.addMessage("👩💼 Connected to human agent. Please wait...", "bot");
     };
 
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.message) {
-        this.addMessage(data.message, "bot");
+        this.addMessage(`👩💼 Agent: ${data.message}`, "bot");
       }
     };
 
-    this.socket.onerror = () => {
+    this.socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
       this.whatsAppFallback();
     };
 
     this.socket.onclose = () => {
+      console.log("WebSocket closed");
       this.addMessage("ℹ️ Human chat ended.", "bot");
       this.handoverActive = false;
     };
+
+    // Timeout fallback
+    setTimeout(() => {
+      if (this.socket && this.socket.readyState !== WebSocket.OPEN) {
+        this.whatsAppFallback();
+      }
+    }, 5000);
   }
 
   whatsAppFallback() {
