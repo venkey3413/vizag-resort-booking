@@ -5,7 +5,7 @@ class ResortChatWidget {
 
     // 🔐 BACKEND CONFIG
     this.apiUrl = "https://vizagresortbooking.in:8000";
-    this.wsUrl = "wss://vizagresortbooking.in:8000/ws/user";
+    this.wsUrl = "wss://vizagresortbooking.in:8000/dashboard/ws/user";
 
     this.socket = null;
     this.handoverActive = false;
