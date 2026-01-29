@@ -2322,6 +2322,7 @@ function initializePremiumChatWidget() {
                     <button class="mcp-tool-btn" data-tool="rules">📋 Resort Rules</button>
                     <button class="mcp-tool-btn" data-tool="availability">📅 Check Availability</button>
                     <button class="mcp-tool-btn" data-tool="coupons">🎫 Active Coupons</button>
+                    <button class="mcp-tool-btn" data-tool="human">👩💼 Talk to Human</button>
                 </div>
             </div>
         `;
@@ -2389,6 +2390,31 @@ function initializePremiumChatWidget() {
                 case 'coupons':
                     message = 'Show me active coupons';
                     break;
+                case 'human':
+                    // Handle human agent request
+                    addMessage('👩💼 Connecting you to a human agent...', 'bot');
+                    
+                    try {
+                        const response = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                session_id: sessionId,
+                                message: '__HUMAN__'
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.handover === true) {
+                            startHumanChat(sessionId);
+                        } else {
+                            addMessage('⚠️ Agents are offline. Chat on WhatsApp 👉 <a href="https://wa.me/918341674465" target="_blank">WhatsApp Support</a>', 'bot');
+                        }
+                    } catch (error) {
+                        addMessage('⚠️ Agents are offline. Chat on WhatsApp 👉 <a href="https://wa.me/918341674465" target="_blank">WhatsApp Support</a>', 'bot');
+                    }
+                    return; // Exit early for human agent
             }
             
             if (message) {
@@ -2508,13 +2534,14 @@ let humanSocket = null;
 function startHumanChat(sessionId) {
     addMessage('👩💼 You are now connected to a human agent.', 'bot');
 
-    humanSocket = new WebSocket(
-        `ws://${window.location.hostname}:8000/dashboard/ws/user/${sessionId}`
-    );
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.hostname}:8000/dashboard/ws/user/${sessionId}`;
+    
+    humanSocket = new WebSocket(wsUrl);
 
     humanSocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.type === 'agent_message') {
+        if (data.message) {
             addAgentMessage(data.message);
         }
     };

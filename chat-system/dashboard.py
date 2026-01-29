@@ -1,6 +1,8 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 import json
+import os
 
 class ChatManager:
     def __init__(self):
@@ -29,38 +31,13 @@ class ChatManager:
 chat_manager = ChatManager()
 dashboard_app = FastAPI()
 
+# Mount static files
+dashboard_app.mount("/static", StaticFiles(directory="static"), name="static")
+
 @dashboard_app.get("/")
 async def dashboard():
-    return HTMLResponse("""
-    <h2>Human Agent Dashboard</h2>
-    <p>Status: <b id="status">Online</b></p>
-    <p>Pending chats: <span id="count">0</span></p>
-    
-    <div id="chats"></div>
-    <input id="reply" placeholder="Type reply...">
-    <button onclick="sendReply()">Send</button>
-
-    <script>
-      const ws = new WebSocket("ws://" + location.host + "/dashboard/ws/agent");
-      let currentSession = null;
-      
-      ws.onmessage = (e) => {
-        const d = JSON.parse(e.data);
-        document.getElementById("count").innerText = d.count;
-        if(d.type === 'new_chat') {
-          new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg").play();
-        }
-      };
-      
-      function sendReply() {
-        const msg = document.getElementById('reply').value;
-        if(msg && currentSession) {
-          ws.send(JSON.stringify({type: 'reply', session: currentSession, message: msg}));
-          document.getElementById('reply').value = '';
-        }
-      }
-    </script>
-    """)
+    with open("static/dashboard.html", "r") as f:
+        return HTMLResponse(f.read())
 
 @dashboard_app.websocket("/ws/agent")
 async def agent_ws(ws: WebSocket):
