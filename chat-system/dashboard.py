@@ -48,6 +48,7 @@ dashboard_app = FastAPI()
 dashboard_app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @dashboard_app.get("/")
+@dashboard_app.get("")
 async def dashboard():
     return HTMLResponse("""
 <!DOCTYPE html>
