@@ -209,9 +209,10 @@ class ResortChatWidget {
 
   whatsAppFallback() {
     this.addMessage(
-      "⚠️ Agents are offline.<br>Chat on WhatsApp 👉 <a href='https://wa.me/918341674465' target='_blank'>WhatsApp Support</a>",
+      "❌ Unable to connect to agent. Please try again later.",
       "bot"
     );
+    this.handoverActive = false;
   }
 
   // ==========================
