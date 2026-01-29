@@ -5,14 +5,13 @@ import redis
 import asyncio
 from datetime import datetime
 
-dashboard_app = FastAPI()
-
-# Redis connection
+# Simple Redis connection
 try:
     redis_client = redis.Redis(host='redis', port=6379, decode_responses=True)
-    redis_client.ping()  # Test connection
-except:
-    redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+    redis_client.ping()
+except Exception as e:
+    print(f"Redis connection failed: {e}")
+    redis_client = None
 
 # -----------------------------
 # CHAT MANAGER WITH REDIS
@@ -246,23 +245,39 @@ loadChats();
 # -----------------------------
 @dashboard_app.get("/api/chats")
 async def get_chats():
-    return chat_manager.get_all_chats()
+    try:
+        if not redis_client:
+            return {"error": "Redis not available"}
+        return chat_manager.get_all_chats()
+    except Exception as e:
+        return {"error": str(e)}
 
 @dashboard_app.get("/api/chats/{session_id}")
 async def get_chat(session_id: str):
-    messages = chat_manager.get_chat_messages(session_id)
-    return {"messages": messages}
+    try:
+        if not redis_client:
+            return {"messages": []}
+        messages = chat_manager.get_chat_messages(session_id)
+        return {"messages": messages}
+    except Exception as e:
+        return {"messages": [], "error": str(e)}
 
 @dashboard_app.post("/api/reply")
 async def send_reply(data: dict):
-    session_id = data.get("session_id")
-    message = data.get("message")
-    
-    if session_id and message:
-        await chat_manager.send_agent_reply(session_id, message)
-        return {"status": "sent"}
-    
-    return {"error": "Missing data"}
+    try:
+        if not redis_client:
+            return {"error": "Redis not available"}
+        
+        session_id = data.get("session_id")
+        message = data.get("message")
+        
+        if session_id and message:
+            await chat_manager.send_agent_reply(session_id, message)
+            return {"status": "sent"}
+        
+        return {"error": "Missing data"}
+    except Exception as e:
+        return {"error": str(e)}
 
 # -----------------------------
 # SERVER-SENT EVENTS FOR AGENTS
@@ -270,21 +285,37 @@ async def send_reply(data: dict):
 @dashboard_app.get("/agent-stream")
 async def agent_stream():
     async def event_generator():
+        if not redis_client:
+            yield "data: {\"error\": \"Redis not available\"}\n\n"
+            return
+            
         pubsub = redis_client.pubsub()
-        pubsub.subscribe("agent_notifications")
-        
         try:
+            pubsub.subscribe("agent_notifications")
+            yield "data: {\"status\": \"connected\"}\n\n"
+            
             while True:
-                message = pubsub.get_message(timeout=1)
-                if message and message['type'] == 'message':
-                    yield f"data: {message['data']}\n\n"
-                await asyncio.sleep(0.1)
+                try:
+                    message = pubsub.get_message(timeout=1)
+                    if message and message['type'] == 'message':
+                        yield f"data: {message['data']}\n\n"
+                    await asyncio.sleep(0.5)
+                except Exception as e:
+                    print(f"SSE error: {e}")
+                    break
         except Exception as e:
             print(f"Agent stream error: {e}")
+            yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
         finally:
-            pubsub.close()
+            try:
+                pubsub.close()
+            except:
+                pass
     
-    return StreamingResponse(event_generator(), media_type="text/plain")
+    return StreamingResponse(event_generator(), media_type="text/plain", headers={
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive"
+    })
 
 # -----------------------------
 # USER WEBSOCKET (FOR RECEIVING REPLIES)
