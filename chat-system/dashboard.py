@@ -288,9 +288,12 @@ async def dashboard():
                     
                     // Play notification sound
                     try {
-                        new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
+                        // Only play sound after user interaction
+                        if (document.hasFocus()) {
+                            new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(() => {});
+                        }
                     } catch (e) {
-                        console.log('Could not play notification sound');
+                        // Silently ignore audio errors
                     }
                 }
             };
