@@ -2535,7 +2535,7 @@ function startHumanChat(sessionId) {
     addMessage('👩💼 You are now connected to a human agent.', 'bot');
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.hostname}:8000/dashboard/ws/user/${sessionId}`;
+    const wsUrl = `${protocol}//35.154.92.5:8000/dashboard/ws/user/${sessionId}`;
     
     humanSocket = new WebSocket(wsUrl);
 
@@ -2548,10 +2548,16 @@ function startHumanChat(sessionId) {
 
     humanSocket.onopen = () => {
         console.log('✅ Connected to human agent');
+        addMessage('👩💼 Connected to human agent!', 'bot');
+    };
+
+    humanSocket.onerror = (error) => {
+        console.error('Human chat WebSocket error:', error);
+        addMessage('❌ Unable to connect to agent. Please try again later.', 'bot');
     };
 
     humanSocket.onclose = () => {
-        addMessage('❌ Human agent disconnected.', 'bot');
+        addMessage('ℹ️ Human agent disconnected.', 'bot');
     };
 }
 
