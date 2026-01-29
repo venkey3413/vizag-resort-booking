@@ -65,6 +65,8 @@ async def dashboard():
             height: 100vh;
             display: flex;
             flex-direction: column;
+            margin: 0;
+            padding: 0;
         }
         
         .header {
@@ -96,23 +98,28 @@ async def dashboard():
             gap: 20px;
             padding: 20px;
             overflow: hidden;
+            min-height: 600px;
         }
         
         .chat-list {
             width: 350px;
+            min-width: 350px;
             background: rgba(255,255,255,0.95);
             border-radius: 15px;
             padding: 20px;
             overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
         .chat-area {
             flex: 1;
+            min-width: 400px;
             background: rgba(255,255,255,0.95);
             border-radius: 15px;
             padding: 20px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
         .chat-item {
