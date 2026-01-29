@@ -2470,6 +2470,35 @@ function initializePremiumChatWidget() {
         }
     });
     
+    // Human agent button
+    const humanBtn = document.getElementById('vrbHumanBtn');
+    if (humanBtn) {
+        humanBtn.addEventListener('click', async () => {
+            addMessage('👩💼 Connecting you to a human agent...', 'bot');
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        message: '__HUMAN__'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.handover === true) {
+                    startHumanChat(sessionId);
+                } else {
+                    addMessage('⚠️ Agents are offline. Chat on WhatsApp 👉 <a href="https://wa.me/918341674465" target="_blank">WhatsApp Support</a>', 'bot');
+                }
+            } catch (error) {
+                addMessage('⚠️ Agents are offline. Chat on WhatsApp 👉 <a href="https://wa.me/918341674465" target="_blank">WhatsApp Support</a>', 'bot');
+            }
+        });
+    }
+    
     console.log('✅ Premium chat widget initialized with MCP server integration');
 }
 

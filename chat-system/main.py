@@ -72,6 +72,13 @@ async def chat(req: ChatRequest):
     # -----------------------------
     # HUMAN HANDOVER (FINAL)
     # -----------------------------
+    if msg == "__HUMAN__":
+        await chat_manager.add_chat(session_id, "User requested human agent")
+        return {
+            "answer": "👩💼 Connecting you to a live agent...",
+            "handover": True
+        }
+    
     await chat_manager.add_chat(session_id, msg)
 
     return {

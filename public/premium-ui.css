@@ -1333,6 +1333,25 @@ img{ max-width:100%; display:block; }
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
+.vrb-human-btn{
+  width: 100%;
+  background: linear-gradient(135deg, #ff9800, #ff5722);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 25px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+}
+
+.vrb-human-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px){
   .vrb-chat-box{
