@@ -2196,7 +2196,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     
     // ✅ Initialize premium chat widget
-    // initializePremiumChatWidget();
+    initializePremiumChatWidget();
 });
 
 
