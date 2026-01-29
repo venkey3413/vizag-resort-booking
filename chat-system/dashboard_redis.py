@@ -1,5 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse
 import json
 import redis
 import asyncio
@@ -15,7 +15,8 @@ redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
 # -----------------------------
 class RedisChatManager:
     def __init__(self):
-        pass
+        self.agent_connections = {}
+        self.user_connections = {}
         
     async def add_chat(self, session_id, message):
         # Store chat in Redis
@@ -119,7 +120,7 @@ h3 { color:#333; margin-bottom:10px }
 let currentSession = null;
 let eventSource = null;
 
-// Start listening for agent notifications via Server-Sent Events
+// Start listening for agent notifications
 function startAgentListener() {
   eventSource = new EventSource('/dashboard/agent-stream');
   
@@ -130,7 +131,7 @@ function startAgentListener() {
   
   eventSource.onerror = function(event) {
     console.error('EventSource error:', event);
-    setTimeout(startAgentListener, 5000);
+    setTimeout(startAgentListener, 5000); // Reconnect after 5 seconds
   };
 }
 
@@ -288,6 +289,7 @@ async def agent_stream():
 @dashboard_app.websocket("/ws/user/{session_id}")
 async def user_ws(ws: WebSocket, session_id: str):
     await ws.accept()
+    chat_manager.user_connections[session_id] = ws
     
     # Subscribe to user-specific channel
     pubsub = redis_client.pubsub()
@@ -312,4 +314,7 @@ async def user_ws(ws: WebSocket, session_id: str):
             
     except WebSocketDisconnect:
         print(f"User {session_id} disconnected")
+        chat_manager.user_connections.pop(session_id, None)
         pubsub.close()
+
+from fastapi.responses import StreamingResponse

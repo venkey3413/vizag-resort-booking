@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import re
-import redis
+import json
 
 from conversation_state import get_state, update_state, clear_state
 from mcp_server.server import (
@@ -11,15 +11,12 @@ from mcp_server.server import (
     check_resort_availability,
 )
 
-from dashboard_redis import dashboard_app, chat_manager
+from dashboard import dashboard_app, chat_manager
 
 app = FastAPI(title="Vizag Resort Booking Chat API")
 
-# Mount dashboard
+# ✅ Mount dashboard correctly
 app.mount("/dashboard", dashboard_app)
-
-# Redis client
-redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 class ChatRequest(BaseModel):
     session_id: str
@@ -32,7 +29,9 @@ async def chat(req: ChatRequest):
     session_id = req.session_id
     state = get_state(session_id)
 
+    # -----------------------------
     # MCP TOOLS
+    # -----------------------------
     if "refund" in text:
         return {"answer": get_refund_policy(), "handover": False}
 
@@ -42,7 +41,9 @@ async def chat(req: ChatRequest):
     if "rules" in text:
         return {"answer": get_resort_rules(), "handover": False}
 
+    # -----------------------------
     # AVAILABILITY FLOW
+    # -----------------------------
     if "availability" in text:
         update_state(session_id, {"intent": "availability"})
         return {"answer": "📅 Enter check-in date (YYYY-MM-DD)", "handover": False}
@@ -69,9 +70,28 @@ async def chat(req: ChatRequest):
         clear_state(session_id)
         return {"answer": result, "handover": False}
 
-    # HUMAN HANDOVER
-    await chat_manager.add_chat(session_id, msg)
+    # -----------------------------
+    # HUMAN HANDOVER (FINAL)
+    # -----------------------------
+    if msg == "__HUMAN__":
+        await chat_manager.add_chat(session_id, msg)
+        for agent_ws in chat_manager.agent_connections.values():
+            try:
+                await agent_ws.send_text(json.dumps({"type": "new_chat"}))
+            except:
+                pass
+        return {
+            "answer": "👩💼 Connecting you to a live agent...",
+            "handover": True
+        }
     
+    await chat_manager.add_chat(session_id, msg)
+    for agent_ws in chat_manager.agent_connections.values():
+        try:
+            await agent_ws.send_text(json.dumps({"type": "new_chat"}))
+        except:
+            pass
+
     return {
         "answer": "👩💼 Connecting you to a live agent...",
         "handover": True
