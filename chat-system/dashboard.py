@@ -50,7 +50,9 @@ dashboard_app.mount("/static", StaticFiles(directory="static"), name="static")
 @dashboard_app.get("/")
 @dashboard_app.get("")
 async def dashboard():
-    return FileResponse("static/dashboard.html")
+    import os
+    file_path = os.path.join(os.path.dirname(__file__), "static", "dashboard.html")
+    return FileResponse(file_path)
 
 @dashboard_app.websocket("/ws/agent")
 async def agent_ws(ws: WebSocket):
