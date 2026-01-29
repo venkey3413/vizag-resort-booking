@@ -2,8 +2,20 @@ import json
 import redis
 import asyncio
 from fastapi import FastAPI, WebSocket
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 app = FastAPI()
+
+BASE_DIR = Path(__file__).resolve().parent
+
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+
+@app.get("/dashboard/", response_class=HTMLResponse)
+def dashboard():
+    html_path = BASE_DIR / "human_dashboard.html"
+    return html_path.read_text()
 
 redis_pub = redis.Redis(decode_responses=True)
 redis_sub = redis.Redis(decode_responses=True)
