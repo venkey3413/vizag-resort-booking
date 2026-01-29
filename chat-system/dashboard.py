@@ -8,7 +8,11 @@ from datetime import datetime
 dashboard_app = FastAPI()
 
 # Redis connection
-redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+try:
+    redis_client = redis.Redis(host='redis', port=6379, decode_responses=True)
+    redis_client.ping()  # Test connection
+except:
+    redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 # -----------------------------
 # CHAT MANAGER WITH REDIS
