@@ -125,9 +125,7 @@ class ResortChatWidget {
     // 👩‍💼 If human already connected → websocket
     if (this.handoverActive && this.socket) {
       this.socket.send(JSON.stringify({
-        session_id: this.sessionId,
-        message: message,
-        sender: "user"
+        message: message
       }));
       return;
     }
@@ -183,15 +181,13 @@ class ResortChatWidget {
 
     this.socket.onerror = (error) => {
       console.error("WebSocket error:", error);
-      this.addMessage("❌ Connection failed. Trying WhatsApp...", "bot");
-      this.whatsAppFallback();
+      this.addMessage("❌ Connection failed. Please try again later.", "bot");
     };
 
     this.socket.onclose = (event) => {
       console.log("WebSocket closed:", event.code, event.reason);
       if (!event.wasClean) {
-        this.addMessage("❌ Connection lost. Trying WhatsApp...", "bot");
-        this.whatsAppFallback();
+        this.addMessage("❌ Connection lost. Please try again later.", "bot");
       } else {
         this.addMessage("ℹ️ Human chat ended.", "bot");
       }
@@ -202,7 +198,7 @@ class ResortChatWidget {
     setTimeout(() => {
       if (this.socket && this.socket.readyState !== WebSocket.OPEN) {
         console.log('WebSocket connection timeout');
-        this.whatsAppFallback();
+        this.addMessage("❌ Unable to connect to agent. Please try again.", "bot");
       }
     }, 5000);
   }
