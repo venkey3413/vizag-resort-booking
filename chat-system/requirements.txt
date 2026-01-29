@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-requests
-websockets
-pydantic
-
-# MCP (REQUIRED)
-mcp
-redis==4.5.4
