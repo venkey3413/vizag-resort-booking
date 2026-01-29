@@ -4,8 +4,8 @@ class ResortChatWidget {
     this.sessionId = this.generateSessionId();
 
     // 🔐 BACKEND CONFIG
-    this.apiUrl = "https://vizagresortbooking.in:8000";
-    this.wsUrl = "wss://vizagresortbooking.in:8000/dashboard/ws/user";
+    this.apiUrl = "http://35.154.92.5:8000";
+    this.wsUrl = "ws://35.154.92.5:8000/dashboard/ws/user";
 
     this.socket = null;
     this.handoverActive = false;
@@ -164,6 +164,7 @@ class ResortChatWidget {
   startHumanChat() {
     if (this.handoverActive) return;
 
+    console.log('Starting human chat with URL:', `${this.wsUrl}/${this.sessionId}`);
     this.handoverActive = true;
     this.socket = new WebSocket(`${this.wsUrl}/${this.sessionId}`);
 
@@ -173,6 +174,7 @@ class ResortChatWidget {
     };
 
     this.socket.onmessage = (event) => {
+      console.log('Received from agent:', event.data);
       const data = JSON.parse(event.data);
       if (data.message) {
         this.addMessage(`👩💼 Agent: ${data.message}`, "bot");
@@ -181,18 +183,25 @@ class ResortChatWidget {
 
     this.socket.onerror = (error) => {
       console.error("WebSocket error:", error);
+      this.addMessage("❌ Connection failed. Trying WhatsApp...", "bot");
       this.whatsAppFallback();
     };
 
-    this.socket.onclose = () => {
-      console.log("WebSocket closed");
-      this.addMessage("ℹ️ Human chat ended.", "bot");
+    this.socket.onclose = (event) => {
+      console.log("WebSocket closed:", event.code, event.reason);
+      if (!event.wasClean) {
+        this.addMessage("❌ Connection lost. Trying WhatsApp...", "bot");
+        this.whatsAppFallback();
+      } else {
+        this.addMessage("ℹ️ Human chat ended.", "bot");
+      }
       this.handoverActive = false;
     };
 
     // Timeout fallback
     setTimeout(() => {
       if (this.socket && this.socket.readyState !== WebSocket.OPEN) {
+        console.log('WebSocket connection timeout');
         this.whatsAppFallback();
       }
     }, 5000);
