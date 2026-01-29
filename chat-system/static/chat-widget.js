@@ -17,7 +17,10 @@ class ResortChatWidget {
   setupWebSocket() {
     this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      this.addMessage(data.message, data.sender === "human" ? "bot" : "bot");
+
+      if (data.sender === "human") {
+        this.addMessage(data.message, "bot");
+      }
     };
   }
 

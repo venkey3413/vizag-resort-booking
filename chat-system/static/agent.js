@@ -1,5 +1,5 @@
 const ws = new WebSocket("ws://localhost:8000/ws/agent");
-let currentChatId = null;
+let selectedChatId = null;
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
@@ -12,17 +12,17 @@ ws.onmessage = (event) => {
 };
 
 function selectChat(chatId) {
-  currentChatId = chatId;
+  selectedChatId = chatId;
   document.getElementById("activeChat").innerText = "Chat: " + chatId;
   document.getElementById("messages").innerHTML = "";
 }
 
 function sendReply() {
-  if (!currentChatId) return;
+  if (!selectedChatId) return;
   
   const msg = document.getElementById("replyInput").value;
   ws.send(JSON.stringify({
-    chat_id: currentChatId,
+    chat_id: selectedChatId,
     message: msg
   }));
   

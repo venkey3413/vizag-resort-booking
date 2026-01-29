@@ -1,6 +1,7 @@
 import json
 import redis
 import asyncio
+import time
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 app = FastAPI()
@@ -37,7 +38,7 @@ async def redis_listener():
 @app.websocket("/ws/chat")
 async def chat_ws(ws: WebSocket):
     await ws.accept()
-    chat_id = str(id(ws))
+    chat_id = f"chat_{int(time.time()*1000)}"
     connections[chat_id] = ws
 
     try:
