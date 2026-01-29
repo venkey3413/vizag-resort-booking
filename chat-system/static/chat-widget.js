@@ -125,6 +125,7 @@ class ResortChatWidget {
 
   sendHumanRequest() {
     this.addMessage("🎧 Talk to human agent", "user");
+    this.addMessage("Waiting for a human agent to join...", "bot");
     this.connectHuman("I want to talk to a human agent");
   }
 
