@@ -4,50 +4,110 @@ import json
 import redis
 import asyncio
 from datetime import datetime
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 dashboard_app = FastAPI()
 
-# Redis connection
-redis_client = redis.Redis(host='redis', port=6379, decode_responses=True)
+# Redis connection with fallback
+try:
+    redis_client = redis.Redis(host='redis', port=6379, decode_responses=True, socket_timeout=5)
+    redis_client.ping()
+    logger.info("✅ Connected to Redis at redis:6379")
+except:
+    try:
+        redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True, socket_timeout=5)
+        redis_client.ping()
+        logger.info("✅ Connected to Redis at localhost:6379")
+    except Exception as e:
+        logger.error(f"❌ Redis connection failed: {e}")
+        redis_client = None
 
 class SimpleChatManager:
-    async def add_chat(self, session_id, message):
-        # Store in Redis
-        chat_data = {
-            "from": "user",
-            "message": message,
-            "time": datetime.now().isoformat()
-        }
-        redis_client.lpush(f"chat:{session_id}", json.dumps(chat_data))
+    def __init__(self):
+        self.active_connections = {}
         
-        # Notify agents
-        redis_client.publish("new_chats", session_id)
+    async def add_chat(self, session_id, message):
+        if not redis_client:
+            logger.error("Redis not available")
+            return
+            
+        try:
+            # Store in Redis
+            chat_data = {
+                "from": "user",
+                "message": message,
+                "time": datetime.now().isoformat()
+            }
+            redis_client.lpush(f"chat:{session_id}", json.dumps(chat_data))
+            
+            # Notify agents
+            redis_client.publish("new_chats", session_id)
+            logger.info(f"📨 User message stored for session {session_id}")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to add chat: {e}")
         
     async def add_reply(self, session_id, message):
-        # Store in Redis
-        reply_data = {
-            "from": "agent", 
-            "message": message,
-            "time": datetime.now().isoformat()
-        }
-        redis_client.lpush(f"chat:{session_id}", json.dumps(reply_data))
-        
-        # Send to user
-        redis_client.publish(f"user:{session_id}", message)
+        if not redis_client:
+            logger.error("Redis not available")
+            return
+            
+        try:
+            # Store in Redis
+            reply_data = {
+                "from": "agent", 
+                "message": message,
+                "time": datetime.now().isoformat()
+            }
+            redis_client.lpush(f"chat:{session_id}", json.dumps(reply_data))
+            
+            # Send to user via WebSocket if connected
+            if session_id in self.active_connections:
+                try:
+                    await self.active_connections[session_id].send_text(
+                        json.dumps({"message": message})
+                    )
+                    logger.info(f"📤 Reply sent to user {session_id}")
+                except:
+                    logger.warning(f"Failed to send WebSocket message to {session_id}")
+            
+            # Also publish to Redis for backup
+            redis_client.publish(f"user:{session_id}", message)
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to add reply: {e}")
         
     def get_messages(self, session_id):
-        messages = redis_client.lrange(f"chat:{session_id}", 0, -1)
-        return [json.loads(msg) for msg in reversed(messages)]
+        if not redis_client:
+            return []
+            
+        try:
+            messages = redis_client.lrange(f"chat:{session_id}", 0, -1)
+            return [json.loads(msg) for msg in reversed(messages)]
+        except Exception as e:
+            logger.error(f"❌ Failed to get messages: {e}")
+            return []
         
     def get_all_chats(self):
-        keys = redis_client.keys("chat:*")
-        chats = {}
-        for key in keys:
-            session_id = key.replace("chat:", "")
-            messages = self.get_messages(session_id)
-            if messages:
-                chats[session_id] = {"messages": messages}
-        return chats
+        if not redis_client:
+            return {}
+            
+        try:
+            keys = redis_client.keys("chat:*")
+            chats = {}
+            for key in keys:
+                session_id = key.replace("chat:", "")
+                messages = self.get_messages(session_id)
+                if messages:
+                    chats[session_id] = {"messages": messages}
+            return chats
+        except Exception as e:
+            logger.error(f"❌ Failed to get all chats: {e}")
+            return {}
 
 chat_manager = SimpleChatManager()
 
@@ -71,15 +131,17 @@ button { padding: 10px; background: #4caf50; color: white; border: none; }
 .chat-item { cursor: pointer; padding: 8px; border-bottom: 1px solid #eee; }
 .chat-item:hover { background: #f5f5f5; }
 .chat-item.active { background: #2196f3; color: white; }
+.status { padding: 10px; background: #f0f0f0; font-size: 12px; }
 </style>
 </head>
 <body>
 <div class="sidebar">
-  <h3>Chats</h3>
-  <div id="chatList">No chats</div>
+  <h3>Human Agent Dashboard</h3>
+  <div class="status" id="status">Connecting...</div>
+  <div id="chatList">Loading chats...</div>
 </div>
 <div class="chat">
-  <div id="messages" class="messages">Select a chat</div>
+  <div id="messages" class="messages">Select a chat to start</div>
   <div style="display: flex; padding: 10px;">
     <input id="reply" placeholder="Type reply..." disabled />
     <button onclick="sendReply()" id="sendBtn" disabled>Send</button>
@@ -96,7 +158,8 @@ async function loadChats() {
     const list = document.getElementById('chatList');
     
     if (Object.keys(chats).length === 0) {
-      list.innerHTML = 'No chats';
+      list.innerHTML = '<div style="padding:10px;color:#666;">No active chats</div>';
+      document.getElementById('status').textContent = 'No chats - Waiting for users...';
       return;
     }
     
@@ -106,10 +169,14 @@ async function loadChats() {
       div.className = 'chat-item';
       div.textContent = `User ${id.slice(-6)}`;
       div.onclick = () => openChat(id);
+      if (id === currentSession) div.classList.add('active');
       list.appendChild(div);
     });
+    
+    document.getElementById('status').textContent = `${Object.keys(chats).length} active chats`;
   } catch (e) {
     console.error('Load error:', e);
+    document.getElementById('status').textContent = 'Connection error';
   }
 }
 
@@ -121,43 +188,60 @@ async function openChat(id) {
   });
   event.target.classList.add('active');
   
-  const res = await fetch(`/dashboard/api/chats/${id}`);
-  const data = await res.json();
-  const box = document.getElementById('messages');
-  
-  box.innerHTML = '';
-  data.messages.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'msg ' + m.from;
-    div.textContent = m.from + ': ' + m.message;
-    box.appendChild(div);
-  });
-  
-  document.getElementById('reply').disabled = false;
-  document.getElementById('sendBtn').disabled = false;
+  try {
+    const res = await fetch(`/dashboard/api/chats/${id}`);
+    const data = await res.json();
+    const box = document.getElementById('messages');
+    
+    box.innerHTML = '';
+    data.messages.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'msg ' + m.from;
+      div.innerHTML = `<strong>${m.from}:</strong> ${m.message}<br><small>${new Date(m.time).toLocaleTimeString()}</small>`;
+      box.appendChild(div);
+    });
+    
+    box.scrollTop = box.scrollHeight;
+    
+    document.getElementById('reply').disabled = false;
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('reply').focus();
+  } catch (e) {
+    console.error('Open chat error:', e);
+  }
 }
 
 async function sendReply() {
   const text = document.getElementById('reply').value.trim();
   if (!text || !currentSession) return;
   
-  await fetch('/dashboard/api/reply', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({session_id: currentSession, message: text})
-  });
-  
-  const box = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = 'msg agent';
-  div.textContent = 'agent: ' + text;
-  box.appendChild(div);
-  
-  document.getElementById('reply').value = '';
+  try {
+    await fetch('/dashboard/api/reply', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({session_id: currentSession, message: text})
+    });
+    
+    const box = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'msg agent';
+    div.innerHTML = `<strong>agent:</strong> ${text}<br><small>${new Date().toLocaleTimeString()}</small>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    
+    document.getElementById('reply').value = '';
+  } catch (e) {
+    console.error('Send reply error:', e);
+  }
 }
 
-// Auto refresh
-setInterval(loadChats, 2000);
+// Enter key to send
+document.getElementById('reply').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendReply();
+});
+
+// Auto refresh every 3 seconds
+setInterval(loadChats, 3000);
 loadChats();
 </script>
 </body>
@@ -168,7 +252,8 @@ loadChats();
 async def get_chats():
     try:
         return chat_manager.get_all_chats()
-    except:
+    except Exception as e:
+        logger.error(f"❌ Get chats error: {e}")
         return {}
 
 @dashboard_app.get("/api/chats/{session_id}")
@@ -176,7 +261,8 @@ async def get_chat(session_id: str):
     try:
         messages = chat_manager.get_messages(session_id)
         return {"messages": messages}
-    except:
+    except Exception as e:
+        logger.error(f"❌ Get chat error: {e}")
         return {"messages": []}
 
 @dashboard_app.post("/api/reply")
@@ -186,34 +272,42 @@ async def reply(data: dict):
         message = data.get("message")
         if session_id and message:
             await chat_manager.add_reply(session_id, message)
+            logger.info(f"📤 Agent replied to {session_id}: {message}")
         return {"status": "ok"}
-    except:
+    except Exception as e:
+        logger.error(f"❌ Reply error: {e}")
         return {"status": "error"}
 
 @dashboard_app.websocket("/ws/user/{session_id}")
-async def user_ws(ws: WebSocket, session_id: str):
-    await ws.accept()
+async def user_ws(websocket: WebSocket, session_id: str):
+    await websocket.accept()
+    logger.info(f"🔌 WebSocket connected for session {session_id}")
     
-    # Subscribe to user messages
-    pubsub = redis_client.pubsub()
-    pubsub.subscribe(f"user:{session_id}")
+    # Store connection
+    chat_manager.active_connections[session_id] = websocket
     
     try:
         while True:
-            # Check for agent replies
-            message = pubsub.get_message(timeout=0.1)
-            if message and message['type'] == 'message':
-                await ws.send_text(json.dumps({"message": message['data']}))
-            
-            # Check for user messages
+            # Wait for user messages
             try:
-                data = await asyncio.wait_for(ws.receive_text(), timeout=0.1)
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
                 payload = json.loads(data)
                 user_message = payload.get("message", "")
                 if user_message:
                     await chat_manager.add_chat(session_id, user_message)
+                    logger.info(f"📨 Received from user {session_id}: {user_message}")
             except asyncio.TimeoutError:
-                pass
+                # Send ping to keep connection alive
+                await websocket.ping()
+            except Exception as e:
+                logger.error(f"❌ WebSocket receive error: {e}")
+                break
                 
     except WebSocketDisconnect:
-        pubsub.close()
+        logger.info(f"🔌 WebSocket disconnected for session {session_id}")
+    except Exception as e:
+        logger.error(f"❌ WebSocket error: {e}")
+    finally:
+        # Clean up connection
+        if session_id in chat_manager.active_connections:
+            del chat_manager.active_connections[session_id]

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import re
-import json
+import redis
 
 from conversation_state import get_state, update_state, clear_state
 from mcp_server.server import (
@@ -15,8 +15,11 @@ from dashboard import dashboard_app, chat_manager
 
 app = FastAPI(title="Vizag Resort Booking Chat API")
 
-# ✅ Mount dashboard correctly
+# Mount dashboard
 app.mount("/dashboard", dashboard_app)
+
+# Redis client
+redis_client = redis.Redis(host='redis', port=6379, decode_responses=True)
 
 class ChatRequest(BaseModel):
     session_id: str
@@ -29,9 +32,7 @@ async def chat(req: ChatRequest):
     session_id = req.session_id
     state = get_state(session_id)
 
-    # -----------------------------
     # MCP TOOLS
-    # -----------------------------
     if "refund" in text:
         return {"answer": get_refund_policy(), "handover": False}
 
@@ -41,9 +42,7 @@ async def chat(req: ChatRequest):
     if "rules" in text:
         return {"answer": get_resort_rules(), "handover": False}
 
-    # -----------------------------
     # AVAILABILITY FLOW
-    # -----------------------------
     if "availability" in text:
         update_state(session_id, {"intent": "availability"})
         return {"answer": "📅 Enter check-in date (YYYY-MM-DD)", "handover": False}
@@ -70,19 +69,10 @@ async def chat(req: ChatRequest):
         clear_state(session_id)
         return {"answer": result, "handover": False}
 
-    # -----------------------------
-    # HUMAN HANDOVER (FINAL)
-    # -----------------------------
-    if msg == "__HUMAN__":
-        await chat_manager.add_chat(session_id, "User requested human agent")
-        return {
-            "answer": "👩💼 Connecting you to a live agent...",
-            "handover": True
-        }
-    
+    # HUMAN HANDOVER
     await chat_manager.add_chat(session_id, msg)
-
+    
     return {
-        "answer": "👩‍💼 Connecting you to a live agent...",
+        "answer": "👩💼 Connecting you to a live agent...",
         "handover": True
     }
