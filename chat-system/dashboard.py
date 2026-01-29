@@ -133,11 +133,24 @@ async function openChat(id) {
 }
 
 function sendReply() {
-  const text = document.getElementById("reply").value;
+  const text = document.getElementById("reply").value.trim();
+  if (!text || !currentSession) return;
+  
+  console.log('Sending reply:', text, 'to session:', currentSession);
+  
   socket.send(JSON.stringify({
     session_id: currentSession,
     message: text
   }));
+  
+  // Add to UI immediately
+  const box = document.getElementById("chatBox");
+  const d = document.createElement("div");
+  d.className = "msg agent";
+  d.innerText = "agent: " + text;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+  
   document.getElementById("reply").value = "";
 }
 
@@ -165,12 +178,19 @@ async def get_chat(session_id: str):
 async def user_ws(ws: WebSocket, session_id: str):
     await ws.accept()
     chat_manager.user_connections[session_id] = ws
+    print(f"✅ User {session_id} connected")
     try:
         while True:
             data = await ws.receive_text()
-            msg = json.loads(data)["message"]
-            await chat_manager.add_message(session_id, "user", msg)
+            payload = json.loads(data)
+            message = payload.get("message", "")
+            print(f"📨 User {session_id} sent: {message}")
+            
+            # Add message to chat history
+            await chat_manager.add_message(session_id, "user", message)
+            
     except WebSocketDisconnect:
+        print(f"❌ User {session_id} disconnected")
         chat_manager.user_connections.pop(session_id, None)
 
 # -----------------------------
@@ -180,14 +200,25 @@ async def user_ws(ws: WebSocket, session_id: str):
 async def agent_ws(ws: WebSocket, agent_id: str):
     await ws.accept()
     chat_manager.agent_connections[agent_id] = ws
+    print(f"✅ Agent {agent_id} connected")
+    
+    # Send current chats to new agent
+    try:
+        await ws.send_text(json.dumps({"type": "new_chat"}))
+    except:
+        pass
+    
     try:
         while True:
             data = await ws.receive_text()
             payload = json.loads(data)
-            await chat_manager.add_message(
-                payload["session_id"],
-                "agent",
-                payload["message"]
-            )
+            session_id = payload.get("session_id")
+            message = payload.get("message")
+            print(f"📨 Agent {agent_id} replied to {session_id}: {message}")
+            
+            if session_id and message:
+                await chat_manager.add_message(session_id, "agent", message)
+                
     except WebSocketDisconnect:
+        print(f"❌ Agent {agent_id} disconnected")
         chat_manager.agent_connections.pop(agent_id, None)
