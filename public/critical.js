@@ -2409,10 +2409,10 @@ function initializePremiumChatWidget() {
                         if (data.handover === true) {
                             startHumanChat(sessionId);
                         } else {
-                            addMessage('⚠️ Agents are offline. Chat on WhatsApp 👉 <a href="https://wa.me/918341674465" target="_blank">WhatsApp Support</a>', 'bot');
+                            addMessage('❌ Unable to connect to agent. Please try again later.', 'bot');
                         }
                     } catch (error) {
-                        addMessage('⚠️ Agents are offline. Chat on WhatsApp 👉 <a href="https://wa.me/918341674465" target="_blank">WhatsApp Support</a>', 'bot');
+                        addMessage('❌ Unable to connect to agent. Please try again later.', 'bot');
                     }
                     return; // Exit early for human agent
             }
@@ -2520,7 +2520,7 @@ function initializePremiumChatWidget() {
                     addMessage('⚠️ Agents are offline. Chat on WhatsApp 👉 <a href="https://wa.me/918341674465" target="_blank">WhatsApp Support</a>', 'bot');
                 }
             } catch (error) {
-                addMessage('⚠️ Agents are offline. Chat on WhatsApp 👉 <a href="https://wa.me/918341674465" target="_blank">WhatsApp Support</a>', 'bot');
+                addMessage('❌ Unable to connect to agent. Please try again later.', 'bot');
             }
         });
     }
