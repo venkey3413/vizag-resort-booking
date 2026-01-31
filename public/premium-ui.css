@@ -1740,7 +1740,7 @@ button.book-now{
   position: sticky;
   top: 0;
   z-index: 9999;
-  padding: 14px 0;
+  padding: 8px 0;
   background: linear-gradient(135deg,
     rgba(10,116,218,0.92),
     rgba(26,163,255,0.82),
@@ -1765,18 +1765,18 @@ button.book-now{
   display:flex;
   flex-direction: column;
   align-items:center;
-  gap: 4px;
+  gap: 2px;
   color: #fff;
   font-weight: 950;
-  font-size: 22px;
-  letter-spacing: 0.3px;
+  font-size: 16px;
+  letter-spacing: 0.2px;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .vrb-logo img{
-  width: 46px;
-  height: 46px;
+  width: 55px;
+  height: 55px;
   border-radius: 18px;
   object-fit: cover;
   border: 2px solid rgba(255,255,255,0.35);
@@ -1784,12 +1784,12 @@ button.book-now{
 }
 
 .logo-caption{
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   opacity: 0.9;
-  margin-top: -2px;
+  margin-top: -1px;
 }
 
 /* ✅ Nav links Premium */
@@ -1808,8 +1808,8 @@ button.book-now{
   color: rgba(255,255,255,0.92);
   text-decoration:none;
   font-weight: 900;
-  font-size: 14px;
-  padding: 10px 16px;
+  font-size: 12px;
+  padding: 8px 12px;
   border-radius: 999px;
   transition: 0.22s ease;
 }
@@ -1837,8 +1837,9 @@ button.book-now{
   border: 1px solid rgba(255,255,255,0.20) !important;
   color: #fff !important;
   font-weight: 900 !important;
-  padding: 10px 18px !important;
+  padding: 8px 14px !important;
   border-radius: 999px !important;
+  font-size: 12px !important;
   transition: 0.2s ease;
 }
 
@@ -1850,8 +1851,9 @@ button.book-now{
   background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
   color: #fff !important;
   font-weight: 950 !important;
-  padding: 10px 18px !important;
+  padding: 8px 14px !important;
   border-radius: 999px !important;
+  font-size: 12px !important;
   box-shadow: 0 18px 40px rgba(255,111,0,0.35) !important;
   transition: 0.2s ease;
 }
