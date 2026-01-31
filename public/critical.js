@@ -647,9 +647,7 @@ window.bookNow=function(resortId,resortName){
                     const checkInDate = new Date(checkIn);
                     const dayOfWeek = checkInDate.getDay();
                     let dayType = 'weekday';
-                    if (dayOfWeek === 5) {
-                        dayType = 'friday';
-                    } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    if (dayOfWeek === 0 || dayOfWeek === 6) {
                         dayType = 'weekend';
                     }
                     
@@ -715,17 +713,13 @@ window.bookNow=function(resortId,resortName){
                     let nightlyRate = resort.price;
                     
                     if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-                        // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
-                        if (checkInDayOfWeek === 5) {
-                            // Friday
-                            const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
-                            if (fridayPrice) nightlyRate = fridayPrice.price;
-                        } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+                        // Mon-Fri = weekdays (1,2,3,4,5), Sat-Sun = weekends (6,0)
+                        if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
                             // Weekend (Saturday=6, Sunday=0)
                             const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
                             if (weekendPrice) nightlyRate = weekendPrice.price;
                         } else {
-                            // Weekday (Monday=1 to Thursday=4)
+                            // Weekday (Monday=1 to Friday=5)
                             const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
                             if (weekdayPrice) nightlyRate = weekdayPrice.price;
                         }
@@ -784,7 +778,7 @@ window.bookNow=function(resortId,resortName){
                                 if (totalAmountEl) totalAmountEl.textContent = `₹${total.toLocaleString()}`;
                                 const discountRowEl = document.getElementById('discountRow');
                                 if (discountRowEl) discountRowEl.style.display = 'none';
-                                const validDays = coupon.day_type === 'weekday' ? 'weekdays (Mon-Thu)' : 'weekends (Fri-Sun)';
+                                const validDays = coupon.day_type === 'weekday' ? 'weekdays (Mon-Fri)' : 'weekends (Sat-Sun)';
                                 const couponMsgEl = document.getElementById('couponMessage');
                                 if (couponMsgEl) couponMsgEl.innerHTML = `<span style="color:#dc3545;">Coupon removed - valid only for ${validDays}</span>`;
                             }
@@ -830,14 +824,7 @@ window.bookNow=function(resortId,resortName){
                 
                 if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
                     hasDynamicPricing = true;
-                    if (dayOfWeek === 5) {
-                        // Friday
-                        const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
-                        if (fridayPrice) {
-                            nightlyRate = fridayPrice.price;
-                            dayTypeText = 'Friday';
-                        }
-                    } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    if (dayOfWeek === 0 || dayOfWeek === 6) {
                         // Weekend
                         const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
                         if (weekendPrice) {
@@ -845,7 +832,7 @@ window.bookNow=function(resortId,resortName){
                             dayTypeText = 'Weekend';
                         }
                     } else {
-                        // Weekday
+                        // Weekday (Mon-Fri)
                         const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
                         if (weekdayPrice) {
                             nightlyRate = weekdayPrice.price;
@@ -854,9 +841,7 @@ window.bookNow=function(resortId,resortName){
                     }
                 } else {
                     // No dynamic pricing configured - show day type but same price
-                    if (dayOfWeek === 5) {
-                        dayTypeText = 'Friday';
-                    } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    if (dayOfWeek === 0 || dayOfWeek === 6) {
                         dayTypeText = 'Weekend';
                     } else {
                         dayTypeText = 'Weekday';
@@ -911,11 +896,9 @@ window.bookNow=function(resortId,resortName){
                 
                 const checkInDate = new Date(checkIn);
                 const dayOfWeek = checkInDate.getDay();
-                // Friday=5, Saturday=6, Sunday=0
+                // Mon-Fri = weekdays (1,2,3,4,5), Sat-Sun = weekends (6,0)
                 let dayType = 'weekday';
-                if (dayOfWeek === 5) {
-                    dayType = 'friday';
-                } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
                     dayType = 'weekend';
                 }
                 
@@ -945,8 +928,7 @@ window.bookNow=function(resortId,resortName){
                         </div>
                     ` + validCoupons.map(coupon => {
                         const discountText = coupon.type === 'percentage' ? `${coupon.discount}% OFF` : `₹${coupon.discount} OFF`;
-                        const dayText = coupon.day_type === 'weekday' ? ' (Mon-Thu)' : 
-                                      coupon.day_type === 'friday' ? ' (Friday)' :
+                        const dayText = coupon.day_type === 'weekday' ? ' (Mon-Fri)' : 
                                       coupon.day_type === 'weekend' ? ' (Sat-Sun)' : ' (All Days)';
                         return `
                             <div class="coupon-option" onclick="selectCoupon('${coupon.code}')" style="

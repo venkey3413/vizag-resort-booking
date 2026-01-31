@@ -44,11 +44,9 @@ function applyCouponImpl() {
         // Validate coupon for selected date
         const checkInDate = new Date(checkIn);
         const dayOfWeek = checkInDate.getDay();
-        // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
+        // Mon-Fri = weekdays (1,2,3,4,5), Sat-Sun = weekends (6,0)
         let dayType = 'weekday';
-        if (dayOfWeek === 5) {
-            dayType = 'friday';
-        } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
             dayType = 'weekend';
         }
         
@@ -476,15 +474,8 @@ function calculateTotal() {
     });
     
     if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-        // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
-        if (checkInDayOfWeek === 5) {
-            // Friday
-            const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
-            if (fridayPrice) {
-                nightlyRate = fridayPrice.price;
-                console.log('✅ Applied Friday pricing:', fridayPrice.price);
-            }
-        } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+        // Mon-Fri = weekdays (1,2,3,4,5), Sat-Sun = weekends (6,0)
+        if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
             // Weekend (Saturday=6, Sunday=0)
             const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
             if (weekendPrice) {
@@ -492,7 +483,7 @@ function calculateTotal() {
                 console.log('✅ Applied weekend pricing:', weekendPrice.price);
             }
         } else {
-            // Weekday (Monday=1 to Thursday=4)
+            // Weekday (Monday=1 to Friday=5)
             const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
             if (weekdayPrice) {
                 nightlyRate = weekdayPrice.price;

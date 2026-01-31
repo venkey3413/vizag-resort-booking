@@ -79,10 +79,7 @@ app.post('/api/check-availability', async (req, res) => {
         
         // Apply dynamic pricing
         if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-            if (checkInDayOfWeek === 5) {
-                const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
-                if (fridayPrice) nightlyRate = fridayPrice.price;
-            } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+            if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
                 const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
                 if (weekendPrice) nightlyRate = weekendPrice.price;
             } else {
@@ -201,10 +198,7 @@ app.post('/api/bookings', async (req, res) => {
         
         // Use dynamic pricing from resort data
         if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-            if (checkInDayOfWeek === 5) {
-                const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
-                if (fridayPrice) nightlyRate = fridayPrice.price;
-            } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
+            if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
                 const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
                 if (weekendPrice) nightlyRate = weekendPrice.price;
             } else {
