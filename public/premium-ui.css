@@ -1371,7 +1371,7 @@ img{ max-width:100%; display:block; }
 }
 
 /* =========================
-   ANIMATIONS (Replay)
+   ANIMATIONS (Enhanced)
 ========================= */
 
 .vrb-hide{
@@ -1382,6 +1382,126 @@ img{ max-width:100%; display:block; }
 .vrb-show{
   opacity:1;
   transform: translateY(0px) scale(1);
+}
+
+/* Scroll animations */
+.vrb-anim{
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vrb-anim.animate{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Button hover animations */
+.vrb-btn, .vrb-btn-primary, .vrb-btn-orange, .vrb-btn-nav, .vrb-whatsapp{
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.vrb-btn:hover, .vrb-btn-primary:hover, .vrb-btn-orange:hover{
+  transform: translateY(-3px) scale(1.05) !important;
+}
+
+/* Card animations */
+.vrb-card, .resort-card{
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.vrb-card:hover, .resort-card:hover{
+  transform: translateY(-12px) scale(1.02) !important;
+}
+
+/* Stagger animation for cards */
+.vrb-grid .vrb-card:nth-child(1) { animation-delay: 0.1s; }
+.vrb-grid .vrb-card:nth-child(2) { animation-delay: 0.2s; }
+.vrb-grid .vrb-card:nth-child(3) { animation-delay: 0.3s; }
+.vrb-grid .vrb-card:nth-child(4) { animation-delay: 0.4s; }
+.vrb-grid .vrb-card:nth-child(5) { animation-delay: 0.5s; }
+.vrb-grid .vrb-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Fade in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Bounce animation for buttons */
+@keyframes bounce {
+  0%, 20%, 60%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  80% {
+    transform: translateY(-5px);
+  }
+}
+
+.bounce-on-click {
+  animation: bounce 0.6s ease;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.8s ease-out;
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.8s ease-out;
 }
 /* ==========================================
    PREMIUM FIX FOR BELOW RESORT SECTION
