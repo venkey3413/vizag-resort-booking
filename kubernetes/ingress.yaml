@@ -7,7 +7,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: your-domain.com
+  - host: vshakago.in
     http:
       paths:
       - path: /
