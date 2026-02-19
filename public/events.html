@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events Booking - VShaka Go</title>
+
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <!-- ✅ Premium Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <!-- ✅ Load your premium UI -->
+  <link rel="stylesheet" href="premium-ui.css" />
+
+  <style>
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ✅ PREMIUM NAVBAR -->
+  <header class="vrb-navbar">
+    <div class="vrb-nav-container">
+
+      <a href="index.html" class="vrb-logo">
+        <img src="logo.png" alt="Logo">
+        <div class="logo-caption">
+          <span>Vizag Starts Here & Go</span>
+        </div>
+      </a>
+
+      <nav class="vrb-nav-links" id="vrbNavLinks">
+      </nav>
+
+      <div class="vrb-nav-actions">
+        <a class="vrb-whatsapp" href="https://wa.me/918341674465" target="_blank">WhatsApp</a>
+        <a class="vrb-btn-nav" href="index.html#resorts">Book Resort</a>
+        <button class="vrb-hamburger" onclick="vrbToggleMenu()">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ✅ ICON BUTTONS SECTION -->
+  <section class="vrb-icon-buttons">
+    <div class="vrb-icon-container">
+      <button class="vrb-icon-btn" onclick="window.location.href='events.html'">
+        <span class="icon">🎉</span>
+        <span class="text">Events</span>
+      </button>
+      <button class="vrb-icon-btn" onclick="window.location.href='index.html'">
+        <span class="icon">🏨</span>
+        <span class="text">Hotel</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ✅ EVENTS SECTION -->
+  <section id="events" class="vrb-section">
+    <div class="vrb-container">
+      <div class="vrb-section-head vrb-anim">
+        <h2 class="vrb-title">Events & Party Bookings in Vizag</h2>
+        <p class="vrb-subtitle">
+          Birthday • Wedding • Corporate • Engagement • Pool Parties
+        </p>
+      </div>
+
+      <div class="vrb-grid" id="eventsGrid">
+        <div class="vrb-card">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400" alt="Birthday Party">
+            <div class="vrb-badge">₹15,000</div>
+          </div>
+          <div class="vrb-body">
+            <h3>Birthday Party</h3>
+            <p class="vrb-meta">📍 Beach Resort • 👥 50 Guests</p>
+            <div class="vrb-tags">
+              <span>Decoration</span>
+              <span>Cake</span>
+              <span>DJ</span>
+              <span>Photography</span>
+            </div>
+            <div class="vrb-bottom">
+              <div class="vrb-price">₹15,000 <span>/event</span></div>
+              <button class="vrb-btn-primary">Book Event</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="vrb-card">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400" alt="Wedding">
+            <div class="vrb-badge">₹75,000</div>
+          </div>
+          <div class="vrb-body">
+            <h3>Wedding Ceremony</h3>
+            <p class="vrb-meta">📍 Premium Resort • 👥 200 Guests</p>
+            <div class="vrb-tags">
+              <span>Full Decoration</span>
+              <span>Catering</span>
+              <span>Photography</span>
+              <span>Music</span>
+            </div>
+            <div class="vrb-bottom">
+              <div class="vrb-price">₹75,000 <span>/event</span></div>
+              <button class="vrb-btn-primary">Book Event</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="vrb-card">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400" alt="Corporate Event">
+            <div class="vrb-badge">₹25,000</div>
+          </div>
+          <div class="vrb-body">
+            <h3>Corporate Event</h3>
+            <p class="vrb-meta">📍 Conference Hall • 👥 100 Guests</p>
+            <div class="vrb-tags">
+              <span>AV Setup</span>
+              <span>Catering</span>
+              <span>Stage</span>
+              <span>Networking</span>
+            </div>
+            <div class="vrb-bottom">
+              <div class="vrb-price">₹25,000 <span>/event</span></div>
+              <button class="vrb-btn-primary">Book Event</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="vrb-card">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400" alt="Engagement">
+            <div class="vrb-badge">₹20,000</div>
+          </div>
+          <div class="vrb-body">
+            <h3>Engagement Party</h3>
+            <p class="vrb-meta">📍 Garden Resort • 👥 75 Guests</p>
+            <div class="vrb-tags">
+              <span>Decoration</span>
+              <span>Photography</span>
+              <span>Catering</span>
+              <span>Music</span>
+            </div>
+            <div class="vrb-bottom">
+              <div class="vrb-price">₹20,000 <span>/event</span></div>
+              <button class="vrb-btn-primary">Book Event</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="vrb-card">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400" alt="Pool Party">
+            <div class="vrb-badge">₹12,000</div>
+          </div>
+          <div class="vrb-body">
+            <h3>Pool Party</h3>
+            <p class="vrb-meta">📍 Pool Resort • 👥 40 Guests</p>
+            <div class="vrb-tags">
+              <span>Pool Access</span>
+              <span>DJ</span>
+              <span>Snacks</span>
+              <span>Drinks</span>
+            </div>
+            <div class="vrb-bottom">
+              <div class="vrb-price">₹12,000 <span>/event</span></div>
+              <button class="vrb-btn-primary">Book Event</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="vrb-card">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400" alt="Anniversary">
+            <div class="vrb-badge">₹18,000</div>
+          </div>
+          <div class="vrb-body">
+            <h3>Anniversary Celebration</h3>
+            <p class="vrb-meta">📍 Romantic Resort • 👥 60 Guests</p>
+            <div class="vrb-tags">
+              <span>Romantic Setup</span>
+              <span>Dinner</span>
+              <span>Photography</span>
+              <span>Music</span>
+            </div>
+            <div class="vrb-bottom">
+              <div class="vrb-price">₹18,000 <span>/event</span></div>
+              <button class="vrb-btn-primary">Book Event</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ✅ FOOTER -->
+  <footer id="contact" class="vrb-footer">
+    <div class="vrb-container vrb-footer-grid vrb-anim">
+
+      <div>
+        <h3>Vizag Starts Here & Go</h3>
+        <p>
+          Resorts + Events booking in Vizag.<br>
+          Premium verified listings with best deals.
+        </p>
+
+        <div class="vrb-footer-badges">
+          <span>✅ Verified</span>
+          <span>⚡ Instant Booking</span>
+          <span>💰 Best Price</span>
+        </div>
+      </div>
+
+      <div>
+        <h4>Quick Links</h4>
+        <a href="index.html">Home</a>
+        <a href="index.html#resorts">Resorts</a>
+        <a href="events.html">Events</a>
+      </div>
+
+      <div>
+        <h4>Support</h4>
+        <a href="tel:+918341674465">📞 +91 8341674465</a>
+        <a href="mailto:vizagresortbooking@gmail.com">✉️ vizagresortbooking@gmail.com</a>
+        <a href="https://wa.me/918341674465" target="_blank">💬 WhatsApp Support</a>
+      </div>
+
+    </div>
+
+    <div class="vrb-footer-bottom">
+      © 2026 Vizag Starts Here & Go • Built with ❤️ in Vizag
+    </div>
+  </footer>
+
+  <a class="vrb-policy-btn" href="Cancellation & terms and conditions (1).pdf" target="_blank">
+    📄 Policy
+  </a>
+
+  <!-- ✅ SCRIPTS -->
+  <script>
+    function vrbToggleMenu() {
+      document.getElementById("vrbNavLinks").classList.toggle("open");
+    }
+
+    // Enhanced Animation System
+    document.addEventListener('DOMContentLoaded', function() {
+      // Scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate');
+          }
+        });
+      }, observerOptions);
+
+      // Observe all animation elements
+      document.querySelectorAll('.vrb-anim').forEach(el => {
+        observer.observe(el);
+      });
+
+      // Button click animations
+      document.querySelectorAll('button, .vrb-btn, .vrb-btn-primary').forEach(btn => {
+        btn.addEventListener('click', function() {
+          this.classList.add('bounce-on-click');
+          setTimeout(() => {
+            this.classList.remove('bounce-on-click');
+          }, 600);
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
