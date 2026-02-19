@@ -38,6 +38,10 @@ app.get('/', (req, res) => {
 
 // Use centralized database API
 const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
+const BOOKING_API_URL = process.env.BOOKING_API_URL || 'http://booking-service:3002';
+const MAIN_API_URL = process.env.MAIN_API_URL || 'http://main-service:3000';
+const BOOKING_API_URL = process.env.BOOKING_API_URL || 'http://booking-service:3002';
+const MAIN_API_URL = process.env.MAIN_API_URL || 'http://main-service:3000';
 
 app.get('/api/resorts', async (req, res) => {
     try {
@@ -154,7 +158,7 @@ app.delete('/api/resorts/:id', async (req, res) => {
 
 app.post('/api/resorts/reorder', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/resorts/reorder', {
+        const response = await fetch(`${BOOKING_API_URL}/api/resorts/reorder`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -273,7 +277,7 @@ app.post('/api/events/reorder', async (req, res) => {
 // Food item management endpoints
 app.get('/api/food-items', async (req, res) => {
     try {
-        const response = await fetch('http://main-service:3000/api/food-items');
+        const response = await fetch(`${MAIN_API_URL}/api/food-items`);
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -283,7 +287,7 @@ app.get('/api/food-items', async (req, res) => {
 
 app.post('/api/food-items', async (req, res) => {
     try {
-        const response = await fetch('http://main-service:3000/api/food-items', {
+        const response = await fetch(`${MAIN_API_URL}/api/food-items`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -297,7 +301,7 @@ app.post('/api/food-items', async (req, res) => {
 
 app.put('/api/food-items/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://main-service:3000/api/food-items/${req.params.id}`, {
+        const response = await fetch(`${MAIN_API_URL}/api/food-items/${req.params.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -311,7 +315,7 @@ app.put('/api/food-items/:id', async (req, res) => {
 
 app.delete('/api/food-items/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://main-service:3000/api/food-items/${req.params.id}`, {
+        const response = await fetch(`${MAIN_API_URL}/api/food-items/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -324,7 +328,7 @@ app.delete('/api/food-items/:id', async (req, res) => {
 // Travel packages management endpoints
 app.get('/api/travel-packages', async (req, res) => {
     try {
-        const response = await fetch('http://main-service:3000/api/travel-packages');
+        const response = await fetch(`${MAIN_API_URL}/api/travel-packages`);
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -334,7 +338,7 @@ app.get('/api/travel-packages', async (req, res) => {
 
 app.post('/api/travel-packages', async (req, res) => {
     try {
-        const response = await fetch('http://main-service:3000/api/travel-packages', {
+        const response = await fetch(`${MAIN_API_URL}/api/travel-packages`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -348,7 +352,7 @@ app.post('/api/travel-packages', async (req, res) => {
 
 app.put('/api/travel-packages/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://main-service:3000/api/travel-packages/${req.params.id}`, {
+        const response = await fetch(`${MAIN_API_URL}/api/travel-packages/${req.params.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -362,7 +366,7 @@ app.put('/api/travel-packages/:id', async (req, res) => {
 
 app.delete('/api/travel-packages/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://main-service:3000/api/travel-packages/${req.params.id}`, {
+        const response = await fetch(`${MAIN_API_URL}/api/travel-packages/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -385,7 +389,7 @@ app.get('/api/bookings', async (req, res) => {
 
 app.post('/api/bookings/:id/cancel', async (req, res) => {
     try {
-        const response = await fetch(`http://booking-service:3002/api/bookings/${req.params.id}/cancel`, {
+        const response = await fetch(`${BOOKING_API_URL}/api/bookings/${req.params.id}/cancel`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -399,7 +403,7 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
 
 app.put('/api/bookings/:id/payment', async (req, res) => {
     try {
-        const response = await fetch(`http://booking-service:3002/api/bookings/${req.params.id}/payment`, {
+        const response = await fetch(`${BOOKING_API_URL}/api/bookings/${req.params.id}/payment`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -413,7 +417,7 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
 
 app.post('/api/bookings/:id/send-email', async (req, res) => {
     try {
-        const response = await fetch(`http://booking-service:3002/api/bookings/${req.params.id}/send-email`, {
+        const response = await fetch(`${BOOKING_API_URL}/api/bookings/${req.params.id}/send-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -451,7 +455,7 @@ app.post('/api/coupons', async (req, res) => {
 
 app.delete('/api/coupons/:code', async (req, res) => {
     try {
-        const response = await fetch(`http://booking-service:3002/api/coupons/${req.params.code}`, {
+        const response = await fetch(`${BOOKING_API_URL}/api/coupons/${req.params.code}`, {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -464,7 +468,7 @@ app.delete('/api/coupons/:code', async (req, res) => {
 // Owner management endpoints
 app.get('/api/owners', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/owners');
+        const response = await fetch(`${BOOKING_API_URL}/api/owners`);
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -474,7 +478,7 @@ app.get('/api/owners', async (req, res) => {
 
 app.delete('/api/owners/:id', async (req, res) => {
     try {
-        const response = await fetch(`http://booking-service:3002/api/owners/${req.params.id}`, {
+        const response = await fetch(`${BOOKING_API_URL}/api/owners/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
