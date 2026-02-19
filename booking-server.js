@@ -23,8 +23,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.static('bookings-public'));
-
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', port: PORT, timestamp: new Date().toISOString() });
@@ -32,7 +30,7 @@ app.get('/health', (req, res) => {
 
 // Root endpoint
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/bookings-public/index.html');
+    res.json({ message: 'Booking Management API', status: 'running', port: PORT });
 });
 
 // Real-time Redis pub/sub listener endpoint
