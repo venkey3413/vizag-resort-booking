@@ -258,7 +258,7 @@ app.delete('/api/events/:id', async (req, res) => {
 
 app.post('/api/events/reorder', async (req, res) => {
     try {
-        const response = await fetch('http://booking-service:3002/api/events/reorder', {
+        const response = await fetch(`${DB_API_URL}/api/events/reorder`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)

@@ -180,12 +180,266 @@
     }
 
     function bookEvent(eventId) {
-      // For now, redirect to WhatsApp with event details
       const event = events.find(e => e.id === eventId);
       if (event) {
-        const message = `Hi! I want to book ${event.name} at ${event.location} for ₹${event.price.toLocaleString()}. Please provide more details.`;
+        openEventBookingModal(eventId, event.name);
+      }
+    }
+
+    function openEventBookingModal(eventId, eventName) {
+      const event = events.find(e => e.id === eventId);
+      if (!event) return;
+      
+      // Create booking modal if it doesn't exist
+      let modal = document.getElementById('eventBookingModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'eventBookingModal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `
+          <div style="background:white;padding:2rem;border-radius:10px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
+            <span onclick="closeEventModal()" style="position:absolute;top:10px;right:15px;font-size:28px;cursor:pointer;color:#999;">&times;</span>
+            <h2 id="modalEventName">Book Event</h2>
+            <form id="eventBookingForm">
+              <input type="hidden" id="eventId">
+              <input type="hidden" id="eventPrice">
+              
+              <div style="margin-bottom:1rem;">
+                <label>Full Name:</label>
+                <input type="text" id="eventGuestName" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:5px;" required>
+              </div>
+              
+              <div style="margin-bottom:1rem;">
+                <label>Email:</label>
+                <input type="email" id="eventEmail" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:5px;" required>
+              </div>
+              
+              <div style="margin-bottom:1rem;">
+                <label>WhatsApp Number:</label>
+                <input type="tel" id="eventPhone" value="+91" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:5px;" required>
+              </div>
+              
+              <div style="margin-bottom:1rem;">
+                <label>Event Date:</label>
+                <input type="date" id="eventDate" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:5px;" required>
+              </div>
+              
+              <div style="margin-bottom:1rem;">
+                <label>Number of Guests:</label>
+                <input type="number" id="eventGuests" min="1" value="50" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:5px;" required>
+              </div>
+              
+              <div style="background:#f8f9fa;padding:1rem;border-radius:5px;margin-bottom:1rem;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                  <span>Event Price:</span>
+                  <span id="eventBaseAmount">₹0</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-weight:bold;">
+                  <span>Total Amount:</span>
+                  <span id="eventTotalAmount">₹0</span>
+                </div>
+              </div>
+              
+              <button type="submit" style="width:100%;background:#007bff;color:white;border:none;padding:1rem;border-radius:5px;cursor:pointer;font-size:1rem;">Book Event</button>
+            </form>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Add event listeners
+        document.getElementById('eventBookingForm').addEventListener('submit', handleEventBooking);
+        document.getElementById('eventDate').addEventListener('change', calculateEventTotal);
+        document.getElementById('eventGuests').addEventListener('change', calculateEventTotal);
+      }
+      
+      // Populate modal with event data
+      document.getElementById('eventId').value = eventId;
+      document.getElementById('eventPrice').value = event.price;
+      document.getElementById('modalEventName').textContent = `Book ${eventName}`;
+      
+      // Set minimum date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('eventDate').min = today;
+      document.getElementById('eventDate').value = today;
+      
+      calculateEventTotal();
+      modal.style.display = 'flex';
+    }
+
+    function closeEventModal() {
+      const modal = document.getElementById('eventBookingModal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.getElementById('eventBookingForm').reset();
+      }
+    }
+
+    function calculateEventTotal() {
+      const eventPrice = parseInt(document.getElementById('eventPrice').value) || 0;
+      const baseAmount = eventPrice;
+      const totalAmount = baseAmount;
+      
+      document.getElementById('eventBaseAmount').textContent = `₹${baseAmount.toLocaleString()}`;
+      document.getElementById('eventTotalAmount').textContent = `₹${totalAmount.toLocaleString()}`;
+    }
+
+    async function handleEventBooking(e) {
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Processing...';
+      submitBtn.disabled = true;
+
+      const bookingData = {
+        eventId: document.getElementById('eventId').value,
+        guestName: document.getElementById('eventGuestName').value,
+        email: document.getElementById('eventEmail').value,
+        phone: document.getElementById('eventPhone').value,
+        eventDate: document.getElementById('eventDate').value,
+        guests: document.getElementById('eventGuests').value
+      };
+      
+      // Basic validation
+      if (!bookingData.eventId || !bookingData.guestName || !bookingData.email || !bookingData.phone || !bookingData.eventDate) {
+        alert('Please fill all required fields');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+      }
+      
+      // Phone validation
+      if (!bookingData.phone.match(/^\+91[0-9]{10}$/)) {
+        alert('Please enter a valid Indian WhatsApp number (+91 followed by 10 digits)');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+      }
+      
+      try {
+        const event = events.find(e => e.id == bookingData.eventId);
+        if (!event) {
+          alert('Event not found');
+          return;
+        }
+        
+        const totalPrice = event.price;
+        const bookingReference = `EV${String(Date.now()).slice(-6)}`;
+        
+        // Create booking data for payment
+        const eventBookingData = {
+          ...bookingData,
+          eventName: event.name,
+          totalPrice: totalPrice,
+          bookingReference: bookingReference
+        };
+        
+        showEventPaymentInterface(eventBookingData);
+        closeEventModal();
+      } catch (error) {
+        console.error('Event booking error:', error);
+        alert('Booking failed. Please try again.');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    function showEventPaymentInterface(booking) {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10001;display:flex;align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div style="background:white;padding:2rem;border-radius:10px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
+          <h2>💳 Complete Payment</h2>
+          <div style="background:#f8f9fa;padding:1rem;border-radius:5px;margin-bottom:1rem;">
+            <h3>${booking.eventName}</h3>
+            <p><strong>Booking ID:</strong> ${booking.bookingReference}</p>
+            <p><strong>Guest:</strong> ${booking.guestName}</p>
+            <p><strong>Event Date:</strong> ${new Date(booking.eventDate).toLocaleDateString()}</p>
+            <p><strong>Guests:</strong> ${booking.guests}</p>
+            <p><strong>Total Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
+          </div>
+          
+          <div style="margin-bottom:1rem;">
+            <h4>Pay via UPI</h4>
+            <div style="background:#e8f5e8;padding:1rem;border-radius:5px;margin-bottom:1rem;">
+              <p><strong>UPI ID:</strong> venkatesh3413@paytm</p>
+              <p><strong>Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
+              <p><strong>Note:</strong> ${booking.bookingReference} - ${booking.guestName}</p>
+            </div>
+            
+            <div style="text-align:center;margin-bottom:1rem;">
+              <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;border-radius:8px;">
+              <p>Scan QR code or use UPI ID above</p>
+            </div>
+            
+            <div>
+              <label>Enter Transaction ID (UTR):</label>
+              <input type="text" id="eventTransactionId" placeholder="Enter 12-digit UTR ID" maxlength="12" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:5px;margin-bottom:1rem;">
+              <button onclick="confirmEventPayment('${booking.bookingReference}', ${booking.totalPrice})" style="width:100%;background:#28a745;color:white;border:none;padding:1rem;border-radius:5px;cursor:pointer;font-size:1rem;">
+                ✅ Confirm Payment
+              </button>
+            </div>
+          </div>
+          
+          <button onclick="closeEventPaymentModal()" style="width:100%;background:#6c757d;color:white;border:none;padding:0.5rem;border-radius:5px;cursor:pointer;">Cancel</button>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Store booking data globally
+      window.currentEventBooking = booking;
+    }
+
+    function closeEventPaymentModal() {
+      const modal = document.querySelector('div[style*="z-index:10001"]');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    async function confirmEventPayment(bookingReference, amount) {
+      const transactionId = document.getElementById('eventTransactionId').value.trim();
+      
+      if (!transactionId) {
+        alert('Please enter the transaction ID (UTR)');
+        return;
+      }
+      
+      if (transactionId.length < 8) {
+        alert('Please enter a valid transaction ID (minimum 8 characters)');
+        return;
+      }
+      
+      try {
+        // Send event booking to server for Telegram notification
+        const booking = window.currentEventBooking;
+        await fetch('/api/event-bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingReference: bookingReference,
+            eventName: booking.eventName,
+            guestName: booking.guestName,
+            email: booking.email,
+            phone: booking.phone,
+            eventDate: booking.eventDate,
+            guests: booking.guests,
+            totalPrice: amount,
+            transactionId: transactionId
+          })
+        });
+        
+        alert(`Event booking confirmed! Booking ID: ${bookingReference}. You will receive confirmation via email and WhatsApp.`);
+        closeEventPaymentModal();
+        
+        // Send WhatsApp message
+        const message = `Event Booking Confirmed!\n\nBooking ID: ${bookingReference}\nEvent: ${booking.eventName}\nDate: ${new Date(booking.eventDate).toLocaleDateString()}\nGuests: ${booking.guests}\nAmount: ₹${amount.toLocaleString()}\nTransaction ID: ${transactionId}`;
         const whatsappUrl = `https://wa.me/918341674465?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
+      } catch (error) {
+        alert('Payment confirmation failed. Please contact support.');
       }
     }
 

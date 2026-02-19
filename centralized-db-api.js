@@ -366,6 +366,21 @@ app.delete('/api/events/:id', async (req, res) => {
     }
 });
 
+app.post('/api/events/reorder', async (req, res) => {
+    try {
+        const { eventOrders } = req.body;
+        
+        for (const order of eventOrders) {
+            await db.run('UPDATE events SET sort_order = ? WHERE id = ?', [order.sort_order, order.id]);
+        }
+        
+        publishEvent('event.reordered', { eventOrders });
+        res.json({ message: 'Events reordered successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to reorder events' });
+    }
+});
+
 // BOOKINGS API
 app.get('/api/bookings', async (req, res) => {
     try {

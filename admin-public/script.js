@@ -1156,17 +1156,6 @@ async function handleEventSubmit(e) {
     submitBtn.textContent = 'Processing...';
     submitBtn.disabled = true;
 
-    const dynamicPricing = [];
-    const weekdayPrice = document.getElementById('eventWeekdayPrice').value;
-    const fridayPrice = document.getElementById('eventFridayPrice').value;
-    const weekendPrice = document.getElementById('eventWeekendPrice').value;
-    const holidayPrice = document.getElementById('eventHolidayPrice').value;
-    
-    if (weekdayPrice) dynamicPricing.push({ day_type: 'weekday', price: parseInt(weekdayPrice) });
-    if (fridayPrice) dynamicPricing.push({ day_type: 'friday', price: parseInt(fridayPrice) });
-    if (weekendPrice) dynamicPricing.push({ day_type: 'weekend', price: parseInt(weekendPrice) });
-    if (holidayPrice) dynamicPricing.push({ day_type: 'holiday', price: parseInt(holidayPrice) });
-
     const eventData = {
         name: document.getElementById('eventName').value,
         location: document.getElementById('eventLocation').value,
@@ -1179,9 +1168,10 @@ async function handleEventSubmit(e) {
         image: document.getElementById('eventImage').value,
         gallery: document.getElementById('eventGallery').value,
         videos: document.getElementById('eventVideos').value,
-        map_link: document.getElementById('eventMapLink').value,
-        dynamic_pricing: dynamicPricing
+        map_link: document.getElementById('eventMapLink').value
     };
+
+    console.log('Event data being sent:', eventData);
 
     try {
         let response;
@@ -1199,13 +1189,19 @@ async function handleEventSubmit(e) {
             });
         }
 
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
+            const result = await response.json();
+            console.log('Event creation result:', result);
             alert(editingEventId ? 'Event updated successfully' : 'Event added successfully');
             document.getElementById('eventForm').reset();
             cancelEventEdit();
             loadEvents();
         } else {
-            alert('Operation failed');
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('Event operation failed:', errorData);
+            alert(`Operation failed: ${errorData.error || 'Unknown error'}`);
         }
     } catch (error) {
         console.error('Error:', error);

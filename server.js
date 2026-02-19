@@ -348,6 +348,27 @@ app.get('/api/bookings', async (req, res) => {
     }
 });
 
+// Event bookings endpoint for Telegram notifications
+app.post('/api/event-bookings', async (req, res) => {
+    try {
+        const { bookingReference, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId } = req.body;
+        
+        // Send Telegram notification
+        try {
+            const message = `🎉 EVENT BOOKING SUBMITTED!\n\n📋 Booking ID: ${bookingReference}\n👤 Guest: ${guestName}\n🎊 Event: ${eventName}\n📅 Date: ${new Date(eventDate).toLocaleDateString()}\n👥 Guests: ${guests}\n💰 Amount: ₹${totalPrice.toLocaleString()}\n🔢 UTR ID: ${transactionId}\n⚠️ Status: Pending Verification\n\n⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            
+            await sendTelegramNotification(message);
+        } catch (telegramError) {
+            console.error('Telegram notification failed:', telegramError);
+        }
+        
+        res.json({ success: true, message: 'Event booking submitted successfully' });
+    } catch (error) {
+        console.error('Event booking error:', error);
+        res.status(500).json({ error: 'Failed to process event booking' });
+    }
+});
+
 // Real-time Redis pub/sub listener endpoint
 app.get('/api/events-stream', (req, res) => {
     const clientId = `main-${Date.now()}-${Math.random()}`;
