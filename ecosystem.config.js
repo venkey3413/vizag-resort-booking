@@ -38,7 +38,7 @@ module.exports = {
     },
     {
       name: 'database-api',
-      script: 'database-api.js',
+      script: 'centralized-db-api.js',
       instances: 1,
       autorestart: true,
       watch: false,

@@ -571,24 +571,6 @@ app.post('/api/send-email-otp', async (req, res) => {
     }
 });
 
-// Food service routes
-app.use('/food', express.static('food-public'));
-app.get('/food', (req, res) => {
-    res.sendFile(__dirname + '/food-public/index.html');
-});
-
-// Travel service routes
-app.use('/travel', express.static('travel-public'));
-app.get('/travel', (req, res) => {
-    res.sendFile(__dirname + '/travel-public/index.html');
-});
-
-// Owner dashboard routes
-app.use('/owner-dashboard', express.static('owner-public'));
-app.get('/owner-dashboard', (req, res) => {
-    res.sendFile(__dirname + '/owner-public/login.html');
-});
-
 // Chat proxy endpoint
 app.post('/api/chat', async (req, res) => {
     try {
@@ -623,8 +605,6 @@ initServices().then(async () => {
     
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Resort Booking Server running on http://0.0.0.0:${PORT}`);
-        console.log(`🍽️ Food Service available at http://0.0.0.0:${PORT}/food`);
-        console.log(`👤 Owner Dashboard available at http://0.0.0.0:${PORT}/owner-dashboard`);
     });
 }).catch(error => {
     console.error('❌ Failed to start server:', error);
