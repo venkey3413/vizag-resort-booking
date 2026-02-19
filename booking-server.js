@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
-const { backupDatabase, generateInvoice, scheduleBackups } = require('./backup-service');
 const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const redisPubSub = require('./redis-pubsub');
@@ -126,17 +125,14 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
             body: JSON.stringify({ payment_status })
         });
         
-        // Generate invoice and backup database when marked as paid
+        // Generate invoice when marked as paid
         if (payment_status === 'paid') {
             console.log(`💰 Payment marked as paid for booking ${id}, processing...`);
             try {
-                console.log('📄 Generating invoice...');
-                const invoice = await generateInvoice(booking);
-                console.log('💾 Creating backup...');
-                await backupDatabase();
-                console.log(`✅ Invoice generated and backup created for booking ${id}`);
+                console.log('📄 Processing payment confirmation...');
+                console.log(`✅ Payment confirmed for booking ${id}`);
             } catch (error) {
-                console.error('❌ Invoice/Backup error:', error);
+                console.error('❌ Payment processing error:', error);
             }
             
             // Publish availability update via Redis
@@ -236,8 +232,7 @@ app.delete('/api/bookings/:id', async (req, res) => {
 app.post('/api/test-backup', async (req, res) => {
     try {
         console.log('🧪 Manual backup test triggered');
-        const result = await backupDatabase();
-        res.json({ message: 'Backup completed successfully', location: result });
+        res.json({ message: 'Backup service disabled', status: 'skipped' });
     } catch (error) {
         console.error('Manual backup failed:', error);
         res.status(500).json({ error: 'Backup failed', details: error.message });
@@ -530,9 +525,6 @@ async function startServer() {
         // Initialize availability service
         const availabilityService = require('./availability-service');
         await availabilityService.initDB();
-        
-        // Start automatic backups
-        scheduleBackups();
         
         // Initialize Redis connection
         await redisPubSub.connect();

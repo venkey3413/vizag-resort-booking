@@ -30,6 +30,15 @@ class RedisPubSub {
             this.publisher = redis.createClient(clientConfig);
             this.subscriber = redis.createClient(clientConfig);
 
+            // Add error handlers to prevent crashes
+            this.publisher.on('error', (err) => {
+                console.error('Redis Publisher Error:', err.message);
+            });
+
+            this.subscriber.on('error', (err) => {
+                console.error('Redis Subscriber Error:', err.message);
+            });
+
             await this.publisher.connect();
             await this.subscriber.connect();
 

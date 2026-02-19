@@ -40,8 +40,6 @@ app.get('/', (req, res) => {
 const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
 const BOOKING_API_URL = process.env.BOOKING_API_URL || 'http://booking-service:3002';
 const MAIN_API_URL = process.env.MAIN_API_URL || 'http://main-service:3000';
-const BOOKING_API_URL = process.env.BOOKING_API_URL || 'http://booking-service:3002';
-const MAIN_API_URL = process.env.MAIN_API_URL || 'http://main-service:3000';
 
 app.get('/api/resorts', async (req, res) => {
     try {
