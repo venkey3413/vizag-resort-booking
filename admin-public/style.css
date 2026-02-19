@@ -152,51 +152,53 @@ button[type="submit"]:hover {
 
 .resorts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
 }
 
 .resort-item {
     border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 1rem;
+    border-radius: 8px;
+    padding: 0.75rem;
     background: white;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .resort-image {
     width: 100%;
-    height: 200px;
+    height: 120px;
     object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
 }
 
 .resort-info h3 {
     margin-bottom: 0.5rem;
     color: #333;
+    font-size: 1rem;
 }
 
 .resort-info p {
     color: #666;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    line-height: 1.3;
 }
 
 .resort-actions {
     display: flex;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
 }
 
 .resort-actions .edit {
     background: #ffc107;
     color: #212529;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .resort-actions .edit:hover {
@@ -207,14 +209,28 @@ button[type="submit"]:hover {
     background: #dc3545;
     color: white;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .resort-actions .delete:hover {
     background: #c82333;
+}
+
+.resort-actions .view-desc {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.resort-actions .view-desc:hover {
+    background: #138496;
 }
 
 .food-management, .travel-management {
@@ -619,4 +635,87 @@ button[type="submit"]:hover {
     .sort-order {
         margin: 0.5rem 0 0 0;
     }
+}
+/* Event Management Styles */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.event-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.event-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+
+.event-info h3 {
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-size: 1rem;
+}
+
+.event-info p {
+    color: #666;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+
+.event-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.event-actions .edit {
+    background: #ffc107;
+    color: #212529;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.event-actions .edit:hover {
+    background: #e0a800;
+}
+
+.event-actions .delete {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.event-actions .delete:hover {
+    background: #c82333;
+}
+
+.event-actions .view-desc {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.event-actions .view-desc:hover {
+    background: #138496;
 }

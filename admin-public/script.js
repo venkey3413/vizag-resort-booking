@@ -196,7 +196,7 @@ function displayResorts() {
             pricingInfo += '<p><strong>Dynamic Pricing:</strong></p>';
             resort.dynamic_pricing.forEach(pricing => {
                 const dayType = pricing.day_type.charAt(0).toUpperCase() + pricing.day_type.slice(1);
-                pricingInfo += `<p style="margin-left: 15px; font-size: 0.9em;">• ${dayType}: ₹${pricing.price.toLocaleString()}/night</p>`;
+                pricingInfo += `<p style="margin-left: 15px; font-size: 0.8em;">• ${dayType}: ₹${pricing.price.toLocaleString()}/night</p>`;
             });
         }
         
@@ -207,12 +207,12 @@ function displayResorts() {
                     <h3>${resort.name}</h3>
                     <p><strong>Location:</strong> ${resort.location}</p>
                     ${pricingInfo}
-                    <p><strong>Description:</strong> ${resort.description}</p>
-                    ${resort.amenities ? `<p><strong>Amenities:</strong> ${resort.amenities.replace(/\n/g, ', ')}</p>` : ''}
-                    ${resort.note ? `<p><strong>Payment Note:</strong> ${resort.note}</p>` : ''}
+                    ${resort.amenities ? `<p><strong>Amenities:</strong> ${resort.amenities.split('\n').slice(0,2).join(', ')}${resort.amenities.split('\n').length > 2 ? '...' : ''}</p>` : ''}
+                    ${resort.note ? `<p><strong>Payment Note:</strong> ${resort.note.substring(0,50)}${resort.note.length > 50 ? '...' : ''}</p>` : ''}
                 </div>
                 <div class="resort-actions">
                     <button class="edit" onclick="editResort(${resort.id})">Edit</button>
+                    <button class="view-desc" onclick="viewResortDescription(${resort.id})">View</button>
                     <button class="delete" onclick="deleteResort(${resort.id})">Delete</button>
                 </div>
             </div>
@@ -465,6 +465,46 @@ async function deleteResort(id) {
         console.error('Error:', error);
         alert('Network error. Please try again.');
     }
+}
+
+function viewResortDescription(id) {
+    const resort = resorts.find(r => r.id === id);
+    if (!resort) return;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = `
+        <div style="background:white;padding:2rem;border-radius:10px;max-width:600px;max-height:80vh;overflow-y:auto;">
+            <h3 style="margin-bottom:1rem;color:#333;">${resort.name}</h3>
+            <div style="margin-bottom:1rem;">
+                <p><strong>Location:</strong> ${resort.location}</p>
+                <p><strong>Price:</strong> ₹${resort.price.toLocaleString()}/night</p>
+            </div>
+            <div style="margin-bottom:1rem;">
+                <h4>Description:</h4>
+                <p style="line-height:1.5;color:#666;">${resort.description}</p>
+            </div>
+            ${resort.amenities ? `
+                <div style="margin-bottom:1rem;">
+                    <h4>Amenities:</h4>
+                    <p style="line-height:1.5;color:#666;">${resort.amenities.replace(/\n/g, '<br>')}</p>
+                </div>
+            ` : ''}
+            ${resort.note ? `
+                <div style="margin-bottom:1rem;">
+                    <h4>Payment Note:</h4>
+                    <p style="line-height:1.5;color:#666;">${resort.note}</p>
+                </div>
+            ` : ''}
+            <button onclick="this.parentElement.parentElement.remove()" style="background:#007bff;color:white;border:none;padding:0.5rem 1rem;border-radius:5px;cursor:pointer;">Close</button>
+        </div>
+    `;
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.remove();
+    });
+    
+    document.body.appendChild(modal);
 }
 
 let coupons = [];
@@ -1083,7 +1123,7 @@ function displayEvents() {
             pricingInfo += '<p><strong>Dynamic Pricing:</strong></p>';
             event.dynamic_pricing.forEach(pricing => {
                 const dayType = pricing.day_type.charAt(0).toUpperCase() + pricing.day_type.slice(1);
-                pricingInfo += `<p style="margin-left: 15px; font-size: 0.9em;">• ${dayType}: ₹${pricing.price.toLocaleString()}/event</p>`;
+                pricingInfo += `<p style="margin-left: 15px; font-size: 0.8em;">• ${dayType}: ₹${pricing.price.toLocaleString()}/event</p>`;
             });
         }
         
@@ -1095,12 +1135,12 @@ function displayEvents() {
                     <p><strong>Location:</strong> ${event.location}</p>
                     <p><strong>Event Type:</strong> ${event.event_type || 'Not specified'}</p>
                     ${pricingInfo}
-                    <p><strong>Description:</strong> ${event.description}</p>
-                    ${event.amenities ? `<p><strong>Amenities:</strong> ${event.amenities.replace(/\n/g, ', ')}</p>` : ''}
-                    ${event.note ? `<p><strong>Payment Note:</strong> ${event.note}</p>` : ''}
+                    ${event.amenities ? `<p><strong>Amenities:</strong> ${event.amenities.split('\n').slice(0,2).join(', ')}${event.amenities.split('\n').length > 2 ? '...' : ''}</p>` : ''}
+                    ${event.note ? `<p><strong>Payment Note:</strong> ${event.note.substring(0,50)}${event.note.length > 50 ? '...' : ''}</p>` : ''}
                 </div>
                 <div class="event-actions">
                     <button class="edit" onclick="editEvent(${event.id})">Edit</button>
+                    <button class="view-desc" onclick="viewEventDescription(${event.id})">View</button>
                     <button class="delete" onclick="deleteEvent(${event.id})">Delete</button>
                 </div>
             </div>
@@ -1273,4 +1313,45 @@ async function saveEventOrder() {
     } catch (error) {
         alert('Error saving event order');
     }
+}
+
+function viewEventDescription(id) {
+    const event = events.find(e => e.id === id);
+    if (!event) return;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = `
+        <div style="background:white;padding:2rem;border-radius:10px;max-width:600px;max-height:80vh;overflow-y:auto;">
+            <h3 style="margin-bottom:1rem;color:#333;">${event.name}</h3>
+            <div style="margin-bottom:1rem;">
+                <p><strong>Location:</strong> ${event.location}</p>
+                <p><strong>Event Type:</strong> ${event.event_type || 'Not specified'}</p>
+                <p><strong>Price:</strong> ₹${event.price.toLocaleString()}/event</p>
+            </div>
+            <div style="margin-bottom:1rem;">
+                <h4>Description:</h4>
+                <p style="line-height:1.5;color:#666;">${event.description}</p>
+            </div>
+            ${event.amenities ? `
+                <div style="margin-bottom:1rem;">
+                    <h4>Amenities:</h4>
+                    <p style="line-height:1.5;color:#666;">${event.amenities.replace(/\n/g, '<br>')}</p>
+                </div>
+            ` : ''}
+            ${event.note ? `
+                <div style="margin-bottom:1rem;">
+                    <h4>Payment Note:</h4>
+                    <p style="line-height:1.5;color:#666;">${event.note}</p>
+                </div>
+            ` : ''}
+            <button onclick="this.parentElement.parentElement.remove()" style="background:#007bff;color:white;border:none;padding:0.5rem 1rem;border-radius:5px;cursor:pointer;">Close</button>
+        </div>
+    `;
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.remove();
+    });
+    
+    document.body.appendChild(modal);
 }

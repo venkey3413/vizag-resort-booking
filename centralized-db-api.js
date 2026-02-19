@@ -39,6 +39,26 @@ async function initDB() {
         )
     `);
     
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            location TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            event_type TEXT,
+            description TEXT,
+            image TEXT,
+            gallery TEXT,
+            videos TEXT,
+            map_link TEXT,
+            amenities TEXT,
+            note TEXT,
+            max_guests INTEGER,
+            sort_order INTEGER DEFAULT 0,
+            available INTEGER DEFAULT 1
+        )
+    `);
+    
     // Drop and recreate bookings table with correct schema
     await db.exec('DROP TABLE IF EXISTS bookings');
     await db.exec(`
@@ -185,6 +205,8 @@ function publishEvent(type, data) {
     
     if (type.startsWith('resort.')) {
         channel = 'resort-events';
+    } else if (type.startsWith('event.')) {
+        channel = 'event-events';
     } else if (type.startsWith('booking.')) {
         channel = 'booking-events';
     } else if (type.startsWith('food.')) {
@@ -291,6 +313,56 @@ app.delete('/api/resorts/:id', async (req, res) => {
         res.json({ message: 'Resort deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete resort' });
+    }
+});
+
+// EVENTS API
+app.get('/api/events', async (req, res) => {
+    try {
+        const events = await db.all('SELECT * FROM events ORDER BY sort_order ASC, id ASC');
+        res.json(events);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch events' });
+    }
+});
+
+app.post('/api/events', async (req, res) => {
+    try {
+        const result = await db.run(`
+            INSERT INTO events (name, location, price, event_type, description, image, gallery, videos, map_link, amenities, note, max_guests)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [req.body.name, req.body.location, req.body.price, req.body.event_type, req.body.description, 
+            req.body.image, req.body.gallery, req.body.videos, req.body.map_link, req.body.amenities, req.body.note, req.body.max_guests]);
+        
+        publishEvent('event.created', { eventId: result.lastID, ...req.body });
+        res.json({ id: result.lastID, message: 'Event created successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create event' });
+    }
+});
+
+app.put('/api/events/:id', async (req, res) => {
+    try {
+        await db.run(`
+            UPDATE events SET name=?, location=?, price=?, event_type=?, description=?, image=?, gallery=?, videos=?, map_link=?, amenities=?, note=?, max_guests=?
+            WHERE id=?
+        `, [req.body.name, req.body.location, req.body.price, req.body.event_type, req.body.description,
+            req.body.image, req.body.gallery, req.body.videos, req.body.map_link, req.body.amenities, req.body.note, req.body.max_guests, req.params.id]);
+        
+        publishEvent('event.updated', { eventId: req.params.id, ...req.body });
+        res.json({ message: 'Event updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update event' });
+    }
+});
+
+app.delete('/api/events/:id', async (req, res) => {
+    try {
+        await db.run('DELETE FROM events WHERE id = ?', [req.params.id]);
+        publishEvent('event.deleted', { eventId: req.params.id });
+        res.json({ message: 'Event deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete event' });
     }
 });
 
