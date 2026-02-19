@@ -57,6 +57,19 @@ app.get('/api/resorts', async (req, res) => {
     }
 });
 
+// Events endpoint
+app.get('/api/events', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/events`);
+        const events = await response.json();
+        console.log('🎉 Fetching events:', events.length, 'found');
+        res.json(events);
+    } catch (error) {
+        console.error('❌ Event fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch events' });
+    }
+});
+
 app.post('/api/check-availability', async (req, res) => {
     try {
         const { resortId, checkIn, checkOut, expectedPrice } = req.body;
@@ -336,7 +349,7 @@ app.get('/api/bookings', async (req, res) => {
 });
 
 // Real-time Redis pub/sub listener endpoint
-app.get('/api/events', (req, res) => {
+app.get('/api/events-stream', (req, res) => {
     const clientId = `main-${Date.now()}-${Math.random()}`;
     redisPubSub.subscribe(clientId, res);
     console.log('📡 Main website connected to Redis pub/sub');

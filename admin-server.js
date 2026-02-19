@@ -25,7 +25,7 @@ app.get('/health', (req, res) => {
 });
 
 // Real-time Redis pub/sub listener endpoint
-app.get('/api/events', (req, res) => {
+app.get('/api/events-stream', (req, res) => {
     const clientId = `admin-${Date.now()}-${Math.random()}`;
     redisPubSub.subscribe(clientId, res);
     console.log('📡 Admin panel connected to Redis pub/sub');
@@ -57,6 +57,19 @@ app.post('/api/resorts', async (req, res) => {
             body: JSON.stringify(req.body)
         });
         const data = await response.json();
+        
+        // Publish resort created event
+        if (response.ok) {
+            try {
+                await redisPubSub.publish('resort-events', {
+                    type: 'resort.created',
+                    resort: data
+                });
+            } catch (eventError) {
+                console.error('Redis publish failed:', eventError);
+            }
+        }
+        
         res.status(response.status).json(data);
     } catch (error) {
         res.status(500).json({ error: 'Failed to add resort' });
@@ -71,6 +84,19 @@ app.put('/api/resorts/:id', async (req, res) => {
             body: JSON.stringify(req.body)
         });
         const data = await response.json();
+        
+        // Publish resort updated event
+        if (response.ok) {
+            try {
+                await redisPubSub.publish('resort-events', {
+                    type: 'resort.updated',
+                    resort: data
+                });
+            } catch (eventError) {
+                console.error('Redis publish failed:', eventError);
+            }
+        }
+        
         res.status(response.status).json(data);
     } catch (error) {
         res.status(500).json({ error: 'Failed to update resort' });
@@ -107,6 +133,19 @@ app.delete('/api/resorts/:id', async (req, res) => {
             method: 'DELETE'
         });
         const data = await response.json();
+        
+        // Publish resort deleted event
+        if (response.ok) {
+            try {
+                await redisPubSub.publish('resort-events', {
+                    type: 'resort.deleted',
+                    resortId: req.params.id
+                });
+            } catch (eventError) {
+                console.error('Redis publish failed:', eventError);
+            }
+        }
+        
         res.status(response.status).json(data);
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete resort' });
@@ -124,6 +163,110 @@ app.post('/api/resorts/reorder', async (req, res) => {
         res.status(response.status).json(data);
     } catch (error) {
         res.status(500).json({ error: 'Failed to reorder resorts' });
+    }
+});
+
+// Event management endpoints
+app.get('/api/events', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/events`);
+        const events = await response.json();
+        res.json(events);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch events' });
+    }
+});
+
+app.post('/api/events', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/events`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        
+        // Publish event created event
+        if (response.ok) {
+            try {
+                await redisPubSub.publish('event-events', {
+                    type: 'event.created',
+                    event: data
+                });
+            } catch (eventError) {
+                console.error('Redis publish failed:', eventError);
+            }
+        }
+        
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add event' });
+    }
+});
+
+app.put('/api/events/:id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/events/${req.params.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        
+        // Publish event updated event
+        if (response.ok) {
+            try {
+                await redisPubSub.publish('event-events', {
+                    type: 'event.updated',
+                    event: data
+                });
+            } catch (eventError) {
+                console.error('Redis publish failed:', eventError);
+            }
+        }
+        
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update event' });
+    }
+});
+
+app.delete('/api/events/:id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/events/${req.params.id}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        
+        // Publish event deleted event
+        if (response.ok) {
+            try {
+                await redisPubSub.publish('event-events', {
+                    type: 'event.deleted',
+                    eventId: req.params.id
+                });
+            } catch (eventError) {
+                console.error('Redis publish failed:', eventError);
+            }
+        }
+        
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete event' });
+    }
+});
+
+app.post('/api/events/reorder', async (req, res) => {
+    try {
+        const response = await fetch('http://booking-service:3002/api/events/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to reorder events' });
     }
 });
 

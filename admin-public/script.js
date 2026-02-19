@@ -1,12 +1,15 @@
 let resorts = [];
+let events = [];
 let foodItems = [];
 let travelPackages = [];
 let editingId = null;
+let editingEventId = null;
 let editingFoodId = null;
 let editingTravelId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResorts();
+    loadEvents();
     loadFoodItems();
     loadTravelPackages();
     loadCoupons();
@@ -50,17 +53,22 @@ function setupRedisSync() {
     
     function connectEventSource() {
         try {
-            eventSource = new EventSource('/api/events');
+            eventSource = new EventSource('/api/events-stream');
             
             eventSource.onmessage = function(event) {
                 try {
                     const data = JSON.parse(event.data);
                     console.log('📡 Admin Redis event received:', data);
                     
-                    if (data.type === 'resort.updated' || data.type === 'resort.added' || data.type === 'resort.deleted') {
+                    if (data.type === 'resort.updated' || data.type === 'resort.created' || data.type === 'resort.deleted') {
                         console.log('🏨 Resort update received - refreshing resorts');
                         loadResorts();
                         loadOwners();
+                    }
+                    
+                    if (data.type === 'event.updated' || data.type === 'event.created' || data.type === 'event.deleted') {
+                        console.log('🎉 Event update received - refreshing events');
+                        loadEvents();
                     }
                     
                     if (data.type === 'food.item.created' || data.type === 'food.item.updated' || data.type === 'food.item.deleted') {
@@ -102,6 +110,7 @@ function setupRedisSync() {
     
     setInterval(() => {
         loadResorts();
+        loadEvents();
         loadFoodItems();
         loadTravelPackages();
         loadOwners();
@@ -112,6 +121,11 @@ function setupEventListeners() {
     const form = document.getElementById('resortForm');
     if (form) {
         form.addEventListener('submit', handleSubmit);
+    }
+    
+    const eventForm = document.getElementById('eventForm');
+    if (eventForm) {
+        eventForm.addEventListener('submit', handleEventSubmit);
     }
     
     const foodForm = document.getElementById('foodForm');
@@ -1034,5 +1048,229 @@ async function saveResortOrder() {
         }
     } catch (error) {
         alert('Error saving resort order');
+    }
+}
+
+// Event Management Functions
+async function loadEvents() {
+    try {
+        const response = await fetch('/api/events');
+        events = await response.json();
+        displayEvents();
+        console.log('Loaded events:', events.length);
+    } catch (error) {
+        console.error('Error loading events:', error);
+        const grid = document.getElementById('eventsGrid');
+        if (grid) {
+            grid.innerHTML = `<div style="color: red; padding: 20px; text-align: center;">Failed to load events: ${error.message}</div>`;
+        }
+    }
+}
+
+function displayEvents() {
+    const grid = document.getElementById('eventsGrid');
+    if (!grid) return;
+    
+    if (!events || events.length === 0) {
+        grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No events found. Add your first event using the form above.</div>';
+        return;
+    }
+    
+    grid.innerHTML = events.map(event => {
+        let pricingInfo = `<p><strong>Base Price:</strong> ₹${event.price.toLocaleString()}/event</p>`;
+        
+        if (event.dynamic_pricing && event.dynamic_pricing.length > 0) {
+            pricingInfo += '<p><strong>Dynamic Pricing:</strong></p>';
+            event.dynamic_pricing.forEach(pricing => {
+                const dayType = pricing.day_type.charAt(0).toUpperCase() + pricing.day_type.slice(1);
+                pricingInfo += `<p style="margin-left: 15px; font-size: 0.9em;">• ${dayType}: ₹${pricing.price.toLocaleString()}/event</p>`;
+            });
+        }
+        
+        return `
+            <div class="event-item">
+                <img src="${event.image}" alt="${event.name}" class="event-image">
+                <div class="event-info">
+                    <h3>${event.name}</h3>
+                    <p><strong>Location:</strong> ${event.location}</p>
+                    <p><strong>Event Type:</strong> ${event.event_type || 'Not specified'}</p>
+                    ${pricingInfo}
+                    <p><strong>Description:</strong> ${event.description}</p>
+                    ${event.amenities ? `<p><strong>Amenities:</strong> ${event.amenities.replace(/\n/g, ', ')}</p>` : ''}
+                    ${event.note ? `<p><strong>Payment Note:</strong> ${event.note}</p>` : ''}
+                </div>
+                <div class="event-actions">
+                    <button class="edit" onclick="editEvent(${event.id})">Edit</button>
+                    <button class="delete" onclick="deleteEvent(${event.id})">Delete</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function handleEventSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('eventSubmitBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Processing...';
+    submitBtn.disabled = true;
+
+    const dynamicPricing = [];
+    const weekdayPrice = document.getElementById('eventWeekdayPrice').value;
+    const fridayPrice = document.getElementById('eventFridayPrice').value;
+    const weekendPrice = document.getElementById('eventWeekendPrice').value;
+    const holidayPrice = document.getElementById('eventHolidayPrice').value;
+    
+    if (weekdayPrice) dynamicPricing.push({ day_type: 'weekday', price: parseInt(weekdayPrice) });
+    if (fridayPrice) dynamicPricing.push({ day_type: 'friday', price: parseInt(fridayPrice) });
+    if (weekendPrice) dynamicPricing.push({ day_type: 'weekend', price: parseInt(weekendPrice) });
+    if (holidayPrice) dynamicPricing.push({ day_type: 'holiday', price: parseInt(holidayPrice) });
+
+    const eventData = {
+        name: document.getElementById('eventName').value,
+        location: document.getElementById('eventLocation').value,
+        price: parseInt(document.getElementById('eventPrice').value),
+        event_type: document.getElementById('eventType').value,
+        description: document.getElementById('eventDescription').value,
+        amenities: document.getElementById('eventAmenities').value,
+        note: document.getElementById('eventNote').value,
+        max_guests: parseInt(document.getElementById('eventMaxGuests').value) || null,
+        image: document.getElementById('eventImage').value,
+        gallery: document.getElementById('eventGallery').value,
+        videos: document.getElementById('eventVideos').value,
+        map_link: document.getElementById('eventMapLink').value,
+        dynamic_pricing: dynamicPricing
+    };
+
+    try {
+        let response;
+        if (editingEventId) {
+            response = await fetch(`/api/events/${editingEventId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            });
+        } else {
+            response = await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            });
+        }
+
+        if (response.ok) {
+            alert(editingEventId ? 'Event updated successfully' : 'Event added successfully');
+            document.getElementById('eventForm').reset();
+            cancelEventEdit();
+            loadEvents();
+        } else {
+            alert('Operation failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+function editEvent(id) {
+    const event = events.find(e => e.id === id);
+    if (!event) return;
+
+    editingEventId = id;
+    document.getElementById('eventName').value = event.name;
+    document.getElementById('eventLocation').value = event.location;
+    document.getElementById('eventPrice').value = event.price;
+    document.getElementById('eventType').value = event.event_type || 'birthday';
+    document.getElementById('eventDescription').value = event.description;
+    document.getElementById('eventAmenities').value = event.amenities || '';
+    document.getElementById('eventNote').value = event.note || '';
+    document.getElementById('eventMaxGuests').value = event.max_guests || '';
+    document.getElementById('eventImage').value = event.image;
+    document.getElementById('eventGallery').value = event.gallery || '';
+    document.getElementById('eventVideos').value = event.videos || '';
+    document.getElementById('eventMapLink').value = event.map_link || '';
+    
+    document.getElementById('eventWeekdayPrice').value = '';
+    document.getElementById('eventFridayPrice').value = '';
+    document.getElementById('eventWeekendPrice').value = '';
+    document.getElementById('eventHolidayPrice').value = '';
+    
+    if (event.dynamic_pricing) {
+        event.dynamic_pricing.forEach(pricing => {
+            if (pricing.day_type === 'weekday') {
+                document.getElementById('eventWeekdayPrice').value = pricing.price;
+            } else if (pricing.day_type === 'friday') {
+                document.getElementById('eventFridayPrice').value = pricing.price;
+            } else if (pricing.day_type === 'weekend') {
+                document.getElementById('eventWeekendPrice').value = pricing.price;
+            } else if (pricing.day_type === 'holiday') {
+                document.getElementById('eventHolidayPrice').value = pricing.price;
+            }
+        });
+    }
+    
+    document.getElementById('eventSubmitBtn').textContent = 'Update Event';
+    const cancelBtn = document.getElementById('eventCancelBtn');
+    if (cancelBtn) cancelBtn.style.display = 'inline-block';
+}
+
+function cancelEventEdit() {
+    editingEventId = null;
+    document.getElementById('eventForm').reset();
+    document.getElementById('eventSubmitBtn').textContent = 'Add Event';
+    const cancelBtn = document.getElementById('eventCancelBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
+async function deleteEvent(id) {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+
+    try {
+        const response = await fetch(`/api/events/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Event deleted successfully');
+            loadEvents();
+        } else {
+            alert('Failed to delete event');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+async function saveEventOrder() {
+    const items = document.querySelectorAll('.sortable-event-item');
+    const eventOrders = Array.from(items).map((item, index) => ({
+        id: parseInt(item.dataset.id),
+        sort_order: index
+    }));
+    
+    try {
+        const response = await fetch('/api/events/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventOrders })
+        });
+        
+        if (response.ok) {
+            alert('Event order saved successfully!');
+            const saveOrderBtn = document.getElementById('saveEventOrderBtn');
+            if (saveOrderBtn) {
+                saveOrderBtn.style.display = 'none';
+            }
+            loadEvents();
+        } else {
+            alert('Failed to save event order');
+        }
+    } catch (error) {
+        alert('Error saving event order');
     }
 }

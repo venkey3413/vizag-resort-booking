@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setupEventListeners();
         setMinDate();
         setupLogoRotation();
-        // Redis sync handled by critical.js
+        setupRedisSync();
         preloadQRCode();
         
         // Set fallback gallery function if critical.js didn't load
@@ -1424,4 +1424,59 @@ function nextSlide() {
 // Start banner rotation every 8 seconds
 if (slides.length > 1) {
     setInterval(nextSlide, 8000);
+}
+
+// Redis real-time sync for main website
+function setupRedisSync() {
+    console.log('📡 Redis real-time sync enabled for main website');
+    
+    let eventSource;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    function connectEventSource() {
+        try {
+            eventSource = new EventSource('/api/events-stream');
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📡 Main website Redis event received:', data);
+                    
+                    if (data.type === 'resort.updated' || data.type === 'resort.created' || data.type === 'resort.deleted') {
+                        console.log('🏨 Resort update received - refreshing resorts');
+                        loadResorts();
+                    }
+                    
+                    if (data.type === 'event.updated' || data.type === 'event.created' || data.type === 'event.deleted') {
+                        console.log('🎉 Event update received - events page will auto-refresh');
+                        // Events page will handle its own updates
+                    }
+                } catch (error) {
+                    // Ignore ping messages
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.log('⚠️ Main website Redis connection error, attempting reconnect...');
+                eventSource.close();
+                
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                } else {
+                    console.log('❌ Max reconnection attempts reached');
+                }
+            };
+            
+            eventSource.onopen = function() {
+                console.log('✅ Redis connected to main website');
+                reconnectAttempts = 0;
+            };
+        } catch (error) {
+            console.error('Main website Redis setup failed:', error);
+        }
+    }
+    
+    connectEventSource();
 }

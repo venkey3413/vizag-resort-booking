@@ -67,131 +67,7 @@
       </div>
 
       <div class="vrb-grid" id="eventsGrid">
-        <div class="vrb-card">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400" alt="Birthday Party">
-            <div class="vrb-badge">₹15,000</div>
-          </div>
-          <div class="vrb-body">
-            <h3>Birthday Party</h3>
-            <p class="vrb-meta">📍 Beach Resort • 👥 50 Guests</p>
-            <div class="vrb-tags">
-              <span>Decoration</span>
-              <span>Cake</span>
-              <span>DJ</span>
-              <span>Photography</span>
-            </div>
-            <div class="vrb-bottom">
-              <div class="vrb-price">₹15,000 <span>/event</span></div>
-              <button class="vrb-btn-primary">Book Event</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="vrb-card">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400" alt="Wedding">
-            <div class="vrb-badge">₹75,000</div>
-          </div>
-          <div class="vrb-body">
-            <h3>Wedding Ceremony</h3>
-            <p class="vrb-meta">📍 Premium Resort • 👥 200 Guests</p>
-            <div class="vrb-tags">
-              <span>Full Decoration</span>
-              <span>Catering</span>
-              <span>Photography</span>
-              <span>Music</span>
-            </div>
-            <div class="vrb-bottom">
-              <div class="vrb-price">₹75,000 <span>/event</span></div>
-              <button class="vrb-btn-primary">Book Event</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="vrb-card">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400" alt="Corporate Event">
-            <div class="vrb-badge">₹25,000</div>
-          </div>
-          <div class="vrb-body">
-            <h3>Corporate Event</h3>
-            <p class="vrb-meta">📍 Conference Hall • 👥 100 Guests</p>
-            <div class="vrb-tags">
-              <span>AV Setup</span>
-              <span>Catering</span>
-              <span>Stage</span>
-              <span>Networking</span>
-            </div>
-            <div class="vrb-bottom">
-              <div class="vrb-price">₹25,000 <span>/event</span></div>
-              <button class="vrb-btn-primary">Book Event</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="vrb-card">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400" alt="Engagement">
-            <div class="vrb-badge">₹20,000</div>
-          </div>
-          <div class="vrb-body">
-            <h3>Engagement Party</h3>
-            <p class="vrb-meta">📍 Garden Resort • 👥 75 Guests</p>
-            <div class="vrb-tags">
-              <span>Decoration</span>
-              <span>Photography</span>
-              <span>Catering</span>
-              <span>Music</span>
-            </div>
-            <div class="vrb-bottom">
-              <div class="vrb-price">₹20,000 <span>/event</span></div>
-              <button class="vrb-btn-primary">Book Event</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="vrb-card">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400" alt="Pool Party">
-            <div class="vrb-badge">₹12,000</div>
-          </div>
-          <div class="vrb-body">
-            <h3>Pool Party</h3>
-            <p class="vrb-meta">📍 Pool Resort • 👥 40 Guests</p>
-            <div class="vrb-tags">
-              <span>Pool Access</span>
-              <span>DJ</span>
-              <span>Snacks</span>
-              <span>Drinks</span>
-            </div>
-            <div class="vrb-bottom">
-              <div class="vrb-price">₹12,000 <span>/event</span></div>
-              <button class="vrb-btn-primary">Book Event</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="vrb-card">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400" alt="Anniversary">
-            <div class="vrb-badge">₹18,000</div>
-          </div>
-          <div class="vrb-body">
-            <h3>Anniversary Celebration</h3>
-            <p class="vrb-meta">📍 Romantic Resort • 👥 60 Guests</p>
-            <div class="vrb-tags">
-              <span>Romantic Setup</span>
-              <span>Dinner</span>
-              <span>Photography</span>
-              <span>Music</span>
-            </div>
-            <div class="vrb-bottom">
-              <div class="vrb-price">₹18,000 <span>/event</span></div>
-              <button class="vrb-btn-primary">Book Event</button>
-            </div>
-          </div>
-        </div>
+        <!-- Events will be loaded dynamically -->
       </div>
     </div>
   </section>
@@ -241,12 +117,136 @@
 
   <!-- ✅ SCRIPTS -->
   <script>
+    let events = [];
+
     function vrbToggleMenu() {
       document.getElementById("vrbNavLinks").classList.toggle("open");
     }
 
+    // Load events from API
+    async function loadEvents() {
+      try {
+        const response = await fetch('/api/events');
+        events = await response.json();
+        displayEvents();
+        console.log('Loaded events:', events.length);
+      } catch (error) {
+        console.error('Error loading events:', error);
+        document.getElementById('eventsGrid').innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">Failed to load events. Please refresh the page.</div>';
+      }
+    }
+
+    function displayEvents() {
+      const grid = document.getElementById('eventsGrid');
+      if (!grid) return;
+      
+      if (!events || events.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No events available at the moment.</div>';
+        return;
+      }
+      
+      grid.innerHTML = events.map(event => {
+        const amenitiesList = event.amenities ? event.amenities.split('\n').filter(a => a.trim()).slice(0, 4) : [];
+        const eventTypeMap = {
+          'birthday': 'Birthday Party',
+          'wedding': 'Wedding',
+          'corporate': 'Corporate Event',
+          'engagement': 'Engagement',
+          'pool-party': 'Pool Party',
+          'anniversary': 'Anniversary'
+        };
+        const displayName = eventTypeMap[event.event_type] || event.name;
+        
+        return `
+          <div class="vrb-card">
+            <div class="vrb-img">
+              <img src="${event.image}" alt="${event.name}" onerror="this.src='https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400'">
+              <div class="vrb-badge">₹${event.price.toLocaleString()}</div>
+            </div>
+            <div class="vrb-body">
+              <h3>${displayName}</h3>
+              <p class="vrb-meta">📍 ${event.location} • 👥 ${event.max_guests ? event.max_guests + ' Guests' : 'Flexible'}</p>
+              <div class="vrb-tags">
+                ${amenitiesList.map(amenity => `<span>${amenity.trim()}</span>`).join('')}
+              </div>
+              <div class="vrb-bottom">
+                <div class="vrb-price">₹${event.price.toLocaleString()} <span>/event</span></div>
+                <button class="vrb-btn-primary" onclick="bookEvent(${event.id})">Book Event</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function bookEvent(eventId) {
+      // For now, redirect to WhatsApp with event details
+      const event = events.find(e => e.id === eventId);
+      if (event) {
+        const message = `Hi! I want to book ${event.name} at ${event.location} for ₹${event.price.toLocaleString()}. Please provide more details.`;
+        const whatsappUrl = `https://wa.me/918341674465?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+      }
+    }
+
+    // Setup Redis real-time updates
+    function setupRedisSync() {
+      console.log('📡 Redis real-time sync enabled for events page');
+      
+      let eventSource;
+      let reconnectAttempts = 0;
+      const maxReconnectAttempts = 5;
+      
+      function connectEventSource() {
+        try {
+          eventSource = new EventSource('/api/events-stream');
+          
+          eventSource.onmessage = function(event) {
+            try {
+              const data = JSON.parse(event.data);
+              console.log('📡 Events page Redis event received:', data);
+              
+              if (data.type === 'event.updated' || data.type === 'event.created' || data.type === 'event.deleted') {
+                console.log('🎉 Event update received - refreshing events');
+                loadEvents();
+              }
+            } catch (error) {
+              // Ignore ping messages
+            }
+          };
+          
+          eventSource.onerror = function(error) {
+            console.log('⚠️ Events page Redis connection error, attempting reconnect...');
+            eventSource.close();
+            
+            if (reconnectAttempts < maxReconnectAttempts) {
+              reconnectAttempts++;
+              setTimeout(connectEventSource, 2000 * reconnectAttempts);
+            } else {
+              console.log('❌ Max reconnection attempts reached');
+            }
+          };
+          
+          eventSource.onopen = function() {
+            console.log('✅ Redis connected to events page');
+            reconnectAttempts = 0;
+          };
+        } catch (error) {
+          console.error('Events page Redis setup failed:', error);
+        }
+      }
+      
+      connectEventSource();
+    }
+
     // Enhanced Animation System
     document.addEventListener('DOMContentLoaded', function() {
+      // Load events on page load
+      loadEvents();
+      
+      // Setup Redis sync after a delay
+      setTimeout(setupRedisSync, 1000);
+      
       // Scroll animations
       const observerOptions = {
         threshold: 0.1,

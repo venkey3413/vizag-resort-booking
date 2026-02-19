@@ -191,135 +191,125 @@
             </div>
         </section>
 
-        <section class="food-management">
-            <h2>Food Item Management</h2>
-
-            <div class="food-form">
-                <h3>Add/Edit Food Item</h3>
-                <form id="foodForm">
-                    <input type="hidden" id="foodId">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="foodName">Item Name:</label>
-                            <input type="text" id="foodName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="foodPrice">Price (₹):</label>
-                            <input type="number" id="foodPrice" required>
-                        </div>
+        <section class="add-event">
+            <h2>Add New Event</h2>
+            <form id="eventForm">
+                <input type="hidden" id="eventId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventName">Event Name:</label>
+                        <input type="text" id="eventName" required>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="foodCategory">Category:</label>
-                            <select id="foodCategory" required>
-                                <option value="">Select Category</option>
-                                <option value="Starters">Starters</option>
-                                <option value="Main Course">Main Course</option>
-                                <option value="Desserts">Desserts</option>
-                                <option value="Beverages">Beverages</option>
-                                <option value="Snacks">Snacks</option>
+                    <div class="form-group">
+                        <label for="eventLocation">Location:</label>
+                        <input type="text" id="eventLocation" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventPrice">Price per Event (₹):</label>
+                        <input type="number" id="eventPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventImage">Main Image:</label>
+                        <input type="url" id="eventImage" placeholder="https://..." readonly>
+                        <button type="button" onclick="uploadEventMainImage()" class="upload-btn">📷 Upload Image</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="eventGallery">Additional Images:</label>
+                    <textarea id="eventGallery" rows="4" placeholder="Uploaded image URLs will appear here" readonly></textarea>
+                    <div class="gallery-buttons">
+                        <button type="button" onclick="uploadEventGalleryImages()" class="upload-btn">🖼️ Upload Gallery Images</button>
+                        <button type="button" onclick="removeEventGalleryImages()" class="remove-btn">🗑️ Remove Images</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="eventVideos">Videos:</label>
+                    <textarea id="eventVideos" rows="3" placeholder="Uploaded video URLs will appear here" readonly></textarea>
+                    <button type="button" onclick="uploadEventVideos()" class="upload-btn">🎥 Upload Videos</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventMapLink">Google Map Link:</label>
+                        <input type="url" id="eventMapLink" placeholder="https://maps.google.com/?q=location">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="eventDescription">Description:</label>
+                    <textarea id="eventDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="eventAmenities">Amenities (one per line):</label>
+                    <textarea id="eventAmenities" rows="4" placeholder="Sound System\nLighting\nDecoration\nCatering\nPhotography\nDJ"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="eventNote">Payment Note (optional):</label>
+                    <textarea id="eventNote" rows="2" placeholder="Special instructions or notes for payment (e.g., 'Pay 50% advance', 'Full payment required')" maxlength="200"></textarea>
+                    <small>This note will be displayed during payment if entered. Leave empty to hide.</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventMaxGuests">Maximum Guests (optional):</label>
+                        <input type="number" id="eventMaxGuests" min="1" max="500" placeholder="e.g., 100">
+                        <small>If set, shows warning when guests exceed this limit. Leave empty for no limit.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventSortOrder">Display Order:</label>
+                        <input type="number" id="eventSortOrder" min="0" placeholder="0" value="0">
+                        <small>Lower numbers appear first on events page. Use drag-drop below to reorder.</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Dynamic Pricing:</label>
+                    <div class="pricing-container">
+                        <div class="pricing-row">
+                            <label>Event Type:</label>
+                            <select id="eventType">
+                                <option value="birthday">Birthday Party</option>
+                                <option value="wedding">Wedding</option>
+                                <option value="corporate">Corporate Event</option>
+                                <option value="engagement">Engagement</option>
+                                <option value="pool-party">Pool Party</option>
+                                <option value="anniversary">Anniversary</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="foodImage">Image URL:</label>
-                            <input type="url" id="foodImage" placeholder="https://..." readonly>
-                            <button type="button" onclick="uploadFoodImage()" class="upload-btn">📷 Upload Image</button>
+                        <div class="pricing-row">
+                            <label>Weekday (Mon-Thu):</label>
+                            <input type="number" id="eventWeekdayPrice" placeholder="₹ per event">
+                        </div>
+                        <div class="pricing-row">
+                            <label>Friday:</label>
+                            <input type="number" id="eventFridayPrice" placeholder="₹ per event">
+                        </div>
+                        <div class="pricing-row">
+                            <label>Weekend (Sat-Sun):</label>
+                            <input type="number" id="eventWeekendPrice" placeholder="₹ per event">
+                        </div>
+                        <div class="pricing-row">
+                            <label>Holiday/Festival:</label>
+                            <input type="number" id="eventHolidayPrice" placeholder="₹ per event">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="foodDescription">Description:</label>
-                        <textarea id="foodDescription" rows="2"></textarea>
-                    </div>
-                    <button type="submit" id="foodSubmitBtn">Add Food Item</button>
-                    <button type="button" id="foodCancelBtn" onclick="cancelFoodEdit()" style="display:none;">Cancel</button>
-                </form>
-            </div>
-
-            <div class="food-list">
-                <h3>Current Menu Items</h3>
-                <div id="foodItemsGrid" class="food-items-grid">
-                    <!-- Food items will be loaded here -->
+                    <small>Leave empty to use base price for that day type</small>
                 </div>
-            </div>
+                <button type="submit" id="eventSubmitBtn">Add Event</button>
+                <button type="button" id="eventCancelBtn" onclick="cancelEventEdit()" style="display:none;">Cancel</button>
+            </form>
         </section>
 
-        <section class="travel-management">
-            <h2>Travel Package Management</h2>
-
-            <div class="travel-form">
-                <h3>Add/Edit Travel Package</h3>
-                <form id="travelForm">
-                    <input type="hidden" id="travelId">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="travelName">Package Name:</label>
-                            <input type="text" id="travelName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="travelPrice">Base Price - 5 Seater (₹):</label>
-                            <input type="number" id="travelPrice" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Car Seater Pricing:</label>
-                        <div class="car-pricing-container">
-                            <div class="pricing-row">
-                                <label>5 Seater:</label>
-                                <input type="number" id="price5Seater" placeholder="₹ per trip">
-                            </div>
-                            <div class="pricing-row">
-                                <label>7 Seater:</label>
-                                <input type="number" id="price7Seater" placeholder="₹ per trip">
-                            </div>
-                            <div class="pricing-row">
-                                <label>12 Seater:</label>
-                                <input type="number" id="price12Seater" placeholder="₹ per trip">
-                            </div>
-                            <div class="pricing-row">
-                                <label>14 Seater:</label>
-                                <input type="number" id="price14Seater" placeholder="₹ per trip">
-                            </div>
-                        </div>
-                        <small>Set fixed prices for each car type manually.</small>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="travelDuration">Duration:</label>
-                            <input type="text" id="travelDuration" placeholder="e.g., 8-10 hours" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="travelImage">Main Image URL:</label>
-                            <input type="url" id="travelImage" placeholder="https://..." readonly>
-                            <button type="button" onclick="uploadTravelImage()" class="upload-btn">📷 Upload Image</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="travelGallery">Additional Images (Gallery):</label>
-                        <textarea id="travelGallery" rows="4" placeholder="Uploaded image URLs will appear here" readonly></textarea>
-                        <div class="gallery-buttons">
-                            <button type="button" onclick="uploadTravelGalleryImages()" class="upload-btn">🖼️ Upload Gallery Images</button>
-                            <button type="button" onclick="removeTravelGalleryImages()" class="remove-btn">🗑️ Remove Images</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="travelDescription">Description:</label>
-                        <textarea id="travelDescription" rows="3" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="travelSites">Sites/Places to Visit (one per line):</label>
-                        <textarea id="travelSites" rows="4" placeholder="Araku Valley\nBorra Caves\nKatiki Waterfalls\nLambasingi\nTyda Nature Camp"></textarea>
-                    </div>
-                    <button type="submit" id="travelSubmitBtn">Add Travel Package</button>
-                    <button type="button" id="travelCancelBtn" onclick="cancelTravelEdit()" style="display:none;">Cancel</button>
-                </form>
-            </div>
-
-            <div class="travel-list">
-                <h3>Current Travel Packages</h3>
-                <div id="travelPackagesGrid" class="travel-packages-grid">
-                    <!-- Travel packages will be loaded here -->
+        <section class="events-list">
+            <h2>Manage Events</h2>
+            <div class="event-ordering">
+                <h3>Event Display Order</h3>
+                <p>Drag and drop to reorder how events appear on the events page:</p>
+                <div id="sortableEvents" class="sortable-events">
+                    <!-- Sortable event list will be loaded here -->
                 </div>
+                <button id="saveEventOrderBtn" onclick="saveEventOrder()" class="save-order-btn" style="display:none;">💾 Save New Order</button>
+            </div>
+            <div id="eventsGrid" class="events-grid">
+                <!-- Events will be loaded here -->
             </div>
         </section>
 
@@ -508,24 +498,8 @@
             });
         }
         
-        function uploadFoodImage() {
-            cloudinary.openUploadWidget({
-                cloudName: CLOUDINARY_CLOUD_NAME,
-                uploadPreset: 'resort_images',
-                sources: ['local', 'url'],
-                multiple: false,
-                resourceType: 'image',
-                maxFileSize: 10000000,
-                cropping: true,
-                croppingAspectRatio: 1
-            }, (error, result) => {
-                if (!error && result && result.event === "success") {
-                    document.getElementById('foodImage').value = result.info.secure_url;
-                }
-            });
-        }
-        
-        function uploadTravelImage() {
+        // Event Management Functions
+        function uploadEventMainImage() {
             cloudinary.openUploadWidget({
                 cloudName: CLOUDINARY_CLOUD_NAME,
                 uploadPreset: 'resort_images',
@@ -537,12 +511,12 @@
                 croppingAspectRatio: 16/9
             }, (error, result) => {
                 if (!error && result && result.event === "success") {
-                    document.getElementById('travelImage').value = result.info.secure_url;
+                    document.getElementById('eventImage').value = result.info.secure_url;
                 }
             });
         }
         
-        function uploadTravelGalleryImages() {
+        function uploadEventGalleryImages() {
             cloudinary.openUploadWidget({
                 cloudName: CLOUDINARY_CLOUD_NAME,
                 uploadPreset: 'resort_images',
@@ -552,16 +526,16 @@
                 maxFileSize: 10000000
             }, (error, result) => {
                 if (!error && result && result.event === "success") {
-                    const currentGallery = document.getElementById('travelGallery').value;
+                    const currentGallery = document.getElementById('eventGallery').value;
                     const newUrl = result.info.secure_url;
                     const updatedGallery = currentGallery ? currentGallery + '\n' + newUrl : newUrl;
-                    document.getElementById('travelGallery').value = updatedGallery;
+                    document.getElementById('eventGallery').value = updatedGallery;
                 }
             });
         }
         
-        function removeTravelGalleryImages() {
-            const galleryTextarea = document.getElementById('travelGallery');
+        function removeEventGalleryImages() {
+            const galleryTextarea = document.getElementById('eventGallery');
             const currentGallery = galleryTextarea.value.trim();
             
             if (!currentGallery) {
@@ -576,7 +550,6 @@
                 return;
             }
             
-            // Create a modal to show images for selection
             const modal = document.createElement('div');
             modal.className = 'image-removal-modal';
             modal.innerHTML = `
@@ -585,7 +558,7 @@
                     <div class="images-grid">
                         ${images.map((url, index) => `
                             <div class="image-item">
-                                <img src="${url}" alt="Gallery Image ${index + 1}">
+                                <img src="${url}" alt="Event Image ${index + 1}">
                                 <label>
                                     <input type="checkbox" value="${index}"> Remove
                                 </label>
@@ -593,75 +566,15 @@
                         `).join('')}
                     </div>
                     <div class="modal-actions">
-                        <button onclick="confirmRemoveImages()">Remove Selected</button>
-                        <button onclick="closeRemovalModal()">Cancel</button>
+                        <button onclick="confirmRemoveEventImages()">Remove Selected</button>
+                        <button onclick="closeEventRemovalModal()">Cancel</button>
                     </div>
                 </div>
             `;
             
             document.body.appendChild(modal);
             
-            // Add modal styles
-            const style = document.createElement('style');
-            style.textContent = `
-                .image-removal-modal {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.8);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 10000;
-                }
-                .image-removal-modal .modal-content {
-                    background: white;
-                    padding: 2rem;
-                    border-radius: 10px;
-                    max-width: 80%;
-                    max-height: 80%;
-                    overflow-y: auto;
-                }
-                .images-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                    gap: 1rem;
-                    margin: 1rem 0;
-                }
-                .image-item {
-                    text-align: center;
-                }
-                .image-item img {
-                    width: 100%;
-                    height: 100px;
-                    object-fit: cover;
-                    border-radius: 5px;
-                }
-                .modal-actions {
-                    text-align: center;
-                    margin-top: 1rem;
-                }
-                .modal-actions button {
-                    margin: 0 0.5rem;
-                    padding: 0.5rem 1rem;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                }
-                .modal-actions button:first-child {
-                    background: #dc3545;
-                    color: white;
-                }
-                .modal-actions button:last-child {
-                    background: #6c757d;
-                    color: white;
-                }
-            `;
-            document.head.appendChild(style);
-            
-            window.confirmRemoveImages = function() {
+            window.confirmRemoveEventImages = function() {
                 const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
                 const indicesToRemove = Array.from(checkboxes).map(cb => parseInt(cb.value));
                 
@@ -673,16 +586,40 @@
                 const remainingImages = images.filter((_, index) => !indicesToRemove.includes(index));
                 galleryTextarea.value = remainingImages.join('\n');
                 
-                closeRemovalModal();
+                closeEventRemovalModal();
                 alert(`Removed ${indicesToRemove.length} image(s)`);
             };
             
-            window.closeRemovalModal = function() {
+            window.closeEventRemovalModal = function() {
                 modal.remove();
-                style.remove();
-                delete window.confirmRemoveImages;
-                delete window.closeRemovalModal;
+                delete window.confirmRemoveEventImages;
+                delete window.closeEventRemovalModal;
             };
+        }
+        
+        function uploadEventVideos() {
+            cloudinary.openUploadWidget({
+                cloudName: CLOUDINARY_CLOUD_NAME,
+                uploadPreset: 'resort_videos',
+                sources: ['local', 'url'],
+                multiple: true,
+                resourceType: 'video',
+                maxFileSize: 100000000
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    const currentVideos = document.getElementById('eventVideos').value;
+                    const newUrl = result.info.secure_url;
+                    const updatedVideos = currentVideos ? currentVideos + '\n' + newUrl : newUrl;
+                    document.getElementById('eventVideos').value = updatedVideos;
+                }
+            });
+        }
+        
+        function cancelEventEdit() {
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventId').value = '';
+            document.getElementById('eventSubmitBtn').textContent = 'Add Event';
+            document.getElementById('eventCancelBtn').style.display = 'none';
         }
         
 
