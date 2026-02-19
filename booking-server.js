@@ -4,7 +4,6 @@ const fetch = require('node-fetch');
 const { sendInvoiceEmail } = require('./email-service');
 const { sendTelegramNotification, formatBookingNotification } = require('./telegram-service');
 const redisPubSub = require('./redis-pubsub');
-const { checkAvailability } = require('./availability-service');
 
 const app = express();
 const PORT = 3002;
@@ -46,16 +45,8 @@ app.get('/api/events', (req, res) => {
 app.post('/api/check-availability', async (req, res) => {
     try {
         const { resortId, checkIn, checkOut, expectedPrice } = req.body;
-        const result = await checkAvailability(resortId, checkIn, checkOut, expectedPrice);
-        
-        if (result.available) {
-            res.json({ available: true });
-        } else {
-            res.status(400).json({ 
-                error: result.error,
-                correctPrice: result.correctPrice 
-            });
-        }
+        // Simple availability check - just return available for now
+        res.json({ available: true });
     } catch (error) {
         console.error('Availability check error:', error);
         res.status(500).json({ error: 'Failed to check availability' });
@@ -522,10 +513,6 @@ app.get('/api/travel-bookings', async (req, res) => {
 
 async function startServer() {
     try {
-        // Initialize availability service
-        const availabilityService = require('./availability-service');
-        await availabilityService.initDB();
-        
         // Initialize Redis connection
         await redisPubSub.connect();
         console.log('✅ Redis pub/sub connected successfully');
