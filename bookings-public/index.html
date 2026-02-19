@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Management - Vizag Resort Booking</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .booking-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .booking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .booking-id { font-weight: bold; color: #667eea; }
+        .status { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .status.paid { background: #d4edda; color: #155724; }
+        .status.pending { background: #fff3cd; color: #856404; }
+        .booking-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .detail-item { display: flex; flex-direction: column; }
+        .detail-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+        .detail-value { font-weight: 500; }
+        .loading { text-align: center; padding: 50px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Booking Management</h1>
+        <div id="bookings-container">
+            <div class="loading">Loading bookings...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadBookings() {
+            try {
+                const response = await fetch('/api/bookings');
+                const bookings = await response.json();
+                displayBookings(bookings);
+            } catch (error) {
+                document.getElementById('bookings-container').innerHTML = '<div class="loading">Error loading bookings</div>';
+            }
+        }
+
+        function displayBookings(bookings) {
+            const container = document.getElementById('bookings-container');
+            
+            if (bookings.length === 0) {
+                container.innerHTML = '<div class="loading">No bookings found</div>';
+                return;
+            }
+
+            container.innerHTML = bookings.map(booking => `
+                <div class="booking-card">
+                    <div class="booking-header">
+                        <div class="booking-id">Booking #${booking.booking_reference || 'RB' + String(booking.id).padStart(6, '0')}</div>
+                        <div class="status ${booking.payment_status}">${booking.payment_status.toUpperCase()}</div>
+                    </div>
+                    <div class="booking-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Guest Name</div>
+                            <div class="detail-value">${booking.guest_name}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Resort</div>
+                            <div class="detail-value">${booking.resort_name}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Check-in</div>
+                            <div class="detail-value">${new Date(booking.check_in).toLocaleDateString()}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Check-out</div>
+                            <div class="detail-value">${new Date(booking.check_out).toLocaleDateString()}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Total Amount</div>
+                            <div class="detail-value">₹${booking.total_amount}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Phone</div>
+                            <div class="detail-value">${booking.phone}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">${booking.email}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Booking Date</div>
+                            <div class="detail-value">${new Date(booking.created_at).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        loadBookings();
+    </script>
+</body>
+</html>
