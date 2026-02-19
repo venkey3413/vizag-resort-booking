@@ -8,6 +8,7 @@ console.log('🔗 Main server using DB API URL:', DB_API_URL);
 const redisPubSub = require('./redis-pubsub');
 const { sendTelegramNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -398,6 +399,129 @@ app.get('/api/razorpay-key', (req, res) => {
         });
     }
     res.json({ key: key });
+});
+
+// Razorpay webhook endpoint for automatic payment confirmation
+app.post('/api/razorpay-webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    try {
+        const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+        if (!webhookSecret) {
+            console.error('❌ Razorpay webhook secret not configured');
+            return res.status(400).json({ error: 'Webhook not configured' });
+        }
+
+        // Verify webhook signature
+        const signature = req.headers['x-razorpay-signature'];
+        const body = req.body;
+        
+        const expectedSignature = crypto
+            .createHmac('sha256', webhookSecret)
+            .update(body)
+            .digest('hex');
+
+        if (signature !== expectedSignature) {
+            console.error('❌ Invalid webhook signature');
+            return res.status(400).json({ error: 'Invalid signature' });
+        }
+
+        const event = JSON.parse(body.toString());
+        console.log('🔔 Razorpay webhook received:', event.event, event.payload?.payment?.entity?.id);
+
+        // Handle payment success
+        if (event.event === 'payment.captured') {
+            const payment = event.payload.payment.entity;
+            const paymentId = payment.id;
+            const amount = payment.amount / 100; // Convert from paise to rupees
+            const orderId = payment.order_id;
+            
+            console.log('💳 Payment captured:', {
+                paymentId,
+                amount,
+                orderId,
+                method: payment.method,
+                status: payment.status
+            });
+
+            // Find booking by order_id or payment reference
+            const bookingsResponse = await fetch(`${DB_API_URL}/api/bookings`);
+            const bookings = await bookingsResponse.json();
+            
+            // Match booking by amount and recent timestamp (within last hour)
+            const recentBookings = bookings.filter(booking => {
+                const bookingTime = new Date(booking.booking_date);
+                const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+                return booking.total_price === amount && 
+                       bookingTime > oneHourAgo &&
+                       booking.payment_status === 'pending';
+            });
+
+            if (recentBookings.length === 1) {
+                const booking = recentBookings[0];
+                
+                // Update booking status to paid
+                await fetch(`${DB_API_URL}/api/bookings/${booking.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        payment_status: 'paid',
+                        transaction_id: paymentId
+                    })
+                });
+
+                // Send confirmation notifications
+                try {
+                    const confirmationMessage = `✅ PAYMENT CONFIRMED!\n\n📋 Booking ID: ${booking.booking_reference}\n👤 Guest: ${booking.guest_name}\n💳 Transaction ID: ${paymentId}\n💳 UTR Number: ${paymentId}\n💰 Amount: ₹${amount.toLocaleString()}\n✅ Status: CONFIRMED\n\n⏰ Confirmed at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+                    
+                    await sendTelegramNotification(confirmationMessage);
+                    
+                    // Send confirmation email to customer
+                    await sendInvoiceEmail({
+                        to: booking.email,
+                        subject: `Booking Confirmed - ${booking.booking_reference}`,
+                        html: `
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                <h2 style="color: #28a745;">🎉 Booking Confirmed!</h2>
+                                <p>Dear ${booking.guest_name},</p>
+                                <p>Your payment has been successfully processed and your booking is now confirmed.</p>
+                                
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                    <h3>Booking Details:</h3>
+                                    <p><strong>Booking ID:</strong> ${booking.booking_reference}</p>
+                                    <p><strong>Transaction ID:</strong> ${paymentId}</p>
+                                    <p><strong>UTR Number:</strong> ${paymentId}</p>
+                                    <p><strong>Amount Paid:</strong> ₹${amount.toLocaleString()}</p>
+                                    <p><strong>Check-in:</strong> ${new Date(booking.check_in).toLocaleDateString()}</p>
+                                    <p><strong>Check-out:</strong> ${new Date(booking.check_out).toLocaleDateString()}</p>
+                                    <p><strong>Guests:</strong> ${booking.guests}</p>
+                                </div>
+                                
+                                <p>Thank you for choosing Vizag Resorts. We look forward to hosting you!</p>
+                                <p>For any queries, please contact us with your booking reference.</p>
+                                
+                                <hr style="margin: 30px 0;">
+                                <p style="color: #666; font-size: 12px;">Vizag Resort Booking System</p>
+                            </div>
+                        `
+                    });
+                } catch (notificationError) {
+                    console.error('❌ Notification sending failed:', notificationError);
+                }
+
+                console.log('✅ Booking automatically confirmed:', booking.booking_reference);
+            } else {
+                console.log('⚠️ Could not match payment to booking:', {
+                    amount,
+                    recentBookingsCount: recentBookings.length,
+                    paymentId
+                });
+            }
+        }
+
+        res.status(200).json({ status: 'ok' });
+    } catch (error) {
+        console.error('❌ Webhook processing error:', error);
+        res.status(500).json({ error: 'Webhook processing failed' });
+    }
 });
 
 // Coupons endpoint

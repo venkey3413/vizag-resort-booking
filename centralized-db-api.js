@@ -434,12 +434,39 @@ app.post('/api/bookings', async (req, res) => {
 
 app.put('/api/bookings/:id', async (req, res) => {
     try {
-        await db.run('UPDATE bookings SET payment_status = ? WHERE id = ?', 
-                    [req.body.payment_status, req.params.id]);
+        const updateFields = [];
+        const params = [];
+        
+        if (req.body.payment_status) {
+            updateFields.push('payment_status = ?');
+            params.push(req.body.payment_status);
+        }
+        
+        if (req.body.transaction_id) {
+            updateFields.push('transaction_id = ?');
+            params.push(req.body.transaction_id);
+        }
+        
+        if (req.body.status) {
+            updateFields.push('status = ?');
+            params.push(req.body.status);
+        }
+        
+        if (updateFields.length === 0) {
+            return res.status(400).json({ error: 'No valid fields to update' });
+        }
+        
+        params.push(req.params.id);
+        
+        await db.run(
+            `UPDATE bookings SET ${updateFields.join(', ')} WHERE id = ?`,
+            params
+        );
         
         publishEvent('booking.updated', { bookingId: req.params.id, ...req.body });
         res.json({ message: 'Booking updated successfully' });
     } catch (error) {
+        console.error('Booking update error:', error);
         res.status(500).json({ error: 'Failed to update booking' });
     }
 });
