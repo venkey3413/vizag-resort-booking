@@ -53,11 +53,13 @@ img{ max-width:100%; display:block; }
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 8px 12px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 12px;
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 1;
+  min-width: 120px;
   
   /* Glass effect */
   background: rgba(255,255,255,0.9);
