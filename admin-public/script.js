@@ -1189,14 +1189,14 @@ async function handleEventSubmit(e) {
         location: document.getElementById('eventLocation').value,
         price: parseInt(document.getElementById('eventPrice').value),
         event_type: document.getElementById('eventType').value,
-        description: document.getElementById('eventDescription').value,
-        amenities: document.getElementById('eventAmenities').value,
-        note: document.getElementById('eventNote').value,
+        description: document.getElementById('eventDescription').value || '',
+        amenities: document.getElementById('eventAmenities').value || '',
+        note: document.getElementById('eventNote').value || '',
         max_guests: parseInt(document.getElementById('eventMaxGuests').value) || null,
-        image: document.getElementById('eventImage').value,
-        gallery: document.getElementById('eventGallery').value,
-        videos: document.getElementById('eventVideos').value,
-        map_link: document.getElementById('eventMapLink').value
+        image: document.getElementById('eventImage').value || 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400',
+        gallery: document.getElementById('eventGallery').value || '',
+        videos: document.getElementById('eventVideos').value || '',
+        map_link: document.getElementById('eventMapLink').value || ''
     };
 
     console.log('Event data being sent:', eventData);
