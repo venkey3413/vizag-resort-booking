@@ -62,7 +62,14 @@ app.get('/api/resorts', async (req, res) => {
 app.get('/api/events', async (req, res) => {
     try {
         console.log('🎉 Main: Fetching events from DB API:', DB_API_URL);
-        const response = await fetch(`${DB_API_URL}/api/events`);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch(`${DB_API_URL}/api/events`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             console.log('❌ DB API failed, returning empty array');
@@ -73,7 +80,7 @@ app.get('/api/events', async (req, res) => {
         console.log('🎉 Fetching events:', events.length, 'found');
         res.json(events);
     } catch (error) {
-        console.error('❌ Event fetch error:', error);
+        console.error('❌ Event fetch error:', error.message);
         res.json([]);
     }
 });
