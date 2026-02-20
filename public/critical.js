@@ -1598,7 +1598,7 @@ function setupMainWebsiteRedisSync() {
     
     function connectEventSource() {
         try {
-            eventSource = new EventSource('/api/events');
+            eventSource = new EventSource('/api/events-stream');
             
             eventSource.onmessage = function(event) {
                 try {
