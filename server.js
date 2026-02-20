@@ -61,13 +61,20 @@ app.get('/api/resorts', async (req, res) => {
 // Events endpoint
 app.get('/api/events', async (req, res) => {
     try {
+        console.log('🎉 Main: Fetching events from DB API:', DB_API_URL);
         const response = await fetch(`${DB_API_URL}/api/events`);
+        
+        if (!response.ok) {
+            console.log('❌ DB API failed, returning empty array');
+            return res.json([]);
+        }
+        
         const events = await response.json();
         console.log('🎉 Fetching events:', events.length, 'found');
         res.json(events);
     } catch (error) {
         console.error('❌ Event fetch error:', error);
-        res.status(500).json({ error: 'Failed to fetch events' });
+        res.json([]);
     }
 });
 
