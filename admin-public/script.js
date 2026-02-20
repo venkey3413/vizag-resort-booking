@@ -1094,7 +1094,14 @@ async function saveResortOrder() {
 // Event Management Functions
 async function loadEvents() {
     try {
+        console.log('Loading events from admin server...');
         const response = await fetch('/api/events');
+        console.log('Events response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         events = await response.json();
         displayEvents();
         console.log('Loaded events:', events.length);
