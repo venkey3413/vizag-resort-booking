@@ -36,9 +36,10 @@ app.get('/', (req, res) => {
 });
 
 // Real-time Redis pub/sub listener endpoint
-app.get('/api/events', (req, res) => {
+app.get('/api/events-stream', (req, res) => {
     const clientId = `booking-${Date.now()}-${Math.random()}`;
     redisPubSub.subscribe(clientId, res);
+    console.log('📡 Booking management connected to Redis pub/sub');
 });
 
 // Availability check endpoint with pricing validation
