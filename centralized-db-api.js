@@ -55,7 +55,8 @@ async function initDB() {
             note TEXT,
             max_guests INTEGER,
             sort_order INTEGER DEFAULT 0,
-            available INTEGER DEFAULT 1
+            available INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
     
@@ -328,16 +329,19 @@ app.get('/api/events', async (req, res) => {
 
 app.post('/api/events', async (req, res) => {
     try {
+        console.log('Creating event with data:', req.body);
         const result = await db.run(`
-            INSERT INTO events (name, location, price, event_type, description, image, gallery, videos, map_link, amenities, note, max_guests)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO events (name, location, price, event_type, description, image, gallery, videos, map_link, amenities, note, max_guests, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [req.body.name, req.body.location, req.body.price, req.body.event_type, req.body.description, 
-            req.body.image, req.body.gallery, req.body.videos, req.body.map_link, req.body.amenities, req.body.note, req.body.max_guests]);
+            req.body.image || '', req.body.gallery || '', req.body.videos || '', req.body.map_link || '', 
+            req.body.amenities || '', req.body.note || '', req.body.max_guests || null, req.body.sort_order || 0]);
         
         publishEvent('event.created', { eventId: result.lastID, ...req.body });
         res.json({ id: result.lastID, message: 'Event created successfully' });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create event' });
+        console.error('Event creation error:', error);
+        res.status(500).json({ error: 'Failed to create event', details: error.message });
     }
 });
 
