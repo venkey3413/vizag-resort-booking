@@ -1103,11 +1103,24 @@ async function loadEvents() {
         }
         
         const responseText = await response.text();
-        console.log('Events raw response:', responseText.substring(0, 200));
+        console.log('Events raw response length:', responseText.length);
+        console.log('Events raw response preview:', responseText.substring(0, 100));
         
-        events = JSON.parse(responseText);
-        displayEvents();
+        if (!responseText.trim()) {
+            console.log('Empty response received');
+            events = [];
+        } else {
+            try {
+                events = JSON.parse(responseText);
+                console.log('Parsed events successfully:', events.length);
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.log('Response that failed to parse:', responseText);
+                events = [];
+            }
+        }
         console.log('Loaded events:', events.length);
+        displayEvents();
     } catch (error) {
         console.error('Error loading events:', error);
         const grid = document.getElementById('eventsGrid');
@@ -1118,8 +1131,12 @@ async function loadEvents() {
 }
 
 function displayEvents() {
+    console.log('displayEvents called with events:', events ? events.length : 'null/undefined');
     const grid = document.getElementById('eventsGrid');
-    if (!grid) return;
+    if (!grid) {
+        console.log('eventsGrid element not found');
+        return;
+    }
     
     if (!events || events.length === 0) {
         grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No events found. Add your first event using the form above.</div>';
