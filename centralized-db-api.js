@@ -667,7 +667,7 @@ app.get('/api/blocked-dates/:resortId', async (req, res) => {
 });
 
 // REAL-TIME EVENTS ENDPOINT
-app.get('/api/events', (req, res) => {
+app.get('/api/events-stream', (req, res) => {
     const clientId = `db-client-${Date.now()}-${Math.random()}`;
     redisPubSub.subscribe(clientId, res);
     console.log('📡 Database API client connected to real-time events');
