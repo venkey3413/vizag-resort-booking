@@ -1099,6 +1099,7 @@ async function loadEvents() {
         console.log('Events response status:', response.status);
         
         if (!response.ok) {
+            console.log('❌ Events API failed with status:', response.status);
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
@@ -1107,14 +1108,14 @@ async function loadEvents() {
         console.log('Events raw response preview:', responseText.substring(0, 100));
         
         if (!responseText.trim()) {
-            console.log('Empty response received');
+            console.log('Empty events response received');
             events = [];
         } else {
             try {
                 events = JSON.parse(responseText);
                 console.log('Parsed events successfully:', events.length);
             } catch (parseError) {
-                console.error('JSON parse error:', parseError);
+                console.error('Events JSON parse error:', parseError);
                 console.log('Response that failed to parse:', responseText);
                 events = [];
             }
