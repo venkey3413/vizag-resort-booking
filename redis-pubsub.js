@@ -46,20 +46,20 @@ class RedisPubSub {
             console.log(`✅ Redis connected: ${redisHost}:${redisPort}`);
 
             // Subscribe to all channels
+            await this.subscriber.subscribe('resort-events', (message) => {
+                this.handleMessage('resort-events', message);
+            });
+
+            await this.subscriber.subscribe('event-events', (message) => {
+                this.handleMessage('event-events', message);
+            });
+
             await this.subscriber.subscribe('booking-events', (message) => {
                 this.handleMessage('booking-events', message);
             });
 
-            await this.subscriber.subscribe('food-events', (message) => {
-                this.handleMessage('food-events', message);
-            });
-
-            await this.subscriber.subscribe('travel-events', (message) => {
-                this.handleMessage('travel-events', message);
-            });
-
-            await this.subscriber.subscribe('resort-events', (message) => {
-                this.handleMessage('resort-events', message);
+            await this.subscriber.subscribe('coupon-events', (message) => {
+                this.handleMessage('coupon-events', message);
             });
 
             console.log('✅ Subscribed to all event channels');
@@ -111,7 +111,9 @@ class RedisPubSub {
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive'
+            'Connection': 'keep-alive',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Cache-Control'
         });
         res.write('data: {"type":"connected"}\n\n');
 
