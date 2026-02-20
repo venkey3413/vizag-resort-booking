@@ -1102,7 +1102,10 @@ async function loadEvents() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        events = await response.json();
+        const responseText = await response.text();
+        console.log('Events raw response:', responseText.substring(0, 200));
+        
+        events = JSON.parse(responseText);
         displayEvents();
         console.log('Loaded events:', events.length);
     } catch (error) {

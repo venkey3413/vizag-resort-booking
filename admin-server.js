@@ -176,23 +176,55 @@ app.post('/api/resorts/reorder', async (req, res) => {
 // Event management endpoints
 app.get('/api/events', async (req, res) => {
     try {
+        console.log('🎉 Admin: Fetching events from DB API:', DB_API_URL);
         let response;
         let events;
         
-        // Try centralized DB API first
+        // Try centralized DB API first with timeout
         try {
-            response = await fetch(`${DB_API_URL}/api/events`);
-            events = await response.json();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            response = await fetch(`${DB_API_URL}/api/events`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                events = await response.json();
+                console.log('✅ Admin: Got', events.length, 'events from DB API');
+            } else {
+                throw new Error(`DB API returned ${response.status}`);
+            }
         } catch (dbError) {
-            console.log('⚠️ Admin: DB API failed, trying main server fallback');
+            console.log('⚠️ Admin: DB API failed:', dbError.message, '- trying main server fallback');
             // Fallback to main server
-            response = await fetch(`${MAIN_API_URL}/api/events`);
-            events = await response.json();
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                response = await fetch(`${MAIN_API_URL}/api/events`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    events = await response.json();
+                    console.log('✅ Admin: Got', events.length, 'events from main server');
+                } else {
+                    throw new Error(`Main server returned ${response.status}`);
+                }
+            } catch (mainError) {
+                console.log('❌ Admin: Main server also failed:', mainError.message);
+                // Return empty array as last resort
+                events = [];
+            }
         }
         
         res.json(events);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch events' });
+        console.error('❌ Admin: Events fetch failed:', error);
+        res.json([]);
     }
 });
 
