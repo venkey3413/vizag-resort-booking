@@ -1650,9 +1650,9 @@ function setupMainWebsiteRedisSync() {
                 
                 if (reconnectAttempts < maxReconnectAttempts) {
                     reconnectAttempts++;
-                    setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                    setTimeout(connectEventSource, 5000 + (reconnectAttempts * 2000));
                 } else {
-                    console.log('❌ Max reconnection attempts reached');
+                    console.log('❌ Max reconnection attempts reached - Redis disabled');
                 }
             };
             
