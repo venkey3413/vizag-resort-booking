@@ -216,23 +216,52 @@
         
         // Real-time updates via Redis pub/sub
         function connectToRealTimeUpdates() {
-            const eventSource = new EventSource('/api/events');
+            console.log('📡 Redis real-time sync enabled for booking management');
             
-            eventSource.onmessage = function(event) {
+            let eventSource;
+            let reconnectAttempts = 0;
+            const maxReconnectAttempts = 5;
+            
+            function connectEventSource() {
                 try {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'booking.created' || data.type === 'booking.added') {
-                        console.log('New booking received:', data);
-                        loadBookings(); // Reload all bookings
-                    }
+                    eventSource = new EventSource('/api/events-stream');
+                    
+                    eventSource.onmessage = function(event) {
+                        try {
+                            const data = JSON.parse(event.data);
+                            console.log('📡 Booking management Redis event received:', data);
+                            
+                            if (data.type === 'booking.created' || data.type === 'booking.added' || data.type === 'booking.updated') {
+                                console.log('📋 Booking event detected - reloading bookings');
+                                loadBookings();
+                            }
+                        } catch (error) {
+                            // Ignore ping messages
+                        }
+                    };
+                    
+                    eventSource.onerror = function(error) {
+                        console.log('⚠️ Booking management Redis connection error, attempting reconnect...');
+                        eventSource.close();
+                        
+                        if (reconnectAttempts < maxReconnectAttempts) {
+                            reconnectAttempts++;
+                            setTimeout(connectEventSource, 2000 * reconnectAttempts);
+                        } else {
+                            console.log('❌ Max reconnection attempts reached');
+                        }
+                    };
+                    
+                    eventSource.onopen = function() {
+                        console.log('✅ Redis connected to booking management');
+                        reconnectAttempts = 0;
+                    };
                 } catch (error) {
-                    console.error('Error parsing SSE data:', error);
+                    console.error('Booking management Redis setup failed:', error);
                 }
-            };
+            }
             
-            eventSource.onerror = function(error) {
-                console.error('SSE connection error:', error);
-            };
+            connectEventSource();
         }
         
         // Initialize
