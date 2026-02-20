@@ -1650,7 +1650,8 @@ function setupMainWebsiteRedisSync() {
                 
                 if (reconnectAttempts < maxReconnectAttempts) {
                     reconnectAttempts++;
-                    setTimeout(connectEventSource, 5000 + (reconnectAttempts * 2000));
+                    const delay = Math.min(30000, 5000 * Math.pow(2, reconnectAttempts - 1));
+                    setTimeout(connectEventSource, delay);
                 } else {
                     console.log('❌ Max reconnection attempts reached - Redis disabled');
                 }
