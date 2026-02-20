@@ -72,7 +72,13 @@ app.get('/api/events', async (req, res) => {
         clearTimeout(timeoutId);
         
         if (!response.ok) {
-            console.log('❌ DB API failed, returning empty array');
+            console.log('❌ DB API failed with status:', response.status);
+            return res.json([]);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.log('❌ DB API returned non-JSON response:', contentType);
             return res.json([]);
         }
         
