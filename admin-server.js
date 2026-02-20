@@ -36,10 +36,15 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/admin-public/index.html');
 });
 
-// Use centralized database API
-const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
-const BOOKING_API_URL = process.env.BOOKING_API_URL || 'http://booking-service:3002';
-const MAIN_API_URL = process.env.MAIN_API_URL || 'http://main-service:3000';
+// Use centralized database API - EC2 deployment
+const DB_API_URL = process.env.DB_API_URL || 'http://35.154.92.5:3003';
+const BOOKING_API_URL = process.env.BOOKING_API_URL || 'http://35.154.92.5:3002';
+const MAIN_API_URL = process.env.MAIN_API_URL || 'http://35.154.92.5:3000';
+
+console.log('🔗 Admin server API URLs (EC2):');
+console.log('  DB API:', DB_API_URL);
+console.log('  Booking API:', BOOKING_API_URL);
+console.log('  Main API:', MAIN_API_URL);
 
 app.get('/api/resorts', async (req, res) => {
     try {
@@ -171,8 +176,20 @@ app.post('/api/resorts/reorder', async (req, res) => {
 // Event management endpoints
 app.get('/api/events', async (req, res) => {
     try {
-        const response = await fetch(`${DB_API_URL}/api/events`);
-        const events = await response.json();
+        let response;
+        let events;
+        
+        // Try centralized DB API first
+        try {
+            response = await fetch(`${DB_API_URL}/api/events`);
+            events = await response.json();
+        } catch (dbError) {
+            console.log('⚠️ Admin: DB API failed, trying main server fallback');
+            // Fallback to main server
+            response = await fetch(`${MAIN_API_URL}/api/events`);
+            events = await response.json();
+        }
+        
         res.json(events);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch events' });
@@ -181,12 +198,34 @@ app.get('/api/events', async (req, res) => {
 
 app.post('/api/events', async (req, res) => {
     try {
-        const response = await fetch(`${DB_API_URL}/api/events`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(req.body)
-        });
-        const data = await response.json();
+        console.log('🎉 Admin: Creating event with data:', req.body);
+        console.log('🔗 Admin: Using DB API URL:', DB_API_URL);
+        
+        let response;
+        let data;
+        
+        // Try centralized DB API first
+        try {
+            response = await fetch(`${DB_API_URL}/api/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(req.body)
+            });
+            data = await response.json();
+            console.log('📊 Admin: DB API response status:', response.status);
+        } catch (dbError) {
+            console.log('⚠️ Admin: DB API failed, trying main server fallback');
+            // Fallback to main server
+            response = await fetch(`${MAIN_API_URL}/api/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(req.body)
+            });
+            data = await response.json();
+            console.log('📊 Admin: Main server response status:', response.status);
+        }
+        
+        console.log('📊 Admin: Response data:', data);
         
         // Publish event created event
         if (response.ok) {
@@ -195,6 +234,7 @@ app.post('/api/events', async (req, res) => {
                     type: 'event.created',
                     event: data
                 });
+                console.log('📡 Admin: Published event.created to Redis');
             } catch (eventError) {
                 console.error('Redis publish failed:', eventError);
             }
@@ -202,18 +242,34 @@ app.post('/api/events', async (req, res) => {
         
         res.status(response.status).json(data);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to add event' });
+        console.error('❌ Admin: Event creation failed:', error);
+        res.status(500).json({ error: 'Failed to add event', details: error.message });
     }
 });
 
 app.put('/api/events/:id', async (req, res) => {
     try {
-        const response = await fetch(`${DB_API_URL}/api/events/${req.params.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(req.body)
-        });
-        const data = await response.json();
+        let response;
+        let data;
+        
+        // Try centralized DB API first
+        try {
+            response = await fetch(`${DB_API_URL}/api/events/${req.params.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(req.body)
+            });
+            data = await response.json();
+        } catch (dbError) {
+            console.log('⚠️ Admin: DB API failed, trying main server fallback');
+            // Fallback to main server
+            response = await fetch(`${MAIN_API_URL}/api/events/${req.params.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(req.body)
+            });
+            data = await response.json();
+        }
         
         // Publish event updated event
         if (response.ok) {
@@ -235,10 +291,23 @@ app.put('/api/events/:id', async (req, res) => {
 
 app.delete('/api/events/:id', async (req, res) => {
     try {
-        const response = await fetch(`${DB_API_URL}/api/events/${req.params.id}`, {
-            method: 'DELETE'
-        });
-        const data = await response.json();
+        let response;
+        let data;
+        
+        // Try centralized DB API first
+        try {
+            response = await fetch(`${DB_API_URL}/api/events/${req.params.id}`, {
+                method: 'DELETE'
+            });
+            data = await response.json();
+        } catch (dbError) {
+            console.log('⚠️ Admin: DB API failed, trying main server fallback');
+            // Fallback to main server
+            response = await fetch(`${MAIN_API_URL}/api/events/${req.params.id}`, {
+                method: 'DELETE'
+            });
+            data = await response.json();
+        }
         
         // Publish event deleted event
         if (response.ok) {
