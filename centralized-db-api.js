@@ -60,8 +60,7 @@ async function initDB() {
         )
     `);
     
-    // Drop and recreate bookings table with correct schema
-    await db.exec('DROP TABLE IF EXISTS bookings');
+    // Table is created below if it doesn't exist — never drop on startup
     await db.exec(`
         CREATE TABLE bookings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -382,6 +381,47 @@ app.post('/api/events/reorder', async (req, res) => {
         res.json({ message: 'Events reordered successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to reorder events' });
+    }
+});
+
+// GET all event bookings (admin)
+app.get('/api/event-bookings', async (req, res) => {
+    try {
+        const bookings = await db.all('SELECT * FROM event_bookings ORDER BY created_at DESC');
+        res.json(bookings);
+    } catch (error) {
+        console.error('Error fetching event bookings:', error);
+        res.status(500).json({ error: 'Failed to fetch event bookings' });
+    }
+});
+
+// POST create event booking
+app.post('/api/event-bookings', async (req, res) => {
+    try {
+        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId } = req.body;
+        if (!bookingReference || !guestName || !email || !phone || !eventDate || !guests || !totalPrice) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        const result = await db.run(
+            `INSERT INTO event_bookings (booking_reference, event_id, event_name, guest_name, email, phone, event_date, guests, total_price, transaction_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [bookingReference, eventId || null, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId || null]
+        );
+        res.json({ id: result.lastID, bookingReference, message: 'Event booking saved successfully' });
+    } catch (error) {
+        console.error('Error saving event booking:', error);
+        res.status(500).json({ error: 'Failed to save event booking' });
+    }
+});
+
+// PATCH update event booking status (admin)
+app.patch('/api/event-bookings/:id', async (req, res) => {
+    try {
+        const { status } = req.body;
+        await db.run('UPDATE event_bookings SET status = ? WHERE id = ?', [status, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update event booking' });
     }
 });
 

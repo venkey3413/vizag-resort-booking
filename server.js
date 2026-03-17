@@ -492,17 +492,45 @@ app.get('/api/bookings', async (req, res) => {
 // Event bookings endpoint for Telegram notifications
 app.post('/api/event-bookings', async (req, res) => {
     try {
-        const { bookingReference, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId } = req.body;
-        
+        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId } = req.body;
+
+        // Save to DB via centralized API
+        try {
+            const dbResponse = await fetch(`${DB_API_URL}/api/event-bookings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId })
+            });
+            if (!dbResponse.ok) {
+                const err = await dbResponse.json();
+                console.error('❌ Failed to save event booking to DB:', err);
+            } else {
+                console.log('✅ Event booking saved to DB');
+            }
+        } catch (dbError) {
+            console.error('❌ DB API unavailable for event booking:', dbError.message);
+        }
+
         // Send Telegram notification
         try {
-            const message = `🎉 EVENT BOOKING SUBMITTED!\n\n📋 Booking ID: ${bookingReference}\n👤 Guest: ${guestName}\n🎊 Event: ${eventName}\n📅 Date: ${new Date(eventDate).toLocaleDateString()}\n👥 Guests: ${guests}\n💰 Amount: ₹${totalPrice.toLocaleString()}\n🔢 UTR ID: ${transactionId}\n⚠️ Status: Pending Verification\n\n⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
-            
+            const message = `🎉 EVENT BOOKING SUBMITTED!\n\n📋 Booking ID: ${bookingReference}\n👤 Guest: ${guestName}\n🎊 Event: ${eventName}\n📅 Date: ${new Date(eventDate).toLocaleDateString()}\n👥 Guests: ${guests}\n💰 Amount: ₹${parseInt(totalPrice).toLocaleString()}\n🔢 UTR ID: ${transactionId}\n⚠️ Status: Pending Verification\n\n⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
             await sendTelegramNotification(message);
         } catch (telegramError) {
             console.error('Telegram notification failed:', telegramError);
         }
-        
+
+        // Publish Redis event so admin panel updates in real-time
+        try {
+            await redisPubSub.publish('event-events', {
+                type: 'event.booking.created',
+                bookingReference,
+                guestName,
+                eventName
+            });
+        } catch (redisError) {
+            console.error('Redis publish failed:', redisError);
+        }
+
         res.json({ success: true, message: 'Event booking submitted successfully' });
     } catch (error) {
         console.error('Event booking error:', error);

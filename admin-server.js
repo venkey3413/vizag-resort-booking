@@ -587,6 +587,31 @@ app.delete('/api/owners/:id', async (req, res) => {
     }
 });
 
+// Event bookings (view & update status)
+app.get('/api/event-bookings', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/event-bookings`);
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch event bookings' });
+    }
+});
+
+app.patch('/api/event-bookings/:id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/event-bookings/${req.params.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update event booking' });
+    }
+});
+
 (async () => {
     try {
         await redisPubSub.connect();
