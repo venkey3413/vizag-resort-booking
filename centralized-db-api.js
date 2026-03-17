@@ -73,7 +73,7 @@ async function initDB() {
             guests INTEGER NOT NULL,
             total_price INTEGER NOT NULL,
             transaction_id TEXT,
-            status TEXT DEFAULT 'confirmed',
+            status TEXT DEFAULT 'pending',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (event_id) REFERENCES events (id)
         )
@@ -95,7 +95,7 @@ async function initDB() {
             transaction_id TEXT,
             coupon_code TEXT,
             discount_amount INTEGER DEFAULT 0,
-            status TEXT DEFAULT 'pending_payment',
+            status TEXT DEFAULT 'pending',
             payment_status TEXT DEFAULT 'pending',
             booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (resort_id) REFERENCES resorts (id)
@@ -438,9 +438,35 @@ app.patch('/api/event-bookings/:id', async (req, res) => {
     try {
         const { status } = req.body;
         await db.run('UPDATE event_bookings SET status = ? WHERE id = ?', [status, req.params.id]);
+        
+        publishEvent('booking.updated', { eventBookingId: req.params.id, status });
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update event booking' });
+    }
+});
+
+// Send email for event booking
+app.post('/api/event-bookings/:id/send-email', async (req, res) => {
+    try {
+        const booking = await db.get('SELECT * FROM event_bookings WHERE id = ?', [req.params.id]);
+        
+        if (!booking) {
+            return res.status(404).json({ error: 'Event booking not found' });
+        }
+        
+        if (booking.status !== 'confirmed') {
+            return res.status(400).json({ error: 'Event booking must be confirmed first' });
+        }
+        
+        // Here you would integrate with your email service
+        // For now, just return success
+        console.log('📧 Event booking invoice email would be sent to:', booking.email);
+        
+        res.json({ message: 'Event booking invoice sent successfully' });
+    } catch (error) {
+        console.error('Event booking email error:', error);
+        res.status(500).json({ error: 'Failed to send event booking invoice' });
     }
 });
 

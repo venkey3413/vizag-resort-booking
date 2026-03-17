@@ -183,8 +183,8 @@ app.post('/api/bookings/:id/send-email', async (req, res) => {
             return res.status(404).json({ error: 'Booking not found' });
         }
         
-        if (booking.payment_status !== 'paid') {
-            return res.status(400).json({ error: 'Booking must be marked as paid first' });
+        if (booking.status !== 'confirmed') {
+            return res.status(400).json({ error: 'Booking must be confirmed first' });
         }
         
         // Send email
@@ -198,6 +198,21 @@ app.post('/api/bookings/:id/send-email', async (req, res) => {
     } catch (error) {
         console.error('Manual email error:', error);
         res.status(500).json({ error: 'Failed to send email' });
+    }
+});
+
+// Event booking email endpoint
+app.post('/api/event-bookings/:id/send-email', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/event-bookings/${req.params.id}/send-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        res.status(response.status).json(result);
+    } catch (error) {
+        console.error('Event booking email error:', error);
+        res.status(500).json({ error: 'Failed to send event booking email' });
     }
 });
 

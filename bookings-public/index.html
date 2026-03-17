@@ -33,6 +33,18 @@
         .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .stat-number { font-size: 24px; font-weight: bold; color: #667eea; }
         .stat-label { color: #666; margin-top: 5px; }
+        
+        .booking-actions { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .booking-actions button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-confirm { background: #28a745; color: white; }
+        .btn-confirm:hover { background: #218838; }
+        .btn-invoice { background: #007bff; color: white; }
+        .btn-invoice:hover { background: #0056b3; }
+        .btn-cancel { background: #dc3545; color: white; }
+        .btn-cancel:hover { background: #c82333; }
+        .status.confirmed { background: #d4edda; color: #155724; }
+        .status.pending { background: #fff3cd; color: #856404; }
+        .status.cancelled { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -124,7 +136,7 @@
                 <div class="booking-card">
                     <div class="booking-header">
                         <div class="booking-id">Booking #${booking.booking_reference || 'RB' + String(booking.id).padStart(6, '0')}</div>
-                        <div class="status ${booking.payment_status}">${booking.payment_status.toUpperCase()}</div>
+                        <div class="status ${booking.status || 'pending'}">${(booking.status || 'PENDING FOR CONFIRMATION').toUpperCase()}</div>
                     </div>
                     <div class="booking-details">
                         <div class="detail-item">
@@ -157,8 +169,13 @@
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Booking Date</div>
-                            <div class="detail-value">${new Date(booking.created_at).toLocaleDateString()}</div>
+                            <div class="detail-value">${new Date(booking.created_at || booking.booking_date).toLocaleDateString()}</div>
                         </div>
+                    </div>
+                    <div class="booking-actions">
+                        ${booking.status !== 'confirmed' ? `<button class="btn-confirm" onclick="confirmBooking('resort', ${booking.id})">Confirm</button>` : ''}
+                        ${booking.status === 'confirmed' ? `<button class="btn-invoice" onclick="sendInvoice('resort', ${booking.id})">Send Invoice</button>` : ''}
+                        <button class="btn-cancel" onclick="cancelBooking('resort', ${booking.id})">Cancel</button>
                     </div>
                 </div>
             `).join('');
@@ -176,7 +193,7 @@
                 <div class="booking-card">
                     <div class="booking-header">
                         <div class="booking-id">Event Booking #${booking.booking_reference || 'EB' + String(booking.id).padStart(6, '0')}</div>
-                        <div class="status ${booking.status || 'confirmed'}">${(booking.status || 'confirmed').toUpperCase()}</div>
+                        <div class="status ${booking.status || 'pending'}">${(booking.status || 'PENDING FOR CONFIRMATION').toUpperCase()}</div>
                     </div>
                     <div class="booking-details">
                         <div class="detail-item">
@@ -211,6 +228,11 @@
                             <div class="detail-label">Booking Date</div>
                             <div class="detail-value">${new Date(booking.created_at).toLocaleDateString()}</div>
                         </div>
+                    </div>
+                    <div class="booking-actions">
+                        ${booking.status !== 'confirmed' ? `<button class="btn-confirm" onclick="confirmBooking('event', ${booking.id})">Confirm</button>` : ''}
+                        ${booking.status === 'confirmed' ? `<button class="btn-invoice" onclick="sendInvoice('event', ${booking.id})">Send Invoice</button>` : ''}
+                        <button class="btn-cancel" onclick="cancelBooking('event', ${booking.id})">Cancel</button>
                     </div>
                 </div>
             `).join('');
@@ -269,6 +291,80 @@
         // Initialize
         loadBookings();
         connectToRealTimeUpdates();
+        
+        // Booking action functions
+        async function confirmBooking(type, bookingId) {
+            if (!confirm('Are you sure you want to confirm this booking?')) return;
+            
+            try {
+                const endpoint = type === 'resort' ? `/api/bookings/${bookingId}` : `/api/event-bookings/${bookingId}`;
+                const method = type === 'resort' ? 'PUT' : 'PATCH';
+                
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'confirmed' })
+                });
+                
+                if (response.ok) {
+                    alert('Booking confirmed successfully!');
+                    loadBookings(); // Refresh the list
+                } else {
+                    alert('Failed to confirm booking');
+                }
+            } catch (error) {
+                console.error('Error confirming booking:', error);
+                alert('Error confirming booking');
+            }
+        }
+        
+        async function cancelBooking(type, bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking?')) return;
+            
+            try {
+                const endpoint = type === 'resort' ? `/api/bookings/${bookingId}` : `/api/event-bookings/${bookingId}`;
+                const method = type === 'resort' ? 'PUT' : 'PATCH';
+                
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+                
+                if (response.ok) {
+                    alert('Booking cancelled successfully!');
+                    loadBookings(); // Refresh the list
+                } else {
+                    alert('Failed to cancel booking');
+                }
+            } catch (error) {
+                console.error('Error cancelling booking:', error);
+                alert('Error cancelling booking');
+            }
+        }
+        
+        async function sendInvoice(type, bookingId) {
+            if (!confirm('Send invoice to customer?')) return;
+            
+            try {
+                const endpoint = type === 'resort' ? `/api/bookings/${bookingId}/send-email` : `/api/event-bookings/${bookingId}/send-email`;
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    alert('Invoice sent successfully!');
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to send invoice: ${error.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error sending invoice:', error);
+                alert('Error sending invoice');
+            }
+        }
     </script>
 </body>
 </html>
