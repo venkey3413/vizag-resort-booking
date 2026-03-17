@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const path = require('path');
 // Use centralized database API - EC2 Docker service name
 const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
 console.log('🔗 Main server using DB API URL:', DB_API_URL);
@@ -44,6 +45,15 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static('public'));
+
+// Clean URL routing
+app.get('/events', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'events.html'));
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Routes - all database operations via centralized API
 app.get('/api/resorts', async (req, res) => {
