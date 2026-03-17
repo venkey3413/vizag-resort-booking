@@ -60,9 +60,28 @@ async function initDB() {
         )
     `);
     
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS event_bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            booking_reference TEXT NOT NULL,
+            event_id INTEGER,
+            event_name TEXT NOT NULL,
+            guest_name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            event_date DATE NOT NULL,
+            guests INTEGER NOT NULL,
+            total_price INTEGER NOT NULL,
+            transaction_id TEXT,
+            status TEXT DEFAULT 'confirmed',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (event_id) REFERENCES events (id)
+        )
+    `);
+    
     // Table is created below if it doesn't exist — never drop on startup
     await db.exec(`
-        CREATE TABLE bookings (
+        CREATE TABLE IF NOT EXISTS bookings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             resort_id INTEGER,
             guest_name TEXT NOT NULL,
