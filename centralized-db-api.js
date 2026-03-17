@@ -63,20 +63,19 @@ async function initDB() {
     await db.exec(`
         CREATE TABLE IF NOT EXISTS event_bookings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            booking_reference TEXT NOT NULL,
+            booking_reference TEXT UNIQUE NOT NULL,
             event_id INTEGER,
             event_name TEXT NOT NULL,
             guest_name TEXT NOT NULL,
             email TEXT NOT NULL,
             phone TEXT NOT NULL,
-            event_date DATE NOT NULL,
+            event_date TEXT NOT NULL,
             guests INTEGER NOT NULL,
             total_price INTEGER NOT NULL,
             transaction_id TEXT,
             payment_method TEXT DEFAULT 'upi',
-            status TEXT DEFAULT 'pending',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (event_id) REFERENCES events (id)
+            status TEXT DEFAULT 'pending_verification',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
     
