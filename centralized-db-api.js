@@ -417,14 +417,14 @@ app.get('/api/event-bookings', async (req, res) => {
 // POST create event booking
 app.post('/api/event-bookings', async (req, res) => {
     try {
-        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId, paymentMethod } = req.body;
+        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId } = req.body;
         if (!bookingReference || !guestName || !email || !phone || !eventDate || !guests || !totalPrice) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
         const result = await db.run(
-            `INSERT INTO event_bookings (booking_reference, event_id, event_name, guest_name, email, phone, event_date, guests, total_price, transaction_id, payment_method)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [bookingReference, eventId || null, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId || null, paymentMethod || 'upi']
+            `INSERT INTO event_bookings (booking_reference, event_id, event_name, guest_name, email, phone, event_date, guests, total_price, transaction_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [bookingReference, eventId || null, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId || null]
         );
         
         publishEvent('booking.added', { eventBookingId: result.lastID, ...req.body });
