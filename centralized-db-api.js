@@ -319,7 +319,7 @@ app.delete('/api/resorts/:id', async (req, res) => {
 // EVENTS API
 app.get('/api/events', async (req, res) => {
     try {
-        const events = await db.all('SELECT * FROM events ORDER BY sort_order ASC, id ASC');
+        const events = await db.all('SELECT * FROM events WHERE available = 1 ORDER BY sort_order ASC, id ASC');
         res.json(events);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch events' });

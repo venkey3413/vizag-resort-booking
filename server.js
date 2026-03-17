@@ -124,22 +124,8 @@ app.post('/api/events', async (req, res) => {
                 throw new Error('DB API failed');
             }
         } catch (dbError) {
-            console.log('⚠️ DB API unavailable, using fallback');
-            // Fallback: return success for admin panel
-            const eventId = Date.now();
-            const result = { id: eventId, message: 'Event created successfully (fallback)' };
-            
-            // Publish event created event via Redis
-            try {
-                await redisPubSub.publish('event-events', {
-                    type: 'event.created',
-                    event: { id: eventId, ...req.body }
-                });
-            } catch (eventError) {
-                console.error('Redis publish failed:', eventError);
-            }
-            
-            res.json(result);
+            console.log('❌ DB API unavailable - cannot create event:', dbError.message);
+            return res.status(503).json({ error: 'Database unavailable. Please ensure the database service is running.' });
         }
     } catch (error) {
         console.error('❌ Event creation error:', error);

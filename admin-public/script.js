@@ -1174,6 +1174,19 @@ function displayEvents() {
             </div>
         `;
     }).join('');
+    
+    // Populate sortable drag-and-drop list
+    const sortable = document.getElementById('sortableEvents');
+    if (sortable) {
+        sortable.innerHTML = events.map(event => `
+            <div class="sortable-item" data-id="${event.id}" draggable="true">
+                <span class="drag-handle">⁇</span>
+                <span>${event.name} — ${event.location}</span>
+            </div>
+        `).join('');
+        const saveBtn = document.getElementById('saveEventOrderBtn');
+        if (saveBtn) saveBtn.style.display = 'inline-block';
+    }
 }
 
 async function handleEventSubmit(e) {
