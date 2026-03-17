@@ -75,8 +75,9 @@ services:
       - NODE_ENV=production
       - REDIS_URL=redis://redis:6379
     volumes:
-      - db-data:/app
-      - ./resort_booking.db:/app/resort_booking.db
+      - .:/app                              # bind mount so live code is used
+      - /app/node_modules                   # keep node_modules from image
+      - ./resort_booking.db:/app/resort_booking.db  # persist the database
     depends_on:
       - redis
 
