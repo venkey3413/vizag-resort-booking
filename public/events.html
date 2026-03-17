@@ -1005,7 +1005,7 @@
         });
         
         if (response.ok) {
-          // Show success message
+          // Show success message and close modal
           showPaymentSuccess(booking, paymentId);
         } else {
           throw new Error('Failed to save booking');
@@ -1019,31 +1019,12 @@
     function showPaymentSuccess(booking, paymentId) {
       closeEventPaymentModal();
       
-      // Create success modal
-      const successModal = document.createElement('div');
-      successModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:10002;display:flex;align-items:center;justify-content:center;';
-      successModal.innerHTML = `
-        <div style="background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);padding:3rem;border-radius:20px;max-width:500px;width:90%;text-align:center;box-shadow:0 25px 50px rgba(0,0,0,0.25);">
-          <div style="color:#00b894;font-size:4rem;margin-bottom:1rem;">✅</div>
-          <h2 style="font-family:'Playfair Display',serif;font-weight:700;color:#2c3e50;margin-bottom:1rem;">Payment Successful!</h2>
-          <p style="font-family:'Inter',sans-serif;color:#64748b;margin-bottom:1.5rem;">Your event booking has been confirmed.</p>
-          
-          <div style="background:#f0f9ff;padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;text-align:left;">
-            <p style="font-family:'Inter',sans-serif;margin-bottom:0.5rem;"><strong>Booking ID:</strong> ${booking.bookingReference}</p>
-            <p style="font-family:'Inter',sans-serif;margin-bottom:0.5rem;"><strong>Payment ID:</strong> ${paymentId}</p>
-            <p style="font-family:'Inter',sans-serif;margin-bottom:0.5rem;"><strong>Event:</strong> ${booking.eventName}</p>
-            <p style="font-family:'Inter',sans-serif;"><strong>Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
-          </div>
-          
-          <p style="font-family:'Inter',sans-serif;color:#64748b;font-size:0.9rem;margin-bottom:1.5rem;">You will receive confirmation via email and WhatsApp shortly.</p>
-          
-          <button onclick="this.parentElement.parentElement.remove()" style="background:linear-gradient(135deg, #667eea, #764ba2);color:white;border:none;padding:1rem 2rem;border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">
-            Continue
-          </button>
-        </div>
-      `;
-      
-      document.body.appendChild(successModal);
+      // Show success notification like resort booking
+      showSuccessNotification(
+        'Event Booking Confirmed!',
+        `Your event booking has been submitted successfully. Booking ID: ${booking.bookingReference}`,
+        'success'
+      );
       
       // Send WhatsApp message
       setTimeout(() => {
@@ -1051,6 +1032,63 @@
         const whatsappUrl = `https://wa.me/918341674465?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
       }, 2000);
+    }
+    
+    // Success notification function (similar to resort booking)
+    function showSuccessNotification(title, message, type = 'success') {
+      // Remove any existing notifications
+      const existingNotification = document.querySelector('.vrb-notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = 'vrb-notification';
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        z-index: 10003;
+        max-width: 400px;
+        font-family: 'Inter', sans-serif;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      `;
+      
+      notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+          <div style="font-size: 1.5rem;">✅</div>
+          <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">${title}</h3>
+        </div>
+        <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">${message}</p>
+        <div style="margin-top: 12px; text-align: right;">
+          <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Close</button>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Animate in
+      setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+      }, 100);
+      
+      // Auto remove after 8 seconds
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.style.transform = 'translateX(100%)';
+          setTimeout(() => {
+            if (notification.parentElement) {
+              notification.remove();
+            }
+          }, 300);
+        }
+      }, 8000);
     }
 
     function closeEventPaymentModal() {
@@ -1094,6 +1132,7 @@
         });
         
         if (response.ok) {
+          // Show success message and close modal
           showPaymentSuccess(booking, transactionId);
         } else {
           throw new Error('Failed to save booking');
@@ -1161,6 +1200,19 @@
       
       // Setup Redis sync after a delay
       setTimeout(setupRedisSync, 1000);
+      
+      // Setup modal close on outside click
+      document.addEventListener('click', function(e) {
+        const modal = document.getElementById('eventBookingModal');
+        if (modal && e.target === modal) {
+          closeEventModal();
+        }
+        
+        const paymentModal = document.querySelector('div[style*="z-index:10001"]');
+        if (paymentModal && e.target === paymentModal) {
+          closeEventPaymentModal();
+        }
+      });
       
       // Scroll animations
       const observerOptions = {
