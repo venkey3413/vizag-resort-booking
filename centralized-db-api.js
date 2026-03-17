@@ -472,6 +472,17 @@ app.post('/api/event-bookings/:id/send-email', async (req, res) => {
     }
 });
 
+// DELETE event booking endpoint
+app.delete('/api/event-bookings/:id', async (req, res) => {
+    try {
+        await db.run('DELETE FROM event_bookings WHERE id = ?', [req.params.id]);
+        publishEvent('booking.deleted', { eventBookingId: req.params.id });
+        res.json({ message: 'Event booking deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete event booking' });
+    }
+});
+
 // BOOKINGS API
 app.get('/api/bookings', async (req, res) => {
     try {

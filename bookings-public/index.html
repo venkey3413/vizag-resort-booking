@@ -614,6 +614,7 @@ function renderEventBookings() {
                 ${!status.includes('cancel') ? `<button class="btn btn-cancel" onclick="cancelEvent(${b.id}, this)">✕ Cancel</button>` : ''}
                 ${isConfirmed ? `<button class="btn btn-email" onclick="sendEventEmail(${b.id}, this)">✉ Send Email</button>` : ''}
                 <a class="btn btn-whatsapp" href="https://wa.me/${(b.phone||'').replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>
+                <button class="btn btn-delete" onclick="deleteEvent(${b.id}, this)">🗑 Delete</button>
             </div>
         </div>`;
     }).join('');
@@ -679,6 +680,19 @@ async function loadAll() {
     } catch (e) {
         console.error('Load error:', e);
         document.getElementById('resort-list').innerHTML = '<div class="empty">Failed to load. Check server connection.</div>';
+    }
+}
+
+async function deleteEvent(id, btn) {
+    if (!confirm('Permanently delete this event booking?')) return;
+    btn.disabled = true;
+    try {
+        await fetch(`/api/event-bookings/${id}`, { method: 'DELETE' });
+        showToast('Event booking deleted');
+        await loadAll();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+        btn.disabled = false;
     }
 }
 
