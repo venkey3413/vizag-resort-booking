@@ -74,7 +74,7 @@ async function initDB() {
             total_price INTEGER NOT NULL,
             transaction_id TEXT,
             payment_method TEXT DEFAULT 'upi',
-            status TEXT DEFAULT 'pending_verification',
+            status TEXT DEFAULT 'pending',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
