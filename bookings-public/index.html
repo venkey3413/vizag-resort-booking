@@ -84,26 +84,28 @@
         
         async function loadBookings() {
             try {
-                const response = await fetch('/api/bookings');
-                const allBookings = await response.json();
-                
-                // Separate resort and event bookings
-                resortBookings = allBookings.filter(b => !b.event_id);
-                eventBookings = allBookings.filter(b => b.event_id);
-                
+                // Fetch resort bookings and event bookings separately
+                const [resortRes, eventRes] = await Promise.all([
+                    fetch('/api/bookings'),
+                    fetch('/api/event-bookings')
+                ]);
+
+                resortBookings = await resortRes.json();
+                eventBookings = await eventRes.json();
+
                 displayResortBookings(resortBookings);
                 displayEventBookings(eventBookings);
                 updateStats();
             } catch (error) {
                 document.getElementById('resort-bookings').innerHTML = '<div class="loading">Error loading bookings</div>';
-                document.getElementById('event-bookings').innerHTML = '<div class="loading">Error loading bookings</div>';
+                document.getElementById('event-bookings').innerHTML = '<div class="loading">Error loading event bookings</div>';
             }
         }
         
         function updateStats() {
             const totalRevenue = [...resortBookings, ...eventBookings]
                 .filter(b => b.payment_status === 'paid')
-                .reduce((sum, b) => sum + parseFloat(b.total_amount || 0), 0);
+                .reduce((sum, b) => sum + parseFloat(b.total_price || b.total_amount || 0), 0);
                 
             document.getElementById('total-resort-bookings').textContent = resortBookings.length;
             document.getElementById('total-event-bookings').textContent = eventBookings.length;
@@ -143,7 +145,7 @@
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Total Amount</div>
-                            <div class="detail-value">₹${booking.total_amount}</div>
+                            <div class="detail-value">₹${parseInt(booking.total_price || 0).toLocaleString()}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Phone</div>
@@ -174,7 +176,7 @@
                 <div class="booking-card">
                     <div class="booking-header">
                         <div class="booking-id">Event Booking #${booking.booking_reference || 'EB' + String(booking.id).padStart(6, '0')}</div>
-                        <div class="status ${booking.payment_status}">${booking.payment_status.toUpperCase()}</div>
+                        <div class="status ${booking.status || 'confirmed'}">${(booking.status || 'confirmed').toUpperCase()}</div>
                     </div>
                     <div class="booking-details">
                         <div class="detail-item">
@@ -187,15 +189,15 @@
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Event Date</div>
-                            <div class="detail-value">${new Date(booking.event_date || booking.check_in).toLocaleDateString()}</div>
+                            <div class="detail-value">${booking.event_date ? new Date(booking.event_date).toLocaleDateString() : 'N/A'}</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-label">Event Type</div>
-                            <div class="detail-value">${booking.event_type || 'N/A'}</div>
+                            <div class="detail-label">Guests</div>
+                            <div class="detail-value">${booking.guests || 'N/A'}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Total Amount</div>
-                            <div class="detail-value">₹${booking.total_amount}</div>
+                            <div class="detail-value">₹${parseInt(booking.total_price || 0).toLocaleString()}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Phone</div>

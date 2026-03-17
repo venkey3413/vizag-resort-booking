@@ -96,6 +96,17 @@ app.get('/api/bookings', async (req, res) => {
     }
 });
 
+app.get('/api/event-bookings', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/event-bookings`);
+        const bookings = await response.json();
+        res.json(bookings);
+    } catch (error) {
+        console.error('Event bookings fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch event bookings' });
+    }
+});
+
 app.put('/api/bookings/:id/payment', async (req, res) => {
     try {
         const id = req.params.id;
