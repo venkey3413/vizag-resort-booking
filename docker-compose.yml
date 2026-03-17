@@ -37,6 +37,8 @@ services:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
       - DB_API_URL=http://centralized-db-api:3003
+      - MAIN_API_URL=http://main-service:3000
+      - BOOKING_API_URL=http://booking-service:3002
     volumes:
       - .:/app
       - /app/node_modules
