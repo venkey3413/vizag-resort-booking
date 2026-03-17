@@ -54,6 +54,7 @@ async function initDB() {
             amenities TEXT,
             note TEXT,
             max_guests INTEGER,
+            slot_timings TEXT,
             sort_order INTEGER DEFAULT 0,
             available INTEGER DEFAULT 1,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -70,6 +71,7 @@ async function initDB() {
             email TEXT NOT NULL,
             phone TEXT NOT NULL,
             event_date TEXT NOT NULL,
+            event_time TEXT,
             guests INTEGER NOT NULL,
             total_price INTEGER NOT NULL,
             transaction_id TEXT,
@@ -349,11 +351,11 @@ app.post('/api/events', async (req, res) => {
     try {
         console.log('Creating event with data:', req.body);
         const result = await db.run(`
-            INSERT INTO events (name, location, price, event_type, description, image, gallery, videos, map_link, amenities, note, max_guests, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO events (name, location, price, event_type, description, image, gallery, videos, map_link, amenities, note, max_guests, slot_timings, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [req.body.name, req.body.location, req.body.price, req.body.event_type, req.body.description, 
             req.body.image || '', req.body.gallery || '', req.body.videos || '', req.body.map_link || '', 
-            req.body.amenities || '', req.body.note || '', req.body.max_guests || null, req.body.sort_order || 0]);
+            req.body.amenities || '', req.body.note || '', req.body.max_guests || null, req.body.slot_timings || '', req.body.sort_order || 0]);
         
         publishEvent('event.created', { eventId: result.lastID, ...req.body });
         res.json({ id: result.lastID, message: 'Event created successfully' });
@@ -366,10 +368,10 @@ app.post('/api/events', async (req, res) => {
 app.put('/api/events/:id', async (req, res) => {
     try {
         await db.run(`
-            UPDATE events SET name=?, location=?, price=?, event_type=?, description=?, image=?, gallery=?, videos=?, map_link=?, amenities=?, note=?, max_guests=?
+            UPDATE events SET name=?, location=?, price=?, event_type=?, description=?, image=?, gallery=?, videos=?, map_link=?, amenities=?, note=?, max_guests=?, slot_timings=?
             WHERE id=?
         `, [req.body.name, req.body.location, req.body.price, req.body.event_type, req.body.description,
-            req.body.image, req.body.gallery, req.body.videos, req.body.map_link, req.body.amenities, req.body.note, req.body.max_guests, req.params.id]);
+            req.body.image, req.body.gallery, req.body.videos, req.body.map_link, req.body.amenities, req.body.note, req.body.max_guests, req.body.slot_timings, req.params.id]);
         
         publishEvent('event.updated', { eventId: req.params.id, ...req.body });
         res.json({ message: 'Event updated successfully' });
@@ -417,14 +419,14 @@ app.get('/api/event-bookings', async (req, res) => {
 // POST create event booking
 app.post('/api/event-bookings', async (req, res) => {
     try {
-        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId } = req.body;
+        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, eventTime, guests, totalPrice, transactionId } = req.body;
         if (!bookingReference || !guestName || !email || !phone || !eventDate || !guests || !totalPrice) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
         const result = await db.run(
-            `INSERT INTO event_bookings (booking_reference, event_id, event_name, guest_name, email, phone, event_date, guests, total_price, transaction_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [bookingReference, eventId || null, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId || null]
+            `INSERT INTO event_bookings (booking_reference, event_id, event_name, guest_name, email, phone, event_date, event_time, guests, total_price, transaction_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [bookingReference, eventId || null, eventName, guestName, email, phone, eventDate, eventTime || null, guests, totalPrice, transactionId || null]
         );
         
         publishEvent('booking.added', { eventBookingId: result.lastID, ...req.body });

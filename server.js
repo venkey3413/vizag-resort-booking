@@ -488,7 +488,7 @@ app.get('/api/bookings', async (req, res) => {
 // Event bookings endpoint for Telegram notifications
 app.post('/api/event-bookings', async (req, res) => {
     try {
-        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId, paymentMethod } = req.body;
+        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, eventTime, guests, totalPrice, transactionId, paymentMethod } = req.body;
 
         // Save to DB via centralized API
         try {
@@ -503,6 +503,7 @@ app.post('/api/event-bookings', async (req, res) => {
                     email, 
                     phone, 
                     eventDate, 
+                    eventTime: eventTime || null,
                     guests, 
                     totalPrice, 
                     transactionId: transactionId || null,
@@ -522,7 +523,7 @@ app.post('/api/event-bookings', async (req, res) => {
 
         // Send Telegram notification
         try {
-            const message = `🎉 EVENT BOOKING SUBMITTED!\n\n📋 Booking ID: ${bookingReference}\n👤 Guest: ${guestName}\n🎊 Event: ${eventName}\n📅 Date: ${new Date(eventDate).toLocaleDateString()}\n👥 Guests: ${guests}\n💰 Amount: ₹${parseInt(totalPrice).toLocaleString()}\n🔢 UTR ID: ${transactionId || 'Pending'}\n⚠️ Status: Pending Verification\n\n⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            const message = `🎉 EVENT BOOKING SUBMITTED!\n\n📋 Booking ID: ${bookingReference}\n👤 Guest: ${guestName}\n🎊 Event: ${eventName}\n📅 Date: ${new Date(eventDate).toLocaleDateString()}\n${eventTime ? `🕐 Time: ${eventTime}\n` : ''}👥 Guests: ${guests}\n💰 Amount: ₹${parseInt(totalPrice).toLocaleString()}\n🔢 UTR ID: ${transactionId || 'Pending'}\n⚠️ Status: Pending Verification\n\n⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
             await sendTelegramNotification(message);
         } catch (telegramError) {
             console.error('Telegram notification failed:', telegramError);

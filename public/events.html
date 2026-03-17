@@ -526,6 +526,14 @@
                 <span><i class="fas fa-users"></i> ${event.max_guests ? event.max_guests + ' Max' : 'Flexible'}</span>
               </div>
               
+              ${event.slot_timings ? `
+                <div class="vrb-tags">
+                  <span><i class="fas fa-clock"></i> Available Slots</span>
+                  ${event.slot_timings.split('\n').filter(slot => slot.trim()).slice(0, 2).map(slot => `<span><i class="fas fa-time"></i> ${slot.trim()}</span>`).join('')}
+                  ${event.slot_timings.split('\n').filter(slot => slot.trim()).length > 2 ? '<span>+ More slots</span>' : ''}
+                </div>
+              ` : ''}
+              
               ${amenitiesList.length > 0 ? `
                 <div class="vrb-tags">
                   ${amenitiesList.map(amenity => `<span><i class="fas fa-check"></i> ${amenity.trim()}</span>`).join('')}
@@ -686,6 +694,13 @@
                 <input type="date" id="eventDate" style="width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;font-family:'Inter',sans-serif;transition:all 0.3s ease;" required>
               </div>
               
+              <div id="eventTimeSlotContainer" style="margin-bottom:1.5rem;display:none;">
+                <label style="font-family:'Inter',sans-serif;font-weight:600;color:#374151;display:block;margin-bottom:6px;"><i class="fas fa-clock" style="color:#667eea;margin-right:6px;"></i>Select Time Slot:</label>
+                <select id="eventTimeSlot" style="width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;font-family:'Inter',sans-serif;transition:all 0.3s ease;" required>
+                  <option value="">Choose a time slot</option>
+                </select>
+              </div>
+              
               <div style="background:linear-gradient(135deg, #f8fafc, #e2e8f0);padding:1.5rem;border-radius:15px;margin-bottom:1.5rem;border:1px solid #cbd5e1;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
                   <span style="font-family:'Inter',sans-serif;font-weight:500;color:#64748b;"><i class="fas fa-tag" style="margin-right:6px;"></i>Event Price:</span>
@@ -751,6 +766,23 @@
       document.getElementById('eventDate').min = today;
       document.getElementById('eventDate').value = today;
       
+      // Populate time slots if available
+      const timeSlotContainer = document.getElementById('eventTimeSlotContainer');
+      const timeSlotSelect = document.getElementById('eventTimeSlot');
+      
+      if (event.slot_timings && event.slot_timings.trim()) {
+        const slots = event.slot_timings.split('\n').filter(slot => slot.trim());
+        if (slots.length > 0) {
+          timeSlotContainer.style.display = 'block';
+          timeSlotSelect.innerHTML = '<option value="">Choose a time slot</option>' + 
+            slots.map(slot => `<option value="${slot.trim()}">${slot.trim()}</option>`).join('');
+        } else {
+          timeSlotContainer.style.display = 'none';
+        }
+      } else {
+        timeSlotContainer.style.display = 'none';
+      }
+      
       calculateEventTotal();
       
       // Show modal with animation
@@ -798,6 +830,7 @@
         email: document.getElementById('eventEmail').value,
         phone: document.getElementById('eventPhone').value,
         eventDate: document.getElementById('eventDate').value,
+        eventTime: document.getElementById('eventTimeSlot').value || null,
         guests: document.getElementById('eventGuests').value
       };
       
@@ -997,6 +1030,7 @@
             email: booking.email,
             phone: booking.phone,
             eventDate: booking.eventDate,
+            eventTime: booking.eventTime,
             guests: booking.guests,
             totalPrice: booking.totalPrice,
             transactionId: paymentId,
@@ -1124,6 +1158,7 @@
             email: booking.email,
             phone: booking.phone,
             eventDate: booking.eventDate,
+            eventTime: booking.eventTime,
             guests: booking.guests,
             totalPrice: amount,
             transactionId: transactionId,

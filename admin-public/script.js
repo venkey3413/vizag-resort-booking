@@ -1204,6 +1204,7 @@ async function handleEventSubmit(e) {
         event_type: document.getElementById('eventType').value,
         description: document.getElementById('eventDescription').value || '',
         amenities: document.getElementById('eventAmenities').value || '',
+        slot_timings: document.getElementById('eventSlotTimings').value || '',
         note: document.getElementById('eventNote').value || '',
         max_guests: parseInt(document.getElementById('eventMaxGuests').value) || null,
         image: document.getElementById('eventImage').value || 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400',
@@ -1264,6 +1265,7 @@ function editEvent(id) {
     document.getElementById('eventType').value = event.event_type || 'birthday';
     document.getElementById('eventDescription').value = event.description;
     document.getElementById('eventAmenities').value = event.amenities || '';
+    document.getElementById('eventSlotTimings').value = event.slot_timings || '';
     document.getElementById('eventNote').value = event.note || '';
     document.getElementById('eventMaxGuests').value = event.max_guests || '';
     document.getElementById('eventImage').value = event.image;
