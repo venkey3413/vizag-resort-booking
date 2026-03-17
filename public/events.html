@@ -12,6 +12,9 @@
   
   <!-- ✅ Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- ✅ Razorpay Checkout -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <!-- ✅ Load Premium UI -->
   <link rel="stylesheet" href="premium-ui.css" />
@@ -845,42 +848,68 @@
 
     function showEventPaymentInterface(booking) {
       const modal = document.createElement('div');
-      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10001;display:flex;align-items:center;justify-content:center;';
+      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:10001;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s ease;';
       modal.innerHTML = `
-        <div style="background:white;padding:2rem;border-radius:10px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
-          <h2>💳 Complete Payment</h2>
-          <div style="background:#f8f9fa;padding:1rem;border-radius:5px;margin-bottom:1rem;">
-            <h3>${booking.eventName}</h3>
-            <p><strong>Booking ID:</strong> ${booking.bookingReference}</p>
-            <p><strong>Guest:</strong> ${booking.guestName}</p>
-            <p><strong>Event Date:</strong> ${new Date(booking.eventDate).toLocaleDateString()}</p>
-            <p><strong>Guests:</strong> ${booking.guests}</p>
-            <p><strong>Total Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
+        <div style="background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);padding:2.5rem;border-radius:20px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.2);transform:scale(0.9);transition:transform 0.3s ease;">
+          <div style="text-align:center;margin-bottom:2rem;">
+            <h2 style="font-family:'Playfair Display',serif;font-weight:700;color:#2c3e50;margin-bottom:0.5rem;">💳 Complete Payment</h2>
+            <p style="font-family:'Inter',sans-serif;color:#64748b;">Choose your preferred payment method</p>
           </div>
           
-          <div style="margin-bottom:1rem;">
-            <h4>Pay via UPI</h4>
-            <div style="background:#e8f5e8;padding:1rem;border-radius:5px;margin-bottom:1rem;">
-              <p><strong>UPI ID:</strong> venkatesh3413@paytm</p>
-              <p><strong>Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
-              <p><strong>Note:</strong> ${booking.bookingReference} - ${booking.guestName}</p>
+          <div style="background:linear-gradient(135deg, #667eea10, #764ba210);padding:1.5rem;border-radius:15px;margin-bottom:2rem;border:1px solid rgba(102,126,234,0.1);">
+            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:#2c3e50;margin-bottom:1rem;">${booking.eventName}</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-family:'Inter',sans-serif;font-size:0.9rem;">
+              <div><strong>Booking ID:</strong> ${booking.bookingReference}</div>
+              <div><strong>Guest:</strong> ${booking.guestName}</div>
+              <div><strong>Event Date:</strong> ${new Date(booking.eventDate).toLocaleDateString()}</div>
+              <div><strong>Guests:</strong> ${booking.guests}</div>
             </div>
-            
-            <div style="text-align:center;margin-bottom:1rem;">
-              <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;border-radius:8px;">
-              <p>Scan QR code or use UPI ID above</p>
+            <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(102,126,234,0.2);text-align:center;">
+              <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.5rem;color:#667eea;">Total: ₹${booking.totalPrice.toLocaleString()}</span>
             </div>
-            
-            <div>
-              <label>Enter Transaction ID (UTR):</label>
-              <input type="text" id="eventTransactionId" placeholder="Enter 12-digit UTR ID" maxlength="12" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:5px;margin-bottom:1rem;">
-              <button onclick="confirmEventPayment('${booking.bookingReference}', ${booking.totalPrice})" style="width:100%;background:#28a745;color:white;border:none;padding:1rem;border-radius:5px;cursor:pointer;font-size:1rem;">
-                ✅ Confirm Payment
+          </div>
+          
+          <!-- Payment Method Selection -->
+          <div style="margin-bottom:2rem;">
+            <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;color:#374151;margin-bottom:1rem;">Select Payment Method:</h4>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <button id="razorpayBtn" onclick="payWithRazorpay()" style="padding:1rem;border:2px solid #667eea;border-radius:12px;background:linear-gradient(135deg, #667eea, #764ba2);color:white;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(102,126,234,0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                <i class="fas fa-credit-card"></i> Pay with Razorpay
+              </button>
+              <button onclick="showUPIPayment()" style="padding:1rem;border:2px solid #00b894;border-radius:12px;background:linear-gradient(135deg, #00b894, #00a085);color:white;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,184,148,0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                <i class="fas fa-mobile-alt"></i> Pay via UPI
               </button>
             </div>
           </div>
           
-          <button onclick="closeEventPaymentModal()" style="width:100%;background:#6c757d;color:white;border:none;padding:0.5rem;border-radius:5px;cursor:pointer;">Cancel</button>
+          <!-- UPI Payment Section (Initially Hidden) -->
+          <div id="upiPaymentSection" style="display:none;margin-bottom:2rem;">
+            <div style="background:#e8f5e8;padding:1.5rem;border-radius:12px;margin-bottom:1rem;border:1px solid #00b894;">
+              <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;color:#00a085;margin-bottom:1rem;">UPI Payment Details</h4>
+              <div style="font-family:'Inter',sans-serif;color:#2d3748;">
+                <p style="margin-bottom:0.5rem;"><strong>UPI ID:</strong> venkatesh3413@paytm</p>
+                <p style="margin-bottom:0.5rem;"><strong>Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
+                <p><strong>Note:</strong> ${booking.bookingReference} - ${booking.guestName}</p>
+              </div>
+            </div>
+            
+            <div style="text-align:center;margin-bottom:1.5rem;">
+              <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+              <p style="font-family:'Inter',sans-serif;color:#64748b;margin-top:0.5rem;">Scan QR code or use UPI ID above</p>
+            </div>
+            
+            <div>
+              <label style="font-family:'Inter',sans-serif;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Enter Transaction ID (UTR):</label>
+              <input type="text" id="eventTransactionId" placeholder="Enter 12-digit UTR ID" maxlength="12" style="width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;font-family:'Inter',sans-serif;margin-bottom:1rem;transition:all 0.3s ease;" onfocus="this.style.borderColor='#00b894';this.style.boxShadow='0 0 0 3px rgba(0,184,148,0.1)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
+              <button onclick="confirmEventPayment('${booking.bookingReference}', ${booking.totalPrice})" style="width:100%;background:linear-gradient(135deg, #00b894, #00a085);color:white;border:none;padding:1rem;border-radius:12px;cursor:pointer;font-size:1rem;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,184,148,0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                <i class="fas fa-check-circle" style="margin-right:8px;"></i>Confirm Payment
+              </button>
+            </div>
+          </div>
+          
+          <div style="text-align:center;">
+            <button onclick="closeEventPaymentModal()" style="background:#6c757d;color:white;border:none;padding:0.75rem 2rem;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.3s ease;" onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'">Cancel</button>
+          </div>
         </div>
       `;
       
@@ -888,6 +917,140 @@
       
       // Store booking data globally
       window.currentEventBooking = booking;
+      
+      // Show modal with animation
+      setTimeout(() => {
+        modal.style.opacity = '1';
+        modal.querySelector('div').style.transform = 'scale(1)';
+      }, 10);
+    }
+    
+    function showUPIPayment() {
+      document.getElementById('upiPaymentSection').style.display = 'block';
+      document.getElementById('razorpayBtn').style.opacity = '0.5';
+      document.getElementById('razorpayBtn').style.pointerEvents = 'none';
+    }
+    
+    function payWithRazorpay() {
+      const booking = window.currentEventBooking;
+      if (!booking) return;
+      
+      const options = {
+        key: 'rzp_test_RJPlUWvOmXa5kb', // Replace with your Razorpay key
+        amount: booking.totalPrice * 100, // Amount in paise
+        currency: 'INR',
+        name: 'VShaka Go Events',
+        description: `Event Booking - ${booking.eventName}`,
+        order_id: '', // You can generate order_id from backend if needed
+        prefill: {
+          name: booking.guestName,
+          email: booking.email,
+          contact: booking.phone.replace('+91', '')
+        },
+        notes: {
+          booking_reference: booking.bookingReference,
+          event_name: booking.eventName,
+          event_date: booking.eventDate,
+          guests: booking.guests
+        },
+        theme: {
+          color: '#667eea'
+        },
+        handler: function(response) {
+          // Payment successful
+          console.log('Razorpay payment successful:', response);
+          
+          // Save booking with payment details
+          saveEventBookingWithPayment(booking, response.razorpay_payment_id);
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Razorpay payment cancelled');
+          }
+        }
+      };
+      
+      if (typeof Razorpay !== 'undefined') {
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } else {
+        // Fallback: Load Razorpay script dynamically
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = function() {
+          const rzp = new Razorpay(options);
+          rzp.open();
+        };
+        document.head.appendChild(script);
+      }
+    }
+    
+    async function saveEventBookingWithPayment(booking, paymentId) {
+      try {
+        const response = await fetch('/api/event-bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingReference: booking.bookingReference,
+            eventName: booking.eventName,
+            guestName: booking.guestName,
+            email: booking.email,
+            phone: booking.phone,
+            eventDate: booking.eventDate,
+            guests: booking.guests,
+            totalPrice: booking.totalPrice,
+            transactionId: paymentId,
+            paymentMethod: 'razorpay'
+          })
+        });
+        
+        if (response.ok) {
+          // Show success message
+          showPaymentSuccess(booking, paymentId);
+        } else {
+          throw new Error('Failed to save booking');
+        }
+      } catch (error) {
+        console.error('Error saving event booking:', error);
+        alert('Payment successful but booking save failed. Please contact support with payment ID: ' + paymentId);
+      }
+    }
+    
+    function showPaymentSuccess(booking, paymentId) {
+      closeEventPaymentModal();
+      
+      // Create success modal
+      const successModal = document.createElement('div');
+      successModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:10002;display:flex;align-items:center;justify-content:center;';
+      successModal.innerHTML = `
+        <div style="background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);padding:3rem;border-radius:20px;max-width:500px;width:90%;text-align:center;box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+          <div style="color:#00b894;font-size:4rem;margin-bottom:1rem;">✅</div>
+          <h2 style="font-family:'Playfair Display',serif;font-weight:700;color:#2c3e50;margin-bottom:1rem;">Payment Successful!</h2>
+          <p style="font-family:'Inter',sans-serif;color:#64748b;margin-bottom:1.5rem;">Your event booking has been confirmed.</p>
+          
+          <div style="background:#f0f9ff;padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;text-align:left;">
+            <p style="font-family:'Inter',sans-serif;margin-bottom:0.5rem;"><strong>Booking ID:</strong> ${booking.bookingReference}</p>
+            <p style="font-family:'Inter',sans-serif;margin-bottom:0.5rem;"><strong>Payment ID:</strong> ${paymentId}</p>
+            <p style="font-family:'Inter',sans-serif;margin-bottom:0.5rem;"><strong>Event:</strong> ${booking.eventName}</p>
+            <p style="font-family:'Inter',sans-serif;"><strong>Amount:</strong> ₹${booking.totalPrice.toLocaleString()}</p>
+          </div>
+          
+          <p style="font-family:'Inter',sans-serif;color:#64748b;font-size:0.9rem;margin-bottom:1.5rem;">You will receive confirmation via email and WhatsApp shortly.</p>
+          
+          <button onclick="this.parentElement.parentElement.remove()" style="background:linear-gradient(135deg, #667eea, #764ba2);color:white;border:none;padding:1rem 2rem;border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">
+            Continue
+          </button>
+        </div>
+      `;
+      
+      document.body.appendChild(successModal);
+      
+      // Send WhatsApp message
+      setTimeout(() => {
+        const message = `Event Booking Confirmed!\n\nBooking ID: ${booking.bookingReference}\nEvent: ${booking.eventName}\nDate: ${new Date(booking.eventDate).toLocaleDateString()}\nGuests: ${booking.guests}\nAmount: ₹${booking.totalPrice.toLocaleString()}\nPayment ID: ${paymentId}`;
+        const whatsappUrl = `https://wa.me/918341674465?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+      }, 2000);
     }
 
     function closeEventPaymentModal() {
@@ -913,7 +1076,7 @@
       try {
         // Send event booking to server for Telegram notification
         const booking = window.currentEventBooking;
-        await fetch('/api/event-bookings', {
+        const response = await fetch('/api/event-bookings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -925,18 +1088,18 @@
             eventDate: booking.eventDate,
             guests: booking.guests,
             totalPrice: amount,
-            transactionId: transactionId
+            transactionId: transactionId,
+            paymentMethod: 'upi'
           })
         });
         
-        alert(`Event booking confirmed! Booking ID: ${bookingReference}. You will receive confirmation via email and WhatsApp.`);
-        closeEventPaymentModal();
-        
-        // Send WhatsApp message
-        const message = `Event Booking Confirmed!\n\nBooking ID: ${bookingReference}\nEvent: ${booking.eventName}\nDate: ${new Date(booking.eventDate).toLocaleDateString()}\nGuests: ${booking.guests}\nAmount: ₹${amount.toLocaleString()}\nTransaction ID: ${transactionId}`;
-        const whatsappUrl = `https://wa.me/918341674465?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
+        if (response.ok) {
+          showPaymentSuccess(booking, transactionId);
+        } else {
+          throw new Error('Failed to save booking');
+        }
       } catch (error) {
+        console.error('Error confirming payment:', error);
         alert('Payment confirmation failed. Please contact support.');
       }
     }

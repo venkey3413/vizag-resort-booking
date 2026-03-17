@@ -73,6 +73,7 @@ async function initDB() {
             guests INTEGER NOT NULL,
             total_price INTEGER NOT NULL,
             transaction_id TEXT,
+            payment_method TEXT DEFAULT 'upi',
             status TEXT DEFAULT 'pending',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (event_id) REFERENCES events (id)
@@ -417,15 +418,17 @@ app.get('/api/event-bookings', async (req, res) => {
 // POST create event booking
 app.post('/api/event-bookings', async (req, res) => {
     try {
-        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId } = req.body;
+        const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId, paymentMethod } = req.body;
         if (!bookingReference || !guestName || !email || !phone || !eventDate || !guests || !totalPrice) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
         const result = await db.run(
-            `INSERT INTO event_bookings (booking_reference, event_id, event_name, guest_name, email, phone, event_date, guests, total_price, transaction_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [bookingReference, eventId || null, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId || null]
+            `INSERT INTO event_bookings (booking_reference, event_id, event_name, guest_name, email, phone, event_date, guests, total_price, transaction_id, payment_method)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [bookingReference, eventId || null, eventName, guestName, email, phone, eventDate, guests, totalPrice, transactionId || null, paymentMethod || 'upi']
         );
+        
+        publishEvent('booking.added', { eventBookingId: result.lastID, ...req.body });
         res.json({ id: result.lastID, bookingReference, message: 'Event booking saved successfully' });
     } catch (error) {
         console.error('Error saving event booking:', error);
