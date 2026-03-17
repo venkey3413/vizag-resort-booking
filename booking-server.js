@@ -304,6 +304,17 @@ app.post('/api/event-bookings/:id/cancel', async (req, res) => {
     }
 });
 
+// Delete event booking
+app.delete('/api/event-bookings/:id', async (req, res) => {
+    try {
+        await fetch(`${DB_API_URL}/api/event-bookings/${req.params.id}`, { method: 'DELETE' });
+        try { await redisPubSub.publish('booking-events', { type: 'event.booking.deleted', bookingId: req.params.id }); } catch (e) {}
+        res.json({ message: 'Event booking deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete event booking' });
+    }
+});
+
 // ─── OTHER ENDPOINTS ──────────────────────────────────────────────────────────
 
 app.post('/api/check-availability', async (req, res) => res.json({ available: true }));
