@@ -3,368 +3,715 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Management - Vizag Resort Booking</title>
+    <title>Booking Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; color: #333; margin-bottom: 30px; }
-        
-        .tabs { display: flex; background: white; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
-        .tab.active { border-bottom-color: #667eea; background: #f8f9ff; }
-        .tab:hover { background: #f0f0f0; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        .booking-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .booking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .booking-id { font-weight: bold; color: #667eea; }
-        .status { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .status.paid { background: #d4edda; color: #155724; }
-        .status.pending { background: #fff3cd; color: #856404; }
-        .booking-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .detail-item { display: flex; flex-direction: column; }
-        .detail-label { font-size: 12px; color: #666; margin-bottom: 4px; }
-        .detail-value { font-weight: 500; }
-        .loading { text-align: center; padding: 50px; color: #666; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .stat-number { font-size: 24px; font-weight: bold; color: #667eea; }
-        .stat-label { color: #666; margin-top: 5px; }
-        
-        .booking-actions { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .booking-actions button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-confirm { background: #28a745; color: white; }
-        .btn-confirm:hover { background: #218838; }
-        .btn-invoice { background: #007bff; color: white; }
-        .btn-invoice:hover { background: #0056b3; }
-        .btn-cancel { background: #dc3545; color: white; }
-        .btn-cancel:hover { background: #c82333; }
-        .status.confirmed { background: #d4edda; color: #155724; }
-        .status.pending { background: #fff3cd; color: #856404; }
-        .status.cancelled { background: #f8d7da; color: #721c24; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #181b23;
+            --surface2: #1e2130;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+            --text: #e8eaf0;
+            --text2: #8b90a0;
+            --accent: #4f8eff;
+            --green: #34d399;
+            --green-bg: rgba(52,211,153,0.1);
+            --red: #f87171;
+            --red-bg: rgba(248,113,113,0.1);
+            --amber: #fbbf24;
+            --amber-bg: rgba(251,191,36,0.1);
+            --blue-bg: rgba(79,142,255,0.1);
+            --radius: 10px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        header {
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface);
+        }
+
+        header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        header span {
+            font-size: 12px;
+            color: var(--text2);
+            font-family: 'DM Mono', monospace;
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 7px; height: 7px;
+            background: var(--green);
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 1px;
+            background: var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat {
+            flex: 1;
+            background: var(--surface);
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-num {
+            font-size: 22px;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+        }
+
+        .tab-btn {
+            padding: 14px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text2);
+            cursor: pointer;
+            border: none;
+            background: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .tab-panel { display: none; padding: 24px; }
+        .tab-panel.active { display: block; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .refresh-btn {
+            font-size: 12px;
+            color: var(--text2);
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .refresh-btn:hover { color: var(--text); border-color: var(--accent); }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text2);
+            font-size: 13px;
+        }
+
+        .booking-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: border-color 0.15s;
+        }
+
+        .booking-card:hover { border-color: var(--border2); }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-id {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-pending  { background: var(--amber-bg); color: var(--amber); }
+        .badge-confirmed, .badge-paid { background: var(--green-bg); color: var(--green); }
+        .badge-cancelled { background: var(--red-bg); color: var(--red); }
+
+        .card-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0;
+        }
+
+        .field {
+            padding: 12px 18px;
+            border-right: 1px solid var(--border);
+        }
+
+        .field:last-child { border-right: none; }
+
+        .field-label {
+            font-size: 10px;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 3px;
+        }
+
+        .field-value {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .field-value.mono {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-family: inherit;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-confirm {
+            background: var(--green-bg);
+            color: var(--green);
+            border-color: rgba(52,211,153,0.2);
+        }
+
+        .btn-confirm:hover:not(:disabled) {
+            background: rgba(52,211,153,0.2);
+        }
+
+        .btn-cancel {
+            background: var(--red-bg);
+            color: var(--red);
+            border-color: rgba(248,113,113,0.2);
+        }
+
+        .btn-cancel:hover:not(:disabled) {
+            background: rgba(248,113,113,0.2);
+        }
+
+        .btn-email {
+            background: var(--blue-bg);
+            color: var(--accent);
+            border-color: rgba(79,142,255,0.2);
+        }
+
+        .btn-email:hover:not(:disabled) {
+            background: rgba(79,142,255,0.2);
+        }
+
+        .btn-whatsapp {
+            background: rgba(37,211,102,0.1);
+            color: #25d366;
+            border-color: rgba(37,211,102,0.2);
+        }
+
+        .btn-whatsapp:hover:not(:disabled) {
+            background: rgba(37,211,102,0.2);
+        }
+
+        .btn-delete {
+            background: transparent;
+            color: var(--text2);
+            border-color: var(--border2);
+            margin-left: auto;
+        }
+
+        .btn-delete:hover:not(:disabled) {
+            color: var(--red);
+            border-color: rgba(248,113,113,0.3);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            padding: 12px 18px;
+            font-size: 13px;
+            z-index: 999;
+            display: none;
+            max-width: 320px;
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .toast.success { border-color: rgba(52,211,153,0.3); color: var(--green); }
+        .toast.error { border-color: rgba(248,113,113,0.3); color: var(--red); }
+
+        .loading-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 40px 20px;
+            color: var(--text2);
+            font-size: 13px;
+        }
+
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+            .stats-bar { flex-wrap: wrap; }
+            .card-body { grid-template-columns: 1fr 1fr; }
+            .field { border-right: none; border-bottom: 1px solid var(--border); }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Booking Management</h1>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="total-resort-bookings">0</div>
-                <div class="stat-label">Resort Bookings</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-event-bookings">0</div>
-                <div class="stat-label">Event Bookings</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-revenue">₹0</div>
-                <div class="stat-label">Total Revenue</div>
-            </div>
-        </div>
-        
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('resort')">Resort Bookings</div>
-            <div class="tab" onclick="switchTab('event')">Event Bookings</div>
-        </div>
-        
-        <div id="resort-bookings" class="tab-content active">
-            <div class="loading">Loading resort bookings...</div>
-        </div>
-        
-        <div id="event-bookings" class="tab-content">
-            <div class="loading">Loading event bookings...</div>
-        </div>
+
+<header>
+    <h1>Booking Management</h1>
+    <span><span class="live-dot"></span>Live updates via Redis</span>
+</header>
+
+<div class="stats-bar">
+    <div class="stat">
+        <div class="stat-num" id="stat-pending">0</div>
+        <div class="stat-label">Pending</div>
     </div>
+    <div class="stat">
+        <div class="stat-num" id="stat-confirmed">0</div>
+        <div class="stat-label">Confirmed</div>
+    </div>
+    <div class="stat">
+        <div class="stat-num" id="stat-cancelled">0</div>
+        <div class="stat-label">Cancelled</div>
+    </div>
+    <div class="stat">
+        <div class="stat-num" id="stat-revenue">₹0</div>
+        <div class="stat-label">Revenue</div>
+    </div>
+</div>
 
-    <script>
-        let resortBookings = [];
-        let eventBookings = [];
-        
-        function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(tab + '-bookings').classList.add('active');
-        }
-        
-        async function loadBookings() {
-            try {
-                // Fetch resort bookings and event bookings separately
-                const [resortRes, eventRes] = await Promise.all([
-                    fetch('/api/bookings'),
-                    fetch('/api/event-bookings')
-                ]);
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('resort', this)">Resort Bookings <span id="resort-count" style="opacity:0.5;margin-left:4px;font-size:11px;"></span></button>
+    <button class="tab-btn" onclick="switchTab('event', this)">Event Bookings <span id="event-count" style="opacity:0.5;margin-left:4px;font-size:11px;"></span></button>
+</div>
 
-                resortBookings = await resortRes.json();
-                eventBookings = await eventRes.json();
+<div id="tab-resort" class="tab-panel active">
+    <div class="section-header">
+        <span class="section-title">Resort Bookings</span>
+        <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+    </div>
+    <div id="resort-list"><div class="loading-row"><div class="spinner"></div> Loading...</div></div>
+</div>
 
-                displayResortBookings(resortBookings);
-                displayEventBookings(eventBookings);
-                updateStats();
-            } catch (error) {
-                document.getElementById('resort-bookings').innerHTML = '<div class="loading">Error loading bookings</div>';
-                document.getElementById('event-bookings').innerHTML = '<div class="loading">Error loading event bookings</div>';
-            }
-        }
-        
-        function updateStats() {
-            const totalRevenue = [...resortBookings, ...eventBookings]
-                .filter(b => b.payment_status === 'paid')
-                .reduce((sum, b) => sum + parseFloat(b.total_price || b.total_amount || 0), 0);
-                
-            document.getElementById('total-resort-bookings').textContent = resortBookings.length;
-            document.getElementById('total-event-bookings').textContent = eventBookings.length;
-            document.getElementById('total-revenue').textContent = '₹' + totalRevenue.toLocaleString();
-        }
-        
-        function displayResortBookings(bookings) {
-            const container = document.getElementById('resort-bookings');
-            
-            if (bookings.length === 0) {
-                container.innerHTML = '<div class="loading">No resort bookings found</div>';
-                return;
-            }
+<div id="tab-event" class="tab-panel">
+    <div class="section-header">
+        <span class="section-title">Event Bookings</span>
+        <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+    </div>
+    <div id="event-list"><div class="loading-row"><div class="spinner"></div> Loading...</div></div>
+</div>
 
-            container.innerHTML = bookings.map(booking => `
-                <div class="booking-card">
-                    <div class="booking-header">
-                        <div class="booking-id">Booking #${booking.booking_reference || 'RB' + String(booking.id).padStart(6, '0')}</div>
-                        <div class="status ${booking.status || 'pending'}">${(booking.status || 'PENDING FOR CONFIRMATION').toUpperCase()}</div>
-                    </div>
-                    <div class="booking-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Guest Name</div>
-                            <div class="detail-value">${booking.guest_name}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Resort</div>
-                            <div class="detail-value">${booking.resort_name}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Check-in</div>
-                            <div class="detail-value">${new Date(booking.check_in).toLocaleDateString()}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Check-out</div>
-                            <div class="detail-value">${new Date(booking.check_out).toLocaleDateString()}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Total Amount</div>
-                            <div class="detail-value">₹${parseInt(booking.total_price || 0).toLocaleString()}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">${booking.phone}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">${booking.email}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Booking Date</div>
-                            <div class="detail-value">${new Date(booking.created_at || booking.booking_date).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                    <div class="booking-actions">
-                        ${booking.status !== 'confirmed' ? `<button class="btn-confirm" onclick="confirmBooking('resort', ${booking.id})">Confirm</button>` : ''}
-                        ${booking.status === 'confirmed' ? `<button class="btn-invoice" onclick="sendInvoice('resort', ${booking.id})">Send Invoice</button>` : ''}
-                        <button class="btn-cancel" onclick="cancelBooking('resort', ${booking.id})">Cancel</button>
-                    </div>
+<div class="toast" id="toast"></div>
+
+<script>
+let resortBookings = [];
+let eventBookings = [];
+
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+}
+
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    t.style.display = 'block';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.style.display = 'none', 3500);
+}
+
+function badgeClass(status) {
+    if (!status) return 'badge-pending';
+    const s = status.toLowerCase();
+    if (s.includes('confirm') || s === 'paid') return 'badge-confirmed';
+    if (s.includes('cancel')) return 'badge-cancelled';
+    return 'badge-pending';
+}
+
+function badgeLabel(status) {
+    if (!status) return 'PENDING';
+    const s = status.toLowerCase();
+    if (s.includes('confirm') || s === 'paid') return 'CONFIRMED';
+    if (s.includes('cancel')) return 'CANCELLED';
+    return 'PENDING';
+}
+
+function updateStats() {
+    const all = [...resortBookings, ...eventBookings];
+    const pending = all.filter(b => {
+        const s = (b.status || b.payment_status || '').toLowerCase();
+        return !s.includes('confirm') && s !== 'paid' && !s.includes('cancel');
+    }).length;
+    const confirmed = all.filter(b => {
+        const s = (b.status || b.payment_status || '').toLowerCase();
+        return s.includes('confirm') || s === 'paid';
+    }).length;
+    const cancelled = all.filter(b => (b.status || b.payment_status || '').toLowerCase().includes('cancel')).length;
+    const revenue = all
+        .filter(b => { const s = (b.status || b.payment_status || '').toLowerCase(); return s.includes('confirm') || s === 'paid'; })
+        .reduce((sum, b) => sum + parseInt(b.total_price || 0), 0);
+
+    document.getElementById('stat-pending').textContent = pending;
+    document.getElementById('stat-confirmed').textContent = confirmed;
+    document.getElementById('stat-cancelled').textContent = cancelled;
+    document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+    document.getElementById('resort-count').textContent = resortBookings.length;
+    document.getElementById('event-count').textContent = eventBookings.length;
+}
+
+// ── Resort Bookings ──────────────────────────────────────────────────────────
+
+function renderResortBookings() {
+    const el = document.getElementById('resort-list');
+    if (!resortBookings.length) {
+        el.innerHTML = '<div class="empty">No resort bookings yet.</div>';
+        return;
+    }
+
+    el.innerHTML = resortBookings.map(b => {
+        const status = b.payment_status || b.status || 'pending';
+        const isPending = !status.includes('confirm') && status !== 'paid' && !status.includes('cancel');
+        const isConfirmed = status.includes('confirm') || status === 'paid';
+
+        return `
+        <div class="booking-card">
+            <div class="card-top">
+                <span class="card-id">${b.booking_reference || 'RB' + String(b.id).padStart(6,'0')}</span>
+                <div class="card-meta">
+                    <span class="badge ${badgeClass(status)}">${badgeLabel(status)}</span>
+                    <span style="font-size:11px;color:var(--text2);">${new Date(b.booking_date || b.created_at).toLocaleDateString('en-IN')}</span>
                 </div>
-            `).join('');
-        }
-        
-        function displayEventBookings(bookings) {
-            const container = document.getElementById('event-bookings');
-            
-            if (bookings.length === 0) {
-                container.innerHTML = '<div class="loading">No event bookings found</div>';
-                return;
-            }
+            </div>
+            <div class="card-body">
+                <div class="field"><div class="field-label">Guest</div><div class="field-value">${b.guest_name}</div></div>
+                <div class="field"><div class="field-label">Resort</div><div class="field-value">${b.resort_name || 'Resort #' + b.resort_id}</div></div>
+                <div class="field"><div class="field-label">Check-in</div><div class="field-value">${new Date(b.check_in).toLocaleDateString('en-IN')}</div></div>
+                <div class="field"><div class="field-label">Check-out</div><div class="field-value">${new Date(b.check_out).toLocaleDateString('en-IN')}</div></div>
+                <div class="field"><div class="field-label">Guests</div><div class="field-value">${b.guests}</div></div>
+                <div class="field"><div class="field-label">Amount</div><div class="field-value">₹${parseInt(b.total_price || 0).toLocaleString('en-IN')}</div></div>
+                <div class="field"><div class="field-label">Phone</div><div class="field-value mono">${b.phone}</div></div>
+                <div class="field"><div class="field-label">UTR / Txn ID</div><div class="field-value mono">${b.transaction_id || '—'}</div></div>
+            </div>
+            <div class="card-actions">
+                ${isPending ? `<button class="btn btn-confirm" onclick="confirmResort(${b.id}, this)">✓ Confirm</button>` : ''}
+                ${!status.includes('cancel') ? `<button class="btn btn-cancel" onclick="cancelResort(${b.id}, this)">✕ Cancel</button>` : ''}
+                ${isConfirmed ? `<button class="btn btn-email" onclick="sendResortEmail(${b.id}, this)">✉ Send Email</button>` : ''}
+                <a class="btn btn-whatsapp" href="https://wa.me/${(b.phone||'').replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>
+                <button class="btn btn-delete" onclick="deleteResort(${b.id}, this)">🗑 Delete</button>
+            </div>
+        </div>`;
+    }).join('');
+}
 
-            container.innerHTML = bookings.map(booking => `
-                <div class="booking-card">
-                    <div class="booking-header">
-                        <div class="booking-id">Event Booking #${booking.booking_reference || 'EB' + String(booking.id).padStart(6, '0')}</div>
-                        <div class="status ${booking.status || 'pending'}">${(booking.status || 'PENDING FOR CONFIRMATION').toUpperCase()}</div>
-                    </div>
-                    <div class="booking-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Guest Name</div>
-                            <div class="detail-value">${booking.guest_name}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Event</div>
-                            <div class="detail-value">${booking.event_name || 'Event'}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Event Date</div>
-                            <div class="detail-value">${booking.event_date ? new Date(booking.event_date).toLocaleDateString() : 'N/A'}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Guests</div>
-                            <div class="detail-value">${booking.guests || 'N/A'}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Total Amount</div>
-                            <div class="detail-value">₹${parseInt(booking.total_price || 0).toLocaleString()}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">${booking.phone}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">${booking.email}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Booking Date</div>
-                            <div class="detail-value">${new Date(booking.created_at).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                    <div class="booking-actions">
-                        ${booking.status !== 'confirmed' ? `<button class="btn-confirm" onclick="confirmBooking('event', ${booking.id})">Confirm</button>` : ''}
-                        ${booking.status === 'confirmed' ? `<button class="btn-invoice" onclick="sendInvoice('event', ${booking.id})">Send Invoice</button>` : ''}
-                        <button class="btn-cancel" onclick="cancelBooking('event', ${booking.id})">Cancel</button>
-                    </div>
+async function confirmResort(id, btn) {
+    btn.disabled = true; btn.textContent = 'Confirming...';
+    try {
+        const res = await fetch(`/api/bookings/${id}/confirm`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast('Booking confirmed! Email ' + (data.emailSent ? 'sent ✓' : 'failed ✗'));
+        if (data.whatsappUrl) window.open(data.whatsappUrl, '_blank');
+        await loadAll();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+        btn.disabled = false; btn.textContent = '✓ Confirm';
+    }
+}
+
+async function cancelResort(id, btn) {
+    if (!confirm('Cancel this resort booking?')) return;
+    btn.disabled = true; btn.textContent = 'Cancelling...';
+    try {
+        const res = await fetch(`/api/bookings/${id}/cancel`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast('Booking cancelled. Email ' + (data.emailSent ? 'sent ✓' : 'failed ✗'));
+        if (data.whatsappUrl) window.open(data.whatsappUrl, '_blank');
+        await loadAll();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+        btn.disabled = false; btn.textContent = '✕ Cancel';
+    }
+}
+
+async function sendResortEmail(id, btn) {
+    btn.disabled = true; btn.textContent = 'Sending...';
+    try {
+        const res = await fetch(`/api/bookings/${id}/send-email`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast(data.success ? 'Email sent successfully ✓' : 'Email failed ✗', data.success ? 'success' : 'error');
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = '✉ Send Email';
+    }
+}
+
+async function deleteResort(id, btn) {
+    if (!confirm('Permanently delete this booking?')) return;
+    btn.disabled = true;
+    try {
+        await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
+        showToast('Booking deleted');
+        await loadAll();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+        btn.disabled = false;
+    }
+}
+
+// ── Event Bookings ───────────────────────────────────────────────────────────
+
+function renderEventBookings() {
+    const el = document.getElementById('event-list');
+    if (!eventBookings.length) {
+        el.innerHTML = '<div class="empty">No event bookings yet.</div>';
+        return;
+    }
+
+    el.innerHTML = eventBookings.map(b => {
+        const status = b.status || 'pending_verification';
+        const isPending = !status.includes('confirm') && !status.includes('cancel');
+        const isConfirmed = status.includes('confirm');
+
+        return `
+        <div class="booking-card">
+            <div class="card-top">
+                <span class="card-id">${b.booking_reference}</span>
+                <div class="card-meta">
+                    <span class="badge ${badgeClass(status)}">${badgeLabel(status)}</span>
+                    <span style="font-size:11px;color:var(--text2);">${new Date(b.created_at).toLocaleDateString('en-IN')}</span>
                 </div>
-            `).join('');
-        }
-        
-        // Real-time updates via Redis pub/sub
-        function connectToRealTimeUpdates() {
-            console.log('📡 Redis real-time sync enabled for booking management');
-            
-            let eventSource;
-            let reconnectAttempts = 0;
-            const maxReconnectAttempts = 5;
-            
-            function connectEventSource() {
-                try {
-                    eventSource = new EventSource('/api/events-stream');
-                    
-                    eventSource.onmessage = function(event) {
-                        try {
-                            const data = JSON.parse(event.data);
-                            console.log('📡 Booking management Redis event received:', data);
-                            
-                            if (data.type === 'booking.created' || data.type === 'booking.added' || data.type === 'booking.updated') {
-                                console.log('📋 Booking event detected - reloading bookings');
-                                loadBookings();
-                            }
-                        } catch (error) {
-                            // Ignore ping messages
-                        }
-                    };
-                    
-                    eventSource.onerror = function(error) {
-                        console.log('⚠️ Booking management Redis connection error, attempting reconnect...');
-                        eventSource.close();
-                        
-                        if (reconnectAttempts < maxReconnectAttempts) {
-                            reconnectAttempts++;
-                            setTimeout(connectEventSource, 2000 * reconnectAttempts);
-                        } else {
-                            console.log('❌ Max reconnection attempts reached');
-                        }
-                    };
-                    
-                    eventSource.onopen = function() {
-                        console.log('✅ Redis connected to booking management');
-                        reconnectAttempts = 0;
-                    };
-                } catch (error) {
-                    console.error('Booking management Redis setup failed:', error);
-                }
+            </div>
+            <div class="card-body">
+                <div class="field"><div class="field-label">Guest</div><div class="field-value">${b.guest_name}</div></div>
+                <div class="field"><div class="field-label">Event</div><div class="field-value">${b.event_name}</div></div>
+                <div class="field"><div class="field-label">Event Date</div><div class="field-value">${new Date(b.event_date).toLocaleDateString('en-IN')}</div></div>
+                <div class="field"><div class="field-label">Guests</div><div class="field-value">${b.guests}</div></div>
+                <div class="field"><div class="field-label">Amount</div><div class="field-value">₹${parseInt(b.total_price || 0).toLocaleString('en-IN')}</div></div>
+                <div class="field"><div class="field-label">Phone</div><div class="field-value mono">${b.phone}</div></div>
+                <div class="field"><div class="field-label">Email</div><div class="field-value">${b.email}</div></div>
+                <div class="field"><div class="field-label">UTR / Txn ID</div><div class="field-value mono">${b.transaction_id || '—'}</div></div>
+            </div>
+            <div class="card-actions">
+                ${isPending ? `<button class="btn btn-confirm" onclick="confirmEvent(${b.id}, this)">✓ Confirm</button>` : ''}
+                ${!status.includes('cancel') ? `<button class="btn btn-cancel" onclick="cancelEvent(${b.id}, this)">✕ Cancel</button>` : ''}
+                ${isConfirmed ? `<button class="btn btn-email" onclick="sendEventEmail(${b.id}, this)">✉ Resend Email</button>` : ''}
+                <a class="btn btn-whatsapp" href="https://wa.me/${(b.phone||'').replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function confirmEvent(id, btn) {
+    btn.disabled = true; btn.textContent = 'Confirming...';
+    try {
+        const res = await fetch(`/api/event-bookings/${id}/confirm`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast('Event booking confirmed! Email ' + (data.emailSent ? 'sent ✓' : 'failed ✗'));
+        if (data.whatsappUrl) window.open(data.whatsappUrl, '_blank');
+        await loadAll();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+        btn.disabled = false; btn.textContent = '✓ Confirm';
+    }
+}
+
+async function cancelEvent(id, btn) {
+    if (!confirm('Cancel this event booking?')) return;
+    btn.disabled = true; btn.textContent = 'Cancelling...';
+    try {
+        const res = await fetch(`/api/event-bookings/${id}/cancel`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast('Event booking cancelled. Email ' + (data.emailSent ? 'sent ✓' : 'failed ✗'));
+        if (data.whatsappUrl) window.open(data.whatsappUrl, '_blank');
+        await loadAll();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+        btn.disabled = false; btn.textContent = '✕ Cancel';
+    }
+}
+
+async function sendEventEmail(id, btn) {
+    btn.disabled = true; btn.textContent = 'Sending...';
+    try {
+        const res = await fetch(`/api/event-bookings/${id}/confirm`, { method: 'POST' });
+        const data = await res.json();
+        showToast(data.emailSent ? 'Email resent ✓' : 'Email failed ✗', data.emailSent ? 'success' : 'error');
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = '✉ Resend Email';
+    }
+}
+
+// ── Data Loading ─────────────────────────────────────────────────────────────
+
+async function loadAll() {
+    try {
+        const [r1, r2] = await Promise.all([
+            fetch('/api/bookings'),
+            fetch('/api/event-bookings')
+        ]);
+        resortBookings = await r1.json();
+        eventBookings = r2.ok ? await r2.json() : [];
+        renderResortBookings();
+        renderEventBookings();
+        updateStats();
+    } catch (e) {
+        console.error('Load error:', e);
+        document.getElementById('resort-list').innerHTML = '<div class="empty">Failed to load. Check server connection.</div>';
+    }
+}
+
+// ── Redis SSE ────────────────────────────────────────────────────────────────
+
+function connectSSE() {
+    let es = new EventSource('/api/events-stream');
+    let reconnectDelay = 2000;
+
+    es.onmessage = (e) => {
+        try {
+            const data = JSON.parse(e.data);
+            if (data.type && (
+                data.type.includes('booking') ||
+                data.type.includes('payment') ||
+                data.type.includes('event.booking')
+            )) {
+                loadAll();
             }
-            
-            connectEventSource();
-        }
-        
-        // Initialize
-        loadBookings();
-        connectToRealTimeUpdates();
-        
-        // Booking action functions
-        async function confirmBooking(type, bookingId) {
-            if (!confirm('Are you sure you want to confirm this booking?')) return;
-            
-            try {
-                const endpoint = type === 'resort' ? `/api/bookings/${bookingId}` : `/api/event-bookings/${bookingId}`;
-                const method = type === 'resort' ? 'PUT' : 'PATCH';
-                
-                const response = await fetch(endpoint, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'confirmed' })
-                });
-                
-                if (response.ok) {
-                    alert('Booking confirmed successfully!');
-                    loadBookings(); // Refresh the list
-                } else {
-                    alert('Failed to confirm booking');
-                }
-            } catch (error) {
-                console.error('Error confirming booking:', error);
-                alert('Error confirming booking');
-            }
-        }
-        
-        async function cancelBooking(type, bookingId) {
-            if (!confirm('Are you sure you want to cancel this booking?')) return;
-            
-            try {
-                const endpoint = type === 'resort' ? `/api/bookings/${bookingId}` : `/api/event-bookings/${bookingId}`;
-                const method = type === 'resort' ? 'PUT' : 'PATCH';
-                
-                const response = await fetch(endpoint, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'cancelled' })
-                });
-                
-                if (response.ok) {
-                    alert('Booking cancelled successfully!');
-                    loadBookings(); // Refresh the list
-                } else {
-                    alert('Failed to cancel booking');
-                }
-            } catch (error) {
-                console.error('Error cancelling booking:', error);
-                alert('Error cancelling booking');
-            }
-        }
-        
-        async function sendInvoice(type, bookingId) {
-            if (!confirm('Send invoice to customer?')) return;
-            
-            try {
-                const endpoint = type === 'resort' ? `/api/bookings/${bookingId}/send-email` : `/api/event-bookings/${bookingId}/send-email`;
-                
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (response.ok) {
-                    alert('Invoice sent successfully!');
-                } else {
-                    const error = await response.json();
-                    alert(`Failed to send invoice: ${error.error || 'Unknown error'}`);
-                }
-            } catch (error) {
-                console.error('Error sending invoice:', error);
-                alert('Error sending invoice');
-            }
-        }
-    </script>
+        } catch (_) {}
+    };
+
+    es.onerror = () => {
+        es.close();
+        setTimeout(() => { es = connectSSE(); reconnectDelay = Math.min(reconnectDelay * 1.5, 30000); }, reconnectDelay);
+    };
+
+    return es;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+loadAll();
+connectSSE();
+</script>
 </body>
 </html>
