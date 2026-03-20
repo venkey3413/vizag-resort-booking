@@ -21,29 +21,6 @@ A streamlined resort booking management system with integrated food and travel s
 - Email notifications and invoicing
 - Database operations and backups
 
-## Quick Start
-
-1. Install dependencies:
-```bash
-npm install
-```
-
-2. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-3. Start all services:
-```bash
-npm start
-```
-
-## Direct Access URLs
-
-- Main Website: `http://YOUR_SERVER_IP:3000`
-- Admin Panel: `http://YOUR_SERVER_IP:3001`
-- Booking Management: `http://YOUR_SERVER_IP:3002`
 
 ## Database
 
