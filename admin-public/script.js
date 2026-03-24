@@ -280,10 +280,53 @@ async function handleSubmit(e) {
             return;
         }
         
-        resortData.createOwner = true;
-        resortData.ownerName = ownerName;
-        resortData.ownerEmail = ownerEmail;
-        resortData.ownerPassword = ownerPassword;
+        if (createOwnerAccountEl && createOwnerAccountEl.checked) {
+            const ownerNameEl = document.getElementById('ownerName');
+            const ownerEmailEl = document.getElementById('ownerEmail');
+            const ownerPasswordEl = document.getElementById('ownerPassword');
+            
+            const ownerName = ownerNameEl ? ownerNameEl.value : '';
+            const ownerEmail = ownerEmailEl ? ownerEmailEl.value : '';
+            const ownerPassword = ownerPasswordEl ? ownerPasswordEl.value : '';
+            
+            if (!ownerName || !ownerEmail || !ownerPassword) {
+                alert('Please fill all owner credential fields');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            if (ownerPassword.length < 6) {
+                alert('Owner password must be at least 6 characters');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            // Create owner account after resort is created
+            try {
+                const ownerResponse = await fetch('/api/owners', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: ownerName,
+                        email: ownerEmail,
+                        phone: ownerEmail.includes('@') ? null : ownerEmail,
+                        password: ownerPassword,
+                        resortId: resortId
+                    })
+                });
+                
+                if (ownerResponse.ok) {
+                    successMessage += ` and owner account created successfully!`;
+                } else {
+                    const ownerError = await ownerResponse.json();
+                    successMessage += `, but owner account creation failed: ${ownerError.error}`;
+                }
+            } catch (ownerError) {
+                successMessage += ', but owner account creation failed due to network error';
+            }
+        }
     }
 
     try {

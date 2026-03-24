@@ -202,6 +202,18 @@ async function initDB() {
         )
     `);
     
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS owners (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT,
+            phone TEXT,
+            password TEXT NOT NULL,
+            resort_ids TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
     console.log('✅ Database tables initialized');
     
     // Add sample resort if none exist (for EC2 deployment)
@@ -851,6 +863,128 @@ app.post('/api/chat-messages', async (req, res) => {
         res.json({ id: result.lastID, message: 'Chat message created successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to create chat message' });
+    }
+});
+
+// OWNERS API
+app.get('/api/owners', async (req, res) => {
+    try {
+        const owners = await db.all(`
+            SELECT o.id, o.name, o.email, o.phone, o.resort_ids, o.created_at,
+                   GROUP_CONCAT(r.name) as resort_names
+            FROM owners o
+            LEFT JOIN resorts r ON (',' || o.resort_ids || ',') LIKE ('%,' || r.id || ',%')
+            GROUP BY o.id
+            ORDER BY o.created_at DESC
+        `);
+        res.json(owners);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch owners' });
+    }
+});
+
+app.post('/api/owners', async (req, res) => {
+    try {
+        const { name, email, phone, password, resortId } = req.body;
+        
+        if (!name || !password || (!email && !phone)) {
+            return res.status(400).json({ error: 'Name, password, and either email or phone are required' });
+        }
+        
+        // Simple password hashing (in production, use bcrypt)
+        const hashedPassword = Buffer.from(password).toString('base64');
+        
+        const result = await db.run(`
+            INSERT INTO owners (name, email, phone, password, resort_ids)
+            VALUES (?, ?, ?, ?, ?)
+        `, [name, email || null, phone || null, hashedPassword, resortId ? resortId.toString() : '']);
+        
+        publishEvent('owner.created', { ownerId: result.lastID, name, email, phone });
+        res.json({ id: result.lastID, message: 'Owner created successfully' });
+    } catch (error) {
+        console.error('Owner creation error:', error);
+        res.status(500).json({ error: 'Failed to create owner' });
+    }
+});
+
+app.delete('/api/owners/:id', async (req, res) => {
+    try {
+        await db.run('DELETE FROM owners WHERE id = ?', [req.params.id]);
+        publishEvent('owner.deleted', { ownerId: req.params.id });
+        res.json({ message: 'Owner deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete owner' });
+    }
+});
+
+// Owner login endpoint
+app.post('/api/owner-login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email/phone and password are required' });
+        }
+        
+        // Find owner by email or phone
+        const owner = await db.get(
+            'SELECT * FROM owners WHERE email = ? OR phone = ?',
+            [email, email]
+        );
+        
+        if (!owner) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        // Simple password verification (in production, use bcrypt)
+        const hashedPassword = Buffer.from(password).toString('base64');
+        if (owner.password !== hashedPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        // Get owner's resorts
+        let resorts = [];
+        if (owner.resort_ids) {
+            const resortIds = owner.resort_ids.split(',').filter(id => id.trim());
+            if (resortIds.length > 0) {
+                const placeholders = resortIds.map(() => '?').join(',');
+                resorts = await db.all(
+                    `SELECT id, name, location FROM resorts WHERE id IN (${placeholders})`,
+                    resortIds
+                );
+            }
+        }
+        
+        // Get bookings for owner's resorts
+        let bookings = [];
+        if (resorts.length > 0) {
+            const resortIds = resorts.map(r => r.id);
+            const placeholders = resortIds.map(() => '?').join(',');
+            bookings = await db.all(
+                `SELECT * FROM bookings WHERE resort_id IN (${placeholders}) ORDER BY booking_date DESC`,
+                resortIds
+            );
+        }
+        
+        res.json({
+            success: true,
+            owner: {
+                id: owner.id,
+                name: owner.name,
+                email: owner.email,
+                phone: owner.phone
+            },
+            resorts,
+            bookings,
+            stats: {
+                totalBookings: bookings.length,
+                pendingBookings: bookings.filter(b => b.payment_status === 'pending').length,
+                confirmedBookings: bookings.filter(b => b.payment_status === 'paid').length
+            }
+        });
+    } catch (error) {
+        console.error('Owner login error:', error);
+        res.status(500).json({ error: 'Login failed' });
     }
 });
 

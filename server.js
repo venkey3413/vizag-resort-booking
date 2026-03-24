@@ -754,6 +754,65 @@ app.post('/api/send-email-otp', async (req, res) => {
     }
 });
 
+// Owner login endpoint
+app.post('/api/owner-login', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/owner-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Owner login proxy error:', error);
+        res.status(500).json({ error: 'Login service unavailable' });
+    }
+});
+
+// Owners API proxy
+app.get('/api/owners', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/owners`);
+        const owners = await response.json();
+        res.json(owners);
+    } catch (error) {
+        console.error('Owners fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch owners' });
+    }
+});
+
+app.post('/api/owners', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/owners`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Owner creation proxy error:', error);
+        res.status(500).json({ error: 'Failed to create owner' });
+    }
+});
+
+app.delete('/api/owners/:id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/owners/${req.params.id}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Owner deletion proxy error:', error);
+        res.status(500).json({ error: 'Failed to delete owner' });
+    }
+});
+
 // Chat proxy endpoint
 app.post('/api/chat', async (req, res) => {
     try {

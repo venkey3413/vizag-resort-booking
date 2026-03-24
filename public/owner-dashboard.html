@@ -266,12 +266,18 @@
             messageDiv.innerHTML = '';
             
             try {
-                // Simulate login (replace with actual API call)
-                if (email && password) {
-                    // For demo purposes, accept any credentials
-                    showDashboard(email);
+                const response = await fetch('/api/owner-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showDashboard(data);
                 } else {
-                    throw new Error('Please fill all fields');
+                    throw new Error(data.error || 'Login failed');
                 }
             } catch (error) {
                 messageDiv.innerHTML = `<div class="error">${error.message}</div>`;
@@ -281,17 +287,22 @@
             }
         });
         
-        function showDashboard(ownerEmail) {
+        function showDashboard(loginData) {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
             
             // Update owner info
-            document.getElementById('ownerName').textContent = ownerEmail;
-            document.getElementById('ownerResorts').textContent = 'Managing your resort properties';
+            document.getElementById('ownerName').textContent = loginData.owner.name;
             
-            // Simulate stats (replace with actual API calls)
-            document.getElementById('totalBookings').textContent = '12';
-            document.getElementById('pendingBookings').textContent = '3';
+            const resortNames = loginData.resorts.map(r => r.name).join(', ') || 'No resorts assigned';
+            document.getElementById('ownerResorts').textContent = `Managing: ${resortNames}`;
+            
+            // Update stats with real data
+            document.getElementById('totalBookings').textContent = loginData.stats.totalBookings;
+            document.getElementById('pendingBookings').textContent = loginData.stats.pendingBookings;
+            
+            // Store login data for later use
+            window.ownerData = loginData;
         }
         
         function contactAdmin() {
