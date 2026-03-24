@@ -51,6 +51,10 @@ app.get('/events', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'events.html'));
 });
 
+app.get('/owner-dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'owner-dashboard.html'));
+});
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

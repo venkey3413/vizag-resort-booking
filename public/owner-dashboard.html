@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - VShaka Go</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: #764ba2;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .success {
+            background: #d1fae5;
+            color: #059669;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .dashboard {
+            display: none;
+        }
+        
+        .dashboard.active {
+            display: block;
+        }
+        
+        .welcome {
+            background: linear-gradient(135deg, #667eea10, #764ba210);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        
+        .logout-btn {
+            background: #ef4444;
+            margin-top: 1rem;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="logo">🏨</div>
+            <h1>Owner Dashboard</h1>
+            <p class="subtitle">Login to manage your resort bookings</p>
+            
+            <div id="message"></div>
+            
+            <form id="ownerLoginForm">
+                <div class="form-group">
+                    <label for="email">Email or Phone:</label>
+                    <input type="text" id="email" placeholder="Enter your email or phone number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="btn" id="loginBtn">Login</button>
+            </form>
+            
+            <a href="/" class="back-link">← Back to Main Site</a>
+        </div>
+        
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <div class="logo">🏨</div>
+            <h1>Welcome Back!</h1>
+            <div class="welcome">
+                <h3 id="ownerName">Resort Owner</h3>
+                <p id="ownerResorts">Managing your resorts</p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalBookings">0</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingBookings">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+            
+            <div style="text-align: left; margin-bottom: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: #2c3e50;">Quick Actions:</h4>
+                <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5;">
+                    • View and manage your resort bookings<br>
+                    • Update availability and pricing<br>
+                    • Contact admin for support<br>
+                    • Access detailed booking reports
+                </p>
+            </div>
+            
+            <button class="btn" onclick="contactAdmin()">📞 Contact Admin</button>
+            <button class="btn logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('ownerLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const messageDiv = document.getElementById('message');
+            
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.disabled = true;
+            messageDiv.innerHTML = '';
+            
+            try {
+                // Simulate login (replace with actual API call)
+                if (email && password) {
+                    // For demo purposes, accept any credentials
+                    showDashboard(email);
+                } else {
+                    throw new Error('Please fill all fields');
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="error">${error.message}</div>`;
+            } finally {
+                loginBtn.textContent = 'Login';
+                loginBtn.disabled = false;
+            }
+        });
+        
+        function showDashboard(ownerEmail) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            
+            // Update owner info
+            document.getElementById('ownerName').textContent = ownerEmail;
+            document.getElementById('ownerResorts').textContent = 'Managing your resort properties';
+            
+            // Simulate stats (replace with actual API calls)
+            document.getElementById('totalBookings').textContent = '12';
+            document.getElementById('pendingBookings').textContent = '3';
+        }
+        
+        function contactAdmin() {
+            const message = "Hello, I'm a resort owner and need assistance with my dashboard.";
+            const whatsappUrl = `https://wa.me/918341674465?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+        
+        function logout() {
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('ownerLoginForm').reset();
+            document.getElementById('message').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
