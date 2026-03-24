@@ -955,13 +955,16 @@ app.post('/api/owner-login', async (req, res) => {
             }
         }
         
-        // Get bookings for owner's resorts
+        // Get bookings for owner's resorts only
         let bookings = [];
         if (resorts.length > 0) {
             const resortIds = resorts.map(r => r.id);
             const placeholders = resortIds.map(() => '?').join(',');
             bookings = await db.all(
-                `SELECT * FROM bookings WHERE resort_id IN (${placeholders}) ORDER BY booking_date DESC`,
+                `SELECT b.*, r.name as resort_name FROM bookings b 
+                 LEFT JOIN resorts r ON b.resort_id = r.id 
+                 WHERE b.resort_id IN (${placeholders}) 
+                 ORDER BY b.booking_date DESC`,
                 resortIds
             );
         }
