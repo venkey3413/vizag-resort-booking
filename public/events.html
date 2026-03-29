@@ -22,6 +22,413 @@
   <style>
     html { scroll-behavior: smooth; }
     
+    /* ✅ Partner Poster Styles */
+    .poster {
+      width: 800px;
+      max-width: 100%;
+      background: #0a1628;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.08);
+      margin: 0 auto;
+    }
+
+    /* Ocean wave bg */
+    .poster::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 420px;
+      background: linear-gradient(160deg, #0d3b6e 0%, #1a5fa8 40%, #0a7a5a 80%, #0a1628 100%);
+      z-index: 0;
+    }
+
+    .wave-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 420px;
+      background-image: repeating-linear-gradient(
+        -30deg,
+        rgba(255,255,255,0.015) 0px,
+        rgba(255,255,255,0.015) 1px,
+        transparent 1px,
+        transparent 40px
+      );
+      z-index: 1;
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      z-index: 2;
+      padding: 36px 52px 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245,166,35,0.15);
+      border: 1px solid rgba(245,166,35,0.3);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 11px;
+      color: #f5c842;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: #f5c842;
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    .headline {
+      font-family: 'Playfair Display', serif;
+      font-size: 54px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      margin-bottom: 10px;
+    }
+
+    .headline em {
+      font-style: normal;
+      background: linear-gradient(90deg, #f5a623, #f5e642);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subline {
+      font-size: 15px;
+      color: rgba(255,255,255,0.55);
+      font-weight: 300;
+      margin-top: 12px;
+      line-height: 1.6;
+      max-width: 440px;
+    }
+
+    /* Offer highlight strip */
+    .offer-strip {
+      position: relative;
+      z-index: 2;
+      margin: 30px 52px;
+      background: linear-gradient(90deg, rgba(245,166,35,0.12), rgba(245,230,66,0.06));
+      border: 1px solid rgba(245,166,35,0.25);
+      border-radius: 16px;
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .offer-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .offer-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .offer-icon.orange { background: rgba(245,166,35,0.15); }
+    .offer-icon.teal { background: rgba(20,200,140,0.12); }
+
+    .offer-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .offer-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .offer-value span {
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      color: rgba(255,255,255,0.5);
+      font-weight: 400;
+      margin-left: 4px;
+    }
+
+    .offer-divider {
+      width: 1px;
+      height: 44px;
+      background: rgba(255,255,255,0.1);
+      margin: 0 28px;
+    }
+
+    .offer-arrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.25);
+      font-size: 22px;
+    }
+
+    .arrow-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Features grid */
+    .features {
+      position: relative;
+      z-index: 2;
+      padding: 0 52px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .feature-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .fi-blue { background: rgba(24,95,165,0.3); }
+    .fi-teal { background: rgba(15,110,86,0.3); }
+    .fi-amber { background: rgba(185,117,23,0.3); }
+
+    .feature-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 4px;
+      letter-spacing: -0.2px;
+    }
+
+    .feature-desc {
+      font-size: 11px;
+      color: rgba(255,255,255,0.38);
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    /* Comparison section */
+    .compare-section {
+      position: relative;
+      z-index: 2;
+      padding: 0 52px;
+      margin-bottom: 28px;
+    }
+
+    .compare-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .compare-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .compare-item {
+      flex: 1;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .compare-item:last-child { border-right: none; }
+
+    .compare-item.highlight {
+      background: rgba(245,166,35,0.08);
+      border-right: 1px solid rgba(245,166,35,0.12);
+    }
+
+    .compare-name {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .compare-item.highlight .compare-name {
+      color: #f5c842;
+      font-weight: 600;
+    }
+
+    .compare-pct {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .compare-item.highlight .compare-pct {
+      color: #f5c842;
+      font-size: 16px;
+    }
+
+    /* CTA Footer */
+    .cta-footer {
+      position: relative;
+      z-index: 2;
+      margin: 0 52px 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #14c88c 0%, #0a7a5a 100%);
+      border-radius: 16px;
+      padding: 24px 28px;
+    }
+
+    .cta-left .cta-big {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .cta-left .cta-small {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      font-weight: 300;
+    }
+
+    .cta-contact {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .cta-btn {
+      background: #fff;
+      color: #0a7a5a;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+    }
+
+    .cta-phone {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Website tag */
+    .site-tag {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding-bottom: 24px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 1px;
+    }
+
+    .site-tag strong { color: rgba(255,255,255,0.35); }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .poster {
+        border-radius: 16px;
+      }
+      
+      .headline {
+        font-size: 36px;
+      }
+      
+      .hero, .offer-strip, .features, .compare-section, .cta-footer {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+      
+      .features {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      
+      .offer-strip {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .offer-divider {
+        width: 100%;
+        height: 1px;
+        margin: 0;
+      }
+      
+      .offer-arrow {
+        transform: rotate(90deg);
+      }
+      
+      .cta-footer {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+      
+      .cta-contact {
+        align-items: center;
+      }
+    }
+    
     /* ✅ Premium Event Card Enhancements */
     .vrb-card {
       transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -398,6 +805,105 @@
 
       <div class="vrb-grid" id="eventsGrid">
         <!-- Events will be loaded dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ✅ PARTNER POSTER SECTION -->
+  <section class="vrb-section">
+    <div class="vrb-container">
+      <div class="poster">
+        <div class="wave-overlay"></div>
+
+        <!-- Hero -->
+        <div class="hero">
+          <div class="eyebrow">Exclusive Partner Offer</div>
+          <div class="headline">List Your Resort.<br><em>Earn More.</em></div>
+          <div class="subline">Join Vizag's fastest-growing resort & event booking platform. Zero risk. Zero cost to start. Just more bookings at your doorstep.</div>
+        </div>
+
+        <!-- Offer Strip -->
+        <div class="offer-strip">
+          <div class="offer-item">
+            <div class="offer-icon orange">🎁</div>
+            <div>
+              <div class="offer-label">Phase 1 — Free Period</div>
+              <div class="offer-value">3 Months <span>free listing</span></div>
+            </div>
+          </div>
+          <div class="offer-divider"></div>
+          <div class="offer-arrow">
+            <div class="arrow-label">then</div>
+            <div>→</div>
+          </div>
+          <div class="offer-divider"></div>
+          <div class="offer-item">
+            <div class="offer-icon teal">💰</div>
+            <div>
+              <div class="offer-label">Phase 2 — Commission</div>
+              <div class="offer-value">Only 6% <span>per booking</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="features">
+          <div class="feature-card">
+            <div class="feature-icon-wrap fi-blue">📲</div>
+            <div class="feature-title">Instant Bookings</div>
+            <div class="feature-desc">Customers book & pay online 24/7. You just confirm.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap fi-teal">📣</div>
+            <div class="feature-title">Free Marketing</div>
+            <div class="feature-desc">We promote your resort via WhatsApp, Google & social media.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap fi-amber">🛡️</div>
+            <div class="feature-title">Zero Risk</div>
+            <div class="feature-desc">No booking, no commission. Pay only when we deliver guests.</div>
+          </div>
+        </div>
+
+        <!-- Commission Comparison -->
+        <div class="compare-section">
+          <div class="compare-label">Commission Comparison — Why Choose Us</div>
+          <div class="compare-row">
+            <div class="compare-item highlight">
+              <div class="compare-name">🌊 VshakaGo</div>
+              <div class="compare-pct">6%</div>
+            </div>
+            <div class="compare-item">
+              <div class="compare-name">MakeMyTrip</div>
+              <div class="compare-pct">20%</div>
+            </div>
+            <div class="compare-item">
+              <div class="compare-name">OYO</div>
+              <div class="compare-pct">25%</div>
+            </div>
+            <div class="compare-item">
+              <div class="compare-name">Booking.com</div>
+              <div class="compare-pct">18%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Footer -->
+        <div class="cta-footer">
+          <div class="cta-left">
+            <div class="cta-big">Ready to Partner With Us?</div>
+            <div class="cta-small">List your resort for FREE — start getting bookings this week</div>
+          </div>
+          <div class="cta-contact">
+            <a href="https://wa.me/918341674465" class="cta-btn">
+              💬 WhatsApp Us
+            </a>
+            <div class="cta-phone">📞 +91 83416 74465</div>
+          </div>
+        </div>
+
+        <!-- Site Tag -->
+        <div class="site-tag">Powered by <strong>vshakago.in</strong> — Vizag's Premier Resort Booking Platform</div>
       </div>
     </div>
   </section>
