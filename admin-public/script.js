@@ -256,29 +256,57 @@ async function handleSubmit(e) {
         dynamic_pricing: dynamicPricing
     };
     
-        if (createOwnerAccountEl && createOwnerAccountEl.checked) {
-            const ownerNameEl = document.getElementById('ownerName');
-            const ownerEmailEl = document.getElementById('ownerEmail');
-            const ownerPasswordEl = document.getElementById('ownerPassword');
-            
-            const ownerName = ownerNameEl ? ownerNameEl.value : '';
-            const ownerEmail = ownerEmailEl ? ownerEmailEl.value : '';
-            const ownerPassword = ownerPasswordEl ? ownerPasswordEl.value : '';
-            
-            if (!ownerName || !ownerEmail || !ownerPassword) {
-                alert('Please fill all owner credential fields');
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                return;
-            }
-            
-            if (ownerPassword.length < 6) {
-                alert('Owner password must be at least 6 characters');
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                return;
-            }
+    // Check if owner account creation is requested
+    const createOwnerAccountEl = document.getElementById('createOwnerAccount');
+    if (createOwnerAccountEl && createOwnerAccountEl.checked) {
+        const ownerNameEl = document.getElementById('ownerName');
+        const ownerEmailEl = document.getElementById('ownerEmail');
+        const ownerPasswordEl = document.getElementById('ownerPassword');
+        
+        const ownerName = ownerNameEl ? ownerNameEl.value : '';
+        const ownerEmail = ownerEmailEl ? ownerEmailEl.value : '';
+        const ownerPassword = ownerPasswordEl ? ownerPasswordEl.value : '';
+        
+        if (!ownerName || !ownerEmail || !ownerPassword) {
+            alert('Please fill all owner credential fields');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
         }
+        
+        if (ownerPassword.length < 6) {
+            alert('Owner password must be at least 6 characters');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+    }
+
+    // Check if owner account creation is requested
+    const createOwnerAccountEl = document.getElementById('createOwnerAccount');
+    if (createOwnerAccountEl && createOwnerAccountEl.checked) {
+        const ownerNameEl = document.getElementById('ownerName');
+        const ownerEmailEl = document.getElementById('ownerEmail');
+        const ownerPasswordEl = document.getElementById('ownerPassword');
+        
+        const ownerName = ownerNameEl ? ownerNameEl.value : '';
+        const ownerEmail = ownerEmailEl ? ownerEmailEl.value : '';
+        const ownerPassword = ownerPasswordEl ? ownerPasswordEl.value : '';
+        
+        if (!ownerName || !ownerEmail || !ownerPassword) {
+            alert('Please fill all owner credential fields');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+        
+        if (ownerPassword.length < 6) {
+            alert('Owner password must be at least 6 characters');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+    }
 
     try {
         // Remove dynamic_pricing from resort data for now
@@ -286,21 +314,26 @@ async function handleSubmit(e) {
         
         let response;
         if (editingId) {
+            console.log('🔄 Updating resort with ID:', editingId);
             response = await fetch(`/api/resorts/${editingId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(resortDataWithoutPricing)
             });
         } else {
+            console.log('➕ Creating new resort');
             response = await fetch('/api/resorts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(resortDataWithoutPricing)
             });
         }
+        
+        console.log('📡 Resort API response status:', response.status);
 
         if (response.ok) {
             const result = await response.json();
+            console.log('✅ Resort operation result:', result);
             const resortId = editingId || result.id;
             
             // Save dynamic pricing separately if provided

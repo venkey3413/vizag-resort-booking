@@ -567,7 +567,7 @@ app.delete('/api/coupons/:code', async (req, res) => {
 // Owner management endpoints
 app.get('/api/owners', async (req, res) => {
     try {
-        const response = await fetch(`${BOOKING_API_URL}/api/owners`);
+        const response = await fetch(`${DB_API_URL}/api/owners`);
         const data = await response.json();
         res.json(data);
     } catch (error) {
@@ -575,9 +575,23 @@ app.get('/api/owners', async (req, res) => {
     }
 });
 
+app.post('/api/owners', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/owners`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create owner' });
+    }
+});
+
 app.delete('/api/owners/:id', async (req, res) => {
     try {
-        const response = await fetch(`${BOOKING_API_URL}/api/owners/${req.params.id}`, {
+        const response = await fetch(`${DB_API_URL}/api/owners/${req.params.id}`, {
             method: 'DELETE'
         });
         const data = await response.json();
