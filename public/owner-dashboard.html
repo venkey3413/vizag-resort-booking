@@ -978,11 +978,6 @@ function populateResorts() {
           <div style="font-size:.78rem;color:var(--text-muted)">Max ${r.max_guests||'—'} guests</div>
         </div>
         ${r.amenities ? `<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.75rem">✨ ${r.amenities}</div>` : ''}
-        <div class="resort-actions">
-          <button class="btn ${avail?'btn-danger':'btn-success'} btn-sm" onclick="toggleAvailability(${r.id},${avail?0:1})" style="width:100%">
-            ${avail?'🔴 Mark Closed':'🟢 Mark Open'}
-          </button>
-        </div>
       </div>
     </div>`;
   }).join('');
@@ -1102,41 +1097,6 @@ async function saveResort() {
     showToast('Resort updated successfully!','success');
   } catch(e) {
     showToast('Failed to update resort. Try again.','error');
-  }
-}
-
-async function toggleAvailability(id, val) {
-  const resort = allResorts.find(r=>r.id==id||r.id===String(id));
-  if (!resort) return;
-  try {
-    // Fetch latest resort data first to ensure we have all fields
-    const getRes = await fetch(`/api/resorts/${id}`);
-    const latestResort = await getRes.json();
-    
-    // Update only the availability field, preserve everything else
-    const res = await fetch(`/api/resorts/${id}`, {
-      method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name: latestResort.name,
-        location: latestResort.location,
-        price: latestResort.price,
-        description: latestResort.description || '',
-        image: latestResort.image || '',
-        gallery: latestResort.gallery || '',
-        videos: latestResort.videos || '',
-        map_link: latestResort.map_link || '',
-        amenities: latestResort.amenities || '',
-        max_guests: latestResort.max_guests || null,
-        available: val
-      })
-    });
-    if (!res.ok) throw new Error();
-    resort.available = val;
-    populateResorts();
-    populateOverview();
-    showToast(`Resort marked as ${val?'Available':'Unavailable'}`, 'success');
-  } catch(e) {
-    showToast('Failed to update availability','error');
   }
 }
 
