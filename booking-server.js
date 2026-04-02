@@ -78,10 +78,21 @@ app.post('/api/bookings/:id/confirm', async (req, res) => {
         const whatsappMsg = `✅ Booking Confirmed!\n\nBooking ID: ${booking.booking_reference}\nGuest: ${booking.guest_name}\nResort: ${booking.resort_name}\nCheck-in: ${new Date(booking.check_in).toLocaleDateString()}\nCheck-out: ${new Date(booking.check_out).toLocaleDateString()}\nAmount: ₹${parseInt(booking.total_price).toLocaleString()}\n\nYour booking is confirmed. We look forward to welcoming you!`;
         const whatsappUrl = `https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMsg)}`;
 
-        // Redis publish
+        // Redis publish - notify owner dashboard
         try {
-            await redisPubSub.publish('booking-events', { type: 'booking.confirmed', bookingId: id });
-        } catch (e) {}
+            await redisPubSub.publish('booking-events', { 
+                type: 'booking.updated', 
+                data: { 
+                    bookingId: id, 
+                    payment_status: 'paid',
+                    status: 'confirmed',
+                    resort_id: booking.resort_id
+                }
+            });
+            console.log('📡 Published booking.updated to Redis for owner dashboard');
+        } catch (e) {
+            console.error('Redis publish failed:', e);
+        }
 
         res.json({ success: true, emailSent, whatsappUrl });
     } catch (error) {
@@ -139,9 +150,21 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
         const whatsappMsg = `❌ Booking Cancelled\n\nBooking ID: ${booking.booking_reference}\nGuest: ${booking.guest_name}\nResort: ${booking.resort_name}\nCheck-in: ${new Date(booking.check_in).toLocaleDateString()}\n\nYour booking has been cancelled. Refund (if applicable) will be processed within 3-5 business days.\n\nFor queries: vizagresortbooking@gmail.com`;
         const whatsappUrl = `https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMsg)}`;
 
+        // Redis publish - notify owner dashboard
         try {
-            await redisPubSub.publish('booking-events', { type: 'booking.cancelled', bookingId: id });
-        } catch (e) {}
+            await redisPubSub.publish('booking-events', { 
+                type: 'booking.updated', 
+                data: { 
+                    bookingId: id, 
+                    payment_status: 'cancelled',
+                    status: 'cancelled',
+                    resort_id: booking.resort_id
+                }
+            });
+            console.log('📡 Published booking cancellation to Redis for owner dashboard');
+        } catch (e) {
+            console.error('Redis publish failed:', e);
+        }
 
         res.json({ success: true, emailSent, whatsappUrl });
     } catch (error) {

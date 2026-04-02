@@ -815,6 +815,9 @@ function initDashboard() {
   populatePricing();
   populateReports();
   populateResortFilter();
+  
+  // Setup Redis real-time sync
+  setupRedisSync();
 }
 
 // ═══════════════════════════════════════════════
@@ -1423,6 +1426,174 @@ function showToast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + type;
   setTimeout(() => { t.className = 'toast'; }, 3200);
+}
+
+// ═══════════════════════════════════════════════
+// REDIS PUB/SUB - REAL-TIME UPDATES
+// ═══════════════════════════════════════════════
+function setupRedisSync() {
+  console.log('📡 Owner Dashboard: Setting up Redis real-time sync');
+  
+  let eventSource;
+  let reconnectAttempts = 0;
+  const maxReconnectAttempts = 5;
+  
+  function connectEventSource() {
+    try {
+      eventSource = new EventSource('/api/events-stream');
+      
+      eventSource.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('📡 Owner Dashboard Redis event:', data);
+          
+          // Handle booking events - NEW BOOKING
+          if (data.type === 'booking.added') {
+            console.log('🆕 New booking received via Redis');
+            showToast('New booking received!', 'success');
+            refreshBookings();
+          }
+          
+          // Handle booking updates - PAYMENT CONFIRMATION
+          if (data.type === 'booking.updated') {
+            console.log('✅ Booking updated via Redis');
+            const bookingData = data.data || data;
+            if (bookingData.payment_status === 'paid') {
+              showToast('Payment confirmed for booking!', 'success');
+            }
+            refreshBookings();
+          }
+          
+          // Handle booking deletion/cancellation
+          if (data.type === 'booking.deleted') {
+            console.log('❌ Booking cancelled via Redis');
+            showToast('Booking cancelled', 'error');
+            refreshBookings();
+          }
+          
+          // Handle resort updates from admin
+          if (data.type === 'resort.updated') {
+            console.log('🏨 Resort updated via Redis');
+            const resortData = data.data || data;
+            if (resortData.resortId && allResorts.find(r => r.id == resortData.resortId)) {
+              showToast('Resort information updated', 'success');
+              refreshResorts();
+            }
+          }
+          
+          // Handle pricing updates
+          if (data.type === 'resort.pricing.updated') {
+            console.log('💰 Pricing updated via Redis');
+            const pricingData = data.data || data;
+            if (pricingData.resortId && allResorts.find(r => r.id == pricingData.resortId)) {
+              showToast('Pricing updated successfully', 'success');
+              refreshResorts();
+              populatePricing();
+            }
+          }
+          
+          // Handle blocked date events
+          if (data.type === 'resort.date.blocked') {
+            console.log('🚫 Date blocked via Redis');
+            const blockData = data.data || data;
+            const currentResortId = document.getElementById('blockResortSelect')?.value;
+            if (currentResortId && blockData.resortId == currentResortId) {
+              loadBlockedDates(currentResortId);
+            }
+          }
+          
+          if (data.type === 'resort.date.unblocked') {
+            console.log('✅ Date unblocked via Redis');
+            const blockData = data.data || data;
+            const currentResortId = document.getElementById('blockResortSelect')?.value;
+            if (currentResortId && blockData.resortId == currentResortId) {
+              loadBlockedDates(currentResortId);
+            }
+          }
+          
+        } catch (error) {
+          // Ignore ping messages
+        }
+      };
+      
+      eventSource.onerror = function(error) {
+        console.log('⚠️ Owner Dashboard Redis connection error, attempting reconnect...');
+        eventSource.close();
+        
+        if (reconnectAttempts < maxReconnectAttempts) {
+          reconnectAttempts++;
+          setTimeout(connectEventSource, 2000 * reconnectAttempts);
+        } else {
+          console.log('❌ Max reconnection attempts reached');
+          showToast('Real-time updates disconnected', 'error');
+        }
+      };
+      
+      eventSource.onopen = function() {
+        console.log('✅ Owner Dashboard Redis connected');
+        reconnectAttempts = 0;
+        showToast('Real-time updates connected', 'success');
+      };
+    } catch (error) {
+      console.error('Owner Dashboard Redis setup failed:', error);
+    }
+  }
+  
+  connectEventSource();
+}
+
+// Refresh functions for real-time updates
+async function refreshBookings() {
+  if (!ownerData || !ownerData.owner) return;
+  
+  try {
+    // Re-fetch bookings from server
+    const res = await fetch('/api/bookings');
+    const allServerBookings = await res.json();
+    
+    // Filter bookings for owner's resorts only
+    const ownerResortIds = allResorts.map(r => r.id);
+    allBookings = allServerBookings.filter(b => ownerResortIds.includes(b.resort_id));
+    
+    // Update stats
+    ownerData.stats = {
+      totalBookings: allBookings.length,
+      pendingBookings: allBookings.filter(b => b.payment_status === 'pending').length,
+      confirmedBookings: allBookings.filter(b => b.payment_status === 'paid').length
+    };
+    
+    // Update UI
+    populateOverview();
+    populateBookings();
+    populateReports();
+    
+    console.log('✅ Bookings refreshed from Redis event:', allBookings.length);
+  } catch (error) {
+    console.error('Failed to refresh bookings:', error);
+  }
+}
+
+async function refreshResorts() {
+  if (!ownerData || !ownerData.owner) return;
+  
+  try {
+    // Re-fetch owner's resorts
+    const ownerResortIds = ownerData.resorts.map(r => r.id);
+    const res = await fetch('/api/resorts');
+    const allServerResorts = await res.json();
+    
+    // Filter for owner's resorts
+    allResorts = allServerResorts.filter(r => ownerResortIds.includes(r.id));
+    
+    // Update UI
+    populateResorts();
+    populatePricing();
+    populateOverview();
+    
+    console.log('✅ Resorts refreshed from Redis event');
+  } catch (error) {
+    console.error('Failed to refresh resorts:', error);
+  }
 }
 </script>
 </body>

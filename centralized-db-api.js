@@ -327,10 +327,10 @@ app.post('/api/resorts', async (req, res) => {
 app.put('/api/resorts/:id', async (req, res) => {
     try {
         await db.run(`
-            UPDATE resorts SET name=?, location=?, price=?, description=?, image=?, gallery=?, videos=?, map_link=?, amenities=?
+            UPDATE resorts SET name=?, location=?, price=?, description=?, image=?, gallery=?, videos=?, map_link=?, amenities=?, available=?
             WHERE id=?
         `, [req.body.name, req.body.location, req.body.price, req.body.description,
-            req.body.image, req.body.gallery, req.body.videos, req.body.map_link, req.body.amenities, req.params.id]);
+            req.body.image, req.body.gallery, req.body.videos, req.body.map_link, req.body.amenities, req.body.available, req.params.id]);
         
         publishEvent('resort.updated', { resortId: req.params.id, ...req.body });
         res.json({ message: 'Resort updated successfully' });

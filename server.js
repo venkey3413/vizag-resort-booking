@@ -590,6 +590,19 @@ app.post('/api/blocked-dates', async (req, res) => {
             body: JSON.stringify(req.body)
         });
         const data = await response.json();
+        
+        // Publish Redis event for real-time updates
+        if (response.ok) {
+            try {
+                await redisPubSub.publish('resort-events', {
+                    type: 'resort.date.blocked',
+                    data: req.body
+                });
+            } catch (redisError) {
+                console.error('Redis publish failed:', redisError);
+            }
+        }
+        
         res.status(response.status).json(data);
     } catch (error) {
         res.status(500).json({ error: 'Failed to block date' });
@@ -602,6 +615,19 @@ app.delete('/api/blocked-dates/:resortId/:blockDate', async (req, res) => {
             method: 'DELETE'
         });
         const data = await response.json();
+        
+        // Publish Redis event for real-time updates
+        if (response.ok) {
+            try {
+                await redisPubSub.publish('resort-events', {
+                    type: 'resort.date.unblocked',
+                    data: { resortId: req.params.resortId, blockDate: req.params.blockDate }
+                });
+            } catch (redisError) {
+                console.error('Redis publish failed:', redisError);
+            }
+        }
+        
         res.status(response.status).json(data);
     } catch (error) {
         res.status(500).json({ error: 'Failed to unblock date' });
@@ -866,6 +892,19 @@ app.put('/api/resorts/:id', async (req, res) => {
             body: JSON.stringify(req.body)
         });
         const data = await resp.json();
+        
+        // Publish Redis event for real-time updates
+        if (resp.ok) {
+            try {
+                await redisPubSub.publish('resort-events', {
+                    type: 'resort.updated',
+                    data: { resortId: req.params.id, ...req.body }
+                });
+            } catch (redisError) {
+                console.error('Redis publish failed:', redisError);
+            }
+        }
+        
         res.status(resp.status).json(data);
     } catch (e) { res.status(500).json({ error: 'Failed to update resort' }); }
 });
@@ -886,6 +925,19 @@ app.post('/api/dynamic-pricing', async (req, res) => {
             body: JSON.stringify(req.body)
         });
         const data = await resp.json();
+        
+        // Publish Redis event for real-time updates
+        if (resp.ok) {
+            try {
+                await redisPubSub.publish('resort-events', {
+                    type: 'resort.pricing.updated',
+                    data: req.body
+                });
+            } catch (redisError) {
+                console.error('Redis publish failed:', redisError);
+            }
+        }
+        
         res.status(resp.status).json(data);
     } catch (e) { res.status(500).json({ error: 'Failed to update pricing' }); }
 });
