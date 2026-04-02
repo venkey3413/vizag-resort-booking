@@ -1,0 +1,47 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../models/resort.dart';
+
+class ApiService {
+  static const String baseUrl = "https://vshakago.in";
+
+  static Future<List<Resort>> getResorts() async {
+    final response = await http.get(Uri.parse("$baseUrl/api/resorts"));
+
+    if (response.statusCode == 200) {
+      List data = jsonDecode(response.body);
+      return data.map((e) => Resort.fromJson(e)).toList();
+    } else {
+      throw Exception("Failed to load resorts");
+    }
+  }
+
+  static Future<Map<String, dynamic>> bookResort(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/bookings"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to create booking");
+    }
+  }
+
+  static Future<Map<String, dynamic>> checkAvailability(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/check-availability"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['error'] ?? "Availability check failed");
+    }
+  }
+}
