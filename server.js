@@ -224,6 +224,16 @@ app.post('/api/check-availability', async (req, res) => {
             return res.status(400).json({ error: 'Resort not found' });
         }
         
+        // Check if check-in date is blocked
+        const blockedDatesResponse = await fetch(`${DB_API_URL}/api/blocked-dates/${resortId}`);
+        const blockedDates = await blockedDatesResponse.json();
+        
+        if (blockedDates.includes(checkIn)) {
+            return res.status(400).json({ 
+                error: `This resort is not available on ${new Date(checkIn).toLocaleDateString()}. Please choose a different date.` 
+            });
+        }
+        
         // Calculate correct pricing
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
@@ -569,6 +579,32 @@ app.get('/api/blocked-dates/:resortId', async (req, res) => {
     } catch (error) {
         console.error('Blocked dates fetch error:', error);
         res.json([]);
+    }
+});
+
+app.post('/api/blocked-dates', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/blocked-dates`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to block date' });
+    }
+});
+
+app.delete('/api/blocked-dates/:resortId/:blockDate', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/blocked-dates/${req.params.resortId}/${req.params.blockDate}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to unblock date' });
     }
 });
 

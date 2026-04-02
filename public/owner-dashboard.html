@@ -528,6 +528,28 @@ tr:hover td{background:#f8fafc}
         <div class="resorts-grid" id="resortsGrid">
           <div class="empty" style="grid-column:1/-1"><div class="empty-icon">🏨</div><p>No resorts assigned to your account</p></div>
         </div>
+        
+        <!-- Blocked Dates Section -->
+        <div class="card" style="margin-top:1.5rem" id="blockedDatesSection" style="display:none">
+          <div class="card-header">
+            <div class="card-title">🚫 Blocked Check-in Dates</div>
+          </div>
+          <div class="card-body">
+            <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Block specific check-in dates when your resort is not available. Customers won't be able to book on these dates.</p>
+            
+            <div style="display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap">
+              <select id="blockResortSelect" class="filter-input" style="min-width:200px">
+                <option value="">Select Resort</option>
+              </select>
+              <input type="date" id="blockDateInput" class="filter-input" style="min-width:150px">
+              <button class="btn btn-danger btn-sm" onclick="blockDate()">🚫 Block Date</button>
+            </div>
+            
+            <div id="blockedDatesList" style="display:flex;flex-wrap:wrap;gap:.5rem">
+              <p style="font-size:.85rem;color:var(--text-muted)">Select a resort to view blocked dates</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ── PRICING PAGE ──────────────────────── -->
@@ -922,12 +944,21 @@ function exportBookings() {
 // ═══════════════════════════════════════════════
 // RESORTS
 // ═══════════════════════════════════════════════
+let blockedDatesMap = {};
+
 function populateResorts() {
   const grid = document.getElementById('resortsGrid');
   if (!allResorts.length) {
     grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🏨</div><p>No resorts assigned to your account. Contact admin to get your resort listed.</p></div>';
+    document.getElementById('blockedDatesSection').style.display = 'none';
     return;
   }
+  
+  document.getElementById('blockedDatesSection').style.display = 'block';
+  const select = document.getElementById('blockResortSelect');
+  select.innerHTML = '<option value="">Select Resort</option>' + allResorts.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+  select.onchange = function() { if (this.value) loadBlockedDates(this.value); };
+  
   grid.innerHTML = allResorts.map(r => {
     const avail = r.available !== 0 && r.available !== '0';
     return `
@@ -945,15 +976,74 @@ function populateResorts() {
         </div>
         ${r.amenities ? `<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.75rem">✨ ${r.amenities}</div>` : ''}
         <div class="resort-actions">
-          <button class="btn btn-primary btn-sm" onclick="openEditResort(${r.id})">✏️ Edit</button>
-          <button class="btn ${avail?'btn-danger':'btn-success'} btn-sm" onclick="toggleAvailability(${r.id},${avail?0:1})">
+          <button class="btn ${avail?'btn-danger':'btn-success'} btn-sm" onclick="toggleAvailability(${r.id},${avail?0:1})" style="width:100%">
             ${avail?'🔴 Mark Closed':'🟢 Mark Open'}
           </button>
-          <button class="btn btn-warning btn-sm" onclick="openPricingModal(${r.id},'${r.name.replace(/'/g,"\\'")}')">💰</button>
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+async function loadBlockedDates(resortId) {
+  try {
+    const res = await fetch(`/api/blocked-dates/${resortId}`);
+    const dates = await res.json();
+    blockedDatesMap[resortId] = dates;
+    displayBlockedDates(resortId, dates);
+  } catch(e) {
+    console.error('Failed to load blocked dates:', e);
+    showToast('Failed to load blocked dates', 'error');
+  }
+}
+
+function displayBlockedDates(resortId, dates) {
+  const container = document.getElementById('blockedDatesList');
+  if (!dates || dates.length === 0) {
+    container.innerHTML = '<p style="font-size:.85rem;color:var(--text-muted)">No blocked dates for this resort</p>';
+    return;
+  }
+  container.innerHTML = dates.map(date => `
+    <div style="display:inline-flex;align-items:center;gap:.5rem;background:var(--gray-light);padding:.5rem .75rem;border-radius:8px;font-size:.85rem">
+      <span>📅 ${formatDate(date)}</span>
+      <button onclick="unblockDate('${resortId}','${date}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0;line-height:1" title="Unblock this date">×</button>
+    </div>
+  `).join('');
+}
+
+async function blockDate() {
+  const resortId = document.getElementById('blockResortSelect').value;
+  const blockDate = document.getElementById('blockDateInput').value;
+  
+  if (!resortId) { showToast('Please select a resort', 'error'); return; }
+  if (!blockDate) { showToast('Please select a date to block', 'error'); return; }
+  
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const selectedDate = new Date(blockDate);
+  if (selectedDate < today) { showToast('Cannot block dates in the past', 'error'); return; }
+  
+  try {
+    const res = await fetch('/api/blocked-dates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resortId, blockDate, reason: 'Blocked by owner' })
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Failed to block date', 'error'); return; }
+    showToast('Date blocked successfully', 'success');
+    document.getElementById('blockDateInput').value = '';
+    loadBlockedDates(resortId);
+  } catch(e) { showToast('Failed to block date', 'error'); }
+}
+
+async function unblockDate(resortId, blockDate) {
+  if (!confirm(`Unblock ${formatDate(blockDate)}?`)) return;
+  try {
+    const res = await fetch(`/api/blocked-dates/${resortId}/${blockDate}`, { method: 'DELETE' });
+    if (!res.ok) { showToast('Failed to unblock date', 'error'); return; }
+    showToast('Date unblocked successfully', 'success');
+    loadBlockedDates(resortId);
+  } catch(e) { showToast('Failed to unblock date', 'error'); }
 }
 
 async function openEditResort(id) {
@@ -1016,13 +1106,24 @@ async function toggleAvailability(id, val) {
   const resort = allResorts.find(r=>r.id==id||r.id===String(id));
   if (!resort) return;
   try {
+    // Fetch latest resort data first to ensure we have all fields
+    const getRes = await fetch(`/api/resorts/${id}`);
+    const latestResort = await getRes.json();
+    
+    // Update only the availability field, preserve everything else
     const res = await fetch(`/api/resorts/${id}`, {
       method:'PUT', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        name:resort.name, location:resort.location, price:resort.price,
-        description:resort.description||'', image:resort.image||'',
-        gallery:resort.gallery||'', videos:resort.videos||'',
-        map_link:resort.map_link||'', amenities:resort.amenities||'',
+        name: latestResort.name,
+        location: latestResort.location,
+        price: latestResort.price,
+        description: latestResort.description || '',
+        image: latestResort.image || '',
+        gallery: latestResort.gallery || '',
+        videos: latestResort.videos || '',
+        map_link: latestResort.map_link || '',
+        amenities: latestResort.amenities || '',
+        max_guests: latestResort.max_guests || null,
         available: val
       })
     });
@@ -1049,7 +1150,6 @@ function populatePricing() {
     <div class="card">
       <div class="card-header">
         <div class="card-title">💰 ${r.name}</div>
-        <button class="btn btn-primary btn-sm" onclick="openPricingModal(${r.id},'${r.name.replace(/'/g,"\\'")}')">✏️ Edit Pricing</button>
       </div>
       <div class="card-body">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem" id="pricingDisplay_${r.id}">

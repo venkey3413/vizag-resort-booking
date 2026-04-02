@@ -748,33 +748,68 @@ app.post('/api/dynamic-pricing', async (req, res) => {
 // BLOCKED DATES API
 app.get('/api/blocked-dates/:resortId', async (req, res) => {
     try {
-        const blockedDates = [];
-        
-        // Check resort_blocks table
-        try {
-            const blocks = await db.all(
-                'SELECT block_date FROM resort_blocks WHERE resort_id = ?',
-                [req.params.resortId]
-            );
-            blockedDates.push(...blocks);
-        } catch (error) {
-            console.log('Resort blocks table not found');
-        }
-        
-        // Check resort_availability table
-        try {
-            const availability = await db.all(
-                'SELECT blocked_date FROM resort_availability WHERE resort_id = ?',
-                [req.params.resortId]
-            );
-            blockedDates.push(...availability);
-        } catch (error) {
-            console.log('Resort availability table not found');
-        }
-        
-        res.json(blockedDates);
+        const blocks = await db.all(
+            'SELECT id, block_date, reason FROM resort_blocks WHERE resort_id = ? ORDER BY block_date ASC',
+            [req.params.resortId]
+        );
+        res.json(blocks.map(b => b.block_date));
     } catch (error) {
+        console.error('Blocked dates fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch blocked dates' });
+    }
+});
+
+app.post('/api/blocked-dates', async (req, res) => {
+    try {
+        const { resortId, blockDate, reason } = req.body;
+        
+        if (!resortId || !blockDate) {
+            return res.status(400).json({ error: 'Resort ID and block date are required' });
+        }
+        
+        // Check if date is already blocked
+        const existing = await db.get(
+            'SELECT id FROM resort_blocks WHERE resort_id = ? AND block_date = ?',
+            [resortId, blockDate]
+        );
+        
+        if (existing) {
+            return res.status(400).json({ error: 'This date is already blocked' });
+        }
+        
+        const result = await db.run(
+            'INSERT INTO resort_blocks (resort_id, block_date, reason) VALUES (?, ?, ?)',
+            [resortId, blockDate, reason || 'Blocked by owner']
+        );
+        
+        publishEvent('resort.date.blocked', { resortId, blockDate, reason });
+        res.json({ id: result.lastID, message: 'Date blocked successfully' });
+    } catch (error) {
+        console.error('Block date error:', error);
+        res.status(500).json({ error: 'Failed to block date' });
+    }
+});
+
+app.delete('/api/blocked-dates/:id', async (req, res) => {
+    try {
+        await db.run('DELETE FROM resort_blocks WHERE id = ?', [req.params.id]);
+        publishEvent('resort.date.unblocked', { blockId: req.params.id });
+        res.json({ message: 'Date unblocked successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to unblock date' });
+    }
+});
+
+app.delete('/api/blocked-dates/:resortId/:blockDate', async (req, res) => {
+    try {
+        await db.run(
+            'DELETE FROM resort_blocks WHERE resort_id = ? AND block_date = ?',
+            [req.params.resortId, req.params.blockDate]
+        );
+        publishEvent('resort.date.unblocked', { resortId: req.params.resortId, blockDate: req.params.blockDate });
+        res.json({ message: 'Date unblocked successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to unblock date' });
     }
 });
 
