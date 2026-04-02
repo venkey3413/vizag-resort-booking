@@ -813,6 +813,48 @@ app.delete('/api/owners/:id', async (req, res) => {
     }
 });
 
+// ── Owner Dashboard API proxies ─────────────────────────
+app.get('/api/resorts/:id', async (req, res) => {
+    try {
+        const resp = await fetch(`${DB_API_URL}/api/resorts/${req.params.id}`);
+        const data = await resp.json();
+        res.status(resp.status).json(data);
+    } catch (e) { res.status(500).json({ error: 'Failed to fetch resort' }); }
+});
+
+app.put('/api/resorts/:id', async (req, res) => {
+    try {
+        const resp = await fetch(`${DB_API_URL}/api/resorts/${req.params.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await resp.json();
+        res.status(resp.status).json(data);
+    } catch (e) { res.status(500).json({ error: 'Failed to update resort' }); }
+});
+
+app.get('/api/dynamic-pricing/:resortId', async (req, res) => {
+    try {
+        const resp = await fetch(`${DB_API_URL}/api/dynamic-pricing/${req.params.resortId}`);
+        const data = await resp.json();
+        res.status(resp.status).json(data);
+    } catch (e) { res.status(500).json({ error: 'Failed to fetch pricing' }); }
+});
+
+app.post('/api/dynamic-pricing', async (req, res) => {
+    try {
+        const resp = await fetch(`${DB_API_URL}/api/dynamic-pricing`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await resp.json();
+        res.status(resp.status).json(data);
+    } catch (e) { res.status(500).json({ error: 'Failed to update pricing' }); }
+});
+// ────────────────────────────────────────────────────────
+
 // Chat proxy endpoint
 app.post('/api/chat', async (req, res) => {
     try {
