@@ -178,7 +178,12 @@ function populateCouponResortDropdown() {
 
 function displayResorts() {
     const grid = document.getElementById('resortsGrid');
-    if (!grid) return;
+    if (!grid) {
+        console.error('❌ resortsGrid element not found!');
+        return;
+    }
+    
+    console.log('🏨 Displaying resorts:', resorts ? resorts.length : 'null/undefined');
     
     if (!resorts || resorts.length === 0) {
         grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No resorts found. Add your first resort using the form above.</div>';
@@ -219,6 +224,8 @@ function displayResorts() {
         `;
     }).join('');
     
+    console.log('✅ Resort grid HTML updated');
+    console.log('🔄 Calling displaySortableResorts with', resorts.length, 'resorts');
     displaySortableResorts(resorts);
 }
 
@@ -256,32 +263,6 @@ async function handleSubmit(e) {
         dynamic_pricing: dynamicPricing
     };
     
-    // Check if owner account creation is requested
-    const createOwnerAccountEl = document.getElementById('createOwnerAccount');
-    if (createOwnerAccountEl && createOwnerAccountEl.checked) {
-        const ownerNameEl = document.getElementById('ownerName');
-        const ownerEmailEl = document.getElementById('ownerEmail');
-        const ownerPasswordEl = document.getElementById('ownerPassword');
-        
-        const ownerName = ownerNameEl ? ownerNameEl.value : '';
-        const ownerEmail = ownerEmailEl ? ownerEmailEl.value : '';
-        const ownerPassword = ownerPasswordEl ? ownerPasswordEl.value : '';
-        
-        if (!ownerName || !ownerEmail || !ownerPassword) {
-            alert('Please fill all owner credential fields');
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-            return;
-        }
-        
-        if (ownerPassword.length < 6) {
-            alert('Owner password must be at least 6 characters');
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-            return;
-        }
-    }
-
     // Check if owner account creation is requested
     const createOwnerAccountEl = document.getElementById('createOwnerAccount');
     if (createOwnerAccountEl && createOwnerAccountEl.checked) {
@@ -1042,7 +1023,17 @@ async function deleteOwner(id) {
 
 function displaySortableResorts(resorts) {
     const container = document.getElementById('sortableResorts');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ sortableResorts container not found!');
+        return;
+    }
+    
+    console.log('🔄 Displaying sortable resorts:', resorts.length);
+    
+    if (!resorts || resorts.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No resorts to order.</div>';
+        return;
+    }
     
     container.innerHTML = resorts.map(resort => `
         <div class="sortable-resort-item" data-id="${resort.id}" draggable="true">
@@ -1056,12 +1047,17 @@ function displaySortableResorts(resorts) {
         </div>
     `).join('');
     
+    console.log('✅ Sortable resorts HTML updated');
+    
     setupDragAndDrop();
     
     const saveOrderBtn = document.getElementById('saveOrderBtn');
     if (saveOrderBtn) {
         saveOrderBtn.removeEventListener('click', saveResortOrder);
         saveOrderBtn.addEventListener('click', saveResortOrder);
+        console.log('✅ Save order button configured');
+    } else {
+        console.error('❌ saveOrderBtn not found!');
     }
 }
 
