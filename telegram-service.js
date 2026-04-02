@@ -5,8 +5,16 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 async function sendTelegramNotification(message) {
-    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-        console.error('❌ Telegram credentials not configured');
+    // Check if Telegram is configured
+    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID || 
+        TELEGRAM_BOT_TOKEN === 'your-telegram-bot-token' || 
+        TELEGRAM_CHAT_ID === 'your-telegram-chat-id') {
+        console.warn('⚠️ Telegram notifications not configured. Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env file');
+        console.warn('📝 To setup Telegram notifications:');
+        console.warn('   1. Create a bot with @BotFather on Telegram');
+        console.warn('   2. Get your bot token');
+        console.warn('   3. Get your chat ID from @userinfobot');
+        console.warn('   4. Update .env file with these values');
         return false;
     }
     
@@ -18,11 +26,12 @@ async function sendTelegramNotification(message) {
     return new Promise((resolve, reject) => {
         const payload = {
             chat_id: TELEGRAM_CHAT_ID,
-            text: message.toString()
+            text: message.toString(),
+            parse_mode: 'HTML'
         };
         
         const data = JSON.stringify(payload);
-        console.log('📤 Sending to Telegram:', data);
+        console.log('📤 Sending to Telegram...');
 
         const options = {
             hostname: 'api.telegram.org',
@@ -32,7 +41,8 @@ async function sendTelegramNotification(message) {
             headers: {
                 'Content-Type': 'application/json',
                 'Content-Length': Buffer.byteLength(data)
-            }
+            },
+            timeout: 10000
         };
 
         const req = https.request(options, (res) => {
@@ -42,17 +52,24 @@ async function sendTelegramNotification(message) {
             });
             res.on('end', () => {
                 if (res.statusCode === 200) {
-                    console.log('📱 Telegram notification sent successfully');
+                    console.log('✅ Telegram notification sent successfully');
                     resolve(true);
                 } else {
-                    console.error('❌ Telegram notification failed:', responseData);
+                    console.error('❌ Telegram notification failed. Status:', res.statusCode);
+                    console.error('❌ Response:', responseData);
                     resolve(false);
                 }
             });
         });
 
         req.on('error', (error) => {
-            console.error('❌ Telegram request error:', error);
+            console.error('❌ Telegram request error:', error.message);
+            resolve(false);
+        });
+
+        req.on('timeout', () => {
+            console.error('❌ Telegram request timeout');
+            req.destroy();
             resolve(false);
         });
 
@@ -83,8 +100,7 @@ function formatBookingNotification(booking) {
 
 ⏰ Booked at: ${new Date().toLocaleString('en-IN')}`;
         
-        console.log('📱 Generated Telegram message length:', message.length);
-        console.log('📱 Message preview:', message.substring(0, 100) + '...');
+        console.log('📱 Generated Telegram message');
         return message;
     } catch (error) {
         console.error('❌ Error formatting booking notification:', error);
