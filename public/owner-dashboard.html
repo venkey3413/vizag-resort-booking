@@ -1,322 +1,1329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Dashboard - VShaka Go</title>
-    <link rel="icon" type="image/png" href="logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-        
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: white;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-        
-        .subtitle {
-            color: #64748b;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #374151;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .btn {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1rem;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .back-link {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
-        
-        .back-link:hover {
-            color: #764ba2;
-        }
-        
-        .error {
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .success {
-            background: #d1fae5;
-            color: #059669;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .dashboard {
-            display: none;
-        }
-        
-        .dashboard.active {
-            display: block;
-        }
-        
-        .welcome {
-            background: linear-gradient(135deg, #667eea10, #764ba210);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(102, 126, 234, 0.2);
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-        
-        .stat-label {
-            font-size: 0.8rem;
-            color: #64748b;
-            margin-top: 0.25rem;
-        }
-        
-        .logout-btn {
-            background: #ef4444;
-            margin-top: 1rem;
-        }
-        
-        .logout-btn:hover {
-            background: #dc2626;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner Dashboard – VshakaGo</title>
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+/* ── Reset & Base ─────────────────────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#1a5fa8;--blue-dark:#0d3b6e;--teal:#0a7a5a;--teal-light:#14c88c;
+  --gold:#f5a623;--red:#e53e3e;--gray:#64748b;--gray-light:#f1f5f9;
+  --white:#fff;--border:#e2e8f0;--text:#1e293b;--text-muted:#64748b;
+  --sidebar-w:240px;--header-h:64px;
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
+  --radius:10px;--radius-lg:16px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--gray-light);color:var(--text);min-height:100vh}
+
+/* ── LOGIN PAGE ────────────────────────────────────────── */
+#loginPage{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+  background:linear-gradient(135deg,#0d3b6e 0%,#1a5fa8 45%,#0a7a5a 100%);
+}
+.login-box{
+  background:var(--white);border-radius:var(--radius-lg);
+  padding:2.5rem 2rem;width:100%;max-width:420px;
+  box-shadow:var(--shadow-lg);
+}
+.login-logo{text-align:center;margin-bottom:1.5rem}
+.login-logo img{width:72px;height:72px;border-radius:50%;object-fit:cover}
+.login-logo h2{margin-top:.75rem;font-size:1.4rem;color:var(--text)}
+.login-logo p{font-size:.85rem;color:var(--text-muted);margin-top:.25rem}
+.form-group{margin-bottom:1.25rem}
+.form-group label{display:block;font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.4rem}
+.form-group input{
+  width:100%;padding:.75rem 1rem;border:1.5px solid var(--border);
+  border-radius:var(--radius);font-size:.95rem;color:var(--text);
+  transition:border-color .2s,box-shadow .2s;background:var(--white);
+}
+.form-group input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,168,.1)}
+.btn-login{
+  width:100%;padding:.85rem;background:linear-gradient(135deg,var(--blue),var(--blue-dark));
+  color:#fff;border:none;border-radius:var(--radius);font-size:1rem;
+  font-weight:600;cursor:pointer;transition:opacity .2s,transform .15s;
+}
+.btn-login:hover{opacity:.92;transform:translateY(-1px)}
+.btn-login:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.back-link{display:block;text-align:center;margin-top:1rem;font-size:.85rem;color:var(--blue);text-decoration:none}
+.back-link:hover{text-decoration:underline}
+.alert{padding:.75rem 1rem;border-radius:8px;font-size:.875rem;margin-bottom:1rem}
+.alert-error{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.alert-success{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+
+/* ── DASHBOARD LAYOUT ──────────────────────────────────── */
+#dashPage{display:none;min-height:100vh}
+
+/* Sidebar */
+.sidebar{
+  position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;
+  background:linear-gradient(180deg,var(--blue-dark) 0%,#0a1628 100%);
+  display:flex;flex-direction:column;z-index:100;
+  transition:transform .3s;
+}
+.sidebar-logo{
+  padding:1.25rem 1.25rem 1rem;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:.75rem;
+}
+.sidebar-logo img{width:42px;height:42px;border-radius:50%;object-fit:cover}
+.sidebar-logo .brand{color:#fff}
+.sidebar-logo .brand strong{display:block;font-size:.95rem}
+.sidebar-logo .brand span{font-size:.72rem;color:rgba(255,255,255,.5);letter-spacing:.5px;text-transform:uppercase}
+.sidebar-owner{
+  padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sidebar-owner .owner-label{font-size:.7rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:.35rem}
+.sidebar-owner .owner-name{font-size:.9rem;color:#fff;font-weight:600}
+.sidebar-owner .owner-resort{font-size:.75rem;color:rgba(255,255,255,.5);margin-top:.15rem}
+nav{flex:1;padding:1rem 0;overflow-y:auto}
+.nav-section{padding:.5rem 1.25rem .25rem;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase}
+.nav-item{
+  display:flex;align-items:center;gap:.75rem;padding:.7rem 1.25rem;
+  cursor:pointer;color:rgba(255,255,255,.65);font-size:.875rem;
+  border-left:3px solid transparent;transition:all .15s;
+  text-decoration:none;
+}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--teal-light)}
+.nav-item .nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--gold);color:#000;font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:20px}
+.sidebar-bottom{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.08)}
+.btn-logout{
+  width:100%;padding:.65rem;background:rgba(229,62,62,.15);border:1px solid rgba(229,62,62,.3);
+  color:#fc8181;border-radius:8px;font-size:.85rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:.5rem;transition:all .2s;
+}
+.btn-logout:hover{background:rgba(229,62,62,.25)}
+
+/* Main content */
+.main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  height:var(--header-h);background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.5rem;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);
+}
+.topbar-title{font-size:1.1rem;font-weight:700;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.topbar-avatar{
+  width:36px;height:36px;border-radius:50%;background:var(--blue);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.9rem;cursor:pointer;
+}
+.content{flex:1;padding:1.5rem}
+
+/* ── PAGES (tabs) ─────────────────────────────────────── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── STAT CARDS ───────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{
+  background:var(--white);border-radius:var(--radius);padding:1.25rem 1.5rem;
+  box-shadow:var(--shadow);display:flex;align-items:center;gap:1rem;
+  border-left:4px solid transparent;
+}
+.stat-card.blue{border-left-color:var(--blue)}
+.stat-card.teal{border-left-color:var(--teal-light)}
+.stat-card.gold{border-left-color:var(--gold)}
+.stat-card.red{border-left-color:var(--red)}
+.stat-icon{
+  width:48px;height:48px;border-radius:12px;display:flex;
+  align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;
+}
+.stat-card.blue .stat-icon{background:#eff6ff}
+.stat-card.teal .stat-icon{background:#f0fdf4}
+.stat-card.gold .stat-icon{background:#fffbeb}
+.stat-card.red .stat-icon{background:#fef2f2}
+.stat-num{font-size:1.75rem;font-weight:700;color:var(--text);line-height:1}
+.stat-lbl{font-size:.8rem;color:var(--text-muted);margin-top:.25rem}
+.stat-change{font-size:.75rem;margin-top:.35rem}
+.stat-change.up{color:#16a34a}.stat-change.down{color:var(--red)}
+
+/* ── CARDS ─────────────────────────────────────────────── */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card-header{
+  padding:1rem 1.25rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:1rem;font-weight:700;color:var(--text)}
+.card-body{padding:1.25rem}
+
+/* ── TABLE ─────────────────────────────────────────────── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{
+  padding:.75rem 1rem;background:var(--gray-light);color:var(--text-muted);
+  font-weight:600;text-align:left;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;
+  border-bottom:1px solid var(--border);
+}
+td{padding:.85rem 1rem;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+
+/* ── BADGES ─────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .65rem;border-radius:20px;font-size:.73rem;font-weight:600;white-space:nowrap}
+.badge-paid{background:#dcfce7;color:#16a34a}
+.badge-pending{background:#fef9c3;color:#a16207}
+.badge-cancelled{background:#fee2e2;color:#dc2626}
+.badge-confirmed{background:#dbeafe;color:#1d4ed8}
+.badge-available{background:#dcfce7;color:#16a34a}
+.badge-unavailable{background:#fee2e2;color:#dc2626}
+
+/* ── BUTTONS ─────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-dark)}
+.btn-success{background:var(--teal);color:#fff}.btn-success:hover{background:#085041}
+.btn-warning{background:var(--gold);color:#000}.btn-warning:hover{background:#d97706}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}.btn-outline:hover{background:var(--gray-light)}
+.btn-sm{padding:.35rem .75rem;font-size:.78rem}
+.btn-whatsapp{background:#25D366;color:#fff}.btn-whatsapp:hover{background:#128C7E}
+
+/* ── FILTERS ─────────────────────────────────────────────── */
+.filters{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.filter-input{
+  padding:.5rem .85rem;border:1.5px solid var(--border);border-radius:8px;
+  font-size:.85rem;color:var(--text);background:#fff;min-width:160px;
+}
+.filter-input:focus{outline:none;border-color:var(--blue)}
+
+/* ── RESORT CARDS ────────────────────────────────────────── */
+.resorts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
+.resort-card{
+  background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);
+  overflow:hidden;border:1.5px solid var(--border);transition:box-shadow .2s;
+}
+.resort-card:hover{box-shadow:var(--shadow-md)}
+.resort-img{height:140px;background:linear-gradient(135deg,#0d3b6e,#0a7a5a);display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative}
+.resort-img img{width:100%;height:100%;object-fit:cover}
+.resort-avail-badge{position:absolute;top:.5rem;right:.5rem}
+.resort-body{padding:1rem}
+.resort-name{font-weight:700;font-size:1rem;margin-bottom:.25rem}
+.resort-loc{font-size:.8rem;color:var(--text-muted);margin-bottom:.75rem}
+.resort-price-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.resort-price{font-size:1.1rem;font-weight:700;color:var(--blue)}
+.resort-actions{display:flex;gap:.5rem}
+
+/* ── MODALS ─────────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:#fff;border-radius:var(--radius-lg);width:100%;max-width:500px;
+  max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform .2s;
+}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:1.05rem;font-weight:700}
+.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--gray);line-height:1;padding:.2rem .4rem;border-radius:6px}
+.modal-close:hover{background:var(--gray-light)}
+.modal-body{padding:1.5rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.75rem}
+.field-group{margin-bottom:1.1rem}
+.field-group label{display:block;font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:.35rem}
+.field-group input,.field-group select,.field-group textarea{
+  width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;
+  font-size:.9rem;color:var(--text);background:#fff;transition:border-color .2s;
+}
+.field-group input:focus,.field-group select:focus,.field-group textarea:focus{outline:none;border-color:var(--blue)}
+.field-group textarea{resize:vertical;min-height:80px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+
+/* ── REPORTS ─────────────────────────────────────────────── */
+.reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.chart-box{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem}
+.chart-title{font-size:.9rem;font-weight:700;margin-bottom:1rem;color:var(--text)}
+.bar-chart{display:flex;flex-direction:column;gap:.6rem}
+.bar-row{display:flex;align-items:center;gap:.75rem}
+.bar-label{font-size:.78rem;color:var(--text-muted);width:80px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;background:var(--gray-light);border-radius:20px;height:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;transition:width .6s ease}
+.bar-value{font-size:.78rem;font-weight:600;color:var(--text);width:50px;text-align:right;flex-shrink:0}
+.donut-wrap{display:flex;align-items:center;gap:1.5rem}
+.donut-svg{flex-shrink:0}
+.donut-legend{display:flex;flex-direction:column;gap:.5rem}
+.legend-item{display:flex;align-items:center;gap:.5rem;font-size:.8rem}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── SUPPORT PAGE ────────────────────────────────────────── */
+.support-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.support-card{
+  background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:1.5rem;text-align:center;border:2px solid transparent;
+  transition:border-color .2s,box-shadow .2s;cursor:pointer;
+}
+.support-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md)}
+.support-icon{font-size:2.5rem;margin-bottom:.75rem}
+.support-title{font-weight:700;font-size:1rem;margin-bottom:.4rem}
+.support-desc{font-size:.82rem;color:var(--text-muted);line-height:1.5;margin-bottom:1rem}
+
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
+.empty-icon{font-size:3rem;margin-bottom:.75rem;opacity:.4}
+.empty p{font-size:.9rem}
+
+/* ── TOAST ─────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;
+  background:#1e293b;color:#fff;padding:.75rem 1.25rem;border-radius:10px;
+  font-size:.875rem;box-shadow:var(--shadow-lg);
+  transform:translateY(80px);opacity:0;transition:all .3s;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:#16a34a}
+.toast.error{background:var(--red)}
+
+/* ── TOGGLE ─────────────────────────────────────────────── */
+.toggle{position:relative;display:inline-block;width:44px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;background:#cbd5e1;border-radius:24px;cursor:pointer;transition:.3s;
+}
+.toggle-slider:before{
+  content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;
+  background:#fff;border-radius:50%;transition:.3s;
+}
+.toggle input:checked + .toggle-slider{background:var(--teal-light)}
+.toggle input:checked + .toggle-slider:before{transform:translateX(20px)}
+
+/* ── RESPONSIVE ─────────────────────────────────────────── */
+@media(max-width:900px){
+  :root{--sidebar-w:0px}
+  .sidebar{transform:translateX(-240px);--sidebar-w:240px}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .reports-grid{grid-template-columns:1fr}
+  .support-grid{grid-template-columns:1fr}
+  .hamburger{display:flex!important}
+}
+.hamburger{
+  display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:.4rem;
+}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px}
+.overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99}
+.overlay-bg.open{display:block}
+
+/* Loader */
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Form -->
-        <div id="loginForm">
-            <div class="logo">🏨</div>
-            <h1>Owner Dashboard</h1>
-            <p class="subtitle">Login to manage your resort bookings</p>
-            
-            <div id="message"></div>
-            
-            <form id="ownerLoginForm">
-                <div class="form-group">
-                    <label for="email">Email or Phone:</label>
-                    <input type="text" id="email" placeholder="Enter your email or phone number" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" placeholder="Enter your password" required>
-                </div>
-                
-                <button type="submit" class="btn" id="loginBtn">Login</button>
-            </form>
-            
-            <a href="/" class="back-link">← Back to Main Site</a>
-        </div>
-        
-        <!-- Dashboard -->
-        <div id="dashboard" class="dashboard">
-            <div class="logo">🏨</div>
-            <h1>Welcome Back!</h1>
-            <div class="welcome">
-                <h3 id="ownerName">Resort Owner</h3>
-                <p id="ownerResorts">Managing your resorts</p>
-            </div>
-            
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalBookings">0</div>
-                    <div class="stat-label">Total Bookings</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="pendingBookings">0</div>
-                    <div class="stat-label">Pending</div>
-                </div>
-            </div>
-            
-            <div style="text-align: left; margin-bottom: 2rem;">
-                <h4 style="margin-bottom: 1rem; color: #2c3e50;">Quick Actions:</h4>
-                <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5;">
-                    • View and manage your resort bookings<br>
-                    • Update availability and pricing<br>
-                    • Contact admin for support<br>
-                    • Access detailed booking reports
-                </p>
-            </div>
-            
-            <button class="btn" onclick="contactAdmin()">📞 Contact Admin</button>
-            <button class="btn logout-btn" onclick="logout()">Logout</button>
-        </div>
+
+<!-- ═══ LOGIN PAGE ═══════════════════════════════════════ -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="logo.png" alt="VshakaGo" onerror="this.style.display='none'">
+      <h2>Owner Dashboard</h2>
+      <p>Login to manage your resort bookings</p>
+    </div>
+    <div id="loginAlert"></div>
+    <div class="form-group">
+      <label>Email or Phone</label>
+      <input type="text" id="loginEmail" placeholder="your@email.com or 9XXXXXXXXX" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter your password" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Login to Dashboard</button>
+    <a href="/" class="back-link">← Back to VshakaGo</a>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ════════════════════════════════════════ -->
+<div id="dashPage">
+  <!-- Sidebar overlay (mobile) -->
+  <div class="overlay-bg" id="overlayBg" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.png" alt="VshakaGo" onerror="this.style.display='none'">
+      <div class="brand">
+        <strong>VshakaGo</strong>
+        <span>Owner Portal</span>
+      </div>
+    </div>
+    <div class="sidebar-owner">
+      <div class="owner-label">Logged in as</div>
+      <div class="owner-name" id="sOwnerName">Resort Owner</div>
+      <div class="owner-resort" id="sOwnerResort">Loading...</div>
+    </div>
+    <nav>
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" data-page="overview" onclick="showPage('overview',this)">
+        <span class="nav-icon">📊</span> Overview
+      </div>
+      <div class="nav-item" data-page="bookings" onclick="showPage('bookings',this)">
+        <span class="nav-icon">📋</span> Bookings
+        <span class="nav-badge" id="pendingBadge">0</span>
+      </div>
+      <div class="nav-section">Resort</div>
+      <div class="nav-item" data-page="resorts" onclick="showPage('resorts',this)">
+        <span class="nav-icon">🏨</span> My Resorts
+      </div>
+      <div class="nav-item" data-page="pricing" onclick="showPage('pricing',this)">
+        <span class="nav-icon">💰</span> Pricing
+      </div>
+      <div class="nav-section">Analytics</div>
+      <div class="nav-item" data-page="reports" onclick="showPage('reports',this)">
+        <span class="nav-icon">📈</span> Reports
+      </div>
+      <div class="nav-section">Help</div>
+      <div class="nav-item" data-page="support" onclick="showPage('support',this)">
+        <span class="nav-icon">💬</span> Contact Admin
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="btn-logout" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title" id="pageTitle">Overview</div>
+      </div>
+      <div class="topbar-right">
+        <span style="font-size:.82rem;color:var(--text-muted)" id="topDate"></span>
+        <div class="topbar-avatar" id="topAvatar">R</div>
+      </div>
     </div>
 
-    <script>
-        document.getElementById('ownerLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
-            const messageDiv = document.getElementById('message');
-            
-            loginBtn.textContent = 'Logging in...';
-            loginBtn.disabled = true;
-            messageDiv.innerHTML = '';
-            
-            try {
-                const response = await fetch('/api/owner-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    showDashboard(data);
-                } else {
-                    throw new Error(data.error || 'Login failed');
-                }
-            } catch (error) {
-                messageDiv.innerHTML = `<div class="error">${error.message}</div>`;
-            } finally {
-                loginBtn.textContent = 'Login';
-                loginBtn.disabled = false;
-            }
-        });
-        
-        function showDashboard(loginData) {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('dashboard').classList.add('active');
-            
-            // Update owner info
-            document.getElementById('ownerName').textContent = loginData.owner.name;
-            
-            const resortNames = loginData.resorts.map(r => r.name).join(', ') || 'No resorts assigned';
-            document.getElementById('ownerResorts').textContent = `Managing: ${resortNames}`;
-            
-            // Update stats with real data
-            document.getElementById('totalBookings').textContent = loginData.stats.totalBookings;
-            document.getElementById('pendingBookings').textContent = loginData.stats.pendingBookings;
-            
-            // Store login data for later use
-            window.ownerData = loginData;
-        }
-        
-        function contactAdmin() {
-            const message = "Hello, I'm a resort owner and need assistance with my dashboard.";
-            const whatsappUrl = `https://wa.me/918341674465?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-        }
-        
-        function logout() {
-            document.getElementById('dashboard').classList.remove('active');
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('ownerLoginForm').reset();
-            document.getElementById('message').innerHTML = '';
-        }
-    </script>
+    <!-- Content -->
+    <div class="content">
+
+      <!-- ── OVERVIEW PAGE ─────────────────────── -->
+      <div class="page active" id="page-overview">
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon">📋</div>
+            <div>
+              <div class="stat-num" id="ovTotalBookings">0</div>
+              <div class="stat-lbl">Total Bookings</div>
+            </div>
+          </div>
+          <div class="stat-card teal">
+            <div class="stat-icon">✅</div>
+            <div>
+              <div class="stat-num" id="ovConfirmed">0</div>
+              <div class="stat-lbl">Confirmed</div>
+            </div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-icon">⏳</div>
+            <div>
+              <div class="stat-num" id="ovPending">0</div>
+              <div class="stat-lbl">Pending</div>
+            </div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-icon">💰</div>
+            <div>
+              <div class="stat-num" id="ovRevenue">₹0</div>
+              <div class="stat-lbl">Total Revenue</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <!-- Recent Bookings -->
+          <div class="card" style="grid-column:1/-1">
+            <div class="card-header">
+              <div class="card-title">Recent Bookings</div>
+              <button class="btn btn-outline btn-sm" onclick="showPage('bookings',document.querySelector('[data-page=bookings]'))">View All</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Ref #</th><th>Guest</th><th>Resort</th><th>Check-in</th><th>Check-out</th><th>Guests</th><th>Amount</th><th>Status</th></tr>
+                </thead>
+                <tbody id="recentBookingsBody">
+                  <tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div><p>No bookings yet</p></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Resort Quick Status -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Resort Status</div></div>
+            <div class="card-body" id="resortStatusList">
+              <div class="empty"><div class="empty-icon">🏨</div><p>No resorts assigned</p></div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Quick Actions</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem">
+              <button class="btn btn-primary" style="justify-content:flex-start" onclick="showPage('bookings',document.querySelector('[data-page=bookings]'))">📋 Manage Bookings</button>
+              <button class="btn btn-success" style="justify-content:flex-start" onclick="showPage('resorts',document.querySelector('[data-page=resorts]'))">🏨 Update Resort Info</button>
+              <button class="btn btn-warning" style="justify-content:flex-start" onclick="showPage('pricing',document.querySelector('[data-page=pricing]'))">💰 Update Pricing</button>
+              <button class="btn btn-outline" style="justify-content:flex-start" onclick="showPage('reports',document.querySelector('[data-page=reports]'))">📈 View Reports</button>
+              <button class="btn btn-whatsapp" style="justify-content:flex-start" onclick="contactAdmin('general')">💬 Contact Admin on WhatsApp</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BOOKINGS PAGE ─────────────────────── -->
+      <div class="page" id="page-bookings">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All Bookings</div>
+            <button class="btn btn-outline btn-sm" onclick="exportBookings()">⬇ Export CSV</button>
+          </div>
+          <div class="card-body" style="padding-bottom:0">
+            <div class="filters">
+              <input class="filter-input" type="text" id="searchBooking" placeholder="🔍 Search guest, ref..." oninput="filterBookings()">
+              <select class="filter-input" id="filterStatus" onchange="filterBookings()">
+                <option value="">All Status</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select class="filter-input" id="filterResort" onchange="filterBookings()">
+                <option value="">All Resorts</option>
+              </select>
+              <input class="filter-input" type="date" id="filterDate" onchange="filterBookings()" style="min-width:150px">
+              <button class="btn btn-outline btn-sm" onclick="resetFilters()">✕ Clear</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Ref #</th><th>Guest</th><th>Phone</th><th>Resort</th><th>Check-in</th><th>Check-out</th><th>Guests</th><th>Amount</th><th>Payment</th><th>Booked On</th></tr>
+              </thead>
+              <tbody id="bookingsBody">
+                <tr><td colspan="10"><div class="empty"><div class="empty-icon">📭</div><p>No bookings found</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="padding:.75rem 1.25rem;border-top:1px solid var(--border);font-size:.8rem;color:var(--text-muted)">
+            Showing <span id="bookingCount">0</span> bookings
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RESORTS PAGE ──────────────────────── -->
+      <div class="page" id="page-resorts">
+        <div class="resorts-grid" id="resortsGrid">
+          <div class="empty" style="grid-column:1/-1"><div class="empty-icon">🏨</div><p>No resorts assigned to your account</p></div>
+        </div>
+      </div>
+
+      <!-- ── PRICING PAGE ──────────────────────── -->
+      <div class="page" id="page-pricing">
+        <div id="pricingCards" style="display:flex;flex-direction:column;gap:1rem">
+          <div class="empty"><div class="empty-icon">💰</div><p>No resorts to configure pricing</p></div>
+        </div>
+      </div>
+
+      <!-- ── REPORTS PAGE ──────────────────────── -->
+      <div class="page" id="page-reports">
+        <div class="reports-grid">
+          <!-- Bookings by Status donut -->
+          <div class="chart-box">
+            <div class="chart-title">Bookings by Status</div>
+            <div class="donut-wrap">
+              <svg class="donut-svg" width="120" height="120" viewBox="0 0 120 120" id="donutSvg">
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#e2e8f0" stroke-width="18"/>
+                <text x="60" y="65" text-anchor="middle" font-size="18" font-weight="700" fill="#1e293b" id="donutCenter">0</text>
+              </svg>
+              <div class="donut-legend" id="donutLegend"></div>
+            </div>
+          </div>
+
+          <!-- Revenue by Resort bar -->
+          <div class="chart-box">
+            <div class="chart-title">Revenue by Resort</div>
+            <div class="bar-chart" id="revenueChart"><p style="font-size:.85rem;color:var(--text-muted)">No data yet</p></div>
+          </div>
+
+          <!-- Monthly bookings bar -->
+          <div class="chart-box" style="grid-column:1/-1">
+            <div class="chart-title">Bookings This Month (by day)</div>
+            <div class="bar-chart" id="monthlyChart"><p style="font-size:.85rem;color:var(--text-muted)">No data yet</p></div>
+          </div>
+        </div>
+
+        <!-- Summary table -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Resort Summary Report</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Resort</th><th>Total Bookings</th><th>Confirmed</th><th>Pending</th><th>Revenue</th><th>Avg Stay (nights)</th></tr>
+              </thead>
+              <tbody id="reportBody">
+                <tr><td colspan="6"><div class="empty"><p>No data</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SUPPORT PAGE ──────────────────────── -->
+      <div class="page" id="page-support">
+        <div class="support-grid" style="margin-bottom:1rem">
+          <div class="support-card" onclick="contactAdmin('general')">
+            <div class="support-icon">💬</div>
+            <div class="support-title">WhatsApp Support</div>
+            <div class="support-desc">Chat directly with the VshakaGo admin team on WhatsApp for instant help.</div>
+            <button class="btn btn-whatsapp" style="width:100%;justify-content:center">Open WhatsApp</button>
+          </div>
+          <div class="support-card" onclick="contactAdmin('booking')">
+            <div class="support-icon">📋</div>
+            <div class="support-title">Booking Issue</div>
+            <div class="support-desc">Report problems with a specific booking — guest disputes, payment issues, cancellations.</div>
+            <button class="btn btn-warning" style="width:100%;justify-content:center;color:#000">Report Booking Issue</button>
+          </div>
+          <div class="support-card" onclick="contactAdmin('pricing')">
+            <div class="support-icon">💰</div>
+            <div class="support-title">Pricing Help</div>
+            <div class="support-desc">Get help setting up dynamic pricing, seasonal rates or special offers for your resort.</div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center">Get Pricing Help</button>
+          </div>
+          <div class="support-card" onclick="contactAdmin('listing')">
+            <div class="support-icon">🏨</div>
+            <div class="support-title">Resort Listing</div>
+            <div class="support-desc">Update resort photos, description, amenities or request to add a new property.</div>
+            <button class="btn btn-success" style="width:100%;justify-content:center">Update Listing</button>
+          </div>
+        </div>
+
+        <!-- Send message form -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">📨 Send Message to Admin</div></div>
+          <div class="card-body">
+            <div class="field-row">
+              <div class="field-group">
+                <label>Your Name</label>
+                <input type="text" id="supportName" placeholder="Resort owner name">
+              </div>
+              <div class="field-group">
+                <label>Subject</label>
+                <select id="supportSubject">
+                  <option>General Inquiry</option>
+                  <option>Booking Problem</option>
+                  <option>Pricing Help</option>
+                  <option>Resort Listing Update</option>
+                  <option>Payment Issue</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label>Message</label>
+              <textarea id="supportMsg" placeholder="Describe your issue or question..."></textarea>
+            </div>
+            <button class="btn btn-whatsapp" onclick="sendSupportWhatsApp()">💬 Send via WhatsApp</button>
+          </div>
+        </div>
+
+        <!-- Contact info -->
+        <div class="card" style="margin-top:1rem">
+          <div class="card-header"><div class="card-title">Contact Information</div></div>
+          <div class="card-body" style="display:flex;gap:2rem;flex-wrap:wrap">
+            <div>📞 <strong>+91 83416 74465</strong><br><span style="font-size:.8rem;color:var(--text-muted)">WhatsApp & Calls</span></div>
+            <div>✉️ <strong>vizagresortbooking@gmail.com</strong><br><span style="font-size:.8rem;color:var(--text-muted)">Email Support</span></div>
+            <div>🌐 <strong>vshakago.in</strong><br><span style="font-size:.8rem;color:var(--text-muted)">Website</span></div>
+            <div>⏰ <strong>9 AM – 9 PM</strong><br><span style="font-size:.8rem;color:var(--text-muted)">Support Hours</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /dashPage -->
+
+<!-- ── EDIT RESORT MODAL ────────────────────────────────── -->
+<div class="modal-overlay" id="editResortModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Resort Details</div>
+      <button class="modal-close" onclick="closeModal('editResortModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editResortId">
+      <div class="field-group"><label>Resort Name</label><input type="text" id="editName" placeholder="Resort name"></div>
+      <div class="field-row">
+        <div class="field-group"><label>Location</label><input type="text" id="editLocation" placeholder="Location"></div>
+        <div class="field-group"><label>Base Price (₹/night)</label><input type="number" id="editPrice" placeholder="2500"></div>
+      </div>
+      <div class="field-group"><label>Description</label><textarea id="editDesc" placeholder="Resort description..."></textarea></div>
+      <div class="field-group"><label>Max Guests</label><input type="number" id="editMaxGuests" placeholder="20"></div>
+      <div class="field-group"><label>Amenities (comma separated)</label><input type="text" id="editAmenities" placeholder="Pool, WiFi, AC, Parking..."></div>
+      <div class="field-group">
+        <label>Availability</label>
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <label class="toggle"><input type="checkbox" id="editAvailable"><span class="toggle-slider"></span></label>
+          <span id="editAvailLabel" style="font-size:.875rem;color:var(--text)">Available</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('editResortModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveResort()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PRICING MODAL ─────────────────────────────────────── -->
+<div class="modal-overlay" id="pricingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Update Pricing – <span id="pricingResortName"></span></div>
+      <button class="modal-close" onclick="closeModal('pricingModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pricingResortId">
+      <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:1rem">Set different prices based on day of week. Leave blank to use base price.</p>
+      <div class="field-row">
+        <div class="field-group"><label>Weekday Price (₹)</label><input type="number" id="pWeekday" placeholder="e.g. 2000"></div>
+        <div class="field-group"><label>Friday Price (₹)</label><input type="number" id="pFriday" placeholder="e.g. 2500"></div>
+      </div>
+      <div class="field-group"><label>Weekend Price (₹) <span style="font-size:.75rem;color:var(--text-muted)">(Sat–Sun)</span></label><input type="number" id="pWeekend" placeholder="e.g. 3000"></div>
+      <div style="background:var(--gray-light);border-radius:8px;padding:.85rem;font-size:.82rem;color:var(--text-muted);margin-top:.5rem">
+        💡 <strong>Tip:</strong> Weekend pricing applies to Saturday and Sunday bookings. Friday pricing applies to Friday check-ins.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('pricingModal')">Cancel</button>
+      <button class="btn btn-success" onclick="savePricing()">💰 Update Pricing</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let ownerData = null;
+let allBookings = [];
+let allResorts = [];
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('topDate').textContent = new Date().toLocaleDateString('en-IN', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  // Allow Enter key on login
+  document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('loginEmail').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  // Availability toggle label
+  document.getElementById('editAvailable').addEventListener('change', function(){
+    document.getElementById('editAvailLabel').textContent = this.checked ? 'Available' : 'Unavailable';
+  });
+});
+
+// ═══════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const btn   = document.getElementById('loginBtn');
+  const alert = document.getElementById('loginAlert');
+  if (!email || !pass) { showAlert('loginAlert','Please enter email/phone and password.','error'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Logging in...';
+  alert.innerHTML = '';
+  try {
+    const res = await fetch('/api/owner-login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Login failed');
+    ownerData  = data;
+    allBookings = data.bookings || [];
+    allResorts  = data.resorts  || [];
+    initDashboard();
+  } catch(err) {
+    showAlert('loginAlert', err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Login to Dashboard';
+  }
+}
+
+function showAlert(containerId, msg, type) {
+  document.getElementById(containerId).innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD INIT
+// ═══════════════════════════════════════════════
+function initDashboard() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('dashPage').style.display  = 'block';
+
+  const o = ownerData.owner;
+  document.getElementById('sOwnerName').textContent  = o.name;
+  document.getElementById('sOwnerResort').textContent = allResorts.length
+    ? allResorts.map(r=>r.name).join(', ')
+    : 'No resorts assigned';
+  document.getElementById('topAvatar').textContent = o.name.charAt(0).toUpperCase();
+
+  populateOverview();
+  populateBookings();
+  populateResorts();
+  populatePricing();
+  populateReports();
+  populateResortFilter();
+}
+
+// ═══════════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════════
+function populateOverview() {
+  const s = ownerData.stats;
+  document.getElementById('ovTotalBookings').textContent = s.totalBookings;
+  document.getElementById('ovConfirmed').textContent     = s.confirmedBookings;
+  document.getElementById('ovPending').textContent       = s.pendingBookings;
+  document.getElementById('pendingBadge').textContent    = s.pendingBookings;
+
+  const revenue = allBookings
+    .filter(b => b.payment_status === 'paid')
+    .reduce((sum,b) => sum + (b.total_price||0), 0);
+  document.getElementById('ovRevenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+
+  // Recent 5 bookings
+  const tbody = document.getElementById('recentBookingsBody');
+  const recent = [...allBookings].sort((a,b) => new Date(b.booking_date)-new Date(a.booking_date)).slice(0,5);
+  if (!recent.length) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div><p>No bookings yet</p></div></td></tr>'; return; }
+  tbody.innerHTML = recent.map(b => `
+    <tr>
+      <td><code style="font-size:.78rem;background:var(--gray-light);padding:.15rem .4rem;border-radius:4px">${b.booking_reference||b.id}</code></td>
+      <td><strong>${b.guest_name}</strong></td>
+      <td>${b.resort_name||'—'}</td>
+      <td>${formatDate(b.check_in)}</td>
+      <td>${formatDate(b.check_out)}</td>
+      <td>${b.guests}</td>
+      <td><strong>₹${(b.total_price||0).toLocaleString('en-IN')}</strong></td>
+      <td>${statusBadge(b.payment_status)}</td>
+    </tr>`).join('');
+
+  // Resort quick status
+  const rsl = document.getElementById('resortStatusList');
+  if (!allResorts.length) return;
+  rsl.innerHTML = allResorts.map(r => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:600;font-size:.875rem">${r.name}</div>
+        <div style="font-size:.75rem;color:var(--text-muted)">${r.location}</div>
+      </div>
+      <span class="badge ${r.available===0||r.available==='0' ? 'badge-unavailable':'badge-available'}">
+        ${r.available===0||r.available==='0' ? '🔴 Unavailable':'🟢 Available'}
+      </span>
+    </div>`).join('') + '<div style="height:.5rem"></div>';
+}
+
+// ═══════════════════════════════════════════════
+// BOOKINGS
+// ═══════════════════════════════════════════════
+function populateBookings() {
+  renderBookings(allBookings);
+}
+
+function renderBookings(list) {
+  const tbody = document.getElementById('bookingsBody');
+  document.getElementById('bookingCount').textContent = list.length;
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="empty-icon">📭</div><p>No bookings match your filter</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(b => `
+    <tr>
+      <td><code style="font-size:.75rem;background:var(--gray-light);padding:.15rem .4rem;border-radius:4px">${b.booking_reference||('#'+b.id)}</code></td>
+      <td>
+        <div style="font-weight:600">${b.guest_name}</div>
+        <div style="font-size:.75rem;color:var(--text-muted)">${b.email||''}</div>
+      </td>
+      <td>${b.phone||'—'}</td>
+      <td>${b.resort_name||'—'}</td>
+      <td>${formatDate(b.check_in)}</td>
+      <td>${formatDate(b.check_out)}</td>
+      <td style="text-align:center">${b.guests}</td>
+      <td><strong>₹${(b.total_price||0).toLocaleString('en-IN')}</strong>${b.discount_amount>0?`<div style="font-size:.72rem;color:#16a34a">-₹${b.discount_amount} off</div>`:''}</td>
+      <td>${statusBadge(b.payment_status)}</td>
+      <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(b.booking_date)}</td>
+    </tr>`).join('');
+}
+
+function filterBookings() {
+  const q     = document.getElementById('searchBooking').value.toLowerCase();
+  const stat  = document.getElementById('filterStatus').value;
+  const res   = document.getElementById('filterResort').value;
+  const date  = document.getElementById('filterDate').value;
+  const filtered = allBookings.filter(b => {
+    const matchQ   = !q || (b.guest_name||'').toLowerCase().includes(q) || (b.booking_reference||'').toLowerCase().includes(q) || (b.email||'').toLowerCase().includes(q) || (b.phone||'').includes(q);
+    const matchSt  = !stat || b.payment_status === stat;
+    const matchRes = !res  || String(b.resort_id) === res;
+    const matchDt  = !date || b.check_in === date;
+    return matchQ && matchSt && matchRes && matchDt;
+  });
+  renderBookings(filtered);
+}
+
+function resetFilters() {
+  ['searchBooking','filterDate'].forEach(id => document.getElementById(id).value = '');
+  ['filterStatus','filterResort'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  renderBookings(allBookings);
+}
+
+function populateResortFilter() {
+  const sel = document.getElementById('filterResort');
+  allResorts.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = r.name;
+    sel.appendChild(opt);
+  });
+}
+
+function exportBookings() {
+  if (!allBookings.length) { showToast('No bookings to export','error'); return; }
+  const headers = ['Ref','Guest','Email','Phone','Resort','Check-in','Check-out','Guests','Amount','Status','Booked On'];
+  const rows = allBookings.map(b => [
+    b.booking_reference||b.id, b.guest_name, b.email, b.phone,
+    b.resort_name||'', b.check_in, b.check_out, b.guests,
+    b.total_price, b.payment_status, b.booking_date
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${v||''}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = 'bookings_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  showToast('Bookings exported!','success');
+}
+
+// ═══════════════════════════════════════════════
+// RESORTS
+// ═══════════════════════════════════════════════
+function populateResorts() {
+  const grid = document.getElementById('resortsGrid');
+  if (!allResorts.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🏨</div><p>No resorts assigned to your account. Contact admin to get your resort listed.</p></div>';
+    return;
+  }
+  grid.innerHTML = allResorts.map(r => {
+    const avail = r.available !== 0 && r.available !== '0';
+    return `
+    <div class="resort-card">
+      <div class="resort-img">
+        ${r.image ? `<img src="${r.image}" alt="${r.name}" onerror="this.style.display='none'">` : '🏨'}
+        <span class="resort-avail-badge badge ${avail?'badge-available':'badge-unavailable'}">${avail?'🟢 Open':'🔴 Closed'}</span>
+      </div>
+      <div class="resort-body">
+        <div class="resort-name">${r.name}</div>
+        <div class="resort-loc">📍 ${r.location}</div>
+        <div class="resort-price-row">
+          <div class="resort-price">₹${(r.price||0).toLocaleString('en-IN')}<span style="font-size:.75rem;font-weight:400;color:var(--text-muted)">/night</span></div>
+          <div style="font-size:.78rem;color:var(--text-muted)">Max ${r.max_guests||'—'} guests</div>
+        </div>
+        ${r.amenities ? `<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.75rem">✨ ${r.amenities}</div>` : ''}
+        <div class="resort-actions">
+          <button class="btn btn-primary btn-sm" onclick="openEditResort(${r.id})">✏️ Edit</button>
+          <button class="btn ${avail?'btn-danger':'btn-success'} btn-sm" onclick="toggleAvailability(${r.id},${avail?0:1})">
+            ${avail?'🔴 Mark Closed':'🟢 Mark Open'}
+          </button>
+          <button class="btn btn-warning btn-sm" onclick="openPricingModal(${r.id},'${r.name.replace(/'/g,"\\'")}')">💰</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openEditResort(id) {
+  // Fetch latest resort data
+  let resort = allResorts.find(r=>r.id===id||r.id===String(id));
+  if (!resort) return;
+  try {
+    const res = await fetch(`/api/resorts/${id}`);
+    if (res.ok) resort = await res.json();
+  } catch(e) {}
+
+  document.getElementById('editResortId').value   = id;
+  document.getElementById('editName').value       = resort.name||'';
+  document.getElementById('editLocation').value   = resort.location||'';
+  document.getElementById('editPrice').value      = resort.price||'';
+  document.getElementById('editDesc').value       = resort.description||'';
+  document.getElementById('editMaxGuests').value  = resort.max_guests||'';
+  document.getElementById('editAmenities').value  = resort.amenities||'';
+  const avail = resort.available !== 0 && resort.available !== '0';
+  document.getElementById('editAvailable').checked = avail;
+  document.getElementById('editAvailLabel').textContent = avail ? 'Available' : 'Unavailable';
+  openModal('editResortModal');
+}
+
+async function saveResort() {
+  const id = document.getElementById('editResortId').value;
+  const resort = allResorts.find(r=>r.id==id||r.id===String(id));
+  const payload = {
+    name:       document.getElementById('editName').value,
+    location:   document.getElementById('editLocation').value,
+    price:      parseInt(document.getElementById('editPrice').value)||0,
+    description:document.getElementById('editDesc').value,
+    max_guests: parseInt(document.getElementById('editMaxGuests').value)||null,
+    amenities:  document.getElementById('editAmenities').value,
+    available:  document.getElementById('editAvailable').checked ? 1 : 0,
+    image:      resort?.image||'',
+    gallery:    resort?.gallery||'',
+    videos:     resort?.videos||'',
+    map_link:   resort?.map_link||'',
+  };
+  try {
+    const res = await fetch(`/api/resorts/${id}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Update failed');
+    // Update local data
+    const idx = allResorts.findIndex(r=>r.id==id);
+    if (idx>-1) allResorts[idx] = {...allResorts[idx], ...payload};
+    populateResorts();
+    populateOverview();
+    closeModal('editResortModal');
+    showToast('Resort updated successfully!','success');
+  } catch(e) {
+    showToast('Failed to update resort. Try again.','error');
+  }
+}
+
+async function toggleAvailability(id, val) {
+  const resort = allResorts.find(r=>r.id==id||r.id===String(id));
+  if (!resort) return;
+  try {
+    const res = await fetch(`/api/resorts/${id}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name:resort.name, location:resort.location, price:resort.price,
+        description:resort.description||'', image:resort.image||'',
+        gallery:resort.gallery||'', videos:resort.videos||'',
+        map_link:resort.map_link||'', amenities:resort.amenities||'',
+        available: val
+      })
+    });
+    if (!res.ok) throw new Error();
+    resort.available = val;
+    populateResorts();
+    populateOverview();
+    showToast(`Resort marked as ${val?'Available':'Unavailable'}`, 'success');
+  } catch(e) {
+    showToast('Failed to update availability','error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PRICING
+// ═══════════════════════════════════════════════
+function populatePricing() {
+  const container = document.getElementById('pricingCards');
+  if (!allResorts.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">💰</div><p>No resorts to configure</p></div>';
+    return;
+  }
+  container.innerHTML = allResorts.map(r => `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">💰 ${r.name}</div>
+        <button class="btn btn-primary btn-sm" onclick="openPricingModal(${r.id},'${r.name.replace(/'/g,"\\'")}')">✏️ Edit Pricing</button>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem" id="pricingDisplay_${r.id}">
+          <div style="background:var(--gray-light);border-radius:8px;padding:.85rem;text-align:center">
+            <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.3rem">Base Price</div>
+            <div style="font-size:1.3rem;font-weight:700;color:var(--blue)">₹${(r.price||0).toLocaleString('en-IN')}</div>
+            <div style="font-size:.72rem;color:var(--text-muted)">per night</div>
+          </div>
+          <div style="background:var(--gray-light);border-radius:8px;padding:.85rem;text-align:center" id="pdWeekday_${r.id}">
+            <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.3rem">Weekday</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">—</div>
+            <div style="font-size:.72rem;color:var(--text-muted)">Mon–Thu</div>
+          </div>
+          <div style="background:var(--gray-light);border-radius:8px;padding:.85rem;text-align:center" id="pdFriday_${r.id}">
+            <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.3rem">Friday</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">—</div>
+            <div style="font-size:.72rem;color:var(--text-muted)">Friday</div>
+          </div>
+          <div style="background:var(--gray-light);border-radius:8px;padding:.85rem;text-align:center" id="pdWeekend_${r.id}">
+            <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.3rem">Weekend</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">—</div>
+            <div style="font-size:.72rem;color:var(--text-muted)">Sat–Sun</div>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Load dynamic pricing for each resort
+  allResorts.forEach(r => loadDynamicPricing(r.id));
+}
+
+async function loadDynamicPricing(resortId) {
+  try {
+    const res = await fetch(`/api/dynamic-pricing/${resortId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    data.forEach(p => {
+      const el = document.getElementById(`pd${capitalize(p.day_type)}_${resortId}`);
+      if (el) el.querySelector('div:nth-child(2)').textContent = '₹' + p.price.toLocaleString('en-IN');
+    });
+  } catch(e) {}
+}
+
+function openPricingModal(id, name) {
+  document.getElementById('pricingResortId').value = id;
+  document.getElementById('pricingResortName').textContent = name;
+  ['pWeekday','pFriday','pWeekend'].forEach(f => document.getElementById(f).value = '');
+  // Pre-fill existing
+  fetch(`/api/dynamic-pricing/${id}`).then(r=>r.json()).then(data => {
+    data.forEach(p => {
+      const map = {weekday:'pWeekday',friday:'pFriday',weekend:'pWeekend'};
+      const el = document.getElementById(map[p.day_type]);
+      if (el) el.value = p.price;
+    });
+  }).catch(()=>{});
+  openModal('pricingModal');
+}
+
+async function savePricing() {
+  const resortId    = document.getElementById('pricingResortId').value;
+  const weekdayPrice= document.getElementById('pWeekday').value;
+  const fridayPrice = document.getElementById('pFriday').value;
+  const weekendPrice= document.getElementById('pWeekend').value;
+  try {
+    const res = await fetch('/api/dynamic-pricing', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ resortId, weekdayPrice, fridayPrice, weekendPrice })
+    });
+    if (!res.ok) throw new Error();
+    closeModal('pricingModal');
+    populatePricing();
+    showToast('Pricing updated!','success');
+  } catch(e) {
+    showToast('Failed to update pricing','error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════════
+function populateReports() {
+  // Donut: bookings by status
+  const paid      = allBookings.filter(b=>b.payment_status==='paid').length;
+  const pending   = allBookings.filter(b=>b.payment_status==='pending').length;
+  const cancelled = allBookings.filter(b=>b.payment_status==='cancelled').length;
+  const total     = allBookings.length;
+  drawDonut(total, [{label:'Paid',count:paid,color:'#14c88c'},{label:'Pending',count:pending,color:'#f5a623'},{label:'Cancelled',count:cancelled,color:'#e53e3e'}]);
+
+  // Revenue by resort
+  const revByResort = {};
+  allResorts.forEach(r => { revByResort[r.name] = 0; });
+  allBookings.filter(b=>b.payment_status==='paid').forEach(b => {
+    const rname = b.resort_name || 'Unknown';
+    revByResort[rname] = (revByResort[rname]||0) + (b.total_price||0);
+  });
+  const maxRev = Math.max(1, ...Object.values(revByResort));
+  const revChart = document.getElementById('revenueChart');
+  const revEntries = Object.entries(revByResort);
+  revChart.innerHTML = revEntries.length
+    ? revEntries.sort((a,b)=>b[1]-a[1]).map(([name,rev]) => `
+      <div class="bar-row">
+        <div class="bar-label">${name.length>10?name.slice(0,10)+'…':name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(rev/maxRev*100).toFixed(1)}%;background:var(--blue)"></div></div>
+        <div class="bar-value">₹${(rev/1000).toFixed(0)}k</div>
+      </div>`).join('')
+    : '<p style="font-size:.85rem;color:var(--text-muted)">No revenue data yet</p>';
+
+  // Monthly chart (current month)
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const dayCounts = {};
+  allBookings.forEach(b => {
+    const d = new Date(b.booking_date);
+    if (d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear()) {
+      const day = d.getDate();
+      dayCounts[day] = (dayCounts[day]||0) + 1;
+    }
+  });
+  const maxDay = Math.max(1, ...Object.values(dayCounts), 1);
+  const monthChart = document.getElementById('monthlyChart');
+  const days = Array.from({length:daysInMonth},(_,i)=>i+1);
+  monthChart.innerHTML = days.map(d => `
+    <div class="bar-row">
+      <div class="bar-label" style="width:28px;text-align:right;font-size:.72rem">${d}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${((dayCounts[d]||0)/maxDay*100).toFixed(1)}%;background:var(--teal-light)"></div></div>
+      <div class="bar-value">${dayCounts[d]||0}</div>
+    </div>`).join('');
+
+  // Summary table
+  const tbody = document.getElementById('reportBody');
+  if (!allResorts.length) { tbody.innerHTML='<tr><td colspan="6"><div class="empty"><p>No resorts assigned</p></div></td></tr>'; return; }
+  tbody.innerHTML = allResorts.map(r => {
+    const rbs    = allBookings.filter(b=>b.resort_id==r.id||b.resort_name===r.name);
+    const conf   = rbs.filter(b=>b.payment_status==='paid').length;
+    const pend   = rbs.filter(b=>b.payment_status==='pending').length;
+    const rev    = rbs.filter(b=>b.payment_status==='paid').reduce((s,b)=>s+(b.total_price||0),0);
+    const nights = rbs.map(b => {
+      const ci = new Date(b.check_in), co = new Date(b.check_out);
+      return isNaN(ci)||isNaN(co) ? 0 : Math.round((co-ci)/(1000*60*60*24));
+    });
+    const avgNights = nights.length ? (nights.reduce((a,b)=>a+b,0)/nights.length).toFixed(1) : '—';
+    return `<tr>
+      <td><strong>${r.name}</strong><div style="font-size:.75rem;color:var(--text-muted)">${r.location}</div></td>
+      <td style="text-align:center"><strong>${rbs.length}</strong></td>
+      <td style="text-align:center"><span class="badge badge-paid">${conf}</span></td>
+      <td style="text-align:center"><span class="badge badge-pending">${pend}</span></td>
+      <td><strong>₹${rev.toLocaleString('en-IN')}</strong></td>
+      <td style="text-align:center">${avgNights}</td>
+    </tr>`;
+  }).join('');
+}
+
+function drawDonut(total, segments) {
+  const svg = document.getElementById('donutSvg');
+  document.getElementById('donutCenter').textContent = total;
+  // Remove old segments
+  svg.querySelectorAll('.donut-seg').forEach(e=>e.remove());
+  const legend = document.getElementById('donutLegend');
+  legend.innerHTML = '';
+  if (!total) return;
+  const R = 45, cx = 60, cy = 60, stroke = 18;
+  const circ = 2 * Math.PI * R;
+  let offset = -Math.PI / 2; // start top
+  segments.forEach(seg => {
+    if (!seg.count) { legend.innerHTML += `<div class="legend-item"><span class="legend-dot" style="background:${seg.color}"></span>${seg.label}: 0</div>`; return; }
+    const frac = seg.count / total;
+    const dash = frac * circ;
+    const dashStr = `${dash.toFixed(2)} ${(circ-dash).toFixed(2)}`;
+    const startAngle = offset;
+    const el = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    el.setAttribute('cx',cx); el.setAttribute('cy',cy); el.setAttribute('r',R);
+    el.setAttribute('fill','none'); el.setAttribute('stroke',seg.color); el.setAttribute('stroke-width',stroke);
+    el.setAttribute('stroke-dasharray',dashStr);
+    el.setAttribute('stroke-dashoffset', (circ * (1 - (startAngle + Math.PI/2)/(2*Math.PI))).toFixed(2));
+    el.setAttribute('class','donut-seg');
+    el.style.transformOrigin = 'center';
+    const rotDeg = (startAngle + Math.PI/2) * 180 / Math.PI;
+    el.style.transform = `rotate(${rotDeg}deg)`;
+    svg.insertBefore(el, svg.querySelector('text'));
+    offset += frac * 2 * Math.PI;
+    legend.innerHTML += `<div class="legend-item"><span class="legend-dot" style="background:${seg.color}"></span>${seg.label}: ${seg.count}</div>`;
+  });
+}
+
+// ═══════════════════════════════════════════════
+// SUPPORT
+// ═══════════════════════════════════════════════
+function contactAdmin(type) {
+  const o = ownerData?.owner;
+  const msgs = {
+    general: `Hello VshakaGo Team! I am ${o?.name||'a resort owner'} and need assistance.`,
+    booking: `Hello! I am ${o?.name||'a resort owner'} and I have a booking issue that needs attention.`,
+    pricing: `Hello! I am ${o?.name||'a resort owner'} and need help with resort pricing setup.`,
+    listing: `Hello! I am ${o?.name||'a resort owner'} and need to update my resort listing.`,
+  };
+  const msg = msgs[type] || msgs.general;
+  window.open(`https://wa.me/918341674465?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function sendSupportWhatsApp() {
+  const name    = document.getElementById('supportName').value || ownerData?.owner?.name || 'Resort Owner';
+  const subject = document.getElementById('supportSubject').value;
+  const msg     = document.getElementById('supportMsg').value;
+  if (!msg.trim()) { showToast('Please enter a message','error'); return; }
+  const full = `Hello VshakaGo Support!\n\nName: ${name}\nSubject: ${subject}\n\nMessage:\n${msg}`;
+  window.open(`https://wa.me/918341674465?text=${encodeURIComponent(full)}`, '_blank');
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+const pageTitles = {overview:'Overview',bookings:'Bookings',resorts:'My Resorts',pricing:'Pricing',reports:'Reports',support:'Contact Admin'};
+function showPage(pageId, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+pageId).classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[pageId]||pageId;
+  closeSidebar();
+}
+
+// ═══════════════════════════════════════════════
+// SIDEBAR (mobile)
+// ═══════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlayBg').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlayBg').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
+});
+
+// ═══════════════════════════════════════════════
+// LOGOUT
+// ═══════════════════════════════════════════════
+function doLogout() {
+  ownerData = null; allBookings = []; allResorts = [];
+  document.getElementById('dashPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value  = '';
+  document.getElementById('loginAlert').innerHTML = '';
+}
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+function formatDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}); }
+  catch(e) { return d; }
+}
+function statusBadge(status) {
+  const map = { paid:'badge-paid ✅', pending:'badge-pending ⏳', cancelled:'badge-cancelled ❌', confirmed:'badge-confirmed ✅' };
+  const cls = map[status] ? map[status].split(' ')[0] : 'badge-pending';
+  const lbl = status ? status.charAt(0).toUpperCase()+status.slice(1) : 'Unknown';
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function capitalize(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3200);
+}
+</script>
 </body>
 </html>
