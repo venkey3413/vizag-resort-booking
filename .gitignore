@@ -9,5 +9,6 @@ setup*.js
 start-all.js
 *.md
 !README.md
+!API_DOCUMENTATION.md
 *.sh
 iam-policy.json
