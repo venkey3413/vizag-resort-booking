@@ -74,8 +74,9 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                         },
                       ),
                       items: galleryImages.map((img) {
+                        final imageUrl = img.startsWith('http') ? img : "https://vshakago.in$img";
                         return Image.network(
-                          "https://vshakago.in$img",
+                          imageUrl,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (context, error, stackTrace) {
@@ -90,7 +91,9 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                     )
                   else
                     Image.network(
-                      "https://vshakago.in${widget.resort.image}",
+                      widget.resort.image.startsWith('http') 
+                          ? widget.resort.image
+                          : "https://vshakago.in${widget.resort.image}",
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
@@ -377,7 +380,9 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.network(
-                                "https://vshakago.in${galleryImages[index]}",
+                                galleryImages[index].startsWith('http') 
+                                    ? galleryImages[index]
+                                    : "https://vshakago.in${galleryImages[index]}",
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,

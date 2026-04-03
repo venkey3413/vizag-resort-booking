@@ -52,7 +52,9 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced> {
                 child: Stack(
                   children: [
                     Image.network(
-                      "https://vshakago.in${widget.resort.image}",
+                      widget.resort.image.startsWith('http') 
+                          ? widget.resort.image 
+                          : "https://vshakago.in${widget.resort.image}",
                       height: 180,
                       width: double.infinity,
                       fit: BoxFit.cover,

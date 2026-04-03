@@ -48,11 +48,11 @@ class MyApp extends StatelessWidget {
         ),
         
         // Card theme
-        cardTheme: CardTheme(
+        cardTheme: const CardThemeData(
           elevation: 4,
           color: AppColors.cardBackground,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
         ),
         
@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
           surface: AppColors.cardBackground,
         ),
       ),
-      home: isLoggedIn ? const HomeScreenEnhanced() : const LoginScreen(),
+      home: isLoggedIn ? const HomeScreenEnhanced() : const HomeScreenEnhanced(),
     );
   }
 }

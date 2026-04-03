@@ -40,8 +40,9 @@ class Resort {
     if (gallery == null || gallery!.isEmpty) {
       return [image]; // Return main image if no gallery
     }
+    // Split by newline or comma
     return gallery!
-        .split(',')
+        .split(RegExp(r'[\n,]'))
         .map((img) => img.trim())
         .where((img) => img.isNotEmpty)
         .toList();
