@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/resort.dart';
-import 'booking_screen.dart';
+import 'booking_screen_razorpay.dart';
 
 class DetailsScreen extends StatelessWidget {
   final Resort resort;

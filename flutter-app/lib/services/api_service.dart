@@ -44,4 +44,35 @@ class ApiService {
       throw Exception(error['error'] ?? "Availability check failed");
     }
   }
+
+  // Get Razorpay Key
+  static Future<String> getRazorpayKey() async {
+    final response = await http.get(Uri.parse("$baseUrl/api/razorpay-key"));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['key'] ?? '';
+    } else {
+      throw Exception("Failed to get Razorpay key");
+    }
+  }
+
+  // Owner Login
+  static Future<Map<String, dynamic>> ownerLogin(String email, String password) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/owner-login"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": email,
+        "password": password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['error'] ?? "Login failed");
+    }
+  }
 }
