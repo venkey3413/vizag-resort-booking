@@ -1,0 +1,785 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../models/resort.dart';
+import '../services/api_service.dart';
+
+class BookingModalScreen extends StatefulWidget {
+  final Resort resort;
+
+  const BookingModalScreen({super.key, required this.resort});
+
+  @override
+  State<BookingModalScreen> createState() => _BookingModalScreenState();
+}
+
+class _BookingModalScreenState extends State<BookingModalScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+  final guestsController = TextEditingController(text: "2");
+  
+  DateTime? checkInDate;
+  DateTime? checkOutDate;
+  bool isLoading = false;
+  late Razorpay _razorpay;
+  String? razorpayKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeRazorpay();
+    _fetchRazorpayKey();
+  }
+
+  void _initializeRazorpay() {
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  Future<void> _fetchRazorpayKey() async {
+    try {
+      final key = await ApiService.getRazorpayKey();
+      setState(() {
+        razorpayKey = key;
+      });
+    } catch (e) {
+      print('Failed to fetch Razorpay key: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    guestsController.dispose();
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isCheckIn) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: isCheckIn 
+          ? DateTime.now().add(const Duration(days: 1))
+          : (checkInDate?.add(const Duration(days: 1)) ?? DateTime.now().add(const Duration(days: 2))),
+      firstDate: isCheckIn 
+          ? DateTime.now()
+          : (checkInDate ?? DateTime.now()),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    if (picked != null) {
+      setState(() {
+        if (isCheckIn) {
+          checkInDate = picked;
+          if (checkOutDate != null && checkOutDate!.isBefore(picked.add(const Duration(days: 1)))) {
+            checkOutDate = null;
+          }
+        } else {
+          checkOutDate = picked;
+        }
+      });
+    }
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return "Select Date";
+    return "${date.day}/${date.month}/${date.year}";
+  }
+
+  int _calculateTotalPrice() {
+    if (checkInDate == null || checkOutDate == null) return 0;
+    
+    final nights = checkOutDate!.difference(checkInDate!).inDays;
+    final basePrice = widget.resort.price * nights;
+    final platformFee = (basePrice * 0.015).round();
+    return basePrice + platformFee;
+  }
+
+  void _openRazorpayPayment() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (checkInDate == null || checkOutDate == null) {
+      _showErrorDialog("Please select check-in and check-out dates");
+      return;
+    }
+
+    if (razorpayKey == null || razorpayKey!.isEmpty) {
+      _showErrorDialog("Payment system not configured. Please contact support.");
+      return;
+    }
+
+    final totalPrice = _calculateTotalPrice();
+
+    var options = {
+      'key': razorpayKey,
+      'amount': totalPrice * 100,
+      'name': widget.resort.name,
+      'description': 'Resort Booking Payment',
+      'prefill': {
+        'contact': phoneController.text.trim(),
+        'email': emailController.text.trim(),
+      },
+      'theme': {
+        'color': '#28a745'
+      }
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      _showErrorDialog('Error: $e');
+    }
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    _submitBooking(response.paymentId);
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    _showErrorDialog('Payment failed: ${response.message}');
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    _showErrorDialog('External wallet: ${response.walletName}');
+  }
+
+  Future<void> _submitBooking(String? transactionId) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final checkIn = "${checkInDate!.year}-${checkInDate!.month.toString().padLeft(2, '0')}-${checkInDate!.day.toString().padLeft(2, '0')}";
+      final checkOut = "${checkOutDate!.year}-${checkOutDate!.month.toString().padLeft(2, '0')}-${checkOutDate!.day.toString().padLeft(2, '0')}";
+
+      final totalPrice = _calculateTotalPrice();
+
+      final bookingData = {
+        "resortId": widget.resort.id,
+        "guestName": nameController.text.trim(),
+        "email": emailController.text.trim(),
+        "phone": phoneController.text.trim(),
+        "checkIn": checkIn,
+        "checkOut": checkOut,
+        "guests": int.parse(guestsController.text),
+        "totalPrice": totalPrice,
+        "transactionId": transactionId,
+      };
+
+      final response = await ApiService.bookResort(bookingData);
+
+      setState(() {
+        isLoading = false;
+      });
+
+      if (response['bookingReference'] != null) {
+        _showSuccessDialog(response['bookingReference']);
+      } else {
+        _showErrorDialog("Booking created but no reference received");
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  void _showSuccessDialog(String bookingReference) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green[600], size: 32),
+            const SizedBox(width: 12),
+            const Text("Booking Confirmed!"),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Your booking has been confirmed successfully."),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Booking Reference:",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    bookingReference,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[600], size: 32),
+            const SizedBox(width: 12),
+            const Text("Error"),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final nights = (checkInDate != null && checkOutDate != null)
+        ? checkOutDate!.difference(checkInDate!).inDays
+        : 0;
+    final totalPrice = _calculateTotalPrice();
+
+    return Scaffold(
+      backgroundColor: Colors.black.withOpacity(0.6),
+      body: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Center(
+          child: Container(
+            margin: const EdgeInsets.all(20),
+            constraints: const BoxConstraints(maxWidth: 600),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.97),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.28),
+                  blurRadius: 110,
+                  offset: const Offset(0, 30),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      color: const Color(0xFF0F172A).withOpacity(0.03),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Confirm Booking',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Secure booking with instant confirmation',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF64748B),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Resort Summary
+                    Container(
+                      margin: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A).withOpacity(0.03),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: const Color(0xFF0F172A).withOpacity(0.10),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              widget.resort.image.startsWith('http')
+                                  ? widget.resort.image
+                                  : "https://vshakago.in${widget.resort.image}",
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 80,
+                                  height: 80,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.image),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.resort.name,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.resort.location,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  '\u20b9${widget.resort.price}/night',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Form
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextFormField(
+                              controller: nameController,
+                              decoration: InputDecoration(
+                                labelText: "Full Name",
+                                labelStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                              style: const TextStyle(fontWeight: FontWeight.w900),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Please enter your name";
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+
+                            TextFormField(
+                              controller: emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: InputDecoration(
+                                labelText: "Email",
+                                labelStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                              style: const TextStyle(fontWeight: FontWeight.w900),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Please enter your email";
+                                }
+                                if (!value.contains('@')) {
+                                  return "Please enter a valid email";
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+
+                            TextFormField(
+                              controller: phoneController,
+                              keyboardType: TextInputType.phone,
+                              decoration: InputDecoration(
+                                labelText: "Phone Number",
+                                labelStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                                hintText: "+919876543210",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                              style: const TextStyle(fontWeight: FontWeight.w900),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Please enter your phone number";
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Date Selection
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () => _selectDate(context, true),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: const Color(0xFF0F172A).withOpacity(0.12),
+                                        ),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "Check-in",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w900,
+                                              color: Color(0xFF64748B),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _formatDate(checkInDate),
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w900,
+                                              color: checkInDate == null
+                                                  ? Colors.grey
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: checkInDate == null
+                                        ? null
+                                        : () => _selectDate(context, false),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: checkInDate == null
+                                              ? Colors.grey[300]!
+                                              : const Color(0xFF0F172A).withOpacity(0.12),
+                                        ),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Check-out",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w900,
+                                              color: checkInDate == null
+                                                  ? Colors.grey[300]
+                                                  : const Color(0xFF64748B),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _formatDate(checkOutDate),
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w900,
+                                              color: checkOutDate == null
+                                                  ? Colors.grey
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+
+                            TextFormField(
+                              controller: guestsController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: "Number of Guests",
+                                labelStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                              style: const TextStyle(fontWeight: FontWeight.w900),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Please enter number of guests";
+                                }
+                                final guests = int.tryParse(value);
+                                if (guests == null || guests < 1) {
+                                  return "Please enter a valid number";
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Price Summary
+                            if (nights > 0) ...[ 
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF0F172A).withOpacity(0.03),
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                    color: const Color(0xFF0F172A).withOpacity(0.10),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Base Amount",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                        Text(
+                                          "\u20b9${widget.resort.price * nights}",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "Platform Fee",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                        Text(
+                                          "\u20b9${(widget.resort.price * nights * 0.015).round()}",
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const Divider(height: 20),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "Total Pay",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                        Text(
+                                          "\u20b9${totalPrice.toStringAsFixed(0)}",
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+
+                            // Proceed to Payment Button (Green)
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF28a745),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: isLoading ? null : _openRazorpayPayment,
+                                child: isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Proceed to Payment',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+
+                            // Cancel Button (Red)
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFdc3545),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Note
+                            const Center(
+                              child: Text(
+                                '✅ Coupon supported • ✅ Secure Payment • ✅ Instant Confirmation',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF64748B),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

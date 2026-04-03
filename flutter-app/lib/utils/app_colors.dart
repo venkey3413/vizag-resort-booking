@@ -9,9 +9,17 @@ class AppColors {
   static const warning = Color(0xFFFFC107);
   static const info = Color(0xFF0DCAF0);
   
-  // Background colors
+  // Background colors with gradient
   static const background = Color(0xFFF8F9FA);
   static const cardBackground = Colors.white;
+  
+  // Gradient colors from website
+  static const gradientStart = Color(0xFF667EEA);
+  static const gradientEnd = Color(0xFF764BA2);
+  
+  // Orange gradient for buttons
+  static const orangeStart = Color(0xFFFF6F00);
+  static const orangeEnd = Color(0xFFFF9A3C);
   
   // Text colors
   static const textDark = Color(0xFF212529);

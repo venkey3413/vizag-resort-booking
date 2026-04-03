@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/resort.dart';
-import 'booking_screen_razorpay.dart';
+import 'booking_modal_screen.dart';
 
 class DetailsScreenEnhanced extends StatefulWidget {
   final Resort resort;
@@ -153,12 +153,48 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Resort Name
-                  Text(
-                    widget.resort.name,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                  // Resort Name with Wooden Background
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF8B4513),
+                          Color(0xFFA0522D),
+                          Color(0xFFCD853F),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      widget.resort.name,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black54,
+                            offset: Offset(2, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -308,53 +344,82 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                     const SizedBox(height: 24),
                   ],
 
-                  // Amenities
+                  // Amenities with Premium Chips
                   if (widget.resort.amenities != null &&
                       widget.resort.amenities!.isNotEmpty) ...[
                     const Text(
                       'Amenities',
                       style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: widget.resort.amenities!
-                          .split(',')
-                          .map((amenity) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.blue[200]!),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                _getAmenityIcon(amenity.trim()),
-                                size: 18,
-                                color: Colors.blue[700],
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0A74DA).withOpacity(0.05),
+                        border: Border.all(
+                          color: const Color(0xFF0A74DA).withOpacity(0.12),
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: widget.resort.amenities!
+                            .split(',')
+                            .map((amenity) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.9),
+                              border: Border.all(
+                                color: const Color(0xFF0F172A).withOpacity(0.12),
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                amenity.trim(),
-                                style: TextStyle(
-                                  color: Colors.blue[900],
-                                  fontWeight: FontWeight.w500,
+                              borderRadius: BorderRadius.circular(999),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.06),
+                                  blurRadius: 22,
+                                  offset: const Offset(0, 10),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF6F00).withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    _getAmenityIcon(amenity.trim()),
+                                    size: 12,
+                                    color: const Color(0xFFFF6F00),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  amenity.trim(),
+                                  style: const TextStyle(
+                                    color: Color(0xFF0F172A),
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -403,41 +468,57 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                     const SizedBox(height: 24),
                   ],
 
-                  // Book Now Button
+                  // Book Now Button with Orange Gradient
                   SizedBox(
                     width: double.infinity,
                     height: 56,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[700],
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFF6F00), Color(0xFFFF9A3C)],
                         ),
-                        elevation: 4,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                BookingScreen(resort: widget.resort),
-                          ),
-                        );
-                      },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today, size: 20),
-                          SizedBox(width: 12),
-                          Text(
-                            'Book Now',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFF6F00).withOpacity(0.3),
+                            blurRadius: 40,
+                            offset: const Offset(0, 18),
                           ),
                         ],
+                      ),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  BookingModalScreen(resort: widget.resort),
+                              fullscreenDialog: true,
+                            ),
+                          );
+                        },
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.calendar_today, size: 20),
+                            SizedBox(width: 12),
+                            Text(
+                              'Book Now',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

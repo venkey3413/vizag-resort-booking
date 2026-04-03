@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'screens/splash_screen.dart';
 import 'screens/home_screen_enhanced.dart';
 import 'screens/login_screen.dart';
 import 'utils/app_colors.dart';
@@ -21,11 +22,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Vizag Resort Booking',
+      title: 'VshakaGo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: AppColors.background,
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
         useMaterial3: true,
         
         // Apply Poppins font globally
@@ -61,10 +62,10 @@ class MyApp extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
-            elevation: 2,
+            elevation: 8,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(25),
             ),
             textStyle: GoogleFonts.poppins(
               fontSize: 16,
@@ -100,8 +101,16 @@ class MyApp extends StatelessWidget {
           background: AppColors.background,
           surface: AppColors.cardBackground,
         ),
+        
+        // Page transitions
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
       ),
-      home: isLoggedIn ? const HomeScreenEnhanced() : const HomeScreenEnhanced(),
+      home: const SplashScreen(),
     );
   }
 }
