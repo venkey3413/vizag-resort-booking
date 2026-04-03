@@ -6,6 +6,8 @@ class Resort {
   final String image;
   final String? description;
   final String? amenities;
+  final String? gallery;
+  final String? mapLink;
 
   Resort({
     required this.id,
@@ -15,6 +17,8 @@ class Resort {
     required this.image,
     this.description,
     this.amenities,
+    this.gallery,
+    this.mapLink,
   });
 
   factory Resort.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,20 @@ class Resort {
       image: json['image'],
       description: json['description'],
       amenities: json['amenities'],
+      gallery: json['gallery'],
+      mapLink: json['map_link'],
     );
+  }
+
+  // Helper method to get gallery images as list
+  List<String> getGalleryImages() {
+    if (gallery == null || gallery!.isEmpty) {
+      return [image]; // Return main image if no gallery
+    }
+    return gallery!
+        .split(',')
+        .map((img) => img.trim())
+        .where((img) => img.isNotEmpty)
+        .toList();
   }
 }

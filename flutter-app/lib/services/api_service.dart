@@ -57,6 +57,22 @@ class ApiService {
     }
   }
 
+  // Get Coupons
+  static Future<List<dynamic>> getCoupons({int? resortId}) async {
+    String url = "$baseUrl/api/coupons";
+    if (resortId != null) {
+      url += "?resortId=$resortId";
+    }
+    
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to get coupons");
+    }
+  }
+
   // Owner Login
   static Future<Map<String, dynamic>> ownerLogin(String email, String password) async {
     final response = await http.post(
