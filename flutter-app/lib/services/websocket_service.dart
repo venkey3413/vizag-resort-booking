@@ -10,7 +10,11 @@ class WebSocketService {
   
   // Connect to WebSocket server
   static void connect({Function(Map<String, dynamic>)? onMessage}) {
-    if (_isConnected) return;
+    if (_isConnected) {
+      print('⚠️ WebSocket already connected, updating message handler');
+      _onMessage = onMessage;
+      return;
+    }
     
     try {
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
@@ -25,12 +29,17 @@ class WebSocketService {
           try {
             final data = json.decode(message);
             print('📨 WebSocket message received: ${data['type']}');
+            print('📊 Full message data: $data');
             
             if (_onMessage != null) {
+              print('✅ Calling message handler');
               _onMessage!(data);
+            } else {
+              print('⚠️ No message handler registered');
             }
           } catch (e) {
             print('❌ Error parsing WebSocket message: $e');
+            print('📝 Raw message: $message');
           }
         },
         onError: (error) {
