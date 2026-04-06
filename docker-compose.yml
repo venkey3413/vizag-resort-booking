@@ -81,6 +81,22 @@ services:
     depends_on:
       - redis
 
+  websocket-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.websocket
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - redis
+    restart: unless-stopped
+
 
 
 volumes:
