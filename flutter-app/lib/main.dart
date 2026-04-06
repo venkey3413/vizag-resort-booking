@@ -5,11 +5,18 @@ import 'screens/splash_screen.dart';
 import 'screens/home_screen_enhanced.dart';
 import 'screens/login_screen.dart';
 import 'utils/app_colors.dart';
+import 'services/websocket_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  
+  // Initialize WebSocket connection for real-time updates
+  WebSocketService.connect(onMessage: (data) {
+    print('📨 Real-time update received: ${data['type']}');
+    // Handle real-time updates (booking created, resort updated, etc.)
+  });
   
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
