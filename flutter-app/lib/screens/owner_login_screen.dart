@@ -38,13 +38,13 @@ class _OwnerLoginScreenState extends State<OwnerLoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://vizagresortbooking.in/api/owner-login'),
+        Uri.parse('https://vshakago.in/api/owner-login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text.trim(),
           'password': _passwordController.text,
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       final data = json.decode(response.body);
 
@@ -77,8 +77,9 @@ class _OwnerLoginScreenState extends State<OwnerLoginScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Connection error. Please try again.';
+        _errorMessage = 'Connection error: ${e.toString()}';
       });
+      print('Login error: $e');
     } finally {
       setState(() {
         _isLoading = false;

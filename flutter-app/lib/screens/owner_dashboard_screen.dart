@@ -655,13 +655,13 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://vizagresortbooking.in/api/verify-ticket'),
+        Uri.parse('https://vshakago.in/api/verify-ticket'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'bookingReference': bookingRef,
           'ownerId': widget.ownerId,
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       final data = json.decode(response.body);
 
