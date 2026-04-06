@@ -30,6 +30,7 @@ class OwnerDashboardScreen extends StatefulWidget {
 class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   int _selectedIndex = 0;
   late List<Booking> _bookings;
+  late List<Map<String, dynamic>> _resorts;
   late OwnerStats _stats;
   bool _isRefreshing = false;
 
@@ -37,6 +38,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   void initState() {
     super.initState();
     _bookings = widget.bookings;
+    _resorts = widget.resorts;
     _stats = widget.stats;
   }
 
@@ -51,8 +53,16 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       // Fetch all bookings
       final allBookings = await OwnerApiService.getBookings();
       
+      // Fetch all resorts
+      final allResorts = await OwnerApiService.getResorts();
+      
       // Filter for owner's resorts
       final ownerResortIds = widget.resorts.map((r) => r['id']).toList();
+      final filteredResorts = allResorts
+          .where((r) => ownerResortIds.contains(r['id']))
+          .map((r) => Map<String, dynamic>.from(r))
+          .toList();
+      
       final filteredBookings = allBookings
           .where((b) => ownerResortIds.contains(b['resort_id']))
           .map((b) => Booking.fromJson(b))
@@ -67,6 +77,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
 
       setState(() {
         _bookings = filteredBookings;
+        _resorts = filteredResorts;
         _stats = newStats;
       });
 
@@ -200,8 +211,8 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.resorts.isNotEmpty
-                        ? widget.resorts.map((r) => r['name']).join(', ')
+                    _resorts.isNotEmpty
+                        ? _resorts.map((r) => r['name']).join(', ')
                         : 'No resorts assigned',
                     style: GoogleFonts.dmSans(
                       fontSize: 12,
@@ -422,13 +433,16 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
 
   // Resorts Page
   Widget _buildResortsPage() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _buildSectionHeader('My Resorts (${widget.resorts.length})'),
-        const SizedBox(height: 12),
-        ...widget.resorts.map((resort) => _buildResortCard(resort)),
-      ],
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildSectionHeader('My Resorts (${_resorts.length})'),
+          const SizedBox(height: 12),
+          ..._resorts.map((resort) => _buildResortCard(resort)),
+        ],
+      ),
     );
   }
 
