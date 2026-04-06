@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
@@ -20,14 +21,40 @@ class HomeScreenEnhanced extends StatefulWidget {
 class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
   // Key to refresh the FutureBuilder
   int _refreshKey = 0;
+  StreamSubscription? _wsSubscription;
 
   @override
   void initState() {
     super.initState();
     
-    // Listen for WebSocket real-time updates (don't reconnect, just listen)
-    // Connection is already established in main.dart
-    print('🔄 Home screen listening for WebSocket updates');
+    // Listen for WebSocket real-time updates
+    _wsSubscription = WebSocketService.updateStream.listen((data) {
+      final type = data['type'];
+      print('🔄 Home screen received update: $type');
+      
+      // Auto-refresh UI for relevant updates
+      if (type == 'booking.created' || 
+          type == 'booking.updated' || 
+          type == 'booking.deleted' ||
+          type == 'resort.updated' ||
+          type == 'resort.pricing.updated' ||
+          type == 'resort.date.blocked' ||
+          type == 'resort.date.unblocked') {
+        
+        print('✅ Auto-refreshing resort list...');
+        if (mounted) {
+          setState(() {
+            _refreshKey++;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _wsSubscription?.cancel();
+    super.dispose();
   }
 
   // Refresh function

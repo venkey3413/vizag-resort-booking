@@ -1,10 +1,18 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketService {
   static WebSocketChannel? _channel;
   static bool _isConnected = false;
   static Function(Map<String, dynamic>)? _onMessage;
+  
+  // Stream controller for broadcasting updates to all listeners
+  static final StreamController<Map<String, dynamic>> _updateController = 
+      StreamController<Map<String, dynamic>>.broadcast();
+  
+  // Public stream that widgets can listen to
+  static Stream<Map<String, dynamic>> get updateStream => _updateController.stream;
   
   static const String wsUrl = 'wss://vshakago.in:3005';
   
@@ -30,6 +38,9 @@ class WebSocketService {
             final data = json.decode(message);
             print('📨 WebSocket message received: ${data['type']}');
             print('📊 Full message data: $data');
+            
+            // Broadcast to stream for all listeners
+            _updateController.add(data);
             
             if (_onMessage != null) {
               print('✅ Calling message handler');
