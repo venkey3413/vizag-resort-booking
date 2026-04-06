@@ -18,14 +18,17 @@ class HomeScreenEnhanced extends StatefulWidget {
   State<HomeScreenEnhanced> createState() => _HomeScreenEnhancedState();
 }
 
-class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
+class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBindingObserver {
   // Key to refresh the FutureBuilder
   int _refreshKey = 0;
   StreamSubscription? _wsSubscription;
+  bool _isScreenVisible = true;
+  bool _hasPendingUpdate = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     
     // Listen for WebSocket real-time updates
     _wsSubscription = WebSocketService.updateStream.listen((data) {
@@ -41,18 +44,44 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
           type == 'resort.date.blocked' ||
           type == 'resort.date.unblocked') {
         
-        print('✅ Auto-refreshing resort list...');
-        if (mounted) {
+        // Only refresh if screen is visible, otherwise queue the update
+        if (_isScreenVisible && mounted) {
+          print('✅ Auto-refreshing resort list (screen visible)...');
           setState(() {
             _refreshKey++;
           });
+        } else {
+          print('⏸️ Update queued - will refresh when screen becomes visible');
+          _hasPendingUpdate = true;
         }
       }
     });
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    // Track if app is in foreground
+    if (state == AppLifecycleState.resumed) {
+      _isScreenVisible = true;
+      
+      // Apply queued updates when returning to screen
+      if (_hasPendingUpdate && mounted) {
+        print('✅ Applying queued updates...');
+        setState(() {
+          _refreshKey++;
+          _hasPendingUpdate = false;
+        });
+      }
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _isScreenVisible = false;
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _wsSubscription?.cancel();
     super.dispose();
   }
