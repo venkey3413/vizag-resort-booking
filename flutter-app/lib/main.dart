@@ -39,30 +39,60 @@ void main() async {
           print('✅ Showing snackbar notification');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.sync, color: Colors.white, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      type == 'booking.created' ? '🎉 New booking received!' :
-                      type == 'booking.updated' ? '📝 Booking updated!' :
-                      type == 'booking.deleted' ? '🗑️ Booking deleted!' :
-                      type == 'resort.updated' ? '🏝️ Resort updated!' :
-                      type == 'resort.pricing.updated' ? '💰 Pricing updated!' :
-                      type == 'resort.date.blocked' ? '🚫 Date blocked!' :
-                      type == 'resort.date.unblocked' ? '✅ Date unblocked!' :
-                      '🔄 Data updated!',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              content: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.notifications_active, color: Colors.white, size: 24),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Real-time Update',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            type == 'booking.created' ? '🎉 New booking received!' :
+                            type == 'booking.updated' ? '📝 Booking updated!' :
+                            type == 'booking.deleted' ? '🗑️ Booking deleted!' :
+                            type == 'resort.updated' ? '🏝️ Resort updated!' :
+                            type == 'resort.pricing.updated' ? '💰 Pricing updated!' :
+                            type == 'resort.date.blocked' ? '🚫 Date blocked!' :
+                            type == 'resort.date.unblocked' ? '✅ Date unblocked!' :
+                            '🔄 Data updated!',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              backgroundColor: Colors.blue.shade700,
-              duration: const Duration(seconds: 3),
+              backgroundColor: const Color(0xFF1E88E5),
+              duration: const Duration(seconds: 4),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               margin: const EdgeInsets.all(16),
+              elevation: 8,
             ),
           );
         } else {
