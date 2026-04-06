@@ -95,10 +95,11 @@ app.put('/api/resorts/:id', async (req, res) => {
         // Publish resort updated event
         if (response.ok) {
             try {
-                await redisPubSub.publish('resort-events', {
-                    type: 'resort.updated',
-                    resort: data
-                });
+                await redisPubSub.publish('resort:updated', JSON.stringify({
+                    resortId: req.params.id,
+                    ...req.body
+                }));
+                console.log('📡 Published resort:updated to Redis');
             } catch (eventError) {
                 console.error('Redis publish failed:', eventError);
             }
