@@ -42,6 +42,7 @@ void main() async {
               content: Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
@@ -49,7 +50,7 @@ void main() async {
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.notifications_active, color: Colors.white, size: 24),
+                      child: const Icon(Icons.notifications_active, color: Colors.white, size: 20),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -60,26 +61,30 @@ void main() async {
                           const Text(
                             'Real-time Update',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               fontWeight: FontWeight.w500,
                               color: Colors.white70,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            type == 'booking.created' ? '🎉 New booking received!' :
+                            type == 'booking.created' ? '🎉 New booking!' :
                             type == 'booking.updated' ? '📝 Booking updated!' :
                             type == 'booking.deleted' ? '🗑️ Booking deleted!' :
                             type == 'resort.updated' ? '🏝️ Resort updated!' :
-                            type == 'resort.pricing.updated' ? '💰 Pricing updated!' :
+                            type == 'resort.pricing.updated' ? '💰 Price updated!' :
                             type == 'resort.date.blocked' ? '🚫 Date blocked!' :
                             type == 'resort.date.unblocked' ? '✅ Date unblocked!' :
                             '🔄 Data updated!',
                             style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
