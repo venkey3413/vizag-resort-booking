@@ -209,8 +209,15 @@ class _BookingScreenState extends State<BookingScreen> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Text(widget.resort.location),
+                            Text(
+                              widget.resort.location,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13),
+                            ),
                             Text(
                               "₹${widget.resort.price}/night",
                               style: const TextStyle(
