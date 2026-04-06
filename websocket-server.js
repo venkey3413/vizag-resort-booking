@@ -1,9 +1,20 @@
 const WebSocket = require('ws');
 const redis = require('redis');
+const https = require('https');
+const fs = require('fs');
 
-// Create WebSocket server on port 3003
+// SSL certificate paths (Let's Encrypt)
+const sslOptions = {
+  cert: fs.readFileSync('/etc/letsencrypt/live/vshakago.in/fullchain.pem'),
+  key: fs.readFileSync('/etc/letsencrypt/live/vshakago.in/privkey.pem')
+};
+
+// Create HTTPS server
+const server = https.createServer(sslOptions);
+
+// Create WebSocket server with SSL
 const wss = new WebSocket.Server({ 
-  port: 3005,
+  server,
   perMessageDeflate: false
 });
 
@@ -116,9 +127,12 @@ setInterval(() => {
   });
 }, 30000); // Every 30 seconds
 
-console.log('🚀 WebSocket Server running on ws://localhost:3005');
-console.log('📡 Listening for Redis pub/sub events...');
-console.log('🔄 Real-time sync enabled for Android app, website, and owner dashboard');
+// Start HTTPS server
+server.listen(3005, '0.0.0.0', () => {
+  console.log('🚀 WebSocket Server running on wss://0.0.0.0:3005 (SSL enabled)');
+  console.log('📡 Listening for Redis pub/sub events...');
+  console.log('🔄 Real-time sync enabled for Android app, website, and owner dashboard');
+});
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
