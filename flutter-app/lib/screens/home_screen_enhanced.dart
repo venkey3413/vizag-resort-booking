@@ -7,6 +7,7 @@ import '../widgets/custom_header.dart';
 import '../widgets/resort_card_enhanced.dart';
 import 'details_screen_enhanced.dart';
 import 'events_screen.dart';
+import 'owner_login_screen.dart';
 
 class HomeScreenEnhanced extends StatefulWidget {
   const HomeScreenEnhanced({super.key});
@@ -936,6 +937,56 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Owner Dashboard Button
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF1a5fa8), Color(0xFF0a7a5a)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1a5fa8).withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const OwnerLoginScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.dashboard_outlined,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        label: const Text(
+                          'Owner Dashboard',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    
                     const Text(
                       'Vizag Starts Here & Go',
                       style: TextStyle(
