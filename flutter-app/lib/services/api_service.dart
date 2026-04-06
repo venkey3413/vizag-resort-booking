@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/resort.dart';
+import '../models/event.dart';
 
 class ApiService {
   static const String baseUrl = "https://vshakago.in";
@@ -13,6 +14,31 @@ class ApiService {
       return data.map((e) => Resort.fromJson(e)).toList();
     } else {
       throw Exception("Failed to load resorts");
+    }
+  }
+
+  static Future<List<Event>> getEvents() async {
+    final response = await http.get(Uri.parse("$baseUrl/api/events"));
+
+    if (response.statusCode == 200) {
+      List data = jsonDecode(response.body);
+      return data.map((e) => Event.fromJson(e)).toList();
+    } else {
+      throw Exception("Failed to load events");
+    }
+  }
+
+  static Future<Map<String, dynamic>> bookEvent(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/event-bookings"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to create event booking");
     }
   }
 

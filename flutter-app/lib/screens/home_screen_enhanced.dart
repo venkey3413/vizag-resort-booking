@@ -6,6 +6,7 @@ import '../utils/app_colors.dart';
 import '../widgets/custom_header.dart';
 import '../widgets/resort_card_enhanced.dart';
 import 'details_screen_enhanced.dart';
+import 'events_screen.dart';
 
 class HomeScreenEnhanced extends StatefulWidget {
   const HomeScreenEnhanced({super.key});
@@ -15,21 +16,51 @@ class HomeScreenEnhanced extends StatefulWidget {
 }
 
 class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
+  // Key to refresh the FutureBuilder
+  int _refreshKey = 0;
+
+  // Refresh function
+  Future<void> _refreshResorts() async {
+    setState(() {
+      _refreshKey++;
+    });
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 8),
+            Text('Resorts refreshed!'),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFFF5F7FA),
-              const Color(0xFFC3CFE2).withOpacity(0.5),
-            ],
+      body: RefreshIndicator(
+        onRefresh: _refreshResorts,
+        color: AppColors.primary,
+        backgroundColor: Colors.white,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFFF5F7FA),
+                const Color(0xFFC3CFE2).withOpacity(0.5),
+              ],
+            ),
           ),
-        ),
-        child: CustomScrollView(
+          child: CustomScrollView(
           slivers: [
             // Custom Header
             SliverToBoxAdapter(
@@ -276,49 +307,221 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      
+                      // Icon Buttons (Events & Hotels)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(14),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const EventsScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          '🎉',
+                                          style: TextStyle(fontSize: 28),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          'Events',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.grey[800],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(14),
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Hotel feature coming soon'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          '🏨',
+                                          style: TextStyle(fontSize: 28),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          'Hotel',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.grey[800],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
 
-            // Section Title
+            // Section Title with Refresh Button
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
                 child: Column(
                   children: [
-                    ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [Color(0xFF0066FF), Color(0xFF00A8FF)],
-                      ).createShader(bounds),
-                      child: const Text(
-                        'Popular Resorts in Vizag',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [Color(0xFF0066FF), Color(0xFF00A8FF)],
+                            ).createShader(bounds),
+                            child: const Text(
+                              'Popular Resorts in Vizag',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF0066FF), Color(0xFF00A8FF)],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF0066FF).withOpacity(0.3),
+                                blurRadius: 15,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: _refreshResorts,
+                              child: const Padding(
+                                padding: EdgeInsets.all(8),
+                                child: Icon(
+                                  Icons.refresh,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Verified listings • Best prices',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF64748B),
-                      ),
-                      textAlign: TextAlign.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Verified listings • Best prices',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF64748B),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.green.withOpacity(0.3),
+                            ),
+                          ),
+                          child: const Text(
+                            '🔄 Pull to refresh',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
 
-            // Content
+            // Content with Pull-to-Refresh
             FutureBuilder<List<Resort>>(
+              key: ValueKey(_refreshKey), // Forces rebuild when key changes
               future: ApiService.getResorts(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -851,6 +1054,7 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

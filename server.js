@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const path = require('path');
+const QRCode = require('qrcode');
 // Use centralized database API - EC2 Docker service name
 const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
 console.log('🔗 Main server using DB API URL:', DB_API_URL);
@@ -380,6 +381,22 @@ app.post('/api/bookings', async (req, res) => {
         // Generate booking reference
         const bookingReference = `VE${String(Date.now()).padStart(12, '0')}`;
         
+        // Generate QR Code
+        let qrCodeImage = '';
+        try {
+            qrCodeImage = await QRCode.toDataURL(bookingReference, {
+                width: 300,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            });
+            console.log('✅ QR Code generated for booking:', bookingReference);
+        } catch (qrError) {
+            console.error('❌ QR Code generation failed:', qrError);
+        }
+        
         // Create booking via centralized API
         console.log('🎯 EC2 Main: Creating booking via', DB_API_URL);
         const bookingResponse = await fetch(`${DB_API_URL}/api/bookings`, {
@@ -397,7 +414,8 @@ app.post('/api/bookings', async (req, res) => {
                 transactionId: sanitizedData.transactionId,
                 bookingReference: bookingReference,
                 couponCode: couponCode || null,
-                discountAmount: discountAmount || 0
+                discountAmount: discountAmount || 0,
+                qrCode: qrCodeImage
             })
         });
         
@@ -464,7 +482,8 @@ app.post('/api/bookings', async (req, res) => {
             platformFee,
             totalPrice,
             status: 'pending_payment',
-            paymentDetails: paymentDetails
+            paymentDetails: paymentDetails,
+            qrCode: qrCodeImage
         };
 
         // Publish booking created event via Redis
@@ -830,6 +849,88 @@ app.post('/api/owner-login', async (req, res) => {
     } catch (error) {
         console.error('Owner login proxy error:', error);
         res.status(500).json({ error: 'Login service unavailable' });
+    }
+});
+
+// Verify ticket endpoint for QR scanner
+app.post('/api/verify-ticket', async (req, res) => {
+    try {
+        const { bookingReference, ownerId } = req.body;
+        
+        if (!bookingReference || !ownerId) {
+            return res.json({ valid: false, message: 'Missing required fields' });
+        }
+        
+        // Get booking from database
+        const bookingsResponse = await fetch(`${DB_API_URL}/api/bookings`);
+        const allBookings = await bookingsResponse.json();
+        
+        const booking = allBookings.find(b => 
+            b.booking_reference === bookingReference || 
+            String(b.id) === bookingReference
+        );
+        
+        if (!booking) {
+            return res.json({ valid: false, message: 'Invalid ticket - Booking not found' });
+        }
+        
+        // Get resort details to verify owner
+        const resortsResponse = await fetch(`${DB_API_URL}/api/resorts`);
+        const allResorts = await resortsResponse.json();
+        const resort = allResorts.find(r => r.id === booking.resort_id);
+        
+        if (!resort) {
+            return res.json({ valid: false, message: 'Resort not found' });
+        }
+        
+        // Verify owner
+        if (resort.owner_id != ownerId) {
+            return res.json({ valid: false, message: 'Unauthorized - Not your resort' });
+        }
+        
+        // Check if already checked in
+        if (booking.checked_in) {
+            return res.json({ valid: false, message: 'Already used - Ticket scanned before' });
+        }
+        
+        // Check payment status
+        if (booking.payment_status !== 'paid') {
+            return res.json({ valid: false, message: 'Payment not confirmed' });
+        }
+        
+        // Check if booking date is valid (not in past)
+        const checkInDate = new Date(booking.check_in);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (checkInDate < today) {
+            return res.json({ valid: false, message: 'Booking expired - Check-in date passed' });
+        }
+        
+        // Mark as checked in
+        try {
+            await fetch(`${DB_API_URL}/api/bookings/${booking.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ checked_in: 1 })
+            });
+        } catch (updateError) {
+            console.error('Failed to update check-in status:', updateError);
+        }
+        
+        // Valid ticket
+        res.json({
+            valid: true,
+            guest: booking.guest_name,
+            resort: resort.name,
+            checkIn: booking.check_in,
+            checkOut: booking.check_out,
+            guests: booking.guests
+        });
+        
+    } catch (error) {
+        console.error('Verify ticket error:', error);
+        res.status(500).json({ valid: false, message: 'Verification failed' });
     }
 });
 

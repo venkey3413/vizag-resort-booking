@@ -13,18 +13,19 @@
     "booking": "node booking-server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "sqlite3": "^5.1.6",
-    "sqlite": "^5.0.1",
-    "nodemailer": "^6.9.7",
+    "aws-sdk": "^2.1490.0",
+    "axios": "^1.6.0",
     "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^2.7.0",
+    "nodemailer": "^6.9.7",
+    "qrcode": "^1.5.4",
     "redis": "^4.6.0",
-    "dotenv": "^16.3.1",
-    "aws-sdk": "^2.1490.0",
-    "axios": "^1.6.0"
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
