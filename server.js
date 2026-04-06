@@ -488,13 +488,13 @@ app.post('/api/bookings', async (req, res) => {
 
         // Publish booking created event via Redis
         try {
-            await redisPubSub.publish('booking-events', {
-                type: 'booking.created',
+            await redisPubSub.publish('booking:created', JSON.stringify({
                 bookingId: result.id,
                 resortId: resortId,
                 guestName: guestName,
                 totalPrice: totalPrice
-            });
+            }));
+            console.log('📡 Published booking:created to Redis');
         } catch (eventError) {
             console.error('Redis publish failed:', eventError);
         }
