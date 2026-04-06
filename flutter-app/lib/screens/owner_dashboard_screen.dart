@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../utils/owner_dashboard_colors.dart';
 import '../models/owner.dart';
+import '../services/owner_api_service.dart';
+import 'edit_resort_screen.dart';
 import 'package:intl/intl.dart';
 
 class OwnerDashboardScreen extends StatefulWidget {
@@ -29,12 +31,65 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   int _selectedIndex = 0;
   late List<Booking> _bookings;
   late OwnerStats _stats;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
     _bookings = widget.bookings;
     _stats = widget.stats;
+  }
+
+  Future<void> _refreshData() async {
+    if (_isRefreshing) return;
+    
+    setState(() {
+      _isRefreshing = true;
+    });
+
+    try {
+      // Fetch all bookings
+      final allBookings = await OwnerApiService.getBookings();
+      
+      // Filter for owner's resorts
+      final ownerResortIds = widget.resorts.map((r) => r['id']).toList();
+      final filteredBookings = allBookings
+          .where((b) => ownerResortIds.contains(b['resort_id']))
+          .map((b) => Booking.fromJson(b))
+          .toList();
+
+      // Update stats
+      final newStats = OwnerStats(
+        totalBookings: filteredBookings.length,
+        pendingBookings: filteredBookings.where((b) => b.paymentStatus == 'pending').length,
+        confirmedBookings: filteredBookings.where((b) => b.paymentStatus == 'paid').length,
+      );
+
+      setState(() {
+        _bookings = filteredBookings;
+        _stats = newStats;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data refreshed successfully'),
+          backgroundColor: OwnerDashboardColors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to refresh: ${e.toString()}'),
+          backgroundColor: OwnerDashboardColors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isRefreshing = false;
+      });
+    }
   }
 
   void _onItemTapped(int index) {
@@ -292,9 +347,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         .fold<int>(0, (sum, b) => sum + b.totalPrice);
 
     return RefreshIndicator(
-      onRefresh: () async {
-        // Refresh data
-      },
+      onRefresh: _refreshData,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -348,21 +401,22 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   Widget _buildQRScannerPage() {
     return QRScannerWidget(
       ownerId: widget.owner.id,
-      onScanSuccess: () {
-        // Refresh bookings
-      },
+      onScanSuccess: _refreshData,
     );
   }
 
   // Bookings Page
   Widget _buildBookingsPage() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _buildSectionHeader('All Bookings (${_bookings.length})'),
-        const SizedBox(height: 12),
-        ..._bookings.map((booking) => _buildBookingCard(booking)),
-      ],
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildSectionHeader('All Bookings (${_bookings.length})'),
+          const SizedBox(height: 12),
+          ..._bookings.map((booking) => _buildBookingCard(booking)),
+        ],
+      ),
     );
   }
 
@@ -607,10 +661,46 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 color: OwnerDashboardColors.accent,
               ),
             ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _editResort(resort),
+                icon: const Icon(Icons.edit, size: 18),
+                label: Text(
+                  'Edit Resort',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: OwnerDashboardColors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _editResort(Map<String, dynamic> resort) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditResortScreen(resort: resort),
+      ),
+    );
+
+    if (result == true) {
+      _refreshData();
+    }
   }
 
   String _formatNumber(int number) {
@@ -654,16 +744,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('https://vshakago.in/api/verify-ticket'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'bookingReference': bookingRef,
-          'ownerId': widget.ownerId,
-        }),
-      ).timeout(const Duration(seconds: 10));
-
-      final data = json.decode(response.body);
+      final data = await OwnerApiService.verifyTicket(bookingRef, widget.ownerId);
 
       setState(() {
         _isValid = data['valid'] == true;

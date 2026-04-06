@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../utils/owner_dashboard_colors.dart';
 import '../models/owner.dart';
+import '../services/owner_api_service.dart';
 import 'owner_dashboard_screen.dart';
 
 class OwnerLoginScreen extends StatefulWidget {
@@ -37,18 +38,12 @@ class _OwnerLoginScreenState extends State<OwnerLoginScreen> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('https://vshakago.in/api/owner-login'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-        }),
-      ).timeout(const Duration(seconds: 10));
+      final data = await OwnerApiService.login(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
 
-      final data = json.decode(response.body);
-
-      if (response.statusCode == 200 && data['success'] == true) {
+      if (data['success'] == true) {
         final owner = Owner.fromJson(data['owner']);
         final stats = OwnerStats.fromJson(data['stats']);
         final resorts = (data['resorts'] as List)
