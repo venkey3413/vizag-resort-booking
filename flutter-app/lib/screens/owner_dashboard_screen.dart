@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../utils/owner_dashboard_colors.dart';
 import '../models/owner.dart';
 import '../services/owner_api_service.dart';
@@ -31,7 +29,6 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   int _selectedIndex = 0;
   late List<Booking> _bookings;
   late List<Map<String, dynamic>> _resorts;
-  late OwnerStats _stats;
   bool _isRefreshing = false;
 
   @override
@@ -39,7 +36,6 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
     super.initState();
     _bookings = widget.bookings;
     _resorts = widget.resorts;
-    _stats = widget.stats;
   }
 
   Future<void> _refreshData() async {
@@ -78,7 +74,6 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       setState(() {
         _bookings = filteredBookings;
         _resorts = filteredResorts;
-        _stats = newStats;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

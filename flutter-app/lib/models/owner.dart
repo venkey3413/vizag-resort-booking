@@ -38,13 +38,11 @@ class OwnerStats {
   final int totalBookings;
   final int pendingBookings;
   final int confirmedBookings;
-  final int revenue;
 
   OwnerStats({
     required this.totalBookings,
     required this.pendingBookings,
     required this.confirmedBookings,
-    required this.revenue,
   });
 
   factory OwnerStats.fromJson(Map<String, dynamic> json) {
@@ -52,7 +50,6 @@ class OwnerStats {
       totalBookings: json['totalBookings'] ?? 0,
       pendingBookings: json['pendingBookings'] ?? 0,
       confirmedBookings: json['confirmedBookings'] ?? 0,
-      revenue: 0,
     );
   }
 }
