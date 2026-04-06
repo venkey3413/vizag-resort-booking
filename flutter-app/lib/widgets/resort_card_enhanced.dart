@@ -281,77 +281,91 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFF6F00)
-                                        .withOpacity(0.1),
-                                    border: Border.all(
-                                      color: const Color(0xFFFF6F00)
-                                          .withOpacity(0.18),
+                                Flexible(
+                                  flex: 1,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
                                     ),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '₹${widget.resort.price.toStringAsFixed(0)}',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 18,
-                                          color: AppColors.textDark,
-                                        ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFF6F00)
+                                          .withOpacity(0.1),
+                                      border: Border.all(
+                                        color: const Color(0xFFFF6F00)
+                                            .withOpacity(0.18),
                                       ),
-                                      const Text(
-                                        'per night',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF64748B),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '₹${widget.resort.price.toStringAsFixed(0)}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 16,
+                                            color: AppColors.textDark,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFFFF6F00),
-                                        Color(0xFFFF9A3C),
+                                        const Text(
+                                          'per night',
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                    borderRadius: BorderRadius.circular(25),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFFFF6F00)
-                                            .withOpacity(0.3),
-                                        blurRadius: 30,
-                                        offset: const Offset(0, 16),
-                                      ),
-                                    ],
                                   ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  flex: 1,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFF6F00),
+                                          Color(0xFFFF9A3C),
+                                        ],
+                                      ),
                                       borderRadius: BorderRadius.circular(25),
-                                      onTap: widget.onTap,
-                                      child: const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 10,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFFFF6F00)
+                                              .withOpacity(0.3),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 10),
                                         ),
-                                        child: Text(
-                                          'Book Now',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w900,
+                                      ],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(25),
+                                        onTap: widget.onTap,
+                                        child: const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 14,
+                                            vertical: 10,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Book Now',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
                                         ),
                                       ),
