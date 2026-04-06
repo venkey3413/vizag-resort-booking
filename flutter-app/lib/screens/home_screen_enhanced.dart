@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
 import '../models/resort.dart';
 import '../utils/app_colors.dart';
@@ -7,7 +8,6 @@ import '../widgets/custom_header.dart';
 import '../widgets/resort_card_enhanced.dart';
 import 'details_screen_enhanced.dart';
 import 'events_screen.dart';
-import 'owner_login_screen.dart';
 
 class HomeScreenEnhanced extends StatefulWidget {
   const HomeScreenEnhanced({super.key});
@@ -955,13 +955,14 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                         ],
                       ),
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const OwnerLoginScreen(),
-                            ),
-                          );
+                        onPressed: () async {
+                          const url = 'https://vshakago.in/owner-dashboard';
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            await launchUrl(
+                              Uri.parse(url),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
