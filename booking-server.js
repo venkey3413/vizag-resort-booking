@@ -75,7 +75,9 @@ app.post('/api/bookings/:id/confirm', async (req, res) => {
         } catch (e) { console.error('Email failed:', e.message); }
 
         // Send WhatsApp via wa.me link (generate URL for admin to click)
-        const whatsappMsg = `✅ Booking Confirmed!\n\nBooking ID: ${booking.booking_reference}\nGuest: ${booking.guest_name}\nResort: ${booking.resort_name}\nCheck-in: ${new Date(booking.check_in).toLocaleDateString()}\nCheck-out: ${new Date(booking.check_out).toLocaleDateString()}\nAmount: ₹${parseInt(booking.total_price).toLocaleString()}\n\nYour booking is confirmed. We look forward to welcoming you!`;
+        const bookingId = booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`;
+        const qrCodeText = booking.qr_code ? `\n\n📱 QR Code has been sent to your email. Show it at resort entry.` : '';
+        const whatsappMsg = `✅ Booking Confirmed!\n\nBooking ID: ${bookingId}\nGuest: ${booking.guest_name}\nResort: ${booking.resort_name}\nCheck-in: ${new Date(booking.check_in).toLocaleDateString()}\nCheck-out: ${new Date(booking.check_out).toLocaleDateString()}\nAmount: ₹${parseInt(booking.total_price).toLocaleString()}${qrCodeText}\n\nYour booking is confirmed. We look forward to welcoming you!`;
         const whatsappUrl = `https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMsg)}`;
 
         // Redis publish - notify owner dashboard
@@ -147,7 +149,7 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
             emailSent = true;
         } catch (e) { console.error('Cancel email failed:', e.message); }
 
-        const whatsappMsg = `❌ Booking Cancelled\n\nBooking ID: ${booking.booking_reference}\nGuest: ${booking.guest_name}\nResort: ${booking.resort_name}\nCheck-in: ${new Date(booking.check_in).toLocaleDateString()}\n\nYour booking has been cancelled. Refund (if applicable) will be processed within 3-5 business days.\n\nFor queries: vizagresortbooking@gmail.com`;
+        const whatsappMsg = `❌ Booking Cancelled\n\nBooking ID: ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}\nGuest: ${booking.guest_name}\nResort: ${booking.resort_name}\nCheck-in: ${new Date(booking.check_in).toLocaleDateString()}\n\nYour booking has been cancelled. Refund (if applicable) will be processed within 3-5 business days.\n\nFor queries: vizagresortbooking@gmail.com`;
         const whatsappUrl = `https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMsg)}`;
 
         // Redis publish - notify owner dashboard

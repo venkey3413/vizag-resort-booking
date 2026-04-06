@@ -164,6 +164,15 @@ async function sendInvoiceEmail(booking, type = 'resort') {
             `;
         } else {
             // Resort booking invoice
+            const bookingId = booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`;
+            const qrCodeHtml = booking.qr_code ? `
+                <div style="text-align: center; margin: 30px 0;">
+                    <p style="font-weight: 600; color: #333; margin-bottom: 10px;">Your Booking QR Code:</p>
+                    <img src="${booking.qr_code}" alt="Booking QR Code" style="width: 200px; height: 200px; border: 2px solid #ddd; border-radius: 8px; display: block; margin: 0 auto;"/>
+                    <p style="color: #dc2626; font-size: 12px; margin-top: 10px; font-weight: 600;">⚠️ Show this QR code at resort entry</p>
+                </div>
+            ` : '';
+            
             invoiceHTML = `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                     <div style="text-align: center; margin-bottom: 20px;">
@@ -177,11 +186,13 @@ async function sendInvoiceEmail(booking, type = 'resort') {
                     
                     <p><strong>Here are the details of your confirmed booking:</strong></p>
                     
-                    <p><strong>Booking ID:</strong> ${booking.booking_reference || `RB${String(booking.id).padStart(6, '0')}`}</p>
+                    <p><strong>Booking ID:</strong> ${bookingId}</p>
                     <p><strong>Guest Name:</strong> ${booking.guest_name}</p>
                     <p><strong>Check-in Date:</strong> ${new Date(booking.check_in).toLocaleDateString()}</p>
                     <p><strong>Check-out Date:</strong> ${new Date(booking.check_out).toLocaleDateString()}</p>
                     <p><strong>Resort Name:</strong> ${booking.resort_name}</p>
+                    
+                    ${qrCodeHtml}
                     
                     <p><strong>As per our booking policy:</strong></p>
                     <p><strong>Check-in time:</strong> 11:00 AM</p>

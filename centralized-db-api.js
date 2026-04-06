@@ -99,6 +99,8 @@ async function initDB() {
             discount_amount INTEGER DEFAULT 0,
             status TEXT DEFAULT 'pending',
             payment_status TEXT DEFAULT 'pending',
+            qr_code TEXT,
+            checked_in INTEGER DEFAULT 0,
             booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (resort_id) REFERENCES resorts (id)
         )

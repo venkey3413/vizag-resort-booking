@@ -498,6 +498,7 @@ function renderResortBookings() {
                 </div>
             </div>
             <div class="card-body">
+                <div class="field"><div class="field-label">Booking ID</div><div class="field-value mono">${b.booking_reference || 'RB' + String(b.id).padStart(6,'0')}</div></div>
                 <div class="field"><div class="field-label">Guest</div><div class="field-value">${b.guest_name}</div></div>
                 <div class="field"><div class="field-label">Resort</div><div class="field-value">${b.resort_name || 'Resort #' + b.resort_id}</div></div>
                 <div class="field"><div class="field-label">Check-in</div><div class="field-value">${new Date(b.check_in).toLocaleDateString('en-IN')}</div></div>
@@ -506,6 +507,7 @@ function renderResortBookings() {
                 <div class="field"><div class="field-label">Amount</div><div class="field-value">₹${parseInt(b.total_price || 0).toLocaleString('en-IN')}</div></div>
                 <div class="field"><div class="field-label">Phone</div><div class="field-value mono">${b.phone}</div></div>
                 <div class="field"><div class="field-label">UTR / Txn ID</div><div class="field-value mono">${b.transaction_id || '—'}</div></div>
+                ${b.qr_code ? `<div class="field" style="grid-column: span 2;"><div class="field-label">QR Code</div><div class="field-value"><img src="${b.qr_code}" style="width:120px;height:120px;border:1px solid var(--border);border-radius:8px;" alt="QR Code"/></div></div>` : ''}
             </div>
             <div class="card-actions">
                 ${isPending ? `<button class="btn btn-confirm" onclick="confirmResort(${b.id}, this)">✓ Confirm</button>` : ''}
@@ -600,6 +602,7 @@ function renderEventBookings() {
                 </div>
             </div>
             <div class="card-body">
+                <div class="field"><div class="field-label">Booking ID</div><div class="field-value mono">${b.booking_reference}</div></div>
                 <div class="field"><div class="field-label">Guest</div><div class="field-value">${b.guest_name}</div></div>
                 <div class="field"><div class="field-label">Event</div><div class="field-value">${b.event_name}</div></div>
                 <div class="field"><div class="field-label">Event Date</div><div class="field-value">${new Date(b.event_date).toLocaleDateString('en-IN')}</div></div>
