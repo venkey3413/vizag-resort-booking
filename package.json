@@ -10,7 +10,8 @@
     "restart": "pm2 restart all",
     "logs": "pm2 logs",
     "admin": "node admin-server.js",
-    "booking": "node booking-server.js"
+    "booking": "node booking-server.js",
+    "websocket": "node websocket-server.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1490.0",
@@ -25,7 +26,8 @@
     "qrcode": "^1.5.4",
     "redis": "^4.6.0",
     "sqlite": "^5.0.1",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
