@@ -30,33 +30,45 @@ void main() async {
         type == 'resort.date.blocked' ||
         type == 'resort.date.unblocked') {
       
+      print('🔔 Attempting to show notification for: $type');
+      
       // Show snackbar notification
-      final context = navigatorKey.currentContext;
-      if (context != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.sync, color: Colors.white, size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    type == 'booking.created' ? '🎉 New booking received!' :
-                    type == 'resort.updated' ? '🏝️ Resort updated!' :
-                    type == 'resort.pricing.updated' ? '💰 Pricing updated!' :
-                    '🔄 Data updated!',
-                    style: const TextStyle(fontSize: 12),
+      Future.delayed(const Duration(milliseconds: 500), () {
+        final context = navigatorKey.currentContext;
+        if (context != null) {
+          print('✅ Showing snackbar notification');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.sync, color: Colors.white, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      type == 'booking.created' ? '🎉 New booking received!' :
+                      type == 'booking.updated' ? '📝 Booking updated!' :
+                      type == 'booking.deleted' ? '🗑️ Booking deleted!' :
+                      type == 'resort.updated' ? '🏝️ Resort updated!' :
+                      type == 'resort.pricing.updated' ? '💰 Pricing updated!' :
+                      type == 'resort.date.blocked' ? '🚫 Date blocked!' :
+                      type == 'resort.date.unblocked' ? '✅ Date unblocked!' :
+                      '🔄 Data updated!',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              backgroundColor: Colors.blue.shade700,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.all(16),
             ),
-            backgroundColor: Colors.blue,
-            duration: const Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        );
-      }
+          );
+        } else {
+          print('⚠️ Navigator context is null, cannot show snackbar');
+        }
+      });
     }
   });
   
