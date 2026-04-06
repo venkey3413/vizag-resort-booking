@@ -141,7 +141,7 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(
-                      'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800',
+                      'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&q=80',
                     ),
                     fit: BoxFit.cover,
                   ),

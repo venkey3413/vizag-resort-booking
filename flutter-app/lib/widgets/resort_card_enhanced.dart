@@ -107,6 +107,24 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                                 height: 200,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
+                                cacheWidth: 600,
+                                cacheHeight: 400,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    height: 200,
+                                    color: Colors.grey[200],
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                                loadingProgress.expectedTotalBytes!
+                                            : null,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  );
+                                },
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     height: 200,
