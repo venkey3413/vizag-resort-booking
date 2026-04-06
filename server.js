@@ -883,14 +883,19 @@ app.post('/api/verify-ticket', async (req, res) => {
             return res.json({ valid: false, message: 'Resort not found' });
         }
         
-        // Verify owner
-        if (resort.owner_id != ownerId) {
-            return res.json({ valid: false, message: 'Unauthorized - Not your resort' });
+        // Get owner details to verify resort ownership
+        const ownersResponse = await fetch(`${DB_API_URL}/api/owners`);
+        const allOwners = await ownersResponse.json();
+        const owner = allOwners.find(o => o.id == ownerId);
+        
+        if (!owner) {
+            return res.json({ valid: false, message: 'Owner not found' });
         }
         
-        // Check if already checked in
-        if (booking.checked_in) {
-            return res.json({ valid: false, message: 'Already used - Ticket scanned before' });
+        // Check if resort belongs to this owner
+        const ownerResortIds = owner.resort_ids ? owner.resort_ids.split(',').map(id => parseInt(id.trim())) : [];
+        if (!ownerResortIds.includes(booking.resort_id)) {
+            return res.json({ valid: false, message: 'Unauthorized - Not your resort' });
         }
         
         // Check payment status
@@ -898,10 +903,16 @@ app.post('/api/verify-ticket', async (req, res) => {
             return res.json({ valid: false, message: 'Payment not confirmed' });
         }
         
-        // Check if booking date is valid (not in past)
+        // Check if already checked in
+        if (booking.checked_in) {
+            return res.json({ valid: false, message: 'Already used - Ticket scanned before' });
+        }
+        
+        // Check if booking date is valid (allow check-in on check-in date)
         const checkInDate = new Date(booking.check_in);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        checkInDate.setHours(0, 0, 0, 0);
         
         if (checkInDate < today) {
             return res.json({ valid: false, message: 'Booking expired - Check-in date passed' });
