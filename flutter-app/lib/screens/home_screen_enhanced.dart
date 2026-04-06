@@ -83,7 +83,7 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(
@@ -104,51 +104,51 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                       ],
                     ),
                   ),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     children: [
                       const Text(
                         'Book Resorts in Vizag',
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
-                          letterSpacing: 0.3,
+                          letterSpacing: 0.2,
                           shadows: [
                             Shadow(
                               color: Colors.black26,
-                              offset: Offset(0, 8),
-                              blurRadius: 20,
+                              offset: Offset(0, 4),
+                              blurRadius: 12,
                             ),
                           ],
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         'Best Deals • 24/7 Support',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           color: Colors.white.withOpacity(0.92),
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       
                       // Search Box
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.95),
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: Colors.white.withOpacity(0.25),
                           ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.12),
-                              blurRadius: 60,
-                              offset: const Offset(0, 20),
+                              blurRadius: 40,
+                              offset: const Offset(0, 12),
                             ),
                           ],
                         ),
@@ -157,14 +157,14 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                             // Location Dropdown
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 4,
+                                horizontal: 12,
+                                vertical: 3,
                               ),
                               decoration: BoxDecoration(
                                 border: Border.all(
                                   color: const Color(0xFF0F172A).withOpacity(0.1),
                                 ),
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
@@ -172,8 +172,8 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                                   hint: const Text(
                                     'Select Location',
                                     style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   items: [
@@ -189,8 +189,8 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                                       child: Text(
                                         location,
                                         style: const TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
                                         ),
                                       ),
                                     );
@@ -199,33 +199,66 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 10),
                             
                             // Check-in Date
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
+                                horizontal: 12,
+                                vertical: 10,
                               ),
                               decoration: BoxDecoration(
                                 border: Border.all(
                                   color: const Color(0xFF0F172A).withOpacity(0.1),
                                 ),
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.calendar_today,
-                                    size: 18,
+                                    size: 16,
                                     color: Colors.grey[700],
                                   ),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(width: 8),
                                   const Text(
                                     'Check-in',
                                     style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            
+                            // Check-out Date
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFF0F172A).withOpacity(0.1),
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    size: 16,
+                                    color: Colors.grey[700],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Check-out',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                       color: Color(0xFF64748B),
                                     ),
                                   ),
@@ -233,39 +266,6 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            
-                            // Check-out Date
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color(0xFF0F172A).withOpacity(0.1),
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.calendar_today,
-                                    size: 18,
-                                    color: Colors.grey[700],
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text(
-                                    'Check-out',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFF64748B),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 16),
                             
                             // Search Button
                             SizedBox(
@@ -275,12 +275,12 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                                   gradient: const LinearGradient(
                                     colors: [Color(0xFFFF6F00), Color(0xFFFF9A3C)],
                                   ),
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFFFF6F00).withOpacity(0.35),
-                                      blurRadius: 30,
-                                      offset: const Offset(0, 14),
+                                      color: const Color(0xFFFF6F00).withOpacity(0.3),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
                                     ),
                                   ],
                                 ),
@@ -289,16 +289,16 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
                                     shadowColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
                                   child: const Text(
                                     'Search Resorts',
                                     style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w900,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -308,7 +308,7 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       
                       // Icon Buttons (Events & Hotels)
                       Row(
@@ -318,19 +318,19 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 8),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 6),
                                   ),
                                 ],
                               ),
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(12),
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -340,19 +340,19 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                                     );
                                   },
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
                                     child: Column(
                                       children: [
                                         const Text(
                                           '🎉',
-                                          style: TextStyle(fontSize: 28),
+                                          style: TextStyle(fontSize: 22),
                                         ),
-                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 4),
                                         Text(
                                           'Events',
                                           style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w800,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
                                             color: Colors.grey[800],
                                           ),
                                         ),
@@ -363,24 +363,24 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 8),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 6),
                                   ),
                                 ],
                               ),
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(12),
                                   onTap: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -390,19 +390,19 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
                                     );
                                   },
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
                                     child: Column(
                                       children: [
                                         const Text(
                                           '🏨',
-                                          style: TextStyle(fontSize: 28),
+                                          style: TextStyle(fontSize: 22),
                                         ),
-                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 4),
                                         Text(
                                           'Hotel',
                                           style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w800,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
                                             color: Colors.grey[800],
                                           ),
                                         ),
