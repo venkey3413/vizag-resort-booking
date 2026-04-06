@@ -93,6 +93,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - redis
     restart: unless-stopped
