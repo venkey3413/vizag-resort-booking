@@ -25,53 +25,9 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> {
   void initState() {
     super.initState();
     
-    // Listen for WebSocket real-time updates
-    WebSocketService.connect(onMessage: (data) {
-      final type = data['type'];
-      print('🔄 Real-time update: $type');
-      
-      // Refresh UI when booking or resort changes
-      if (type == 'booking.created' || 
-          type == 'booking.updated' || 
-          type == 'booking.deleted' ||
-          type == 'resort.updated' ||
-          type == 'resort.pricing.updated' ||
-          type == 'resort.date.blocked' ||
-          type == 'resort.date.unblocked') {
-        
-        // Refresh the resort list
-        if (mounted) {
-          setState(() {
-            _refreshKey++;
-          });
-          
-          // Show notification
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.sync, color: Colors.white, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      type == 'booking.created' ? 'New booking received!' :
-                      type == 'resort.updated' ? 'Resort updated!' :
-                      type == 'resort.pricing.updated' ? 'Pricing updated!' :
-                      'Data updated!',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.blue,
-              duration: const Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-          );
-        }
-      }
-    });
+    // Listen for WebSocket real-time updates (don't reconnect, just listen)
+    // Connection is already established in main.dart
+    print('🔄 Home screen listening for WebSocket updates');
   }
 
   // Refresh function

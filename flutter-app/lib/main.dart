@@ -7,6 +7,9 @@ import 'screens/login_screen.dart';
 import 'utils/app_colors.dart';
 import 'services/websocket_service.dart';
 
+// Global key for navigator to show snackbars from anywhere
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
@@ -14,8 +17,47 @@ void main() async {
   
   // Initialize WebSocket connection for real-time updates
   WebSocketService.connect(onMessage: (data) {
-    print('📨 Real-time update received: ${data['type']}');
-    // Handle real-time updates (booking created, resort updated, etc.)
+    final type = data['type'];
+    print('📨 Real-time update received: $type');
+    print('📊 Data: ${data['data']}');
+    
+    // Show notification for booking/resort updates
+    if (type == 'booking.created' || 
+        type == 'booking.updated' || 
+        type == 'booking.deleted' ||
+        type == 'resort.updated' ||
+        type == 'resort.pricing.updated' ||
+        type == 'resort.date.blocked' ||
+        type == 'resort.date.unblocked') {
+      
+      // Show snackbar notification
+      final context = navigatorKey.currentContext;
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.sync, color: Colors.white, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    type == 'booking.created' ? '🎉 New booking received!' :
+                    type == 'resort.updated' ? '🏝️ Resort updated!' :
+                    type == 'resort.pricing.updated' ? '💰 Pricing updated!' :
+                    '🔄 Data updated!',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.blue,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        );
+      }
+    }
   });
   
   runApp(MyApp(isLoggedIn: isLoggedIn));
@@ -29,6 +71,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'VshakaGo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
