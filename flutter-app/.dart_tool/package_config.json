@@ -152,6 +152,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "intl",
+      "rootUri": "file:///C:/Users/venka/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.19.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "json_annotation",
       "rootUri": "file:///C:/Users/venka/AppData/Local/Pub/Cache/hosted/pub.dev/json_annotation-4.11.0",
       "packageUri": "lib/",
@@ -198,6 +204,12 @@
       "rootUri": "file:///C:/Users/venka/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.16.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "mobile_scanner",
+      "rootUri": "file:///C:/Users/venka/AppData/Local/Pub/Cache/hosted/pub.dev/mobile_scanner-5.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "path",
