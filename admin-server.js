@@ -4,6 +4,7 @@ const fetch = require('node-fetch');
 const redisPubSub = require('./redis-pubsub');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
@@ -11,6 +12,30 @@ const PORT = 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Rate limiting configurations
+
+// Strict rate limit for admin login (5 attempts per 15 minutes)
+const adminLoginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: 'Too many login attempts, please try again later' },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: false,
+});
+
+// General API rate limit for admin panel (200 requests per minute)
+const adminApiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 200,
+    message: { error: 'Too many requests, please try again later' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Apply rate limit to all API routes
+app.use('/api/', adminApiLimiter);
 
 // Cache-busting headers
 app.use((req, res, next) => {
@@ -32,7 +57,7 @@ app.get('/health', (req, res) => {
 // ============================================
 
 // Admin login endpoint
-app.post('/api/admin/login', async (req, res) => {
+app.post('/api/admin/login', adminLoginLimiter, async (req, res) => {
     const { username, password } = req.body;
     
     if (!username || !password) {

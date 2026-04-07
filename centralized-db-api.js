@@ -19,15 +19,29 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Rate limiting: 200 requests per 15 minutes per IP
-const limiter = rateLimit({
+// Rate limiting configurations
+
+// Strict rate limit for login endpoints (5 attempts per 15 minutes)
+const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 200,
+    max: 5,
+    message: { error: 'Too many login attempts, please try again later' },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: false,
+});
+
+// General API rate limit (100 requests per minute)
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 100,
     message: { error: 'Too many requests, please try again later' },
     standardHeaders: true,
     legacyHeaders: false,
 });
-app.use('/api/', limiter);
+
+// Apply general rate limit to all API routes
+app.use('/api/', apiLimiter);
 
 // API Key authentication middleware
 const MOBILE_API_KEY = process.env.MOBILE_API_KEY || 'vshakago-mobile-2026-secure-key';
@@ -1012,7 +1026,7 @@ app.delete('/api/owners/:id', async (req, res) => {
 });
 
 // Owner login endpoint
-app.post('/api/owner-login', async (req, res) => {
+app.post('/api/owner-login', loginLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         
