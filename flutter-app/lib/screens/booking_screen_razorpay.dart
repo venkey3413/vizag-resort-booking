@@ -16,7 +16,7 @@ class _BookingScreenState extends State<BookingScreen> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
-  final phoneController = TextEditingController();
+  final phoneController = TextEditingController(text: "+91");
   final guestsController = TextEditingController(text: "2");
   
   DateTime? checkInDate;
@@ -33,20 +33,41 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   void _initializeRazorpay() {
+    print('Initializing Razorpay...');
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    print('Razorpay initialized successfully');
   }
 
   Future<void> _fetchRazorpayKey() async {
     try {
+      print('Fetching Razorpay key from server...');
       final key = await ApiService.getRazorpayKey();
+      print('Razorpay key received: $key');
+      
+      if (key.isEmpty) {
+        print('⚠️ Empty Razorpay key received');
+        _showErrorDialog('Payment system not configured on server. Please contact support.');
+        return;
+      }
+      
       setState(() {
         razorpayKey = key;
       });
+      
+      // Check if test or live mode
+      if (key.startsWith('rzp_test_')) {
+        print('⚠️ RAZORPAY TEST MODE - Use test card: 4111 1111 1111 1111');
+      } else if (key.startsWith('rzp_live_')) {
+        print('✅ RAZORPAY LIVE MODE');
+      } else {
+        print('⚠️ Unknown Razorpay key format: $key');
+      }
     } catch (e) {
       print('Failed to fetch Razorpay key: $e');
+      _showErrorDialog('Failed to initialize payment system. Please check your internet connection and try again.');
     }
   }
 
@@ -129,11 +150,18 @@ class _BookingScreenState extends State<BookingScreen> {
 
     final totalPrice = _calculateTotalPrice();
 
+    print('=== Razorpay Payment Debug ===');
+    print('Key: $razorpayKey');
+    print('Amount: ${totalPrice * 100} paise (₹$totalPrice)');
+    print('Name: ${widget.resort.name}');
+    print('Phone: ${phoneController.text.trim()}');
+    print('Email: ${emailController.text.trim()}');
+
     var options = {
       'key': razorpayKey,
       'amount': totalPrice * 100, // Amount in paise
-      'name': widget.resort.name,
-      'description': 'Resort Booking Payment',
+      'name': 'Vizag Resort Booking',
+      'description': '${widget.resort.name} - Resort Booking',
       'prefill': {
         'contact': phoneController.text.trim(),
         'email': emailController.text.trim(),
@@ -143,24 +171,82 @@ class _BookingScreenState extends State<BookingScreen> {
       }
     };
 
+    print('Opening Razorpay with options: $options');
+
     try {
       _razorpay.open(options);
+      print('Razorpay opened successfully');
     } catch (e) {
-      _showErrorDialog('Error: $e');
+      print('Razorpay open error: $e');
+      _showErrorDialog('Error opening payment: $e');
     }
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    // Payment successful, now create booking
-    _submitBooking(response.paymentId);
+    // Show processing dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            const Text('Verifying payment...'),
+          ],
+        ),
+      ),
+    );
+
+    // Wait a bit for webhook to process, then verify payment status
+    Future.delayed(const Duration(seconds: 3), () async {
+      try {
+        // Verify payment with backend
+        final verifyResponse = await ApiService.verifyPayment(
+          response.paymentId!,
+          response.orderId,
+          response.signature!,
+        );
+
+        Navigator.of(context).pop(); // Close processing dialog
+
+        if (verifyResponse['verified'] == true) {
+          // Payment verified, create booking
+          _submitBooking(response.paymentId);
+        } else {
+          _showErrorDialog('Payment verification failed. Please contact support with payment ID: ${response.paymentId}');
+        }
+      } catch (e) {
+        Navigator.of(context).pop(); // Close processing dialog
+        _showErrorDialog('Payment verification failed: $e');
+      }
+    });
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    _showErrorDialog('Payment failed: ${response.message}');
+    print('=== Payment Error ===');
+    print('Code: ${response.code}');
+    print('Message: ${response.message}');
+    print('Error: ${response.error}');
+    
+    String errorMessage = 'Payment failed';
+    
+    if (response.code == 0) {
+      errorMessage = 'Payment cancelled by user';
+    } else if (response.code == 2) {
+      errorMessage = 'Network error. Please check your internet connection';
+    } else if (response.message != null) {
+      errorMessage = 'Payment failed: ${response.message}';
+    }
+    
+    _showErrorDialog(errorMessage);
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    _showErrorDialog('External wallet: ${response.walletName}');
+    print('=== External Wallet Selected ===');
+    print('Wallet: ${response.walletName}');
+    _showErrorDialog('External wallet selected: ${response.walletName}');
   }
 
   Future<void> _submitBooking(String? transactionId) async {
@@ -184,6 +270,7 @@ class _BookingScreenState extends State<BookingScreen> {
         "guests": int.parse(guestsController.text),
         "totalPrice": totalPrice,
         "transactionId": transactionId,
+        "paymentStatus": "paid", // Mark as paid for Razorpay payments
       };
 
       final response = await ApiService.bookResort(bookingData);
@@ -448,12 +535,24 @@ class _BookingScreenState extends State<BookingScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
+                      onChanged: (value) {
+                        // Ensure +91 prefix is always present
+                        if (!value.startsWith('+91')) {
+                          phoneController.value = TextEditingValue(
+                            text: '+91',
+                            selection: TextSelection.collapsed(offset: 3),
+                          );
+                        }
+                      },
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return "Please enter your phone number";
                         }
                         if (!value.startsWith('+91')) {
                           return "Phone must start with +91";
+                        }
+                        if (value.length != 13) {
+                          return "Please enter 10 digits after +91";
                         }
                         return null;
                       },
@@ -674,10 +773,32 @@ class _BookingScreenState extends State<BookingScreen> {
                           ),
                           elevation: 2,
                         ),
-                        onPressed: isLoading ? null : _openRazorpayPayment,
+                        onPressed: (isLoading || razorpayKey == null) ? null : _openRazorpayPayment,
                         child: isLoading
                             ? const CircularProgressIndicator(
                                 color: Colors.white)
+                            : razorpayKey == null
+                            ? const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    "Loading payment system...",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -713,6 +834,37 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                       ],
                     ),
+                    
+                    // Test Mode Indicator
+                    if (razorpayKey != null && razorpayKey!.startsWith('rzp_test_'))
+                      const SizedBox(height: 12),
+                    if (razorpayKey != null && razorpayKey!.startsWith('rzp_test_'))
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.orange[50],
+                          border: Border.all(color: Colors.orange[300]!),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.warning_amber, size: 16, color: Colors.orange[700]),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'TEST MODE: Use card 4111 1111 1111 1111',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.orange[900],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),

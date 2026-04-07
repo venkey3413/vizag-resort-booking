@@ -3,6 +3,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const redisPubSub = require('./redis-pubsub');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const PORT = 3003;
@@ -933,8 +934,13 @@ app.post('/api/owners', async (req, res) => {
             return res.status(400).json({ error: 'Name, password, and either email or phone are required' });
         }
         
-        // Simple password hashing (in production, use bcrypt)
-        const hashedPassword = Buffer.from(password).toString('base64');
+        // Validate password strength
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+        }
+        
+        // Hash password with bcrypt (12 rounds for strong security)
+        const hashedPassword = await bcrypt.hash(password, 12);
         
         const result = await db.run(`
             INSERT INTO owners (name, email, phone, password, resort_ids)
@@ -975,12 +981,14 @@ app.post('/api/owner-login', async (req, res) => {
         );
         
         if (!owner) {
+            // Use same error message to prevent user enumeration
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         
-        // Simple password verification (in production, use bcrypt)
-        const hashedPassword = Buffer.from(password).toString('base64');
-        if (owner.password !== hashedPassword) {
+        // Verify password with bcrypt
+        const isValidPassword = await bcrypt.compare(password, owner.password);
+        
+        if (!isValidPassword) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         

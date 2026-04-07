@@ -1475,54 +1475,65 @@
       const booking = window.currentEventBooking;
       if (!booking) return;
       
-      const options = {
-        key: 'rzp_test_RJPlUWvOmXa5kb', // Replace with your Razorpay key
-        amount: booking.totalPrice * 100, // Amount in paise
-        currency: 'INR',
-        name: 'VShaka Go Events',
-        description: `Event Booking - ${booking.eventName}`,
-        order_id: '', // You can generate order_id from backend if needed
-        prefill: {
-          name: booking.guestName,
-          email: booking.email,
-          contact: booking.phone.replace('+91', '')
-        },
-        notes: {
-          booking_reference: booking.bookingReference,
-          event_name: booking.eventName,
-          event_date: booking.eventDate,
-          guests: booking.guests
-        },
-        theme: {
-          color: '#667eea'
-        },
-        handler: function(response) {
-          // Payment successful
-          console.log('Razorpay payment successful:', response);
+      // Fetch Razorpay key from server
+      fetch('/api/razorpay-key')
+        .then(response => response.json())
+        .then(data => {
+          const razorpayKey = data.key;
           
-          // Save booking with payment details
-          saveEventBookingWithPayment(booking, response.razorpay_payment_id);
-        },
-        modal: {
-          ondismiss: function() {
-            console.log('Razorpay payment cancelled');
+          const options = {
+            key: razorpayKey,
+            amount: booking.totalPrice * 100, // Amount in paise
+            currency: 'INR',
+            name: 'Vizag Resort Booking',
+            description: `Event Booking - ${booking.eventName}`,
+            order_id: '', // You can generate order_id from backend if needed
+            prefill: {
+              name: booking.guestName,
+              email: booking.email,
+              contact: booking.phone.replace('+91', '')
+            },
+            notes: {
+              booking_reference: booking.bookingReference,
+              event_name: booking.eventName,
+              event_date: booking.eventDate,
+              guests: booking.guests
+            },
+            theme: {
+              color: '#667eea'
+            },
+            handler: function(response) {
+              // Payment successful
+              console.log('Razorpay payment successful:', response);
+              
+              // Save booking with payment details
+              saveEventBookingWithPayment(booking, response.razorpay_payment_id);
+            },
+            modal: {
+              ondismiss: function() {
+                console.log('Razorpay payment cancelled');
+              }
+            }
+          };
+          
+          if (typeof Razorpay !== 'undefined') {
+            const rzp = new Razorpay(options);
+            rzp.open();
+          } else {
+            // Fallback: Load Razorpay script dynamically
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.onload = function() {
+              const rzp = new Razorpay(options);
+              rzp.open();
+            };
+            document.head.appendChild(script);
           }
-        }
-      };
-      
-      if (typeof Razorpay !== 'undefined') {
-        const rzp = new Razorpay(options);
-        rzp.open();
-      } else {
-        // Fallback: Load Razorpay script dynamically
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = function() {
-          const rzp = new Razorpay(options);
-          rzp.open();
-        };
-        document.head.appendChild(script);
-      }
+        })
+        .catch(error => {
+          console.error('Failed to fetch Razorpay key:', error);
+          alert('Payment system not configured. Please contact support.');
+        });
     }
     
     async function saveEventBookingWithPayment(booking, paymentId) {

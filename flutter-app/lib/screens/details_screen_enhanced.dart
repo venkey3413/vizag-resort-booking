@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/video_player.dart';
 import '../models/resort.dart';
 import 'booking_modal_screen.dart';
 
@@ -15,6 +16,19 @@ class DetailsScreenEnhanced extends StatefulWidget {
 
 class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
   int _currentImageIndex = 0;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   Future<void> _openMap() async {
     if (widget.resort.mapLink == null || widget.resort.mapLink!.isEmpty) {
@@ -42,7 +56,9 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
   @override
   Widget build(BuildContext context) {
     final galleryImages = widget.resort.getGalleryImages();
-    final hasGallery = galleryImages.length > 1;
+    final videoUrls = widget.resort.getVideoUrls();
+    final hasGallery = galleryImages.length > 1 || videoUrls.isNotEmpty;
+    final totalMediaCount = galleryImages.length + videoUrls.length;
 
     return Scaffold(
       body: CustomScrollView(
@@ -58,36 +74,66 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                 children: [
                   // Image Gallery Slider
                   if (hasGallery)
-                    CarouselSlider(
-                      options: CarouselOptions(
-                        height: 300,
-                        viewportFraction: 1.0,
-                        autoPlay: true,
-                        autoPlayInterval: const Duration(seconds: 4),
-                        autoPlayAnimationDuration:
-                            const Duration(milliseconds: 800),
-                        enlargeCenterPage: false,
-                        onPageChanged: (index, reason) {
+                    SizedBox(
+                      height: 300,
+                      child: PageView(
+                        controller: _pageController,
+                        onPageChanged: (index) {
                           setState(() {
                             _currentImageIndex = index;
                           });
                         },
-                      ),
-                      items: galleryImages.map((img) {
-                        final imageUrl = img.startsWith('http') ? img : "https://vshakago.in$img";
-                        return Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.image_not_supported,
-                                  size: 80),
+                        children: [
+                          // Gallery Images
+                          ...galleryImages.map((img) {
+                            final imageUrl = img.startsWith('http') ? img : "https://vshakago.in$img";
+                            return GestureDetector(
+                              onTap: () {
+                                print('Image tapped - do nothing');
+                              },
+                              child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              cacheWidth: 800,
+                              cacheHeight: 600,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.image_not_supported, size: 80),
+                                );
+                              },
+                            ),
                             );
-                          },
-                        );
-                      }).toList(),
+                          }),
+                          // Video Thumbnails
+                          ...videoUrls.map((videoUrl) {
+                            return VideoThumbnailWidget(
+                              videoUrl: videoUrl,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VideoPlayerScreen(
+                                      videoUrl: videoUrl,
+                                      resortName: widget.resort.name,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }),
+                        ],
+                      ),
                     )
                   else
                     Image.network(
@@ -95,31 +141,114 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                           ? widget.resort.image
                           : "https://vshakago.in${widget.resort.image}",
                       fit: BoxFit.cover,
+                      cacheWidth: 800,
+                      cacheHeight: 600,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      },
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.grey[300],
-                          child:
-                              const Icon(Icons.image_not_supported, size: 80),
+                          child: const Icon(Icons.image_not_supported, size: 80),
                         );
                       },
                     ),
 
-                  // Gradient Overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
+                  // Gradient Overlay (ignore pointer so it doesn't block video taps)
+                  IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.7),
+                          ],
+                        ),
                       ),
                     ),
                   ),
 
+                  // Navigation Buttons - positioned on sides only
+                  // Left Arrow Button
+                  if (hasGallery && totalMediaCount > 1)
+                    Positioned(
+                      left: 8,
+                      top: 120,
+                      bottom: 120,
+                      width: 48,
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            if (_currentImageIndex > 0) {
+                              _pageController.animateToPage(
+                                _currentImageIndex - 1,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  
+                  // Right Arrow Button
+                  if (hasGallery && totalMediaCount > 1)
+                    Positioned(
+                      right: 8,
+                      top: 120,
+                      bottom: 120,
+                      width: 48,
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            if (_currentImageIndex < totalMediaCount - 1) {
+                              _pageController.animateToPage(
+                                _currentImageIndex + 1,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
                   // Image Counter
-                  if (hasGallery)
+                  if (hasGallery && totalMediaCount > 1)
                     Positioned(
                       bottom: 16,
                       right: 16,
@@ -133,7 +262,7 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          '${_currentImageIndex + 1}/${galleryImages.length}',
+                          '${_currentImageIndex + 1}/$totalMediaCount',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -236,32 +365,39 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Price per night',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Price per night',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Best price guaranteed',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
+                              SizedBox(height: 4),
+                              Text(
+                                'Best price guaranteed',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                        Text(
-                          '₹${widget.resort.price.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            '₹${widget.resort.price.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -451,6 +587,23 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,
+                                cacheWidth: 200,
+                                cacheHeight: 200,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    width: 100,
+                                    height: 100,
+                                    color: Colors.grey[300],
+                                    child: const Center(
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    ),
+                                  );
+                                },
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     width: 100,
@@ -555,5 +708,206 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
     } else {
       return Icons.check_circle;
     }
+  }
+}
+
+// Video Thumbnail Widget that loads actual video thumbnail
+class VideoThumbnailWidget extends StatefulWidget {
+  final String videoUrl;
+  final VoidCallback onTap;
+
+  const VideoThumbnailWidget({
+    super.key,
+    required this.videoUrl,
+    required this.onTap,
+  });
+
+  @override
+  State<VideoThumbnailWidget> createState() => _VideoThumbnailWidgetState();
+}
+
+class _VideoThumbnailWidgetState extends State<VideoThumbnailWidget> {
+  VideoPlayerController? _controller;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThumbnail();
+  }
+
+  Future<void> _loadThumbnail() async {
+    try {
+      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+      await _controller!.initialize();
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      print('Error loading video thumbnail: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.onTap,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (_isInitialized && _controller != null)
+            VideoPlayer(_controller!)
+          else
+            Container(
+              color: Colors.black,
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white54,
+                  strokeWidth: 2,
+                ),
+              ),
+            ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.3),
+                  Colors.black.withOpacity(0.5),
+                ],
+              ),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.play_circle_filled,
+                size: 80,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Video Player Screen for MP4 videos
+class VideoPlayerScreen extends StatefulWidget {
+  final String videoUrl;
+  final String resortName;
+
+  const VideoPlayerScreen({
+    super.key,
+    required this.videoUrl,
+    required this.resortName,
+  });
+
+  @override
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+}
+
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+  late VideoPlayerController _controller;
+  bool _isInitialized = false;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      print('🎥 Initializing video player with URL: ${widget.videoUrl}');
+      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+      print('🎥 Controller created, starting initialization...');
+      await _controller.initialize();
+      print('🎥 Video initialized successfully');
+      print('🎥 Video duration: ${_controller.value.duration}');
+      print('🎥 Video size: ${_controller.value.size}');
+      setState(() {
+        _isInitialized = true;
+      });
+      _controller.play();
+      print('🎥 Video playback started');
+    } catch (e) {
+      print('❌ Video initialization error: $e');
+      setState(() {
+        _hasError = true;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: Text(
+          widget.resortName,
+          style: const TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: _hasError
+            ? const Text(
+                'Error loading video',
+                style: TextStyle(color: Colors.white),
+              )
+            : !_isInitialized
+                ? const CircularProgressIndicator(color: Colors.white)
+                : AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        VideoPlayer(_controller),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _controller.value.isPlaying
+                                  ? _controller.pause()
+                                  : _controller.play();
+                            });
+                          },
+                          child: Container(
+                            color: Colors.transparent,
+                            child: Center(
+                              child: AnimatedOpacity(
+                                opacity: _controller.value.isPlaying ? 0.0 : 1.0,
+                                duration: const Duration(milliseconds: 300),
+                                child: const Icon(
+                                  Icons.play_circle_outline,
+                                  size: 80,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+      ),
+    );
   }
 }

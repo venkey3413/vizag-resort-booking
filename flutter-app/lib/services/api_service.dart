@@ -117,4 +117,27 @@ class ApiService {
       throw Exception(error['error'] ?? "Login failed");
     }
   }
+
+  // Verify Razorpay Payment
+  static Future<Map<String, dynamic>> verifyPayment(
+    String paymentId,
+    String? orderId,
+    String signature,
+  ) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/verify-payment"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "paymentId": paymentId,
+        "orderId": orderId,
+        "signature": signature,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Payment verification failed");
+    }
+  }
 }

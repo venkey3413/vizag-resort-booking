@@ -7,6 +7,7 @@ class Resort {
   final String? description;
   final String? amenities;
   final String? gallery;
+  final String? videos;
   final String? mapLink;
 
   Resort({
@@ -18,6 +19,7 @@ class Resort {
     this.description,
     this.amenities,
     this.gallery,
+    this.videos,
     this.mapLink,
   });
 
@@ -31,6 +33,7 @@ class Resort {
       description: json['description'],
       amenities: json['amenities'],
       gallery: json['gallery'],
+      videos: json['videos'],
       mapLink: json['map_link'],
     );
   }
@@ -46,5 +49,27 @@ class Resort {
         .map((img) => img.trim())
         .where((img) => img.isNotEmpty)
         .toList();
+  }
+
+  // Helper method to get video URLs as list
+  List<String> getVideoUrls() {
+    if (videos == null || videos!.isEmpty) {
+      return [];
+    }
+    return videos!
+        .split(RegExp(r'[\n,]'))
+        .map((url) => url.trim())
+        .where((url) => url.isNotEmpty)
+        .toList();
+  }
+
+  // Helper method to extract YouTube video ID from URL
+  String? getYouTubeVideoId(String url) {
+    final regExp = RegExp(
+      r'(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})',
+      caseSensitive: false,
+    );
+    final match = regExp.firstMatch(url);
+    return match?.group(1);
   }
 }

@@ -305,7 +305,7 @@ app.post('/api/check-availability', async (req, res) => {
 app.post('/api/bookings', async (req, res) => {
     try {
         console.log('🎯 Booking request received:', req.body);
-        const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount, transactionId } = req.body;
+        const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount, transactionId, paymentStatus } = req.body;
 
         // Enhanced input sanitization
         const sanitizedData = {
@@ -415,7 +415,8 @@ app.post('/api/bookings', async (req, res) => {
                 bookingReference: bookingReference,
                 couponCode: couponCode || null,
                 discountAmount: discountAmount || 0,
-                qrCode: qrCodeImage
+                qrCode: qrCodeImage,
+                paymentStatus: paymentStatus || 'pending' // Use provided status or default to pending
             })
         });
         
@@ -442,9 +443,24 @@ app.post('/api/bookings', async (req, res) => {
                 console.log('Payment proof storage failed:', error.message);
             }
             
-            // Send Telegram notification
+            // Send Telegram notification based on payment status
             try {
-                const message = `💳 PAYMENT SUBMITTED!
+                let message;
+                if (paymentStatus === 'paid') {
+                    // Razorpay payment - confirmed
+                    message = `✅ PAYMENT CONFIRMED!
+
+📋 Booking ID: ${bookingReference}
+👤 Guest: ${guestName}
+🏖️ Resort: ${resort.name}
+💰 Amount: ₹${totalPrice.toLocaleString()}
+💳 Payment ID: ${transactionId}
+✅ Status: CONFIRMED
+
+⏰ Confirmed at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+                } else {
+                    // UPI payment - pending verification
+                    message = `💳 PAYMENT SUBMITTED!
 
 📋 Booking ID: ${bookingReference}
 👤 Guest: ${guestName}
@@ -454,6 +470,7 @@ app.post('/api/bookings', async (req, res) => {
 ⚠️ Status: Pending Verification
 
 ⏰ Submitted at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+                }
                 
                 await sendTelegramNotification(message);
             } catch (telegramError) {
@@ -663,6 +680,69 @@ app.get('/api/razorpay-key', (req, res) => {
         });
     }
     res.json({ key: key });
+});
+
+// Razorpay payment verification endpoint
+app.post('/api/verify-payment', async (req, res) => {
+    try {
+        const { paymentId, orderId, signature } = req.body;
+        
+        if (!paymentId) {
+            return res.status(400).json({ verified: false, error: 'Payment ID required' });
+        }
+
+        const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
+        if (!razorpayKeySecret) {
+            return res.status(500).json({ verified: false, error: 'Payment system not configured' });
+        }
+
+        // Verify signature if provided
+        if (orderId && signature) {
+            const text = `${orderId}|${paymentId}`;
+            const expectedSignature = crypto
+                .createHmac('sha256', razorpayKeySecret)
+                .update(text)
+                .digest('hex');
+
+            if (signature !== expectedSignature) {
+                return res.json({ verified: false, error: 'Invalid signature' });
+            }
+        }
+
+        // Fetch payment details from Razorpay
+        const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
+        const auth = Buffer.from(`${razorpayKeyId}:${razorpayKeySecret}`).toString('base64');
+        
+        const paymentResponse = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+            headers: {
+                'Authorization': `Basic ${auth}`
+            }
+        });
+
+        if (!paymentResponse.ok) {
+            return res.json({ verified: false, error: 'Payment not found' });
+        }
+
+        const payment = await paymentResponse.json();
+        
+        // Check if payment is captured/authorized
+        if (payment.status === 'captured' || payment.status === 'authorized') {
+            return res.json({ 
+                verified: true, 
+                paymentId: payment.id,
+                amount: payment.amount / 100,
+                status: payment.status
+            });
+        } else {
+            return res.json({ 
+                verified: false, 
+                error: `Payment status: ${payment.status}` 
+            });
+        }
+    } catch (error) {
+        console.error('❌ Payment verification error:', error);
+        res.status(500).json({ verified: false, error: 'Verification failed' });
+    }
 });
 
 // Razorpay webhook endpoint for automatic payment confirmation

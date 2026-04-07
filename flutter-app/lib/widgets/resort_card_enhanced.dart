@@ -64,7 +64,7 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
             transform: Matrix4.identity()
               ..translate(0.0, _isPressed ? 4.0 : 0.0, 0.0)
               ..scale(_isPressed ? 0.98 : 1.0),
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
@@ -100,50 +100,62 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(22),
                               ),
-                              child: Image.network(
-                                widget.resort.image.startsWith('http')
-                                    ? widget.resort.image
-                                    : "https://vshakago.in${widget.resort.image}",
-                                height: 200,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                cacheWidth: 600,
-                                cacheHeight: 400,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Container(
-                                    height: 200,
-                                    color: Colors.grey[200],
-                                    child: Center(
+                            child: Image.network(
+                              widget.resort.image.startsWith('http')
+                                  ? widget.resort.image
+                                  : "https://vshakago.in${widget.resort.image}",
+                              height: 160,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              cacheWidth: 400,
+                              cacheHeight: 250,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  height: 160,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.grey[300]!,
+                                        Colors.grey[200]!,
+                                      ],
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 30,
+                                      height: 30,
                                       child: CircularProgressIndicator(
                                         value: loadingProgress.expectedTotalBytes != null
                                             ? loadingProgress.cumulativeBytesLoaded /
                                                 loadingProgress.expectedTotalBytes!
                                             : null,
                                         color: AppColors.primary,
+                                        strokeWidth: 3,
                                       ),
                                     ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    height: 200,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.grey[300]!,
-                                          Colors.grey[400]!,
-                                        ],
-                                      ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  height: 160,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.grey[300]!,
+                                        Colors.grey[400]!,
+                                      ],
                                     ),
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      size: 50,
-                                      color: Colors.grey,
-                                    ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.image_not_supported,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  ),
+                                );
+                              },
+                            ),
                             ),
                           ),
 
@@ -204,15 +216,15 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
 
                       // Content
                       Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(14),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Resort name with wooden background
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
+                                horizontal: 10,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
@@ -236,7 +248,7 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                               child: Text(
                                 widget.resort.name,
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
                                   letterSpacing: 0.3,
@@ -252,7 +264,7 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 5),
                             Row(
                               children: [
                                 const Icon(
@@ -275,7 +287,7 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 10),
 
                             // Price and Book button
                             Row(
