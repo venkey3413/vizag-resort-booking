@@ -8,7 +8,14 @@ const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 3003;
 
-app.use(cors());
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://vshakago.in', 'https://www.vshakago.in', 'http://35.154.92.5:3001']
+        : true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 let db;
