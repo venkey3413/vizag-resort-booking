@@ -4,25 +4,39 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 const path = require('path');
 const QRCode = require('qrcode');
+const helmet = require('helmet');
+const crypto = require('crypto');
 // Use centralized database API - EC2 Docker service name
 const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
 console.log('🔗 Main server using DB API URL:', DB_API_URL);
 const redisPubSub = require('./redis-pubsub');
 const { sendTelegramNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
-const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Input sanitization function
-function sanitizeInput(input) {
-    if (typeof input !== 'string') return String(input || '');
-    return input.replace(/[<>"'&]/g, function(match) {
-        const map = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;'};
-        return map[match];
-    });
-}
+// Security headers with Helmet
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "https://checkout.razorpay.com", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://api.razorpay.com"],
+            frameSrc: ["'self'", "https://api.razorpay.com"]
+        }
+    },
+    hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true
+    },
+    frameguard: { action: 'deny' },
+    noSniff: true,
+    xssFilter: true
+}));
 
 // Middleware
 app.use(cors({
@@ -32,19 +46,6 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json({ limit: '10mb' }));
-
-// Security headers
-app.use((req, res, next) => {
-    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('X-Content-Type-Options', 'nosniff');
-    res.set('X-Frame-Options', 'DENY');
-    res.set('X-XSS-Protection', '1; mode=block');
-    res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    next();
-});
-
 app.use(express.static('public'));
 
 // Clean URL routing
