@@ -77,6 +77,12 @@ function authenticateAPIKey(req, res, next) {
     
     const apiKey = req.headers['x-api-key'];
     const origin = req.headers.origin;
+    const clientIP = req.ip || req.connection.remoteAddress;
+    
+    // Allow internal Docker network requests (172.18.0.0/16)
+    if (clientIP && (clientIP.startsWith('172.18.') || clientIP.startsWith('::ffff:172.18.'))) {
+        return next();
+    }
     
     // Allow requests from trusted web origins (CORS already validated)
     if (origin && (origin.includes('vshakago.in') || origin.includes('35.154.92.5:3001'))) {
@@ -85,7 +91,7 @@ function authenticateAPIKey(req, res, next) {
     
     // Require API key for mobile apps and other clients
     if (!apiKey || apiKey !== MOBILE_API_KEY) {
-        console.log('🚫 Unauthorized API access attempt from:', req.ip);
+        console.log('🚫 Unauthorized API access attempt from:', clientIP);
         return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });
     }
     
