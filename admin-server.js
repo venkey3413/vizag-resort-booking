@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const redisPubSub = require('./redis-pubsub');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 const app = express();
 const PORT = 3001;
@@ -23,6 +26,156 @@ app.use(express.static('admin-public'));
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', port: PORT, timestamp: new Date().toISOString() });
 });
+
+// ============================================
+// ADMIN AUTHENTICATION
+// ============================================
+
+// Admin login endpoint
+app.post('/api/admin/login', async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password required' });
+    }
+    
+    try {
+        const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+        const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+        
+        // Check username
+        if (username !== adminUsername) {
+            console.warn('❌ Admin login failed - invalid username', {
+                ip: req.ip,
+                username: username,
+                timestamp: new Date().toISOString()
+            });
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        // Verify password
+        let isValidPassword = false;
+        
+        if (adminPasswordHash) {
+            // Use bcrypt if hash is set
+            isValidPassword = await bcrypt.compare(password, adminPasswordHash);
+        } else {
+            // Fallback to plain text comparison (for initial setup)
+            const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+            isValidPassword = password === adminPassword;
+            
+            if (isValidPassword) {
+                console.warn('⚠️  Using plain text password! Set ADMIN_PASSWORD_HASH in .env');
+            }
+        }
+        
+        if (!isValidPassword) {
+            console.warn('❌ Admin login failed - invalid password', {
+                ip: req.ip,
+                username: username,
+                timestamp: new Date().toISOString()
+            });
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        // Generate JWT token
+        const token = jwt.sign(
+            { 
+                id: 'admin',
+                role: 'admin',
+                username: username,
+                ip: req.ip,
+                timestamp: Date.now()
+            },
+            process.env.JWT_SECRET || 'your-secret-key-change-this',
+            { expiresIn: '8h' }
+        );
+        
+        console.log('✅ Admin login successful', {
+            ip: req.ip,
+            username: username,
+            timestamp: new Date().toISOString()
+        });
+        
+        res.json({ 
+            token, 
+            expiresIn: 28800, // 8 hours in seconds
+            username: username
+        });
+    } catch (error) {
+        console.error('❌ Admin login error:', error);
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// Middleware to authenticate admin requests
+const authenticateAdmin = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.warn('⚠️  Unauthorized admin access attempt - no token', { 
+            ip: req.ip,
+            path: req.path,
+            timestamp: new Date().toISOString()
+        });
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-this');
+        
+        // Optional: Verify IP hasn't changed (session hijacking detection)
+        if (process.env.ADMIN_VERIFY_IP === 'true' && decoded.ip !== req.ip) {
+            console.error('🚨 IP mismatch detected - possible session hijacking', {
+                originalIP: decoded.ip,
+                currentIP: req.ip,
+                username: decoded.username,
+                timestamp: new Date().toISOString()
+            });
+            return res.status(401).json({ error: 'Session invalid - IP changed' });
+        }
+        
+        req.user = decoded;
+        next();
+    } catch (error) {
+        console.warn('⚠️  Invalid admin token', { 
+            ip: req.ip, 
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ error: 'Token expired' });
+        }
+        
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
+// Verify token endpoint (for frontend to check if token is still valid)
+app.get('/api/admin/verify', authenticateAdmin, (req, res) => {
+    res.json({ 
+        valid: true, 
+        username: req.user.username,
+        role: req.user.role
+    });
+});
+
+// Admin logout endpoint (optional - mainly for logging)
+app.post('/api/admin/logout', authenticateAdmin, (req, res) => {
+    console.log('👋 Admin logout', {
+        username: req.user.username,
+        ip: req.ip,
+        timestamp: new Date().toISOString()
+    });
+    res.json({ message: 'Logged out successfully' });
+});
+
+// ============================================
+// END ADMIN AUTHENTICATION
+// ============================================
 
 // Real-time Redis pub/sub listener endpoint
 app.get('/api/events-stream', (req, res) => {
@@ -476,8 +629,12 @@ app.delete('/api/travel-packages/:id', async (req, res) => {
     }
 });
 
-// Forward booking requests to centralized database API
-app.get('/api/bookings', async (req, res) => {
+// Forward booking requests to centralized database API (PROTECTED)
+app.get('/api/bookings', authenticateAdmin, async (req, res) => {
+    console.log('📊 Admin viewing bookings', {
+        username: req.user.username,
+        timestamp: new Date().toISOString()
+    });
     try {
         const response = await fetch(`${DB_API_URL}/api/bookings`);
         const data = await response.json();
@@ -487,7 +644,12 @@ app.get('/api/bookings', async (req, res) => {
     }
 });
 
-app.post('/api/bookings/:id/cancel', async (req, res) => {
+app.post('/api/bookings/:id/cancel', authenticateAdmin, async (req, res) => {
+    console.log('🚫 Admin canceling booking', {
+        bookingId: req.params.id,
+        username: req.user.username,
+        timestamp: new Date().toISOString()
+    });
     try {
         const response = await fetch(`${BOOKING_API_URL}/api/bookings/${req.params.id}/cancel`, {
             method: 'POST',
@@ -501,7 +663,13 @@ app.post('/api/bookings/:id/cancel', async (req, res) => {
     }
 });
 
-app.put('/api/bookings/:id/payment', async (req, res) => {
+app.put('/api/bookings/:id/payment', authenticateAdmin, async (req, res) => {
+    console.log('💳 Admin updating payment status', {
+        bookingId: req.params.id,
+        status: req.body.payment_status,
+        username: req.user.username,
+        timestamp: new Date().toISOString()
+    });
     try {
         const response = await fetch(`${BOOKING_API_URL}/api/bookings/${req.params.id}/payment`, {
             method: 'PUT',
@@ -515,7 +683,12 @@ app.put('/api/bookings/:id/payment', async (req, res) => {
     }
 });
 
-app.post('/api/bookings/:id/send-email', async (req, res) => {
+app.post('/api/bookings/:id/send-email', authenticateAdmin, async (req, res) => {
+    console.log('📧 Admin sending booking email', {
+        bookingId: req.params.id,
+        username: req.user.username,
+        timestamp: new Date().toISOString()
+    });
     try {
         const response = await fetch(`${BOOKING_API_URL}/api/bookings/${req.params.id}/send-email`, {
             method: 'POST',
