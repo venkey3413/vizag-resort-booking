@@ -5,6 +5,7 @@ const { open } = require('sqlite');
 const redisPubSub = require('./redis-pubsub');
 const bcrypt = require('bcrypt');
 const rateLimit = require('express-rate-limit');
+const Joi = require('joi');
 
 const app = express();
 const PORT = 3003;
@@ -70,6 +71,118 @@ function authenticateAPIKey(req, res, next) {
 }
 
 app.use(authenticateAPIKey);
+
+// ============================================
+// INPUT VALIDATION SCHEMAS
+// ============================================
+
+const bookingSchema = Joi.object({
+    resortId: Joi.number().integer().positive().required(),
+    guestName: Joi.string().min(2).max(100).trim().required(),
+    email: Joi.string().email().max(255).trim().lowercase().required(),
+    phone: Joi.string().pattern(/^[6-9]\d{9}$/).required().messages({
+        'string.pattern.base': 'Phone must be a valid 10-digit Indian mobile number'
+    }),
+    checkIn: Joi.date().iso().min('now').required(),
+    checkOut: Joi.date().iso().greater(Joi.ref('checkIn')).required(),
+    guests: Joi.number().integer().min(1).max(50).required(),
+    totalPrice: Joi.number().positive().max(10000000).required(),
+    bookingReference: Joi.string().max(50).optional(),
+    transactionId: Joi.string().max(100).optional().allow(null),
+    couponCode: Joi.string().max(50).optional().allow(null),
+    discountAmount: Joi.number().min(0).optional(),
+    qrCode: Joi.string().optional().allow(null)
+});
+
+const eventBookingSchema = Joi.object({
+    bookingReference: Joi.string().max(50).required(),
+    eventId: Joi.number().integer().positive().optional().allow(null),
+    eventName: Joi.string().min(2).max(200).trim().required(),
+    guestName: Joi.string().min(2).max(100).trim().required(),
+    email: Joi.string().email().max(255).trim().lowercase().required(),
+    phone: Joi.string().pattern(/^[6-9]\d{9}$/).required(),
+    eventDate: Joi.date().iso().min('now').required(),
+    eventTime: Joi.string().max(50).optional().allow(null),
+    guests: Joi.number().integer().min(1).max(1000).required(),
+    totalPrice: Joi.number().positive().max(10000000).required(),
+    transactionId: Joi.string().max(100).optional().allow(null)
+});
+
+const ownerSchema = Joi.object({
+    name: Joi.string().min(2).max(100).trim().required(),
+    email: Joi.string().email().max(255).trim().lowercase().optional().allow(null),
+    phone: Joi.string().pattern(/^[6-9]\d{9}$/).optional().allow(null),
+    password: Joi.string().min(8).max(100).required(),
+    resortId: Joi.number().integer().positive().optional()
+}).or('email', 'phone');
+
+const loginSchema = Joi.object({
+    email: Joi.string().max(255).trim().required(),
+    password: Joi.string().min(1).max(100).required()
+});
+
+const resortSchema = Joi.object({
+    name: Joi.string().min(2).max(200).trim().required(),
+    location: Joi.string().min(2).max(200).trim().required(),
+    price: Joi.number().integer().positive().max(1000000).required(),
+    description: Joi.string().max(5000).optional().allow(''),
+    image: Joi.string().max(500).optional().allow(''),
+    gallery: Joi.string().max(5000).optional().allow(''),
+    videos: Joi.string().max(5000).optional().allow(''),
+    map_link: Joi.string().max(500).optional().allow(''),
+    amenities: Joi.string().max(5000).optional().allow(''),
+    available: Joi.number().integer().valid(0, 1).optional()
+});
+
+const eventSchema = Joi.object({
+    name: Joi.string().min(2).max(200).trim().required(),
+    location: Joi.string().min(2).max(200).trim().required(),
+    price: Joi.number().integer().positive().max(1000000).required(),
+    event_type: Joi.string().max(100).optional().allow(''),
+    description: Joi.string().max(5000).optional().allow(''),
+    image: Joi.string().max(500).optional().allow(''),
+    gallery: Joi.string().max(5000).optional().allow(''),
+    videos: Joi.string().max(5000).optional().allow(''),
+    map_link: Joi.string().max(500).optional().allow(''),
+    amenities: Joi.string().max(5000).optional().allow(''),
+    note: Joi.string().max(1000).optional().allow(''),
+    max_guests: Joi.number().integer().positive().max(10000).optional().allow(null),
+    slot_timings: Joi.string().max(1000).optional().allow(''),
+    sort_order: Joi.number().integer().min(0).optional()
+});
+
+const couponSchema = Joi.object({
+    code: Joi.string().min(2).max(50).uppercase().trim().required(),
+    type: Joi.string().valid('percentage', 'fixed').required(),
+    discount: Joi.number().positive().max(100000).required(),
+    day_type: Joi.string().valid('all', 'weekday', 'weekend', 'friday').optional(),
+    resort_id: Joi.number().integer().positive().optional().allow(null)
+});
+
+// Validation middleware
+function validate(schema) {
+    return (req, res, next) => {
+        const { error, value } = schema.validate(req.body, {
+            abortEarly: false,
+            stripUnknown: true
+        });
+        
+        if (error) {
+            const errors = error.details.map(detail => detail.message);
+            return res.status(400).json({ 
+                error: 'Validation failed', 
+                details: errors 
+            });
+        }
+        
+        req.body = value; // Use validated and sanitized data
+        next();
+    };
+}
+
+// ============================================
+// END INPUT VALIDATION
+// ============================================
 
 let db;
 
@@ -372,7 +485,7 @@ app.get('/api/resorts', async (req, res) => {
     }
 });
 
-app.post('/api/resorts', async (req, res) => {
+app.post('/api/resorts', validate(resortSchema), async (req, res) => {
     try {
         const result = await db.run(`
             INSERT INTO resorts (name, location, price, description, image, gallery, videos, map_link, amenities)
@@ -387,7 +500,7 @@ app.post('/api/resorts', async (req, res) => {
     }
 });
 
-app.put('/api/resorts/:id', async (req, res) => {
+app.put('/api/resorts/:id', validate(resortSchema), async (req, res) => {
     try {
         await db.run(`
             UPDATE resorts SET name=?, location=?, price=?, description=?, image=?, gallery=?, videos=?, map_link=?, amenities=?, available=?
@@ -422,7 +535,7 @@ app.get('/api/events', async (req, res) => {
     }
 });
 
-app.post('/api/events', async (req, res) => {
+app.post('/api/events', validate(eventSchema), async (req, res) => {
     try {
         console.log('Creating event with data:', req.body);
         const result = await db.run(`
@@ -440,7 +553,7 @@ app.post('/api/events', async (req, res) => {
     }
 });
 
-app.put('/api/events/:id', async (req, res) => {
+app.put('/api/events/:id', validate(eventSchema), async (req, res) => {
     try {
         await db.run(`
             UPDATE events SET name=?, location=?, price=?, event_type=?, description=?, image=?, gallery=?, videos=?, map_link=?, amenities=?, note=?, max_guests=?, slot_timings=?
@@ -492,7 +605,7 @@ app.get('/api/event-bookings', async (req, res) => {
 });
 
 // POST create event booking
-app.post('/api/event-bookings', async (req, res) => {
+app.post('/api/event-bookings', validate(eventBookingSchema), async (req, res) => {
     try {
         const { bookingReference, eventId, eventName, guestName, email, phone, eventDate, eventTime, guests, totalPrice, transactionId } = req.body;
         if (!bookingReference || !guestName || !email || !phone || !eventDate || !guests || !totalPrice) {
@@ -584,7 +697,7 @@ app.get('/api/bookings', async (req, res) => {
     }
 });
 
-app.post('/api/bookings', async (req, res) => {
+app.post('/api/bookings', validate(bookingSchema), async (req, res) => {
     try {
         console.log('📝 EC2 Booking creation request:', {
             resortId: req.body.resortId,
@@ -683,7 +796,7 @@ app.get('/api/coupons', async (req, res) => {
     }
 });
 
-app.post('/api/coupons', async (req, res) => {
+app.post('/api/coupons', validate(couponSchema), async (req, res) => {
     try {
         await db.run(`
             INSERT INTO coupons (code, type, discount, day_type, resort_id)
@@ -986,7 +1099,7 @@ app.get('/api/owners', async (req, res) => {
     }
 });
 
-app.post('/api/owners', async (req, res) => {
+app.post('/api/owners', validate(ownerSchema), async (req, res) => {
     try {
         const { name, email, phone, password, resortId } = req.body;
         
@@ -1026,7 +1139,7 @@ app.delete('/api/owners/:id', async (req, res) => {
 });
 
 // Owner login endpoint
-app.post('/api/owner-login', loginLimiter, async (req, res) => {
+app.post('/api/owner-login', loginLimiter, validate(loginSchema), async (req, res) => {
     try {
         const { email, password } = req.body;
         
