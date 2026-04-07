@@ -5,9 +5,19 @@ import '../models/event.dart';
 
 class ApiService {
   static const String baseUrl = "https://vshakago.in";
+  static const String apiKey = "vshakago-mobile-2026-secure-key";
+
+  // Common headers with API key
+  static Map<String, String> get headers => {
+    "Content-Type": "application/json",
+    "X-API-Key": apiKey,
+  };
 
   static Future<List<Resort>> getResorts() async {
-    final response = await http.get(Uri.parse("$baseUrl/api/resorts"));
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/resorts"),
+      headers: headers,
+    );
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
@@ -18,7 +28,10 @@ class ApiService {
   }
 
   static Future<List<Event>> getEvents() async {
-    final response = await http.get(Uri.parse("$baseUrl/api/events"));
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/events"),
+      headers: headers,
+    );
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
@@ -31,7 +44,7 @@ class ApiService {
   static Future<Map<String, dynamic>> bookEvent(Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse("$baseUrl/api/event-bookings"),
-      headers: {"Content-Type": "application/json"},
+      headers: headers,
       body: jsonEncode(data),
     );
 
@@ -45,7 +58,7 @@ class ApiService {
   static Future<Map<String, dynamic>> bookResort(Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse("$baseUrl/api/bookings"),
-      headers: {"Content-Type": "application/json"},
+      headers: headers,
       body: jsonEncode(data),
     );
 
@@ -59,7 +72,7 @@ class ApiService {
   static Future<Map<String, dynamic>> checkAvailability(Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse("$baseUrl/api/check-availability"),
-      headers: {"Content-Type": "application/json"},
+      headers: headers,
       body: jsonEncode(data),
     );
 
@@ -73,7 +86,10 @@ class ApiService {
 
   // Get Razorpay Key
   static Future<String> getRazorpayKey() async {
-    final response = await http.get(Uri.parse("$baseUrl/api/razorpay-key"));
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/razorpay-key"),
+      headers: headers,
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -90,7 +106,10 @@ class ApiService {
       url += "?resortId=$resortId";
     }
     
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(
+      Uri.parse(url),
+      headers: headers,
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -103,7 +122,7 @@ class ApiService {
   static Future<Map<String, dynamic>> ownerLogin(String email, String password) async {
     final response = await http.post(
       Uri.parse("$baseUrl/api/owner-login"),
-      headers: {"Content-Type": "application/json"},
+      headers: headers,
       body: jsonEncode({
         "email": email,
         "password": password,
@@ -126,7 +145,7 @@ class ApiService {
   ) async {
     final response = await http.post(
       Uri.parse("$baseUrl/api/verify-payment"),
-      headers: {"Content-Type": "application/json"},
+      headers: headers,
       body: jsonEncode({
         "paymentId": paymentId,
         "orderId": orderId,

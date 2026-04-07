@@ -4,6 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 const redisPubSub = require('./redis-pubsub');
 const bcrypt = require('bcrypt');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = 3003;
@@ -14,9 +15,47 @@ app.use(cors({
         : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
 }));
 app.use(express.json());
+
+// Rate limiting: 200 requests per 15 minutes per IP
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    message: { error: 'Too many requests, please try again later' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use('/api/', limiter);
+
+// API Key authentication middleware
+const MOBILE_API_KEY = process.env.MOBILE_API_KEY || 'vshakago-mobile-2026-secure-key';
+
+function authenticateAPIKey(req, res, next) {
+    // Skip auth for health check and owner login
+    if (req.path === '/health' || req.path === '/api/owner-login') {
+        return next();
+    }
+    
+    const apiKey = req.headers['x-api-key'];
+    const origin = req.headers.origin;
+    
+    // Allow requests from trusted web origins (CORS already validated)
+    if (origin && (origin.includes('vshakago.in') || origin.includes('35.154.92.5:3001'))) {
+        return next();
+    }
+    
+    // Require API key for mobile apps and other clients
+    if (!apiKey || apiKey !== MOBILE_API_KEY) {
+        console.log('🚫 Unauthorized API access attempt from:', req.ip);
+        return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });
+    }
+    
+    next();
+}
+
+app.use(authenticateAPIKey);
 
 let db;
 
