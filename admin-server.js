@@ -18,9 +18,10 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://upload-widget.cloudinary.com", "https://cdn.socket.io"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'"]
+            connectSrc: ["'self'", "wss:", "ws:"],
+            frameSrc: ["'self'"]
         }
     },
     hsts: {
