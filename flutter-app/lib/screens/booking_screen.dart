@@ -131,9 +131,16 @@ class _BookingScreenState extends State<BookingScreen> {
       final checkIn = "${checkInDate!.year}-${checkInDate!.month.toString().padLeft(2, '0')}-${checkInDate!.day.toString().padLeft(2, '0')}";
       final checkOut = "${checkOutDate!.year}-${checkOutDate!.month.toString().padLeft(2, '0')}-${checkOutDate!.day.toString().padLeft(2, '0')}";
 
-      // Calculate nights and total price
+      // Calculate nights and total price with dynamic pricing
       final nights = checkOutDate!.difference(checkInDate!).inDays;
-      final basePrice = widget.resort.price * nights;
+      int basePrice = 0;
+      
+      // Calculate price for each night based on day of week
+      for (int i = 0; i < nights; i++) {
+        final currentDate = checkInDate!.add(Duration(days: i));
+        basePrice += widget.resort.getPriceForDate(currentDate);
+      }
+      
       final platformFee = (basePrice * 0.015).round();
       final totalPrice = basePrice + platformFee;
 

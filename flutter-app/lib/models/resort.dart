@@ -1,3 +1,17 @@
+class DynamicPricing {
+  final String dayType;
+  final int price;
+
+  DynamicPricing({required this.dayType, required this.price});
+
+  factory DynamicPricing.fromJson(Map<String, dynamic> json) {
+    return DynamicPricing(
+      dayType: json['day_type'],
+      price: json['price'],
+    );
+  }
+}
+
 class Resort {
   final int id;
   final String name;
@@ -9,6 +23,7 @@ class Resort {
   final String? gallery;
   final String? videos;
   final String? mapLink;
+  final List<DynamicPricing> dynamicPricing;
 
   Resort({
     required this.id,
@@ -21,9 +36,17 @@ class Resort {
     this.gallery,
     this.videos,
     this.mapLink,
+    this.dynamicPricing = const [],
   });
 
   factory Resort.fromJson(Map<String, dynamic> json) {
+    List<DynamicPricing> pricing = [];
+    if (json['dynamic_pricing'] != null && json['dynamic_pricing'] is List) {
+      pricing = (json['dynamic_pricing'] as List)
+          .map((p) => DynamicPricing.fromJson(p))
+          .toList();
+    }
+
     return Resort(
       id: json['id'],
       name: json['name'],
@@ -35,7 +58,46 @@ class Resort {
       gallery: json['gallery'],
       videos: json['videos'],
       mapLink: json['map_link'],
+      dynamicPricing: pricing,
     );
+  }
+
+  // Get price for specific day
+  int getPriceForDate(DateTime date) {
+    if (dynamicPricing.isEmpty) {
+      return price; // Use base price if no dynamic pricing
+    }
+
+    final dayOfWeek = date.weekday; // 1=Monday, 7=Sunday
+
+    // Check for Friday pricing (5)
+    if (dayOfWeek == 5) {
+      final fridayPrice = dynamicPricing.firstWhere(
+        (p) => p.dayType == 'friday',
+        orElse: () => DynamicPricing(dayType: '', price: 0),
+      );
+      if (fridayPrice.price > 0) return fridayPrice.price;
+    }
+
+    // Check for weekend pricing (Saturday=6, Sunday=7)
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      final weekendPrice = dynamicPricing.firstWhere(
+        (p) => p.dayType == 'weekend',
+        orElse: () => DynamicPricing(dayType: '', price: 0),
+      );
+      if (weekendPrice.price > 0) return weekendPrice.price;
+    }
+
+    // Check for weekday pricing (Monday-Thursday)
+    if (dayOfWeek >= 1 && dayOfWeek <= 4) {
+      final weekdayPrice = dynamicPricing.firstWhere(
+        (p) => p.dayType == 'weekday',
+        orElse: () => DynamicPricing(dayType: '', price: 0),
+      );
+      if (weekdayPrice.price > 0) return weekdayPrice.price;
+    }
+
+    return price; // Fallback to base price
   }
 
   // Helper method to get gallery images as list
