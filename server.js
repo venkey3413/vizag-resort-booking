@@ -6,9 +6,10 @@ const path = require('path');
 const QRCode = require('qrcode');
 const helmet = require('helmet');
 const crypto = require('crypto');
+const log = require('./logger');
 // Use centralized database API - EC2 Docker service name
 const DB_API_URL = process.env.DB_API_URL || 'http://centralized-db-api:3003';
-console.log('🔗 Main server using DB API URL:', DB_API_URL);
+log.info('Main server using DB API URL', { url: DB_API_URL });
 const redisPubSub = require('./redis-pubsub');
 const { sendTelegramNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
@@ -441,7 +442,7 @@ app.post('/api/bookings', async (req, res) => {
                     })
                 });
             } catch (error) {
-                console.log('Payment proof storage failed:', error.message);
+                log.warn('Payment proof storage failed', { error: error.message });
             }
             
             // Send Telegram notification based on payment status
@@ -770,7 +771,10 @@ app.post('/api/razorpay-webhook', express.raw({ type: 'application/json' }), asy
         }
 
         const event = JSON.parse(body.toString());
-        console.log('🔔 Razorpay webhook received:', event.event, event.payload?.payment?.entity?.id);
+        log.info('Razorpay webhook received', { 
+            event: event.event, 
+            paymentId: event.payload?.payment?.entity?.id 
+        });
 
         // Handle payment success
         if (event.event === 'payment.captured') {
@@ -779,7 +783,7 @@ app.post('/api/razorpay-webhook', express.raw({ type: 'application/json' }), asy
             const amount = payment.amount / 100; // Convert from paise to rupees
             const orderId = payment.order_id;
             
-            console.log('💳 Payment captured:', {
+            log.payment('Payment captured', {
                 paymentId,
                 amount,
                 orderId,
@@ -854,7 +858,7 @@ app.post('/api/razorpay-webhook', express.raw({ type: 'application/json' }), asy
 
                 console.log('✅ Booking automatically confirmed:', booking.booking_reference);
             } else {
-                console.log('⚠️ Could not match payment to booking:', {
+                log.warn('Could not match payment to booking', {
                     amount,
                     recentBookingsCount: recentBookings.length,
                     paymentId

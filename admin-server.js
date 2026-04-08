@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const log = require('./logger');
 require('dotenv').config();
 
 const app = express();
@@ -711,11 +712,10 @@ app.post('/api/bookings/:id/cancel', authenticateAdmin, async (req, res) => {
 });
 
 app.put('/api/bookings/:id/payment', authenticateAdmin, async (req, res) => {
-    console.log('💳 Admin updating payment status', {
+    log.info('Admin updating payment status', {
         bookingId: req.params.id,
         status: req.body.payment_status,
-        username: req.user.username,
-        timestamp: new Date().toISOString()
+        username: req.user.username
     });
     try {
         const response = await fetch(`${BOOKING_API_URL}/api/bookings/${req.params.id}/payment`, {
