@@ -459,49 +459,56 @@ function calculateTotal() {
     const resort = resorts.find(r => r.id === resortId);
     if (!resort) return;
     
-    // Get pricing based on check-in date only
-    const checkInDayOfWeek = startDate.getDay();
-    let nightlyRate = resort.price;
-    
     console.log('🔍 Dynamic pricing calculation:', {
         resortId: resort.id,
         resortName: resort.name,
         checkIn: checkIn,
-        dayOfWeek: checkInDayOfWeek,
+        checkOut: checkOut,
         basePriceFromResort: resort.price,
         dynamicPricing: resort.dynamic_pricing,
         nights: nights
     });
     
+    let totalBasePrice = 0;
+    
+    // Calculate price for each night individually
     if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-        // Mon-Fri = weekdays (1,2,3,4,5), Sat-Sun = weekends (6,0)
-        if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
-            // Weekend (Saturday=6, Sunday=0)
-            const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
-            if (weekendPrice) {
-                nightlyRate = weekendPrice.price;
-                console.log('✅ Applied weekend pricing:', weekendPrice.price);
+        for (let i = 0; i < nights; i++) {
+            const currentNight = new Date(startDate);
+            currentNight.setDate(startDate.getDate() + i);
+            const dayOfWeek = currentNight.getDay(); // 0=Sunday, 6=Saturday
+            let nightlyRate = resort.price;
+            
+            // Mon-Fri = weekdays (1,2,3,4,5), Sat-Sun = weekends (6,0)
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                // Weekend (Saturday=6, Sunday=0)
+                const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
+                if (weekendPrice) {
+                    nightlyRate = weekendPrice.price;
+                    console.log(`   Night ${i + 1} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dayOfWeek]}): ₹${nightlyRate} (Weekend)`);
+                }
+            } else {
+                // Weekday (Monday=1 to Friday=5)
+                const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+                if (weekdayPrice) {
+                    nightlyRate = weekdayPrice.price;
+                    console.log(`   Night ${i + 1} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dayOfWeek]}): ₹${nightlyRate} (Weekday)`);
+                }
             }
-        } else {
-            // Weekday (Monday=1 to Friday=5)
-            const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
-            if (weekdayPrice) {
-                nightlyRate = weekdayPrice.price;
-                console.log('✅ Applied weekday pricing:', weekdayPrice.price);
-            }
+            
+            totalBasePrice += nightlyRate;
         }
     } else {
         console.log('⚠️ No dynamic pricing found, using base price:', resort.price);
+        totalBasePrice = resort.price * nights;
     }
     
-    const basePrice = nightlyRate * nights;
-    const platformFee = Math.round(basePrice * 0.015); // 1.5% platform fee
-    const total = basePrice + platformFee;
+    const platformFee = Math.round(totalBasePrice * 0.015); // 1.5% platform fee
+    const total = totalBasePrice + platformFee;
     
     console.log('💰 Final pricing calculation:', {
-        nightlyRate: nightlyRate,
+        totalBasePrice: totalBasePrice,
         nights: nights,
-        basePrice: basePrice,
         platformFee: platformFee,
         total: total
     });

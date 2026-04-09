@@ -142,53 +142,54 @@ class _BookingScreenState extends State<BookingScreen> {
     if (checkInDate == null || checkOutDate == null) return 0;
     
     final nights = checkOutDate!.difference(checkInDate!).inDays;
-    final checkInDayOfWeek = checkInDate!.weekday; // 1=Monday, 7=Sunday
-    int nightlyRate = widget.resort.price;
+    int totalBasePrice = 0;
     
     print('🔍 Calculating price for ${widget.resort.name}');
-    print('   Check-in day: $checkInDayOfWeek (${_getDayName(checkInDayOfWeek)})');
-    print('   Base price: ₹$nightlyRate');
-    print('   Dynamic pricing count: ${widget.resort.dynamicPricing.length}');
+    print('   Check-in: ${checkInDate!.day}/${checkInDate!.month}/${checkInDate!.year}');
+    print('   Check-out: ${checkOutDate!.day}/${checkOutDate!.month}/${checkOutDate!.year}');
+    print('   Total nights: $nights');
+    print('   Dynamic pricing available: ${widget.resort.dynamicPricing.isNotEmpty}');
     
-    // Apply dynamic pricing based on check-in date
-    if (widget.resort.dynamicPricing.isNotEmpty) {
-      // Monday-Friday (1-5) = weekday, Saturday-Sunday (6-7) = weekend
-      if (checkInDayOfWeek == 6 || checkInDayOfWeek == 7) {
-        // Weekend (Saturday=6, Sunday=7)
-        print('   ✅ Weekend detected');
-        final weekendPrice = widget.resort.dynamicPricing.firstWhere(
-          (p) => p.dayType == 'weekend',
-          orElse: () => DynamicPricing(dayType: '', price: 0),
-        );
-        if (weekendPrice.price > 0) {
-          nightlyRate = weekendPrice.price;
-          print('   ✅ Applied weekend rate: ₹$nightlyRate');
+    // Calculate price for each night individually
+    for (int i = 0; i < nights; i++) {
+      final currentNight = checkInDate!.add(Duration(days: i));
+      final dayOfWeek = currentNight.weekday; // 1=Monday, 7=Sunday
+      int nightlyRate = widget.resort.price;
+      
+      // Apply dynamic pricing based on each night's day of week
+      if (widget.resort.dynamicPricing.isNotEmpty) {
+        if (dayOfWeek == 6 || dayOfWeek == 7) {
+          // Weekend (Saturday=6, Sunday=7)
+          final weekendPrice = widget.resort.dynamicPricing.firstWhere(
+            (p) => p.dayType == 'weekend',
+            orElse: () => DynamicPricing(dayType: '', price: 0),
+          );
+          if (weekendPrice.price > 0) {
+            nightlyRate = weekendPrice.price;
+          }
+          print('   Night ${i + 1} (${_getDayName(dayOfWeek)}): ₹$nightlyRate (Weekend)');
         } else {
-          print('   ⚠️ Weekend price not found, using base rate');
+          // Weekday (Monday=1 to Friday=5)
+          final weekdayPrice = widget.resort.dynamicPricing.firstWhere(
+            (p) => p.dayType == 'weekday',
+            orElse: () => DynamicPricing(dayType: '', price: 0),
+          );
+          if (weekdayPrice.price > 0) {
+            nightlyRate = weekdayPrice.price;
+          }
+          print('   Night ${i + 1} (${_getDayName(dayOfWeek)}): ₹$nightlyRate (Weekday)');
         }
       } else {
-        // Weekday (Monday=1 to Friday=5)
-        print('   ✅ Weekday detected');
-        final weekdayPrice = widget.resort.dynamicPricing.firstWhere(
-          (p) => p.dayType == 'weekday',
-          orElse: () => DynamicPricing(dayType: '', price: 0),
-        );
-        if (weekdayPrice.price > 0) {
-          nightlyRate = weekdayPrice.price;
-          print('   ✅ Applied weekday rate: ₹$nightlyRate');
-        } else {
-          print('   ⚠️ Weekday price not found, using base rate');
-        }
+        print('   Night ${i + 1} (${_getDayName(dayOfWeek)}): ₹$nightlyRate (Base rate)');
       }
-    } else {
-      print('   ⚠️ No dynamic pricing available');
+      
+      totalBasePrice += nightlyRate;
     }
     
-    final basePrice = nightlyRate * nights;
-    final platformFee = (basePrice * 0.015).round();
-    final total = basePrice + platformFee;
+    final platformFee = (totalBasePrice * 0.015).round();
+    final total = totalBasePrice + platformFee;
     
-    print('   💰 Final: ₹$nightlyRate × $nights nights = ₹$basePrice + ₹$platformFee fee = ₹$total');
+    print('   💰 Total base: ₹$totalBasePrice + Platform fee: ₹$platformFee = Total: ₹$total\n');
     
     return total;
   }
