@@ -7,6 +7,45 @@ class DetailsScreen extends StatelessWidget {
 
   const DetailsScreen({super.key, required this.resort});
 
+  Widget _buildDynamicPricingInfo() {
+    final weekday = resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekday',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+    final weekend = resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekend',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+
+    return Column(
+      children: [
+        if (weekday.price > 0)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Weekday (Mon-Fri):',
+                  style: TextStyle(fontSize: 14)),
+              Text('₹${weekday.price}',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        if (weekday.price > 0 && weekend.price > 0) const SizedBox(height: 4),
+        if (weekend.price > 0)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Weekend (Sat-Sun):',
+                  style: TextStyle(fontSize: 14)),
+              Text('₹${weekend.price}',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,21 +101,33 @@ class DetailsScreen extends StatelessWidget {
                       color: Colors.blue[50],
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        const Text(
-                          "Price per night:",
-                          style: TextStyle(fontSize: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              resort.dynamicPricing.isNotEmpty
+                                  ? "Starting from:"
+                                  : "Price per night:",
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            Text(
+                              "₹${resort.price.toStringAsFixed(0)}",
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          "₹${resort.price.toStringAsFixed(0)}",
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
+                        if (resort.dynamicPricing.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          const Divider(),
+                          const SizedBox(height: 4),
+                          _buildDynamicPricingInfo(),
+                        ],
                       ],
                     ),
                   ),

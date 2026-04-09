@@ -46,6 +46,26 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
     super.dispose();
   }
 
+  String _getShortPricing() {
+    final weekday = widget.resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekday',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+    final weekend = widget.resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekend',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+    
+    if (weekday.price > 0 && weekend.price > 0) {
+      return 'WD:₹${weekday.price}|WE:₹${weekend.price}';
+    } else if (weekday.price > 0) {
+      return 'Weekday: ₹${weekday.price}';
+    } else if (weekend.price > 0) {
+      return 'Weekend: ₹${weekend.price}';
+    }
+    return 'per night';
+  }
+
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
@@ -315,7 +335,9 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          '₹${widget.resort.price.toStringAsFixed(0)}',
+                                          widget.resort.dynamicPricing.isNotEmpty
+                                              ? 'From ₹${widget.resort.price.toStringAsFixed(0)}'
+                                              : '₹${widget.resort.price.toStringAsFixed(0)}',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w900,
                                             fontSize: 16,
@@ -324,13 +346,17 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        const Text(
-                                          'per night',
-                                          style: TextStyle(
+                                        Text(
+                                          widget.resort.dynamicPricing.isNotEmpty
+                                              ? _getShortPricing()
+                                              : 'per night',
+                                          style: const TextStyle(
                                             fontSize: 9,
                                             fontWeight: FontWeight.w700,
                                             color: Color(0xFF64748B),
                                           ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ],
                                     ),

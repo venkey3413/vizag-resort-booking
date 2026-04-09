@@ -30,6 +30,49 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
     super.dispose();
   }
 
+  Widget _buildDynamicPricingInfo() {
+    final weekday = widget.resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekday',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+    final weekend = widget.resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekend',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+
+    return Column(
+      children: [
+        if (weekday.price > 0)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Weekday (Mon-Fri):',
+                  style: TextStyle(fontSize: 14, color: Colors.white70)),
+              Text('₹${weekday.price}',
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white)),
+            ],
+          ),
+        if (weekday.price > 0 && weekend.price > 0) const SizedBox(height: 4),
+        if (weekend.price > 0)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Weekend (Sat-Sun):',
+                  style: TextStyle(fontSize: 14, color: Colors.white70)),
+              Text('₹${weekend.price}',
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white)),
+            ],
+          ),
+      ],
+    );
+  }
+
   Future<void> _openMap() async {
     if (widget.resort.mapLink == null || widget.resort.mapLink!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -362,44 +405,56 @@ class _DetailsScreenEnhancedState extends State<DetailsScreenEnhanced> {
                         ),
                       ],
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Price per night',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.resort.dynamicPricing.isNotEmpty
+                                        ? 'Starting from'
+                                        : 'Price per night',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Best price guaranteed',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Best price guaranteed',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: Text(
-                            '₹${widget.resort.price.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                            const SizedBox(width: 12),
+                            Flexible(
+                              child: Text(
+                                '₹${widget.resort.price.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
+                        if (widget.resort.dynamicPricing.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          const Divider(color: Colors.white30),
+                          const SizedBox(height: 8),
+                          _buildDynamicPricingInfo(),
+                        ],
                       ],
                     ),
                   ),

@@ -11,6 +11,26 @@ class ResortCard extends StatelessWidget {
     required this.onTap,
   });
 
+  String _getPricingDetails() {
+    final weekday = resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekday',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+    final weekend = resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekend',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+    
+    if (weekday.price > 0 && weekend.price > 0) {
+      return 'Weekday: ₹${weekday.price} | Weekend: ₹${weekend.price}';
+    } else if (weekday.price > 0) {
+      return 'Weekday: ₹${weekday.price}';
+    } else if (weekend.price > 0) {
+      return 'Weekend: ₹${weekend.price}';
+    }
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -84,12 +104,29 @@ class ResortCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "₹${resort.price.toStringAsFixed(0)}/night",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              resort.dynamicPricing.isNotEmpty
+                                  ? "From ₹${resort.price.toStringAsFixed(0)}/night"
+                                  : "₹${resort.price.toStringAsFixed(0)}/night",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            if (resort.dynamicPricing.isNotEmpty)
+                              Text(
+                                _getPricingDetails(),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       ElevatedButton(

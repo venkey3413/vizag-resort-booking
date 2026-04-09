@@ -22,6 +22,47 @@ class _BookingScreenState extends State<BookingScreen> {
   DateTime? checkOutDate;
   bool isLoading = false;
 
+  List<Widget> _buildPricingRows() {
+    List<Widget> rows = [];
+    
+    final weekday = widget.resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekday',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+    final weekend = widget.resort.dynamicPricing.firstWhere(
+      (p) => p.dayType == 'weekend',
+      orElse: () => DynamicPricing(dayType: '', price: 0),
+    );
+
+    if (weekday.price > 0) {
+      rows.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Weekday (Mon-Fri):', style: TextStyle(fontSize: 13)),
+            Text('₹${weekday.price}',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      );
+    }
+
+    if (weekend.price > 0) {
+      rows.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Weekend (Sat-Sun):', style: TextStyle(fontSize: 13)),
+            Text('₹${weekend.price}',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      );
+    }
+
+    return rows;
+  }
+
   @override
   void dispose() {
     nameController.dispose();
@@ -132,15 +173,37 @@ class _BookingScreenState extends State<BookingScreen> {
       final checkOut = "${checkOutDate!.year}-${checkOutDate!.month.toString().padLeft(2, '0')}-${checkOutDate!.day.toString().padLeft(2, '0')}";
 
       // Calculate nights and total price with dynamic pricing
+      // Use check-in date to determine pricing (same as website)
       final nights = checkOutDate!.difference(checkInDate!).inDays;
-      int basePrice = 0;
       
-      // Calculate price for each night based on day of week
-      for (int i = 0; i < nights; i++) {
-        final currentDate = checkInDate!.add(Duration(days: i));
-        basePrice += widget.resort.getPriceForDate(currentDate);
+      // Get pricing based on check-in date's day of week (matching website logic)
+      final checkInDayOfWeek = checkInDate!.weekday; // 1=Monday, 7=Sunday
+      int nightlyRate = widget.resort.price;
+      
+      if (widget.resort.dynamicPricing.isNotEmpty) {
+        // Monday-Friday (1-5) = weekday, Saturday-Sunday (6-7) = weekend
+        if (checkInDayOfWeek == 6 || checkInDayOfWeek == 7) {
+          // Weekend (Saturday=6, Sunday=7)
+          final weekendPrice = widget.resort.dynamicPricing.firstWhere(
+            (p) => p.dayType == 'weekend',
+            orElse: () => DynamicPricing(dayType: '', price: 0),
+          );
+          if (weekendPrice.price > 0) {
+            nightlyRate = weekendPrice.price;
+          }
+        } else {
+          // Weekday (Monday=1 to Friday=5)
+          final weekdayPrice = widget.resort.dynamicPricing.firstWhere(
+            (p) => p.dayType == 'weekday',
+            orElse: () => DynamicPricing(dayType: '', price: 0),
+          );
+          if (weekdayPrice.price > 0) {
+            nightlyRate = weekdayPrice.price;
+          }
+        }
       }
       
+      final basePrice = nightlyRate * nights;
       final platformFee = (basePrice * 0.015).round();
       final totalPrice = basePrice + platformFee;
 
@@ -225,13 +288,23 @@ class _BookingScreenState extends State<BookingScreen> {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 13),
                             ),
-                            Text(
-                              "₹${widget.resort.price}/night",
-                              style: const TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
+                            if (widget.resort.dynamicPricing.isNotEmpty)
+                              Text(
+                                "From ₹${widget.resort.price}/night",
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              )
+                            else
+                              Text(
+                                "₹${widget.resort.price}/night",
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ),
@@ -239,7 +312,42 @@ class _BookingScreenState extends State<BookingScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+
+              // Dynamic Pricing Info
+              if (widget.resort.dynamicPricing.isNotEmpty)
+                Card(
+                  elevation: 1,
+                  color: Colors.blue[50],
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "📅 Dynamic Pricing",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ..._buildPricingRows(),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Price based on check-in date",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              const SizedBox(height: 12),
 
               // Guest Details
               const Text(
