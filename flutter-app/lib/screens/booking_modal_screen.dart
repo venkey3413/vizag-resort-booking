@@ -682,7 +682,7 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           const Text("Base Amount", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
-                                          Text("₹${widget.resort.price * nights}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
+                                          Text("₹${totalPrice - (totalPrice * 0.015).round()}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
                                         ],
                                       ),
                                       const SizedBox(height: 4),
@@ -690,7 +690,7 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           const Text("Platform Fee", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
-                                          Text("₹${(widget.resort.price * nights * 0.015).round()}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
+                                          Text("₹${(totalPrice * 0.015).round()}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
                                         ],
                                       ),
                                       const Divider(height: 16),
