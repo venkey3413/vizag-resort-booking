@@ -418,6 +418,41 @@ async function initDB() {
         )
     `);
     
+    // Push notification tokens table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS device_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            token TEXT UNIQUE NOT NULL,
+            device_id TEXT,
+            device_type TEXT DEFAULT 'android',
+            user_email TEXT,
+            user_phone TEXT,
+            is_active INTEGER DEFAULT 1,
+            last_active DATETIME DEFAULT CURRENT_TIMESTAMP,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Notification history table
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS notification_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            data TEXT,
+            target_type TEXT DEFAULT 'all',
+            target_value TEXT,
+            sent_count INTEGER DEFAULT 0,
+            success_count INTEGER DEFAULT 0,
+            failure_count INTEGER DEFAULT 0,
+            sent_by TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            sent_at DATETIME
+        )
+    `);
+
+    console.log('✅ Push notification tables initialized');
+    
     console.log('✅ Database tables initialized');
     
     // Add sample resort if none exist (for EC2 deployment)
@@ -1239,6 +1274,156 @@ app.post('/api/owner-login', loginLimiter, validate(loginSchema), async (req, re
     } catch (error) {
         console.error('Owner login error:', error);
         res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+const notificationService = require('./notification-service');
+
+// Register device token
+app.post('/api/device-tokens', async (req, res) => {
+    try {
+        const { token, deviceId, deviceType, userEmail, userPhone } = req.body;
+        
+        if (!token) {
+            return res.status(400).json({ error: 'Token is required' });
+        }
+
+        // Check if token already exists
+        const existing = await db.get('SELECT * FROM device_tokens WHERE token = ?', [token]);
+        
+        if (existing) {
+            // Update existing token
+            await db.run(
+                `UPDATE device_tokens 
+                 SET device_id = ?, device_type = ?, user_email = ?, user_phone = ?, 
+                     is_active = 1, last_active = CURRENT_TIMESTAMP 
+                 WHERE token = ?`,
+                [deviceId, deviceType, userEmail, userPhone, token]
+            );
+            
+            return res.json({ message: 'Token updated', id: existing.id });
+        } else {
+            // Insert new token
+            const result = await db.run(
+                `INSERT INTO device_tokens (token, device_id, device_type, user_email, user_phone)
+                 VALUES (?, ?, ?, ?, ?)`,
+                [token, deviceId, deviceType, userEmail, userPhone]
+            );
+            
+            return res.json({ message: 'Token registered', id: result.lastID });
+        }
+    } catch (error) {
+        console.error('Device token registration error:', error);
+        res.status(500).json({ error: 'Failed to register device token' });
+    }
+});
+
+// Deactivate device token (when user logs out or uninstalls)
+app.post('/api/device-tokens/deactivate', async (req, res) => {
+    try {
+        const { token } = req.body;
+        
+        if (!token) {
+            return res.status(400).json({ error: 'Token is required' });
+        }
+
+        await db.run('UPDATE device_tokens SET is_active = 0 WHERE token = ?', [token]);
+        
+        res.json({ message: 'Token deactivated' });
+    } catch (error) {
+        console.error('Token deactivation error:', error);
+        res.status(500).json({ error: 'Failed to deactivate token' });
+    }
+});
+
+// Get all active device tokens (admin only)
+app.get('/api/device-tokens', async (req, res) => {
+    try {
+        const tokens = await db.all(`
+            SELECT id, device_id, device_type, user_email, user_phone, last_active, created_at
+            FROM device_tokens 
+            WHERE is_active = 1
+            ORDER BY last_active DESC
+        `);
+        
+        res.json(tokens);
+    } catch (error) {
+        console.error('Get tokens error:', error);
+        res.status(500).json({ error: 'Failed to fetch device tokens' });
+    }
+});
+
+// Send push notification (admin only)
+app.post('/api/send-notification', async (req, res) => {
+    try {
+        const { title, body, targetType, targetValue, data, sentBy } = req.body;
+        
+        if (!title || !body) {
+            return res.status(400).json({ error: 'Title and body are required' });
+        }
+
+        let result;
+        
+        switch (targetType) {
+            case 'all':
+                result = await notificationService.sendNotificationToAll(db, title, body, data || {});
+                break;
+            
+            case 'email':
+            case 'phone':
+                if (!targetValue) {
+                    return res.status(400).json({ error: 'Target value required' });
+                }
+                const targets = Array.isArray(targetValue) ? targetValue : [targetValue];
+                result = await notificationService.sendNotificationToUsers(db, targets, title, body, data || {});
+                break;
+            
+            default:
+                return res.status(400).json({ error: 'Invalid target type' });
+        }
+
+        // Save to notification history
+        await db.run(
+            `INSERT INTO notification_history 
+             (title, body, data, target_type, target_value, sent_count, success_count, failure_count, sent_by, sent_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+            [
+                title, 
+                body, 
+                JSON.stringify(data || {}), 
+                targetType, 
+                Array.isArray(targetValue) ? targetValue.join(',') : targetValue || null,
+                (result.successCount || 0) + (result.failureCount || 0),
+                result.successCount || 0,
+                result.failureCount || 0,
+                sentBy || 'admin'
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: 'Notification sent',
+            result: result
+        });
+    } catch (error) {
+        console.error('Send notification error:', error);
+        res.status(500).json({ error: 'Failed to send notification', details: error.message });
+    }
+});
+
+// Get notification history (admin only)
+app.get('/api/notification-history', async (req, res) => {
+    try {
+        const history = await db.all(`
+            SELECT * FROM notification_history 
+            ORDER BY created_at DESC 
+            LIMIT 100
+        `);
+        
+        res.json(history);
+    } catch (error) {
+        console.error('Get notification history error:', error);
+        res.status(500).json({ error: 'Failed to fetch notification history' });
     }
 });
 
