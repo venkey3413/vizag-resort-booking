@@ -40,11 +40,21 @@ class Resort {
   });
 
   factory Resort.fromJson(Map<String, dynamic> json) {
+    print('\n🏨 Parsing resort: ${json['name']}');
+    print('   Base price: ₹${json['price']}');
+    print('   Raw dynamic_pricing: ${json['dynamic_pricing']}');
+    
     List<DynamicPricing> pricing = [];
     if (json['dynamic_pricing'] != null && json['dynamic_pricing'] is List) {
       pricing = (json['dynamic_pricing'] as List)
           .map((p) => DynamicPricing.fromJson(p))
           .toList();
+      print('   ✅ Loaded ${pricing.length} dynamic pricing entries');
+      for (var p in pricing) {
+        print('      - ${p.dayType}: ₹${p.price}');
+      }
+    } else {
+      print('   ⚠️ No dynamic pricing data (${json['dynamic_pricing'] == null ? "null" : "not a list"})');
     }
 
     return Resort(

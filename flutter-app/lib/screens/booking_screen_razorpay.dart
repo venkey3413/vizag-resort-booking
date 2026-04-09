@@ -28,6 +28,15 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void initState() {
     super.initState();
+    print('\n🏨 Booking screen opened for: ${widget.resort.name}');
+    print('   Base price: ₹${widget.resort.price}');
+    print('   Dynamic pricing entries: ${widget.resort.dynamicPricing.length}');
+    if (widget.resort.dynamicPricing.isNotEmpty) {
+      for (var pricing in widget.resort.dynamicPricing) {
+        print('      - ${pricing.dayType}: ₹${pricing.price}');
+      }
+    }
+    print('   👉 Select a check-in date to see dynamic pricing in action\n');
     _initializeRazorpay();
     _fetchRazorpayKey();
   }
@@ -116,6 +125,11 @@ class _BookingScreenState extends State<BookingScreen> {
           checkOutDate = picked;
         }
       });
+      
+      // Trigger price calculation with logging
+      print('\n📅 Date selected - triggering price calculation');
+      final price = _calculateTotalPrice();
+      print('📊 UI will show: ₹$price\n');
     }
   }
 
@@ -128,9 +142,95 @@ class _BookingScreenState extends State<BookingScreen> {
     if (checkInDate == null || checkOutDate == null) return 0;
     
     final nights = checkOutDate!.difference(checkInDate!).inDays;
-    final basePrice = widget.resort.price * nights;
+    final checkInDayOfWeek = checkInDate!.weekday; // 1=Monday, 7=Sunday
+    int nightlyRate = widget.resort.price;
+    
+    print('🔍 Calculating price for ${widget.resort.name}');
+    print('   Check-in day: $checkInDayOfWeek (${_getDayName(checkInDayOfWeek)})');
+    print('   Base price: ₹$nightlyRate');
+    print('   Dynamic pricing count: ${widget.resort.dynamicPricing.length}');
+    
+    // Apply dynamic pricing based on check-in date
+    if (widget.resort.dynamicPricing.isNotEmpty) {
+      // Monday-Friday (1-5) = weekday, Saturday-Sunday (6-7) = weekend
+      if (checkInDayOfWeek == 6 || checkInDayOfWeek == 7) {
+        // Weekend (Saturday=6, Sunday=7)
+        print('   ✅ Weekend detected');
+        final weekendPrice = widget.resort.dynamicPricing.firstWhere(
+          (p) => p.dayType == 'weekend',
+          orElse: () => DynamicPricing(dayType: '', price: 0),
+        );
+        if (weekendPrice.price > 0) {
+          nightlyRate = weekendPrice.price;
+          print('   ✅ Applied weekend rate: ₹$nightlyRate');
+        } else {
+          print('   ⚠️ Weekend price not found, using base rate');
+        }
+      } else {
+        // Weekday (Monday=1 to Friday=5)
+        print('   ✅ Weekday detected');
+        final weekdayPrice = widget.resort.dynamicPricing.firstWhere(
+          (p) => p.dayType == 'weekday',
+          orElse: () => DynamicPricing(dayType: '', price: 0),
+        );
+        if (weekdayPrice.price > 0) {
+          nightlyRate = weekdayPrice.price;
+          print('   ✅ Applied weekday rate: ₹$nightlyRate');
+        } else {
+          print('   ⚠️ Weekday price not found, using base rate');
+        }
+      }
+    } else {
+      print('   ⚠️ No dynamic pricing available');
+    }
+    
+    final basePrice = nightlyRate * nights;
     final platformFee = (basePrice * 0.015).round();
-    return basePrice + platformFee;
+    final total = basePrice + platformFee;
+    
+    print('   💰 Final: ₹$nightlyRate × $nights nights = ₹$basePrice + ₹$platformFee fee = ₹$total');
+    
+    return total;
+  }
+  
+  String _getDayName(int weekday) {
+    const days = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    return days[weekday];
+  }
+  
+  String _getPricingInfo() {
+    if (checkInDate == null) return '';
+    
+    final checkInDayOfWeek = checkInDate!.weekday;
+    final dayName = _getDayName(checkInDayOfWeek);
+    int rate = widget.resort.price;
+    String rateType = 'Base Rate';
+    
+    if (widget.resort.dynamicPricing.isNotEmpty) {
+      if (checkInDayOfWeek == 6 || checkInDayOfWeek == 7) {
+        // Weekend
+        final weekendPrice = widget.resort.dynamicPricing.firstWhere(
+          (p) => p.dayType == 'weekend',
+          orElse: () => DynamicPricing(dayType: '', price: 0),
+        );
+        if (weekendPrice.price > 0) {
+          rate = weekendPrice.price;
+          rateType = 'Weekend Rate';
+        }
+      } else {
+        // Weekday
+        final weekdayPrice = widget.resort.dynamicPricing.firstWhere(
+          (p) => p.dayType == 'weekday',
+          orElse: () => DynamicPricing(dayType: '', price: 0),
+        );
+        if (weekdayPrice.price > 0) {
+          rate = weekdayPrice.price;
+          rateType = 'Weekday Rate';
+        }
+      }
+    }
+    
+    return '$dayName - ₹$rate/night ($rateType)';
   }
 
   void _openRazorpayPayment() {
@@ -258,6 +358,7 @@ class _BookingScreenState extends State<BookingScreen> {
       final checkIn = "${checkInDate!.year}-${checkInDate!.month.toString().padLeft(2, '0')}-${checkInDate!.day.toString().padLeft(2, '0')}";
       final checkOut = "${checkOutDate!.year}-${checkOutDate!.month.toString().padLeft(2, '0')}-${checkOutDate!.day.toString().padLeft(2, '0')}";
 
+      // Use _calculateTotalPrice which now includes dynamic pricing
       final totalPrice = _calculateTotalPrice();
 
       final bookingData = {
@@ -693,6 +794,36 @@ class _BookingScreenState extends State<BookingScreen> {
                         return null;
                       },
                     ),
+                    
+                    // Dynamic Pricing Indicator
+                    if (checkInDate != null && widget.resort.dynamicPricing.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green[300]!),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.check_circle, color: Colors.green[700], size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _getPricingInfo(),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.green[900],
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    
                     const SizedBox(height: 24),
 
                     // Price Summary
@@ -710,11 +841,11 @@ class _BookingScreenState extends State<BookingScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "₹${widget.resort.price} × $nights night${nights > 1 ? 's' : ''}",
+                                  "₹${(totalPrice - (totalPrice * 0.015).round()) ~/ nights} × $nights night${nights > 1 ? 's' : ''}",
                                   style: const TextStyle(fontSize: 16),
                                 ),
                                 Text(
-                                  "₹${widget.resort.price * nights}",
+                                  "₹${totalPrice - (totalPrice * 0.015).round()}",
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ],
@@ -728,7 +859,7 @@ class _BookingScreenState extends State<BookingScreen> {
                                   style: TextStyle(fontSize: 16),
                                 ),
                                 Text(
-                                  "₹${(widget.resort.price * nights * 0.015).round()}",
+                                  "₹${(totalPrice * 0.015).round()}",
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ],

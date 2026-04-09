@@ -29,6 +29,15 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
   @override
   void initState() {
     super.initState();
+    print('\n🏨 Booking modal opened for: ${widget.resort.name}');
+    print('   Base price: ₹${widget.resort.price}');
+    print('   Dynamic pricing entries: ${widget.resort.dynamicPricing.length}');
+    if (widget.resort.dynamicPricing.isNotEmpty) {
+      for (var pricing in widget.resort.dynamicPricing) {
+        print('      - ${pricing.dayType}: ₹${pricing.price}');
+      }
+    }
+    print('   👉 Select a check-in date to see dynamic pricing in action\n');
     _initializeRazorpay();
     _fetchRazorpayKey();
   }
@@ -84,6 +93,11 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
           checkOutDate = picked;
         }
       });
+      
+      // Trigger price calculation with logging
+      print('\n📅 Date selected - triggering price calculation');
+      final price = _calculateTotalPrice();
+      print('📊 UI will show: ₹$price\n');
     }
   }
 
@@ -96,9 +110,60 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
     if (checkInDate == null || checkOutDate == null) return 0;
     
     final nights = checkOutDate!.difference(checkInDate!).inDays;
-    final basePrice = widget.resort.price * nights;
+    final checkInDayOfWeek = checkInDate!.weekday; // 1=Monday, 7=Sunday
+    int nightlyRate = widget.resort.price;
+    
+    print('🔍 Calculating price for ${widget.resort.name}');
+    print('   Check-in day: $checkInDayOfWeek (${_getDayName(checkInDayOfWeek)})');
+    print('   Base price: ₹$nightlyRate');
+    print('   Dynamic pricing count: ${widget.resort.dynamicPricing.length}');
+    
+    // Apply dynamic pricing based on check-in date
+    if (widget.resort.dynamicPricing.isNotEmpty) {
+      // Monday-Friday (1-5) = weekday, Saturday-Sunday (6-7) = weekend
+      if (checkInDayOfWeek == 6 || checkInDayOfWeek == 7) {
+        // Weekend (Saturday=6, Sunday=7)
+        print('   ✅ Weekend detected');
+        final weekendPrice = widget.resort.dynamicPricing.firstWhere(
+          (p) => p.dayType == 'weekend',
+          orElse: () => DynamicPricing(dayType: '', price: 0),
+        );
+        if (weekendPrice.price > 0) {
+          nightlyRate = weekendPrice.price;
+          print('   ✅ Applied weekend rate: ₹$nightlyRate');
+        } else {
+          print('   ⚠️ Weekend price not found, using base rate');
+        }
+      } else {
+        // Weekday (Monday=1 to Friday=5)
+        print('   ✅ Weekday detected');
+        final weekdayPrice = widget.resort.dynamicPricing.firstWhere(
+          (p) => p.dayType == 'weekday',
+          orElse: () => DynamicPricing(dayType: '', price: 0),
+        );
+        if (weekdayPrice.price > 0) {
+          nightlyRate = weekdayPrice.price;
+          print('   ✅ Applied weekday rate: ₹$nightlyRate');
+        } else {
+          print('   ⚠️ Weekday price not found, using base rate');
+        }
+      }
+    } else {
+      print('   ⚠️ No dynamic pricing available');
+    }
+    
+    final basePrice = nightlyRate * nights;
     final platformFee = (basePrice * 0.015).round();
-    return basePrice + platformFee;
+    final total = basePrice + platformFee;
+    
+    print('   💰 Final: ₹$nightlyRate × $nights nights = ₹$basePrice + ₹$platformFee fee = ₹$total');
+    
+    return total;
+  }
+  
+  String _getDayName(int weekday) {
+    const days = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    return days[weekday];
   }
 
   void _openRazorpayPayment() {
