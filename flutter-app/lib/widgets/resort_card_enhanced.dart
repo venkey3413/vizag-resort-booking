@@ -336,7 +336,7 @@ class _ResortCardEnhancedState extends State<ResortCardEnhanced>
                                       children: [
                                         Text(
                                           widget.resort.dynamicPricing.isNotEmpty
-                                              ? 'From ₹${widget.resort.price.toStringAsFixed(0)}'
+                                              ? '₹${widget.resort.price.toStringAsFixed(0)}'
                                               : '₹${widget.resort.price.toStringAsFixed(0)}',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w900,

@@ -1452,3 +1452,226 @@ function viewEventDescription(id) {
     
     document.body.appendChild(modal);
 }
+
+
+// Notification Management
+document.addEventListener('DOMContentLoaded', function() {
+    loadNotificationStats();
+    loadNotificationHistory();
+    setupNotificationForm();
+    
+    setInterval(() => {
+        loadNotificationStats();
+        loadNotificationHistory();
+    }, 30000);
+});
+
+function setupNotificationForm() {
+    const titleInput = document.getElementById('notifTitle');
+    const bodyInput = document.getElementById('notifBody');
+    const form = document.getElementById('notificationForm');
+    const targetRadios = document.querySelectorAll('input[name="target"]');
+    
+    if (titleInput) {
+        titleInput.addEventListener('input', (e) => {
+            document.getElementById('titleCount').textContent = e.target.value.length;
+        });
+    }
+    
+    if (bodyInput) {
+        bodyInput.addEventListener('input', (e) => {
+            document.getElementById('bodyCount').textContent = e.target.value.length;
+        });
+    }
+    
+    targetRadios.forEach(radio => {
+        radio.addEventListener('change', updateTargetInput);
+    });
+    
+    if (form) {
+        form.addEventListener('submit', handleNotificationSubmit);
+    }
+}
+
+function updateTargetInput() {
+    const targetType = document.querySelector('input[name="target"]:checked').value;
+    const targetGroup = document.getElementById('targetValueGroup');
+    const targetLabel = document.getElementById('targetValueLabel');
+    const targetInput = document.getElementById('targetValue');
+    
+    if (targetType === 'all') {
+        targetGroup.style.display = 'none';
+        targetInput.required = false;
+    } else {
+        targetGroup.style.display = 'block';
+        targetInput.required = true;
+        
+        if (targetType === 'email') {
+            targetLabel.textContent = 'Email Address *';
+            targetInput.placeholder = 'user@example.com';
+            targetInput.type = 'email';
+        } else {
+            targetLabel.textContent = 'Phone Number *';
+            targetInput.placeholder = '+919876543210';
+            targetInput.type = 'tel';
+        }
+    }
+}
+
+async function handleNotificationSubmit(e) {
+    e.preventDefault();
+    
+    const title = document.getElementById('notifTitle').value;
+    const body = document.getElementById('notifBody').value;
+    const targetType = document.querySelector('input[name="target"]:checked').value;
+    const targetValue = document.getElementById('targetValue').value;
+    
+    const data = {
+        title,
+        body,
+        targetType,
+        sentBy: 'admin'
+    };
+    
+    if (targetType !== 'all') {
+        data.targetValue = targetValue;
+    }
+    
+    try {
+        const response = await fetch('/api/send-notification', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotificationAlert(`✅ Notification sent successfully! Delivered to ${result.result.successCount} devices.`, 'success');
+            document.getElementById('notificationForm').reset();
+            document.getElementById('titleCount').textContent = '0';
+            document.getElementById('bodyCount').textContent = '0';
+            updateTargetInput();
+            loadNotificationHistory();
+            loadNotificationStats();
+        } else {
+            showNotificationAlert('❌ Failed to send notification: ' + (result.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        showNotificationAlert('❌ Error sending notification: ' + error.message, 'error');
+    }
+}
+
+function showNotificationAlert(message, type) {
+    const alertContainer = document.getElementById('notificationAlert');
+    if (!alertContainer) return;
+    
+    const bgColor = type === 'success' ? '#dcfce7' : '#fee2e2';
+    const textColor = type === 'success' ? '#166534' : '#991b1b';
+    
+    alertContainer.innerHTML = `
+        <div style="background:${bgColor};color:${textColor};padding:12px;border-radius:6px;margin-bottom:1rem;">
+            ${message}
+        </div>
+    `;
+    
+    setTimeout(() => {
+        alertContainer.innerHTML = '';
+    }, 5000);
+}
+
+async function loadNotificationStats() {
+    try {
+        const tokensResponse = await fetch('/api/device-tokens');
+        const tokens = await tokensResponse.json();
+        const activeDevicesEl = document.getElementById('activeDevices');
+        if (activeDevicesEl) {
+            activeDevicesEl.textContent = tokens.length;
+        }
+        
+        const historyResponse = await fetch('/api/notification-history');
+        const history = await historyResponse.json();
+        
+        const today = new Date().toDateString();
+        const todayNotifications = history.filter(n => 
+            new Date(n.created_at).toDateString() === today
+        );
+        
+        const totalSent = todayNotifications.reduce((sum, n) => sum + n.sent_count, 0);
+        const totalSuccess = todayNotifications.reduce((sum, n) => sum + n.success_count, 0);
+        const successRate = totalSent > 0 ? Math.round((totalSuccess / totalSent) * 100) : 0;
+        
+        const totalSentEl = document.getElementById('totalSent');
+        const successRateEl = document.getElementById('successRate');
+        
+        if (totalSentEl) totalSentEl.textContent = totalSent;
+        if (successRateEl) successRateEl.textContent = successRate + '%';
+    } catch (error) {
+        console.error('Error loading notification stats:', error);
+    }
+}
+
+async function loadNotificationHistory() {
+    try {
+        const response = await fetch('/api/notification-history');
+        const history = await response.json();
+        
+        const container = document.getElementById('notificationHistory');
+        if (!container) return;
+        
+        if (history.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No notifications sent yet</p>';
+            return;
+        }
+        
+        container.innerHTML = history.slice(0, 10).map(item => {
+            const date = new Date(item.created_at).toLocaleString();
+            const successRate = item.sent_count > 0 
+                ? Math.round((item.success_count / item.sent_count) * 100) 
+                : 0;
+            
+            return `
+                <div class="history-item">
+                    <div class="history-title">${item.title}</div>
+                    <div class="history-body">${item.body}</div>
+                    <div class="history-meta">
+                        <span>🕒 ${date}</span>
+                        <span>📬 ${item.sent_count} sent</span>
+                        <span>✅ ${item.success_count} delivered</span>
+                        <span style="color:${successRate === 100 ? '#28a745' : '#ffc107'};font-weight:bold;">
+                            ${successRate}% success
+                        </span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading notification history:', error);
+    }
+}
+
+
+// Tab Navigation
+function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    const selectedTab = document.getElementById(tabName + 'Tab');
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}

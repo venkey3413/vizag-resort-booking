@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/resort.dart';
 import 'booking_screen_razorpay.dart';
+import 'debug_pricing_screen.dart';
 
 class DetailsScreen extends StatelessWidget {
   final Resort resort;
@@ -53,6 +54,21 @@ class DetailsScreen extends StatelessWidget {
         title: Text(resort.name),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
+        actions: [
+          // Debug button - remove in production
+          IconButton(
+            icon: const Icon(Icons.bug_report),
+            tooltip: 'Debug Pricing',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DynamicPricingDebugScreen(resort: resort),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

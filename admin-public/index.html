@@ -12,9 +12,17 @@
     <link rel="stylesheet" href="style.css?v=20250103021">
 </head>
 <body>
-
+    <div class="tab-navigation">
+        <button class="tab-btn active" onclick="switchTab('resorts')">🏨 Resorts</button>
+        <button class="tab-btn" onclick="switchTab('events')">🎉 Events</button>
+        <button class="tab-btn" onclick="switchTab('coupons')">🎟️ Coupons</button>
+        <button class="tab-btn" onclick="switchTab('owners')">👤 Owners</button>
+        <button class="tab-btn" onclick="switchTab('notifications')">📱 Push Notifications</button>
+    </div>
 
     <main class="container">
+        <!-- Resorts Tab -->
+        <div id="resortsTab" class="tab-content active">
         <section class="add-resort">
             <h2>Add New Resort</h2>
             <form id="resortForm">
@@ -190,7 +198,10 @@
                 <!-- Resorts will be loaded here -->
             </div>
         </section>
+        </div>
 
+        <!-- Events Tab -->
+        <div id="eventsTab" class="tab-content">
         <section class="add-event">
             <h2>Add New Event</h2>
             <form id="eventForm">
@@ -312,7 +323,10 @@
                 <!-- Events will be loaded here -->
             </div>
         </section>
+        </div>
 
+        <!-- Coupons Tab -->
+        <div id="couponsTab" class="tab-content">
         <section class="coupon-management">
             <h2>Coupon Management</h2>
             
@@ -364,7 +378,10 @@
                 </div>
             </div>
         </section>
+        </div>
 
+        <!-- Owners Tab -->
+        <div id="ownersTab" class="tab-content">
         <section class="owner-management">
             <h2>Owner Management</h2>
             <div class="owner-list">
@@ -374,6 +391,69 @@
                 </div>
             </div>
         </section>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div id="notificationsTab" class="tab-content">
+        <section class="notification-management">
+            <h2>📱 Push Notifications</h2>
+            
+            <div class="notification-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">📲</div>
+                    <div class="stat-label">Active Devices</div>
+                    <div class="stat-value" id="activeDevices">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📬</div>
+                    <div class="stat-label">Sent Today</div>
+                    <div class="stat-value" id="totalSent">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-label">Success Rate</div>
+                    <div class="stat-value" id="successRate">-</div>
+                </div>
+            </div>
+
+            <div class="notification-form">
+                <h3>Send New Notification</h3>
+                <div id="notificationAlert"></div>
+                <form id="notificationForm">
+                    <div class="form-group">
+                        <label for="notifTitle">Notification Title *</label>
+                        <input type="text" id="notifTitle" placeholder="e.g., Special Offer on Beach Resorts!" maxlength="100" required>
+                        <small><span id="titleCount">0</span>/100 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="notifBody">Message Body *</label>
+                        <textarea id="notifBody" rows="3" placeholder="Enter your notification message..." maxlength="200" required></textarea>
+                        <small><span id="bodyCount">0</span>/200 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Send To *</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="target" value="all" checked> All Users</label>
+                            <label><input type="radio" name="target" value="email"> Specific Email</label>
+                            <label><input type="radio" name="target" value="phone"> Specific Phone</label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="targetValueGroup" style="display:none;">
+                        <label id="targetValueLabel">Target Value</label>
+                        <input type="text" id="targetValue" placeholder="Enter email or phone">
+                    </div>
+                    <button type="submit">📤 Send Notification</button>
+                </form>
+            </div>
+
+            <div class="notification-history">
+                <h3>Recent Notifications</h3>
+                <div id="notificationHistory">
+                    <p style="text-align:center;color:#999;padding:20px;">No notifications sent yet</p>
+                </div>
+            </div>
+        </section>
+        </div>
     </main>
 
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>

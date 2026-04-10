@@ -110,7 +110,7 @@ class ResortCard extends StatelessWidget {
                           children: [
                             Text(
                               resort.dynamicPricing.isNotEmpty
-                                  ? "From ₹${resort.price.toStringAsFixed(0)}/night"
+                                  ? "₹${resort.price.toStringAsFixed(0)}/night"
                                   : "₹${resort.price.toStringAsFixed(0)}/night",
                               style: const TextStyle(
                                 fontSize: 18,

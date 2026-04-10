@@ -21,7 +21,7 @@ class ApiService {
 
   // Input validation helper
   static String sanitizeInput(String input) {
-    return input.trim().replaceAll(RegExp(r'[<>"\']'), '');
+    return input.trim().replaceAll(RegExp(r'[<>"]'), '');
   }
 
   // Email validation

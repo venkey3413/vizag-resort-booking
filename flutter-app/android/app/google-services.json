@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "471119677205",
+    "project_id": "vshakago-app",
+    "storage_bucket": "vshakago-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471119677205:android:40055761f649be486c0b1c",
+        "android_client_info": {
+          "package_name": "com.vizagresort.booking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDu3tL0uk_ZaM2NttJGtcg7gQHG2CCKrU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
