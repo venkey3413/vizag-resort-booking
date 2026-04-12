@@ -23,9 +23,9 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
-            scriptSrc: ["'self'", "https://checkout.razorpay.com", "https://cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "https://checkout.razorpay.com", "https://cdn.razorpay.com", "https://cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api.razorpay.com"],
+            connectSrc: ["'self'", "https://api.razorpay.com", "https://lumberjack.razorpay.com"],
             frameSrc: ["'self'", "https://api.razorpay.com"]
         }
     },
