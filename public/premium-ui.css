@@ -307,20 +307,24 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-hero-content h1{
-  font-size: 44px;
-  font-weight: 900;
-  letter-spacing:.3px;
-  text-shadow: 0 12px 30px rgba(0,0,0,.35);
-  color: #fff;
+  font-size: 44px !important;
+  font-weight: 900 !important;
+  letter-spacing:.3px !important;
+  text-shadow: 0 12px 30px rgba(0,0,0,.35) !important;
+  color: #ffffff !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-hero-content p{
-  margin-top: 10px;
-  font-size: 16px;
-  opacity: 1;
-  color: #fff;
-  text-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  font-weight: 600;
+  margin-top: 10px !important;
+  font-size: 18px !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  font-weight: 700 !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 /* Tabs */
@@ -690,19 +694,23 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-heading{
-  text-align:center;
-  font-size:28px;
-  font-weight:900;
-  color: #0f172a;
-  margin-bottom: 8px;
+  text-align:center !important;
+  font-size:32px !important;
+  font-weight:900 !important;
+  color: #0f172a !important;
+  margin-bottom: 12px !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-desc{
-  text-align:center;
-  margin-top:10px;
-  color: #475569;
-  font-weight:700;
-  font-size: 15px;
+  text-align:center !important;
+  margin-top:10px !important;
+  color: #1e293b !important;
+  font-weight:800 !important;
+  font-size: 16px !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-feature-grid{
@@ -740,16 +748,21 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-feature-card h3{
-  font-size:17px;
-  font-weight:900;
-  margin-bottom:8px;
+  font-size:18px !important;
+  font-weight:900 !important;
+  margin-bottom:8px !important;
+  color: #0f172a !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-feature-card p{
-  color: var(--muted);
-  font-weight:800;
-  line-height:1.6;
-  font-size:13px;
+  color: #475569 !important;
+  font-weight:700 !important;
+  line-height:1.6 !important;
+  font-size:14px !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 /* locations */
@@ -775,16 +788,21 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-location-card h3{
-  font-size:16px;
-  font-weight:900;
+  font-size:18px !important;
+  font-weight:900 !important;
+  color: #0f172a !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-location-card p{
-  margin-top:8px;
-  color: var(--muted);
-  font-weight:800;
-  font-size:13px;
-  line-height:1.6;
+  margin-top:8px !important;
+  color: #475569 !important;
+  font-weight:700 !important;
+  font-size:14px !important;
+  line-height:1.6 !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-mini-btn{
@@ -956,29 +974,37 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-footer h3{
-  font-size:22px;
-  font-weight:900;
-  color: #fff;
+  font-size:24px !important;
+  font-weight:900 !important;
+  color: #ffffff !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-footer p{
-  margin-top:10px;
-  opacity:1;
-  line-height:1.7;
-  color: rgba(255,255,255,0.9);
+  margin-top:10px !important;
+  opacity:1 !important;
+  line-height:1.7 !important;
+  color: #ffffff !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-footer h4{
-  font-weight:900;
-  margin-bottom:12px;
-  color: #fff;
+  font-weight:900 !important;
+  margin-bottom:12px !important;
+  color: #ffffff !important;
+  font-size: 18px !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .vrb-footer a{
-  display:block;
-  margin:8px 0;
-  color: rgba(207,230,255,.95);
-  font-weight:800;
+  display:block !important;
+  margin:8px 0 !important;
+  color: #ffffff !important;
+  font-weight:700 !important;
+  visibility: visible !important;
 }
 
 .vrb-footer a:hover{
