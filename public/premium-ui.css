@@ -311,12 +311,16 @@ img{ max-width:100%; display:block; }
   font-weight: 900;
   letter-spacing:.3px;
   text-shadow: 0 12px 30px rgba(0,0,0,.35);
+  color: #fff;
 }
 
 .vrb-hero-content p{
   margin-top: 10px;
   font-size: 16px;
-  opacity: .92;
+  opacity: 1;
+  color: #fff;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-weight: 600;
 }
 
 /* Tabs */
@@ -687,15 +691,18 @@ img{ max-width:100%; display:block; }
 
 .vrb-heading{
   text-align:center;
-  font-size:26px;
+  font-size:28px;
   font-weight:900;
+  color: #0f172a;
+  margin-bottom: 8px;
 }
 
 .vrb-desc{
   text-align:center;
   margin-top:10px;
-  color: var(--muted);
-  font-weight:800;
+  color: #475569;
+  font-weight:700;
+  font-size: 15px;
 }
 
 .vrb-feature-grid{
@@ -951,24 +958,27 @@ img{ max-width:100%; display:block; }
 .vrb-footer h3{
   font-size:22px;
   font-weight:900;
+  color: #fff;
 }
 
 .vrb-footer p{
   margin-top:10px;
-  opacity:.85;
+  opacity:1;
   line-height:1.7;
+  color: rgba(255,255,255,0.9);
 }
 
 .vrb-footer h4{
   font-weight:900;
   margin-bottom:12px;
+  color: #fff;
 }
 
 .vrb-footer a{
   display:block;
   margin:8px 0;
-  color: rgba(207,230,255,.92);
-  font-weight:900;
+  color: rgba(207,230,255,.95);
+  font-weight:800;
 }
 
 .vrb-footer a:hover{
@@ -1987,12 +1997,15 @@ button.book-now{
 }
 
 .logo-caption{
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
-  opacity: 0.9;
-  margin-top: -1px;
+  opacity: 1;
+  margin-top: 2px;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  white-space: nowrap;
 }
 
 /* ✅ Nav links Premium */
