@@ -1,0 +1,84 @@
+/* =========================================
+   CRITICAL TEXT VISIBILITY FIX
+   This file ensures all text is visible immediately
+========================================= */
+
+/* Force all text elements to be visible */
+h1, h2, h3, h4, h5, h6, p, span, div, a, button, label, input, textarea, select {
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: inherit !important;
+}
+
+/* Ensure headings are visible */
+.vrb-hero-content h1,
+.vrb-hero-content p,
+.vrb-title,
+.vrb-subtitle,
+.vrb-heading,
+.vrb-desc {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Fix animation class */
+.vrb-anim {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+
+/* Ensure footer text is visible */
+.vrb-footer h3,
+.vrb-footer h4,
+.vrb-footer p,
+.vrb-footer a {
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #ffffff !important;
+}
+
+/* Ensure feature cards text is visible */
+.vrb-feature-card h3,
+.vrb-feature-card p,
+.vrb-location-card h3,
+.vrb-location-card p {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Ensure resort card text is visible */
+.resort-card h3,
+.resort-card p,
+.resort-card .resort-location,
+.resort-card .resort-price {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Ensure navigation is visible */
+.vrb-nav-links,
+.vrb-nav-links a,
+.vrb-logo {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Remove any transforms that might hide content */
+* {
+  transform: none !important;
+}
+
+/* Re-enable necessary transforms */
+.vrb-card:hover,
+.resort-card:hover {
+  transform: translateY(-12px) scale(1.02) !important;
+}
+
+.vrb-btn:hover,
+.vrb-btn-primary:hover {
+  transform: translateY(-3px) scale(1.05) !important;
+}

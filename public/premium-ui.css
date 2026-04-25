@@ -1,4 +1,32 @@
 /* =========================================
+   CRITICAL FIX: ENSURE ALL TEXT IS VISIBLE
+========================================= */
+
+/* Force all headings and text to be visible */
+h1, h2, h3, h4, h5, h6, p, span, div, a, button {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Inline elements should stay inline */
+span, a, button {
+  display: inline !important;
+}
+
+/* Flex and grid containers */
+.vrb-nav-links, .vrb-nav-actions, .vrb-tabs, .vrb-search-box,
+.vrb-feature-grid, .vrb-location-grid, .vrb-grid {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.vrb-grid {
+  display: grid !important;
+}
+
+/* =========================================
    VIZAG RESORT BOOKING - PREMIUM UI V2
    Latest Modern Design with Glass Effects
 ========================================= */
@@ -1503,16 +1531,16 @@ img{ max-width:100%; display:block; }
   transform: translateY(0px) scale(1);
 }
 
-/* Scroll animations */
+/* Scroll animations - Fixed to show content immediately */
 .vrb-anim{
-  opacity: 0;
-  transform: translateY(50px);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .vrb-anim.animate{
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
 /* Button hover animations */
