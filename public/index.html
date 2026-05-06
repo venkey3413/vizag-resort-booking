@@ -21,14 +21,15 @@
     
     /* ✅ Partner Poster Styles */
     .poster {
-      width: 800px;
+      width: 900px;
       max-width: 100%;
-      background: #0a1628;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
       border-radius: 24px;
       overflow: hidden;
       position: relative;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.2);
       margin: 0 auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
 
     /* Ocean wave bg */
@@ -36,7 +37,7 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0; height: 420px;
-      background: linear-gradient(160deg, #0d3b6e 0%, #1a5fa8 40%, #0a7a5a 80%, #0a1628 100%);
+      background: linear-gradient(160deg, rgba(30,58,138,0.8) 0%, rgba(59,130,246,0.6) 40%, rgba(6,182,212,0.5) 80%, transparent 100%);
       z-index: 0;
     }
 
@@ -91,28 +92,31 @@
 
     .headline {
       font-family: 'Playfair Display', serif;
-      font-size: 54px;
+      font-size: 48px;
       font-weight: 900;
       color: #ffffff;
-      line-height: 1.05;
-      letter-spacing: -1.5px;
+      line-height: 1.1;
+      letter-spacing: -1px;
       margin-bottom: 10px;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
     .headline em {
       font-style: normal;
-      background: linear-gradient(90deg, #f5a623, #f5e642);
+      background: linear-gradient(90deg, #fbbf24, #fde047);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      text-shadow: none;
     }
 
     .subline {
-      font-size: 15px;
-      color: rgba(255,255,255,0.55);
-      font-weight: 300;
+      font-size: 16px;
+      color: rgba(255,255,255,0.95);
+      font-weight: 500;
       margin-top: 12px;
       line-height: 1.6;
-      max-width: 440px;
+      max-width: 500px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
     /* Offer highlight strip */
@@ -151,27 +155,29 @@
     .offer-icon.teal { background: rgba(20,200,140,0.12); }
 
     .offer-label {
-      font-size: 10px;
-      color: rgba(255,255,255,0.4);
+      font-size: 11px;
+      color: rgba(255,255,255,0.85);
       text-transform: uppercase;
       letter-spacing: 1.2px;
-      font-weight: 600;
+      font-weight: 700;
       margin-bottom: 3px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .offer-value {
       font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-weight: 700;
+      font-size: 28px;
+      font-weight: 800;
       color: #fff;
       line-height: 1;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
     .offer-value span {
-      font-size: 13px;
-      font-family: 'DM Sans', sans-serif;
-      color: rgba(255,255,255,0.5);
-      font-weight: 400;
+      font-size: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
       margin-left: 4px;
     }
 
@@ -236,18 +242,20 @@
     .fi-amber { background: rgba(185,117,23,0.3); }
 
     .feature-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.98);
       margin-bottom: 4px;
       letter-spacing: -0.2px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     .feature-desc {
-      font-size: 11px;
-      color: rgba(255,255,255,0.38);
+      font-size: 12px;
+      color: rgba(255,255,255,0.85);
       line-height: 1.5;
-      font-weight: 300;
+      font-weight: 500;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
     /* Comparison section */
@@ -259,12 +267,13 @@
     }
 
     .compare-label {
-      font-size: 10px;
-      color: rgba(255,255,255,0.3);
+      font-size: 11px;
+      color: rgba(255,255,255,0.9);
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      font-weight: 600;
+      font-weight: 700;
       margin-bottom: 12px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .compare-row {
@@ -294,24 +303,26 @@
     }
 
     .compare-name {
-      font-size: 11px;
-      color: rgba(255,255,255,0.45);
+      font-size: 12px;
+      color: rgba(255,255,255,0.85);
+      font-weight: 600;
     }
 
     .compare-item.highlight .compare-name {
-      color: #f5c842;
-      font-weight: 600;
+      color: #fbbf24;
+      font-weight: 800;
     }
 
     .compare-pct {
-      font-size: 14px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.35);
+      font-size: 15px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.8);
     }
 
     .compare-item.highlight .compare-pct {
-      color: #f5c842;
-      font-size: 16px;
+      color: #fbbf24;
+      font-size: 18px;
+      font-weight: 900;
     }
 
     /* CTA Footer */
@@ -659,16 +670,6 @@
             <h4>Anniversaries</h4>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ✅ FOOD -->
-  <section id="food" class="vrb-section">
-    <div class="vrb-container vrb-anim">
-      <div class="vrb-section-head">
-        <h2 class="vrb-title">Food Ordering</h2>
-        <p class="vrb-subtitle">Coming Soon - Pre-order meals for your resort stay</p>
       </div>
     </div>
   </section>
