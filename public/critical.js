@@ -2043,7 +2043,7 @@ function updateBookingModalToPayment(bookingData) {
                 
                 <div style="text-align:center;margin:15px 0;border-top:1px solid #ddd;padding-top:15px;">
                     <p style="margin-bottom:10px;font-weight:600;">Or Scan QR Code</p>
-                    <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
+                    <img src="qr-code.png.jpeg.png" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
                 </div>
                 <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
                 <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
