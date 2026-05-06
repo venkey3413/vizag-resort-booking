@@ -1,32 +1,4 @@
 /* =========================================
-   CRITICAL FIX: ENSURE ALL TEXT IS VISIBLE
-========================================= */
-
-/* Force all headings and text to be visible */
-h1, h2, h3, h4, h5, h6, p, span, div, a, button {
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: block !important;
-}
-
-/* Inline elements should stay inline */
-span, a, button {
-  display: inline !important;
-}
-
-/* Flex and grid containers */
-.vrb-nav-links, .vrb-nav-actions, .vrb-tabs, .vrb-search-box,
-.vrb-feature-grid, .vrb-location-grid, .vrb-grid {
-  display: flex !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-.vrb-grid {
-  display: grid !important;
-}
-
-/* =========================================
    VIZAG RESORT BOOKING - PREMIUM UI V2
    Latest Modern Design with Glass Effects
 ========================================= */
@@ -72,7 +44,7 @@ img{ max-width:100%; display:block; }
   margin: auto;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
@@ -87,7 +59,7 @@ img{ max-width:100%; display:block; }
   cursor: pointer;
   transition: all 0.3s ease;
   flex: 1;
-  min-width: 120px;
+  min-width: 150px;
   
   /* Glass effect */
   background: rgba(255,255,255,0.9);
@@ -144,7 +116,7 @@ img{ max-width:100%; display:block; }
   background: rgba(255,255,255,0.1);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255,255,255,0.2);
-  padding: 6px 0;
+  padding: 3px 0;
   box-shadow: 0 8px 32px rgba(0,0,0,0.1);
 }
 
@@ -153,23 +125,24 @@ img{ max-width:100%; display:block; }
   margin: auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 20px;
+  padding: 0 20px;
 }
 
 .vrb-logo{
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: #fff;
   font-weight: 800;
-  font-size: 20px;
+  font-size: 18px;
   text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .vrb-logo img{
-  width: 35px;
-  height: 35px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(255,255,255,0.3);
@@ -216,51 +189,7 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-nav-actions{
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.vrb-btn-nav{
-  background: linear-gradient(135deg, var(--accent), #ff8a65);
-  color: #fff;
-  font-weight: 700;
-  padding: 12px 20px;
-  border-radius: 25px;
-  box-shadow: 0 8px 25px rgba(255,107,53,0.4);
-  transition: all 0.3s ease;
-}
-
-.vrb-btn-nav:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(255,107,53,0.5);
-}
-
-.vrb-whatsapp{
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  font-weight: 600;
-  padding: 12px 18px;
-  border-radius: 25px;
-  border: 1px solid rgba(255,255,255,0.2);
-  transition: all 0.3s ease;
-}
-
-.vrb-whatsapp:hover{
-  background: rgba(255,255,255,0.25);
-  transform: translateY(-2px);
-}
-
-.vrb-hamburger{
   display: none;
-  border: none;
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  font-size: 20px;
-  padding: 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.2);
 }
 
 @media (max-width: 950px){
@@ -977,8 +906,8 @@ img{ max-width:100%; display:block; }
 ========================= */
 
 .vrb-footer{
-  padding: 60px 0 30px;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  padding: 75px 0 25px;
+  background: #050b18;
   color:#fff;
   position: relative;
   overflow:hidden;
@@ -989,151 +918,86 @@ img{ max-width:100%; display:block; }
   position:absolute;
   inset:0;
   background:
-    radial-gradient(circle at top left, rgba(102,126,234,0.15), transparent 50%),
-    radial-gradient(circle at bottom right, rgba(255,107,53,0.12), transparent 50%);
+    radial-gradient(circle at top left, rgba(26,163,255,.22), transparent 50%),
+    radial-gradient(circle at bottom right, rgba(255,111,0,.18), transparent 50%);
 }
 
-.vrb-footer-content{
+.vrb-footer-grid{
   display:grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap:50px;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap:30px;
   position: relative;
   z-index:2;
-  align-items: start;
-}
-
-.footer-main{
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
 .vrb-footer h3{
-  font-size:28px !important;
+  font-size:24px !important;
   font-weight:900 !important;
   color: #ffffff !important;
   display: block !important;
   visibility: visible !important;
-  margin-bottom: 10px !important;
-  background: linear-gradient(135deg, #fff, #e2e8f0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .vrb-footer p{
-  margin-top:0 !important;
+  margin-top:10px !important;
   opacity:1 !important;
   line-height:1.7 !important;
-  color: rgba(255,255,255,0.85) !important;
+  color: #ffffff !important;
   display: block !important;
   visibility: visible !important;
-  font-size: 15px !important;
-  font-weight: 500 !important;
 }
 
-.footer-support{
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px;
-  padding: 30px 25px;
-  backdrop-filter: blur(10px);
-}
-
-.footer-support h4{
+.vrb-footer h4{
   font-weight:900 !important;
-  margin-bottom:18px !important;
+  margin-bottom:12px !important;
   color: #ffffff !important;
   font-size: 18px !important;
   display: block !important;
   visibility: visible !important;
 }
 
-.footer-support a{
+.vrb-footer a{
   display:block !important;
-  margin:12px 0 !important;
-  color: rgba(255,255,255,0.85) !important;
-  font-weight:600 !important;
+  margin:8px 0 !important;
+  color: #ffffff !important;
+  font-weight:700 !important;
   visibility: visible !important;
-  font-size: 14px !important;
-  transition: all 0.3s ease !important;
-  padding: 8px 0;
 }
 
-.footer-support a:hover{
-  color:#fff !important;
-  transform: translateX(5px);
-  text-decoration: none;
+.vrb-footer a:hover{
+  color:#fff;
+  text-decoration: underline;
 }
 
 .vrb-footer-badges{
-  margin-top:15px;
+  margin-top:14px;
   display:flex;
   flex-wrap:wrap;
   gap:10px;
 }
 
 .vrb-footer-badges span{
-  font-weight:800;
+  font-weight:900;
   font-size:12px;
-  padding: 8px 14px;
-  border-radius:50px;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-}
-
-.footer-owner-btn{
-  margin-top: 20px;
-}
-
-.owner-dashboard-btn{
-  display: inline-flex !important;
-  align-items: center;
-  gap: 10px;
-  background: linear-gradient(135deg, #ff6f00, #ff9a3c) !important;
-  color: #fff !important;
-  padding: 14px 28px !important;
-  border-radius: 50px !important;
-  font-weight: 900 !important;
-  font-size: 15px !important;
-  text-decoration: none !important;
-  box-shadow: 0 10px 30px rgba(255,111,0,0.4) !important;
-  transition: all 0.3s ease !important;
-  border: none;
-}
-
-.owner-dashboard-btn:hover{
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 15px 40px rgba(255,111,0,0.5) !important;
-  color: #fff !important;
-}
-
-.owner-dashboard-btn .icon{
-  font-size: 20px;
+  padding: 8px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
 }
 
 .vrb-footer-bottom{
   width: min(1200px, 92%);
-  margin: 40px auto 0;
-  padding-top: 25px;
+  margin: 28px auto 0;
   text-align:center;
-  opacity:.7;
-  font-weight:700;
-  font-size:14px;
+  opacity:.65;
+  font-weight:800;
+  font-size:13px;
   position: relative;
   z-index:2;
-  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 @media(max-width:950px){
-  .vrb-footer-content{ 
-    grid-template-columns:1fr; 
-    gap: 40px;
-  }
-  
-  .footer-support{
-    padding: 25px 20px;
-  }
+  .vrb-footer-grid{ grid-template-columns:1fr; }
 }
 
 /* =========================
@@ -1596,16 +1460,16 @@ img{ max-width:100%; display:block; }
   transform: translateY(0px) scale(1);
 }
 
-/* Scroll animations - Fixed to show content immediately */
+/* Scroll animations */
 .vrb-anim{
-  opacity: 1 !important;
-  transform: translateY(0) !important;
+  opacity: 0;
+  transform: translateY(50px);
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .vrb-anim.animate{
-  opacity: 1 !important;
-  transform: translateY(0) !important;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Button hover animations */
@@ -2089,40 +1953,39 @@ button.book-now{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  min-height: 60px;
+  gap: 18px;
 }
 
 /* ✅ Logo + Brand */
 .vrb-logo{
   display:flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items:center;
-  gap: 12px;
+  gap: 2px;
   color: #fff;
   font-weight: 950;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 0.2px;
   text-decoration: none;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .vrb-logo img{
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 55px;
+  height: 55px;
+  border-radius: 18px;
   object-fit: cover;
   border: 2px solid rgba(255,255,255,0.35);
   box-shadow: 0 14px 30px rgba(0,0,0,0.24);
 }
 
 .logo-caption{
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   opacity: 1;
+  margin-top: 1px;
   color: #fff;
   text-shadow: 0 2px 8px rgba(0,0,0,0.3);
   white-space: nowrap;
@@ -2130,7 +1993,7 @@ button.book-now{
 
 /* ✅ Nav links Premium */
 .vrb-nav-links{
-  display:none;
+  display:flex;
   align-items:center;
   gap: 12px;
   padding: 6px;
@@ -2161,13 +2024,11 @@ button.book-now{
   box-shadow: 0 12px 22px rgba(0,0,0,0.14);
 }
 
-/* ✅ Right-side actions - FORCE TO RIGHT */
+/* ✅ Right-side actions */
 .vrb-nav-actions{
   display:flex;
   align-items:center;
   gap: 10px;
-  margin-left: auto;
-  flex-shrink: 0;
 }
 
 .vrb-whatsapp{
@@ -3443,141 +3304,65 @@ button[onclick*="Book"]:hover,
 }
 
 .vrb-coupon-card{
-  flex: 0 0 180px !important;
-  border-radius: 14px !important;
+  flex: 0 0 200px !important;
+  border-radius: 16px !important;
 }
 
 .vrb-coupon-img{
-  height: 80px !important;
+  height: 120px !important;
 }
 
 .vrb-coupon-body{
-  padding: 8px !important;
-}
-
-.vrb-coupon-body h3{
-  font-size: 12px !important;
-  margin-bottom: 4px !important;
-  line-height: 1.2 !important;
-}
-
-.vrb-coupon-day{
-  font-size: 9px !important;
-  margin-bottom: 6px !important;
-}
-
-.vrb-coupon-code{
-  padding: 8px !important;
-  border-radius: 12px !important;
-}
-
-.vrb-coupon-code .label{
-  font-size: 9px !important;
-  margin-bottom: 4px !important;
-}
-
-.vrb-coupon-code code{
-  font-size: 10px !important;
-  padding: 4px 8px !important;
-}
-
-.copy-btn{
-  padding: 4px 8px !important;
-  font-size: 9px !important;
-}
-
-.vrb-coupon-badge{
-  padding: 4px 8px !important;
-  font-size: 10px !important;
-  top: 8px !important;
-  left: 8px !important;
+  padding: 12px !important;
 }
 
 /* =========================================================
-   ✅ EVENTS SLIDER - HORIZONTAL SCROLLING WITH ROTATION
+   ✅ EVENTS SLIDER - MOVING LEFT TO RIGHT
 ========================================================= */
 
 .events-slider{
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   margin-top: 30px;
   padding: 20px 0;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(102,126,234,0.3) transparent;
-}
-
-.events-slider::-webkit-scrollbar{
-  height: 8px;
-}
-
-.events-slider::-webkit-scrollbar-track{
-  background: rgba(0,0,0,0.05);
-  border-radius: 4px;
-}
-
-.events-slider::-webkit-scrollbar-thumb{
-  background: rgba(102,126,234,0.3);
-  border-radius: 4px;
 }
 
 .events-track{
   display: flex;
-  gap: 15px;
+  gap: 30px;
+  animation: slideLeftRight 15s linear infinite;
   width: fit-content;
-  padding: 0 10px;
-  animation: slideEvents 20s linear infinite;
 }
 
-@keyframes slideEvents{
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.events-slider:hover .events-track{
-  animation-play-state: paused;
+@keyframes slideLeftRight{
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
 }
 
 .event-card{
-  flex: 0 0 150px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 14px;
-  padding: 0;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-  overflow: hidden;
-  transition: all 0.4s ease;
-  border: 1px solid rgba(15,23,42,0.08);
-  animation: rotateCard 3s ease-in-out infinite;
-}
-
-@keyframes rotateCard{
-  0%, 100% { transform: perspective(1000px) rotateY(0deg); }
-  50% { transform: perspective(1000px) rotateY(10deg); }
+  flex: 0 0 120px;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: transform 0.3s ease;
 }
 
 .event-card:hover{
-  transform: translateY(-8px) scale(1.05) !important;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-  animation: none;
+  transform: translateY(-3px);
 }
 
 .event-card img{
   width: 100%;
-  height: 100px;
+  height: 80px;
   object-fit: cover;
-  margin-bottom: 0;
-  transition: transform 0.3s ease;
-}
-
-.event-card:hover img{
-  transform: scale(1.1);
+  border-radius: 8px;
+  margin-bottom: 8px;
 }
 
 .event-card h4{
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   color: #0f172a;
   margin: 0;
-  padding: 10px 8px;
-  text-align: center;
-  line-height: 1.2;
 }
