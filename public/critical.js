@@ -1238,7 +1238,8 @@ function showPaymentInterface(bookingData){
             
             <div style="margin:20px 0;">
                 <div style="display:flex;margin-bottom:15px;">
-                    <button onclick="showCriticalPaymentMethod('upi')" id="upiTab" style="flex:1;padding:10px;border:2px solid #007bff;background:#007bff;color:white;border-radius:5px;cursor:pointer;">🔗 UPI Payment (Only Available)</button>
+                    <button onclick="showCriticalPaymentMethod('upi')" id="upiTab" style="flex:1;padding:10px;border:2px solid #007bff;background:#007bff;color:white;border-radius:5px 0 0 5px;cursor:pointer;">🔗 UPI Payment</button>
+                    <button onclick="showCriticalPaymentMethod('card')" id="cardTab" style="flex:1;padding:10px;border:2px solid #007bff;background:white;color:#007bff;border-radius:0 5px 5px 0;cursor:pointer;">💳 Card Payment</button>
                 </div>
                 
                 <div id="upiPayment" style="display:block;">
@@ -1246,10 +1247,18 @@ function showPaymentInterface(bookingData){
                     <div style="text-align:center;margin:15px 0;">
                         <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
                     </div>
-                    <p><strong>UPI ID:</strong> vshakago@ybl</p>
+                    <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
                     <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
                     <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" pattern="[0-9]{12}" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
                     <button onclick="confirmCriticalPayment()" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">✅ Confirm UPI Payment</button>
+                </div>
+                
+                <div id="cardPayment" style="display:none;">
+                    <h3>💳 Card Payment</h3>
+                    <p><strong>Base Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
+                    <p><strong>Transaction Fee (1.5%):</strong> ₹${Math.round(bookingData.totalPrice*0.015).toLocaleString()}</p>
+                    <p style="font-weight:bold;border-top:1px solid #ddd;padding-top:5px;margin-top:5px;"><strong>Total Card Payment:</strong> ₹${(bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015)).toLocaleString()}</p>
+                    <button onclick="payCriticalWithCard()" style="background:#6f42c1;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">💳 Pay ₹${(bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015)).toLocaleString()} with Card</button>
                 </div>
             </div>
             
@@ -1271,10 +1280,12 @@ function showPaymentInterface(bookingData){
     window.pendingCriticalBooking=bookingData;
     
     window.showCriticalPaymentMethod=function(method){
-        // Only UPI payment available now
-        document.getElementById('upiPayment').style.display='block';
-        document.getElementById('upiTab').style.background='#007bff';
-        document.getElementById('upiTab').style.color='white';
+        document.getElementById('upiPayment').style.display=method==='upi'?'block':'none';
+        document.getElementById('cardPayment').style.display=method==='card'?'block':'none';
+        document.getElementById('upiTab').style.background=method==='upi'?'#007bff':'white';
+        document.getElementById('upiTab').style.color=method==='upi'?'white':'#007bff';
+        document.getElementById('cardTab').style.background=method==='card'?'#007bff':'white';
+        document.getElementById('cardTab').style.color=method==='card'?'white':'#007bff';
     }
     
     window.confirmCriticalPayment=function(){
@@ -1340,8 +1351,79 @@ function showPaymentInterface(bookingData){
     }
     
     window.payCriticalWithCard=function(){
-        // Card payment temporarily disabled
-        showCriticalNotification('Card payment temporarily unavailable. Please use UPI payment.', 'error');
+        if(typeof Razorpay==='undefined'){
+            const script=document.createElement('script');
+            script.src='https://checkout.razorpay.com/v1/checkout.js';
+            script.onload=function(){setTimeout(window.payCriticalWithCard,500)};
+            script.onerror=function(){showCriticalNotification('Card payment service unavailable. Please use UPI.', 'error')};
+            document.head.appendChild(script);
+            return;
+        }
+        
+        const cardAmount=bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015);
+        const sanitizeInput=s=>s?String(s).replace(/[<>"'&\/]/g,''):'';
+        
+        fetch('/api/bookings',{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json',
+                'X-Requested-With':'XMLHttpRequest',
+                'X-CSRF-Token':getCSRFToken()
+            },
+            body:JSON.stringify({
+                resortId:parseInt(bookingData.resortId)||0,
+                guestName:sanitizeInput(bookingData.guestName).substring(0,100),
+                email:sanitizeInput(bookingData.email).substring(0,100),
+                phone:sanitizeInput(bookingData.phone).substring(0,20),
+                checkIn:sanitizeInput(bookingData.checkIn).substring(0,10),
+                checkOut:sanitizeInput(bookingData.checkOut).substring(0,10),
+                guests:Math.max(1,Math.min(20,parseInt(bookingData.guests)||2))
+            })
+        }).then(r=>r.json()).then(booking=>{
+            if(booking.error){
+                showCriticalNotification('Booking failed: '+booking.error, 'error');
+                return;
+            }
+            fetch('/api/razorpay-key').then(r=>r.json()).then(keyData=>{
+                if(!keyData.key){
+                    showCriticalNotification('Payment system not configured. Please use UPI.', 'error');
+                    return;
+                }
+                const options={
+                    key:keyData.key,
+                    amount:cardAmount*100,
+                    currency:'INR',
+                    name:'Vizag Resorts',
+                    description:'Resort Booking Payment',
+                    handler:function(response){
+                        fetch(`/api/bookings/${booking.id}/notify-card-payment`,{
+                            method:'POST',
+                            headers:{
+                                'Content-Type':'application/json',
+                                'X-Requested-With':'XMLHttpRequest'
+                            },
+                            body:JSON.stringify({paymentId:response.razorpay_payment_id})
+                        }).catch(e=>console.log('Notification failed'));
+                        showCriticalNotification('Card payment successful! You will be notified via email and WhatsApp.', 'success');
+                        paymentModal.remove();
+                        window.pendingCriticalBooking=null;
+                    },
+                    prefill:{
+                        name:bookingData.guestName,
+                        email:bookingData.email,
+                        contact:bookingData.phone
+                    },
+                    theme:{color:'#667eea'},
+                    modal:{
+                        ondismiss:function(){
+                            console.log('Payment cancelled');
+                        }
+                    }
+                };
+                const rzp=new Razorpay(options);
+                rzp.open();
+            }).catch(e=>showCriticalNotification('Payment configuration error. Please use UPI.', 'error'));
+        }).catch(e=>showCriticalNotification('Booking creation failed. Please try again.', 'error'));
     }
 }
 
@@ -1595,19 +1677,19 @@ const script=document.createElement('script');
 script.src='script.js?v=1.0.5';
 document.head.appendChild(script);
 
-// Preload Razorpay for card payments - TEMPORARILY DISABLED
-// window.loadRazorpay=function(){
-//     if(typeof Razorpay==='undefined'){
-//         const razorScript=document.createElement('script');
-//         razorScript.src='https://checkout.razorpay.com/v1/checkout.js';
-//         razorScript.async=true;
-//         razorScript.onerror=()=>console.log('Razorpay failed to load');
-//         document.head.appendChild(razorScript);
-//     }
-// };
+// Preload Razorpay for card payments
+window.loadRazorpay=function(){
+    if(typeof Razorpay==='undefined'){
+        const razorScript=document.createElement('script');
+        razorScript.src='https://checkout.razorpay.com/v1/checkout.js';
+        razorScript.async=true;
+        razorScript.onerror=()=>console.log('Razorpay failed to load');
+        document.head.appendChild(razorScript);
+    }
+};
 
-// Load Razorpay immediately - TEMPORARILY DISABLED
-// window.loadRazorpay();
+// Load Razorpay immediately
+window.loadRazorpay();
 
 // Review system functions
 window.openReviewModal = function(resortId, resortName) {
@@ -1944,7 +2026,8 @@ function updateBookingModalToPayment(bookingData) {
         
         <div style="margin:20px 0;">
             <div style="display:flex;margin-bottom:15px;">
-                <button onclick="showPaymentMethod('upi')" id="upiTab" style="flex:1;padding:10px;border:2px solid #007bff;background:#007bff;color:white;border-radius:5px;cursor:pointer;">🔗 UPI Payment (Only Available)</button>
+                <button onclick="showPaymentMethod('upi')" id="upiTab" style="flex:1;padding:10px;border:2px solid #007bff;background:#007bff;color:white;border-radius:5px 0 0 5px;cursor:pointer;">🔗 UPI Payment</button>
+                <button onclick="showPaymentMethod('card')" id="cardTab" style="flex:1;padding:10px;border:2px solid #007bff;background:white;color:#007bff;border-radius:0 5px 5px 0;cursor:pointer;">💳 Card Payment</button>
             </div>
             
             <div id="upiPayment" style="display:block;">
@@ -1952,10 +2035,18 @@ function updateBookingModalToPayment(bookingData) {
                 <div style="text-align:center;margin:15px 0;">
                     <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
                 </div>
-                <p><strong>UPI ID:</strong> vshakago@ybl</p>
+                <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
                 <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
                 <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" pattern="[0-9]{12}" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
                 <button onclick="confirmPayment()" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">✅ Confirm UPI Payment</button>
+            </div>
+            
+            <div id="cardPayment" style="display:none;">
+                <h3>💳 Card Payment</h3>
+                <p><strong>Base Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
+                <p><strong>Transaction Fee (1.5%):</strong> ₹${Math.round(bookingData.totalPrice*0.015).toLocaleString()}</p>
+                <p style="font-weight:bold;border-top:1px solid #ddd;padding-top:5px;margin-top:5px;"><strong>Total Card Payment:</strong> ₹${(bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015)).toLocaleString()}</p>
+                <button onclick="payWithCard()" style="background:#6f42c1;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">💳 Pay ₹${(bookingData.totalPrice+Math.round(bookingData.totalPrice*0.015)).toLocaleString()} with Card</button>
             </div>
         </div>
         
@@ -1965,10 +2056,12 @@ function updateBookingModalToPayment(bookingData) {
     window.pendingBooking = bookingData;
     
     window.showPaymentMethod = function(method) {
-        // Only UPI payment available now
-        document.getElementById('upiPayment').style.display = 'block';
-        document.getElementById('upiTab').style.background = '#007bff';
-        document.getElementById('upiTab').style.color = 'white';
+        document.getElementById('upiPayment').style.display = method === 'upi' ? 'block' : 'none';
+        document.getElementById('cardPayment').style.display = method === 'card' ? 'block' : 'none';
+        document.getElementById('upiTab').style.background = method === 'upi' ? '#007bff' : 'white';
+        document.getElementById('upiTab').style.color = method === 'upi' ? 'white' : '#007bff';
+        document.getElementById('cardTab').style.background = method === 'card' ? '#007bff' : 'white';
+        document.getElementById('cardTab').style.color = method === 'card' ? 'white' : '#007bff';
     };
     
     window.confirmPayment = function() {
@@ -2021,8 +2114,72 @@ function updateBookingModalToPayment(bookingData) {
     };
     
     window.payWithCard = function() {
-        // Card payment temporarily disabled
-        showCriticalNotification('Card payment temporarily unavailable. Please use UPI payment.', 'error');
+        // Card payment logic here - similar to existing implementation
+        if(typeof Razorpay==='undefined'){
+            const script=document.createElement('script');
+            script.src='https://checkout.razorpay.com/v1/checkout.js';
+            script.onload=function(){setTimeout(window.payWithCard,500)};
+            script.onerror=function(){showCriticalNotification('Card payment service unavailable. Please use UPI.', 'error')};
+            document.head.appendChild(script);
+            return;
+        }
+        
+        const cardAmount=window.pendingBooking.totalPrice+Math.round(window.pendingBooking.totalPrice*0.015);
+        
+        fetch('/api/bookings',{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json',
+                'X-Requested-With':'XMLHttpRequest',
+                'X-CSRF-Token':getCSRFToken()
+            },
+            body:JSON.stringify({
+                resortId:parseInt(window.pendingBooking.resortId)||0,
+                guestName:window.pendingBooking.guestName,
+                email:window.pendingBooking.email,
+                phone:window.pendingBooking.phone,
+                checkIn:window.pendingBooking.checkIn,
+                checkOut:window.pendingBooking.checkOut,
+                guests:window.pendingBooking.guests,
+                couponCode: window.pendingBooking.couponCode || null,
+                discountAmount: window.pendingBooking.discountAmount || 0
+            })
+        }).then(r=>r.json()).then(booking=>{
+            if(booking.error){
+                showCriticalNotification('Booking failed: '+booking.error, 'error');
+                return;
+            }
+            fetch('/api/razorpay-key').then(r=>r.json()).then(keyData=>{
+                if(!keyData.key){
+                    showCriticalNotification('Payment system not configured. Please use UPI.', 'error');
+                    return;
+                }
+                const options={
+                    key:keyData.key,
+                    amount:cardAmount*100,
+                    currency:'INR',
+                    name:'Vizag Resorts',
+                    description:'Resort Booking Payment',
+                    handler:function(response){
+                        showCriticalNotification('Card payment successful! You will be notified via email and WhatsApp.', 'success');
+                        closeBookingModal();
+                    },
+                    prefill:{
+                        name:window.pendingBooking.guestName,
+                        email:window.pendingBooking.email,
+                        contact:window.pendingBooking.phone
+                    },
+                    theme:{color:'#667eea'},
+                    modal:{
+                        ondismiss:function(){
+                            console.log('Payment cancelled');
+                        }
+                    }
+                };
+                const rzp=new Razorpay(options);
+                rzp.open();
+            }).catch(e=>showCriticalNotification('Payment configuration error. Please use UPI.', 'error'));
+        }).catch(e=>showCriticalNotification('Booking creation failed. Please try again.', 'error'));
     };
 }
 // ✅ Enhanced Hero search functionality with proper reset
