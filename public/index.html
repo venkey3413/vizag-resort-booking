@@ -927,6 +927,10 @@
         <span class="btn-badge">FREE</span>
       </a>
       
+      <button class="app-skip-btn" onclick="closeAppModal()">
+        Maybe Later
+      </button>
+      
       <div class="app-stats">
         <div class="stat-item">
           <div class="stat-value">500+</div>
@@ -1009,25 +1013,32 @@
       position: absolute;
       top: 18px;
       right: 18px;
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border: none;
-      background: rgba(0,0,0,0.05);
+      background: rgba(0,0,0,0.1);
       border-radius: 50%;
-      font-size: 20px;
+      font-size: 22px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.3s;
       color: #666;
-      font-weight: 300;
+      font-weight: bold;
+      z-index: 10001;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .app-close-btn:hover {
-      background: rgba(0,0,0,0.1);
+      background: rgba(220,53,69,0.1);
       transform: rotate(90deg) scale(1.1);
-      color: #333;
+      color: #dc3545;
+      box-shadow: 0 4px 12px rgba(220,53,69,0.2);
+    }
+    
+    .app-close-btn:active {
+      transform: rotate(90deg) scale(0.95);
     }
 
     .app-logo {
@@ -1129,6 +1140,27 @@
       transform: translateY(-3px);
       box-shadow: 0 12px 35px rgba(30, 95, 116, 0.45);
     }
+    
+    .app-skip-btn {
+      margin: 0 auto 20px;
+      display: block;
+      padding: 12px 24px;
+      background: transparent;
+      color: #6b7c8d;
+      border: 2px solid rgba(107, 124, 141, 0.2);
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .app-skip-btn:hover {
+      background: rgba(107, 124, 141, 0.1);
+      border-color: rgba(107, 124, 141, 0.4);
+      color: #164654;
+      transform: translateY(-1px);
+    }
 
     .btn-icon {
       font-size: 22px;
@@ -1223,26 +1255,67 @@
   <script src="critical.js"></script>
 
   <script>
-    // App Download Modal
+    // App Download Modal - Enhanced with proper closing
+    let appModalTimeout;
+    
     window.addEventListener('DOMContentLoaded', function() {
       const modal = document.getElementById('appDownloadModal');
       
+      // Check if user has already dismissed the modal today
+      const dismissedToday = localStorage.getItem('appModalDismissed');
+      const today = new Date().toDateString();
+      
+      if (dismissedToday === today) {
+        console.log('🚫 App modal already dismissed today');
+        return;
+      }
+      
       // Show modal on page load
       setTimeout(function() {
-        modal.style.display = 'flex';
+        if (modal) {
+          modal.style.display = 'flex';
+          console.log('📱 App modal displayed');
+        }
       }, 500);
       
-      // Auto-close after 5 seconds
-      setTimeout(function() {
+      // Auto-close after 8 seconds (increased time)
+      appModalTimeout = setTimeout(function() {
         closeAppModal();
-      }, 5500);
+      }, 8000);
     });
 
     function closeAppModal() {
+      console.log('🔄 Attempting to close app modal...');
       const modal = document.getElementById('appDownloadModal');
+      
+      if (!modal) {
+        console.log('❌ Modal element not found');
+        return;
+      }
+      
+      if (modal.style.display === 'none') {
+        console.log('ℹ️ Modal already closed');
+        return;
+      }
+      
+      console.log('✅ Closing modal...');
+      
+      // Clear any existing timeout
+      if (appModalTimeout) {
+        clearTimeout(appModalTimeout);
+        console.log('🕐 Cleared auto-close timeout');
+      }
+      
+      // Store dismissal in localStorage
+      const today = new Date().toDateString();
+      localStorage.setItem('appModalDismissed', today);
+      console.log('💾 Stored dismissal for today');
+      
       modal.style.animation = 'appFadeOut 0.3s ease';
       setTimeout(function() {
         modal.style.display = 'none';
+        modal.style.animation = ''; // Reset animation
+        console.log('✅ Modal closed successfully');
       }, 300);
     }
 
@@ -1261,7 +1334,22 @@
     // Close on Escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
-        closeAppModal();
+        const modal = document.getElementById('appDownloadModal');
+        if (modal && modal.style.display !== 'none') {
+          closeAppModal();
+        }
+      }
+    });
+    
+    // Ensure close button works
+    document.addEventListener('DOMContentLoaded', function() {
+      const closeBtn = document.querySelector('.app-close-btn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeAppModal();
+        });
       }
     });
   </script>
