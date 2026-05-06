@@ -753,7 +753,7 @@ app.post('/api/coupons', async (req, res) => {
 
 app.delete('/api/coupons/:code', async (req, res) => {
     try {
-        const response = await fetch(`${BOOKING_API_URL}/api/coupons/${req.params.code}`, {
+        const response = await fetch(`${DB_API_URL}/api/coupons/${req.params.code}`, {
             method: 'DELETE'
         });
         const data = await response.json();
