@@ -1246,7 +1246,7 @@ function showPaymentInterface(bookingData){
                     <div style="text-align:center;margin:15px 0;">
                         <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
                     </div>
-                    <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
+                    <p><strong>UPI ID:</strong> vshakago@ybl</p>
                     <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
                     <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" pattern="[0-9]{12}" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
                     <button onclick="confirmCriticalPayment()" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">✅ Confirm UPI Payment</button>
@@ -1952,7 +1952,7 @@ function updateBookingModalToPayment(bookingData) {
                 <div style="text-align:center;margin:15px 0;">
                     <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
                 </div>
-                <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
+                <p><strong>UPI ID:</strong> vshakago@ybl</p>
                 <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
                 <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" pattern="[0-9]{12}" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
                 <button onclick="confirmPayment()" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">✅ Confirm UPI Payment</button>
