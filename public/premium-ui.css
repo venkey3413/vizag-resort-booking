@@ -968,7 +968,7 @@ img{ max-width:100%; display:block; }
 .vrb-footer-grid{
   display:grid;
   grid-template-columns: 2fr 1fr 1fr;
-  gap:30px;
+  gap:40px;
   position: relative;
   z-index:2;
 }
@@ -979,20 +979,22 @@ img{ max-width:100%; display:block; }
   color: #ffffff !important;
   display: block !important;
   visibility: visible !important;
+  margin-bottom: 12px !important;
 }
 
 .vrb-footer p{
   margin-top:10px !important;
   opacity:1 !important;
   line-height:1.7 !important;
-  color: #ffffff !important;
+  color: rgba(255,255,255,0.9) !important;
   display: block !important;
   visibility: visible !important;
+  font-size: 15px !important;
 }
 
 .vrb-footer h4{
   font-weight:900 !important;
-  margin-bottom:12px !important;
+  margin-bottom:14px !important;
   color: #ffffff !important;
   font-size: 18px !important;
   display: block !important;
@@ -1002,14 +1004,17 @@ img{ max-width:100%; display:block; }
 .vrb-footer a{
   display:block !important;
   margin:8px 0 !important;
-  color: #ffffff !important;
+  color: rgba(255,255,255,0.85) !important;
   font-weight:700 !important;
   visibility: visible !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
 }
 
 .vrb-footer a:hover{
-  color:#fff;
+  color:#fff !important;
   text-decoration: underline;
+  transform: translateX(3px);
 }
 
 .vrb-footer-badges{
@@ -1040,7 +1045,10 @@ img{ max-width:100%; display:block; }
 }
 
 @media(max-width:950px){
-  .vrb-footer-grid{ grid-template-columns:1fr; }
+  .vrb-footer-grid{ 
+    grid-template-columns:1fr; 
+    gap: 30px;
+  }
 }
 
 /* =========================
