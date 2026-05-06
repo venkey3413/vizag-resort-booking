@@ -2032,7 +2032,17 @@ function updateBookingModalToPayment(bookingData) {
             
             <div id="upiPayment" style="display:block;">
                 <h3>🔗 UPI Payment</h3>
-                <div style="text-align:center;margin:15px 0;">
+                
+                <div style="margin:15px 0;">
+                    <h4 style="margin-bottom:10px;">Select Payment App</h4>
+                    <button onclick="payWithUpiApp('phonepe')" style="width:100%;padding:12px;margin:5px 0;background:#5f259f;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;font-weight:600;">📱 PhonePe</button>
+                    <button onclick="payWithUpiApp('gpay')" style="width:100%;padding:12px;margin:5px 0;background:#000;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;font-weight:600;">💳 Google Pay</button>
+                    <button onclick="payWithUpiApp('paytm')" style="width:100%;padding:12px;margin:5px 0;background:#00baf2;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;font-weight:600;">💰 Paytm</button>
+                    <p style="text-align:center;color:#666;font-size:13px;margin-top:10px;">You will be redirected to UPI app</p>
+                </div>
+                
+                <div style="text-align:center;margin:15px 0;border-top:1px solid #ddd;padding-top:15px;">
+                    <p style="margin-bottom:10px;font-weight:600;">Or Scan QR Code</p>
                     <img src="qr-code.png.jpeg" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
                 </div>
                 <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
@@ -2111,6 +2121,30 @@ function updateBookingModalToPayment(bookingData) {
             btn.textContent = '✅ Confirm UPI Payment';
             btn.disabled = false;
         });
+    };
+    
+    window.payWithUpiApp = function(app) {
+        const amount = window.pendingBooking.totalPrice;
+        const bookingRef = window.pendingBooking.bookingReference;
+        const upiId = 'vizagresorts@ybl';
+        const merchantName = 'VizagResorts';
+        
+        let upiUrl = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
+        
+        if (app === 'phonepe') {
+            upiUrl = `phonepe://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
+        } else if (app === 'gpay') {
+            upiUrl = `tez://upi/pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
+        } else if (app === 'paytm') {
+            upiUrl = `paytmmp://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
+        }
+        
+        window.location.href = upiUrl;
+        
+        setTimeout(() => {
+            const fallbackUrl = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
+            window.location.href = fallbackUrl;
+        }, 1500);
     };
     
     window.payWithCard = function() {
