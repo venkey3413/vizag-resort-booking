@@ -1126,11 +1126,8 @@ function showPaymentMethod(method) {
 }
 
 async function payWithRazorpay(bookingReference, amount, name, email, phone) {
-    // Use critical.js payment function
-    if (window.payCriticalWithCard && typeof window.payCriticalWithCard === 'function') {
-        return window.payCriticalWithCard();
-    }
-    alert('Payment system loading... Please try again.');
+    // Razorpay temporarily disabled
+    showNotification('Card payment temporarily unavailable. Please use UPI payment.', 'error');
 }
 
 async function notifyCardPaymentSuccess(bookingId, paymentId) {
