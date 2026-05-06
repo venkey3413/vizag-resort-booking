@@ -2004,7 +2004,8 @@ button.book-now{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  gap: 20px;
+  min-height: 60px;
 }
 
 /* ✅ Logo + Brand */
@@ -2015,23 +2016,24 @@ button.book-now{
   gap: 12px;
   color: #fff;
   font-weight: 950;
-  font-size: 16px;
+  font-size: 14px;
   letter-spacing: 0.2px;
   text-decoration: none;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .vrb-logo img{
-  width: 45px;
-  height: 45px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   object-fit: cover;
   border: 2px solid rgba(255,255,255,0.35);
   box-shadow: 0 14px 30px rgba(0,0,0,0.24);
 }
 
 .logo-caption{
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -2043,7 +2045,7 @@ button.book-now{
 
 /* ✅ Nav links Premium */
 .vrb-nav-links{
-  display:flex;
+  display:none;
   align-items:center;
   gap: 12px;
   padding: 6px;
@@ -2074,11 +2076,13 @@ button.book-now{
   box-shadow: 0 12px 22px rgba(0,0,0,0.14);
 }
 
-/* ✅ Right-side actions */
+/* ✅ Right-side actions - FORCE TO RIGHT */
 .vrb-nav-actions{
   display:flex;
   align-items:center;
   gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .vrb-whatsapp{
@@ -3354,40 +3358,54 @@ button[onclick*="Book"]:hover,
 }
 
 .vrb-coupon-card{
-  flex: 0 0 240px !important;
-  border-radius: 16px !important;
+  flex: 0 0 180px !important;
+  border-radius: 14px !important;
 }
 
 .vrb-coupon-img{
-  height: 100px !important;
+  height: 80px !important;
 }
 
 .vrb-coupon-body{
-  padding: 10px !important;
+  padding: 8px !important;
 }
 
 .vrb-coupon-body h3{
-  font-size: 14px !important;
-  margin-bottom: 6px !important;
+  font-size: 12px !important;
+  margin-bottom: 4px !important;
+  line-height: 1.2 !important;
 }
 
 .vrb-coupon-day{
-  font-size: 11px !important;
-  margin-bottom: 8px !important;
+  font-size: 9px !important;
+  margin-bottom: 6px !important;
 }
 
 .vrb-coupon-code{
-  padding: 10px !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+}
+
+.vrb-coupon-code .label{
+  font-size: 9px !important;
+  margin-bottom: 4px !important;
 }
 
 .vrb-coupon-code code{
-  font-size: 12px !important;
-  padding: 6px 10px !important;
+  font-size: 10px !important;
+  padding: 4px 8px !important;
 }
 
 .copy-btn{
-  padding: 6px 10px !important;
-  font-size: 11px !important;
+  padding: 4px 8px !important;
+  font-size: 9px !important;
+}
+
+.vrb-coupon-badge{
+  padding: 4px 8px !important;
+  font-size: 10px !important;
+  top: 8px !important;
+  left: 8px !important;
 }
 
 /* =========================================================
