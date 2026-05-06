@@ -2126,25 +2126,13 @@ function updateBookingModalToPayment(bookingData) {
     window.payWithUpiApp = function(app) {
         const amount = window.pendingBooking.totalPrice;
         const bookingRef = window.pendingBooking.bookingReference;
-        const upiId = 'vizagresorts@ybl';
-        const merchantName = 'VizagResorts';
+        const upiId = 'vshakago@ybl';
+        const merchantName = 'VshakaGo';
         
-        let upiUrl = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
-        
-        if (app === 'phonepe') {
-            upiUrl = `phonepe://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
-        } else if (app === 'gpay') {
-            upiUrl = `tez://upi/pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
-        } else if (app === 'paytm') {
-            upiUrl = `paytmmp://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
-        }
+        // Always use standard UPI link - works with all UPI apps
+        const upiUrl = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
         
         window.location.href = upiUrl;
-        
-        setTimeout(() => {
-            const fallbackUrl = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${amount}&cu=INR&tn=${bookingRef}`;
-            window.location.href = fallbackUrl;
-        }, 1500);
     };
     
     window.payWithCard = function() {

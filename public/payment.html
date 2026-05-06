@@ -192,29 +192,11 @@ function pay(app) {
   const amount = bookingData.amount;
   const bookingId = bookingData.bookingId;
 
-  const baseUPI = `upi://pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR&tn=${bookingId}`;
-
-  let url = baseUPI;
-
-  if (app === "phonepe") {
-    url = `phonepe://pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR&tn=${bookingId}`;
-  }
-
-  if (app === "gpay") {
-    url = `tez://upi/pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR&tn=${bookingId}`;
-  }
-
-  if (app === "paytm") {
-    url = `paytmmp://pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR&tn=${bookingId}`;
-  }
+  // Always use standard UPI link - works with all UPI apps
+  const url = `upi://pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR&tn=${bookingId}`;
 
   // Redirect
   window.location.href = url;
-
-  // fallback
-  setTimeout(() => {
-    window.location.href = baseUPI;
-  }, 1500);
 }
 
 
