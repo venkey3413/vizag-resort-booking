@@ -2045,7 +2045,7 @@ function updateBookingModalToPayment(bookingData) {
                     <p style="margin-bottom:10px;font-weight:600;">Or Scan QR Code</p>
                     <img src="qr-code.png.jpeg.png" alt="UPI QR Code" style="max-width:200px;height:auto;border:1px solid #ddd;border-radius:8px;">
                 </div>
-                <p><strong>UPI ID:</strong> vizagresorts@ybl</p>
+                <p><strong>UPI ID:</strong> vshakago@ybl</p>
                 <p><strong>Amount:</strong> ₹${bookingData.totalPrice.toLocaleString()}</p>
                 <input type="text" placeholder="Enter 12-digit UTR" id="utrInput" maxlength="12" pattern="[0-9]{12}" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;">
                 <button onclick="confirmPayment()" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:5px;cursor:pointer;width:100%;margin:10px 0;">✅ Confirm UPI Payment</button>
@@ -2124,7 +2124,7 @@ function updateBookingModalToPayment(bookingData) {
     };
     
     window.payWithUpiApp = function(app) {
-        const amount = window.pendingBooking.totalPrice;
+        const amount = Math.floor(window.pendingBooking.totalPrice); // Ensure integer
         const bookingRef = window.pendingBooking.bookingReference;
         const upiId = 'vshakago@ybl';
         const merchantName = 'VshakaGo';

@@ -189,7 +189,7 @@ document.getElementById("qrAmount").innerText = bookingData.amount;
 // ==========================
 function pay(app) {
 
-  const amount = bookingData.amount;
+  const amount = Math.floor(bookingData.amount); // Ensure integer
   const bookingId = bookingData.bookingId;
 
   // Always use standard UPI link - works with all UPI apps
