@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Scroll-triggered animation observer */
+.vrb-anim {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.vrb-anim.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fix body overflow from premium-ui */
+body {
+  background: #fff !important;
+  overflow-x: hidden;
+}
+
+/* Smooth card hover */
+.vrb-card:hover {
+  transform: translateY(-10px) scale(1.01) !important;
+}
+
+/* Portfolio dark card hover */
+section .vrb-card:hover {
+  box-shadow: 0 30px 80px rgba(0,0,0,0.25) !important;
+}
+
