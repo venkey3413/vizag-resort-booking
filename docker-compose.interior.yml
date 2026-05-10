@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  interior-service:
+    build: ./interior-service
+    ports:
+      - "3006:3006"
+    volumes:
+      - ./interior-service:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
