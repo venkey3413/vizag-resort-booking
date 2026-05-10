@@ -14,7 +14,7 @@ const BOT_REPLIES: Record<string, string> = {
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { from: 'bot', text: 'Hello! Welcome to Luxe Interiors. I\'m here to help you create your dream space. How can I assist you today?' },
+    { from: 'bot', text: 'Hello! Welcome to Interiors. I\'m here to help you create your dream space. How can I assist you today?' },
   ]);
   const [input, setInput] = useState('');
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -43,7 +43,7 @@ export default function ChatWidget() {
           <div className="vrb-chat-title">
             <img src="https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=60" alt="designer" />
             <div>
-              <h4>Luxe Design Assistant</h4>
+              <h4>Design Assistant</h4>
               <p className="chat-status">● Online now</p>
             </div>
           </div>

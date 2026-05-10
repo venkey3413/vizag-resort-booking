@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="vrb-container">
         <div className="vrb-footer-grid">
           <div>
-            <h3>Luxe Interiors</h3>
+            <h3>Interiors</h3>
             <p>
               Award-winning interior design studio crafting bespoke living and working environments for discerning clients worldwide since 2009.
             </p>
@@ -49,12 +49,12 @@ export default function Footer() {
             ))}
             <h4 style={{ marginTop: 24 }}>Contact</h4>
             <a href="tel:+12125558899">+1 (212) 555-8899</a>
-            <a href="mailto:hello@luxeinteriors.com">hello@luxeinteriors.com</a>
+            <a href="mailto:hello@interiors.com">hello@interiors.com</a>
           </div>
         </div>
       </div>
       <div className="vrb-footer-bottom">
-        © {new Date().getFullYear()} Luxe Interiors Studio. All rights reserved. · Privacy Policy · Terms of Service
+        © {new Date().getFullYear()} Interiors Studio. All rights reserved. · Privacy Policy · Terms of Service
       </div>
     </footer>
   );

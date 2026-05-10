@@ -29,7 +29,7 @@ export default function Contact() {
               {[
                 ['📍', 'Studio Address', '432 Park Avenue, Suite 1800, New York, NY 10022'],
                 ['📞', 'Phone', '+1 (212) 555-8899'],
-                ['✉️', 'Email', 'hello@luxeinteriors.com'],
+                ['✉️', 'Email', 'hello@interiors.com'],
                 ['🕐', 'Hours', 'Mon–Fri: 9am–7pm · Sat: 10am–5pm'],
               ].map(([icon, label, value]) => (
                 <div key={label} style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
