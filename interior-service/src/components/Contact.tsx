@@ -17,36 +17,9 @@ export default function Contact() {
           <p className="vrb-subtitle">Book a free 30-minute consultation with one of our senior designers</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 40, marginTop: 50, alignItems: 'start' }}>
-          {/* Left info */}
-          <div className="vrb-anim">
-            <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 24, padding: 36, boxShadow: '0 20px 60px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ fontSize: 26, fontWeight: 900, marginBottom: 16, color: '#0f172a' }}>Let's Create Something Extraordinary</h3>
-              <p style={{ color: '#475569', lineHeight: 1.7, marginBottom: 28 }}>
-                Whether you're starting from scratch or refreshing an existing space, our team is ready to bring your vision to life with precision and artistry.
-              </p>
-
-              {[
-                ['📍', 'Studio Address', '432 Park Avenue, Suite 1800, New York, NY 10022'],
-                ['📞', 'Phone', '+1 (212) 555-8899'],
-                ['✉️', 'Email', 'hello@interiors.com'],
-                ['🕐', 'Hours', 'Mon–Fri: 9am–7pm · Sat: 10am–5pm'],
-              ].map(([icon, label, value]) => (
-                <div key={label} style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,111,0,0.1)', border: '1px solid rgba(255,111,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-                    {icon}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1 }}>{label}</div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginTop: 2 }}>{value}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
           {/* Form */}
-          <div className="vrb-anim">
+          <div className="vrb-anim" style={{ maxWidth: '600px', width: '100%' }}>
             <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: 24, padding: 36, boxShadow: '0 20px 60px rgba(0,0,0,0.1)' }}>
               {submitted ? (
                 <div style={{ textAlign: 'center', padding: '40px 0' }}>
