@@ -10,20 +10,22 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ padding: '60px 6%', background: 'linear-gradient(135deg,#f8f2ff,#f4ecff)' }}>
+    <section id="contact" style={{ padding: '40px 5%', background: 'linear-gradient(135deg,#f8f2ff,#f4ecff)' }}>
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1.2fr 0.9fr',
+        gridTemplateColumns: '1fr 1fr',
         background: '#fff',
-        borderRadius: '28px',
+        borderRadius: '24px',
         overflow: 'hidden',
         boxShadow: '0 20px 60px rgba(125,87,175,.12)',
-        maxWidth: '1200px',
-        margin: 'auto'
+        maxWidth: '1100px',
+        margin: 'auto',
+        height: '85vh',
+        maxHeight: '650px'
       }}>
         
         {/* LEFT IMAGE AREA */}
-        <div style={{ position: 'relative', minHeight: '700px' }}>
+        <div style={{ position: 'relative', height: '100%' }}>
           <img
             src="https://raw.githubusercontent.com/venkey3413/vizag-resort-booking/main/interior-service/wooden_luxury_interior_only.png"
             alt="Luxury Interior"
@@ -38,42 +40,42 @@ export default function Contact() {
           {/* FEATURES */}
           <div style={{
             position: 'absolute',
-            bottom: '30px',
-            left: '30px',
-            right: '30px',
+            bottom: '20px',
+            left: '20px',
+            right: '20px',
             zIndex: 2,
             background: 'rgba(255,255,255,.88)',
             backdropFilter: 'blur(10px)',
-            borderRadius: '22px',
+            borderRadius: '18px',
             display: 'grid',
             gridTemplateColumns: 'repeat(3,1fr)',
-            gap: '16px',
-            padding: '22px',
+            gap: '12px',
+            padding: '16px',
           }}>
             {[
-              { icon: '🪑', title: 'Expert Designers', desc: 'Luxury interiors crafted with precision.' },
-              { icon: '✨', title: 'Personalized Ideas', desc: 'Tailored concepts matching your vision.' },
-              { icon: '🏆', title: 'Premium Quality', desc: 'High-end wooden finishes & décor.' },
+              { icon: '🪑', title: 'Expert Designers', desc: 'Luxury interiors crafted.' },
+              { icon: '✨', title: 'Personalized Ideas', desc: 'Tailored concepts.' },
+              { icon: '🏆', title: 'Premium Quality', desc: 'High-end finishes.' },
             ].map((feature, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{
-                  width: '60px',
-                  height: '60px',
+                  width: '50px',
+                  height: '50px',
                   margin: 'auto',
-                  marginBottom: '14px',
+                  marginBottom: '10px',
                   borderRadius: '50%',
                   border: '2px solid #8a45d1',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '24px',
+                  fontSize: '20px',
                   color: '#8a45d1',
                   background: '#f8f2ff',
                 }}>
                   {feature.icon}
                 </div>
-                <h4 style={{ fontSize: '17px', color: '#4b2367', marginBottom: '8px' }}>{feature.title}</h4>
-                <p style={{ color: '#666', lineHeight: 1.6, fontSize: '13px' }}>{feature.desc}</p>
+                <h4 style={{ fontSize: '14px', color: '#4b2367', marginBottom: '6px', fontWeight: 700 }}>{feature.title}</h4>
+                <p style={{ color: '#666', lineHeight: 1.5, fontSize: '11px' }}>{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -81,151 +83,93 @@ export default function Contact() {
 
         {/* RIGHT FORM AREA */}
         <div style={{
-          padding: '50px 45px',
+          padding: '30px 35px',
           background: 'linear-gradient(180deg,#f9f5ff,#f5effd)',
           position: 'relative',
+          height: '100%',
+          overflowY: 'auto'
         }}>
           {submitted ? (
-            <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <div style={{ fontSize: 56, marginBottom: 14 }}>✅</div>
-              <h3 style={{ fontSize: 28, fontWeight: 900, marginBottom: 10, color: '#5f238b' }}>Thank You!</h3>
-              <p style={{ color: '#555', fontSize: 16 }}>We've received your inquiry. Our design expert will reach out within 24 hours.</p>
+            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+              <h3 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8, color: '#5f238b' }}>Thank You!</h3>
+              <p style={{ color: '#555', fontSize: 14 }}>We've received your inquiry. Our design expert will reach out within 24 hours.</p>
             </div>
           ) : (
             <>
-              <div style={{ textAlign: 'center', marginBottom: '35px', position: 'relative', zIndex: 2 }}>
-                <span style={{ color: '#b07a2d', letterSpacing: '3px', fontSize: '13px', fontWeight: 600 }}>
+              <div style={{ textAlign: 'center', marginBottom: '20px', position: 'relative', zIndex: 2 }}>
+                <span style={{ color: '#b07a2d', letterSpacing: '2px', fontSize: '11px', fontWeight: 600 }}>
                   BOOK FREE
                 </span>
                 <h2 style={{
-                  fontSize: '62px',
+                  fontSize: '42px',
                   lineHeight: 1,
-                  margin: '16px 0',
+                  margin: '10px 0',
                   color: '#5f238b',
                   fontFamily: 'Playfair Display, serif',
                 }}>
                   Consultation
                 </h2>
-                <p style={{ color: '#555', lineHeight: 1.8, fontSize: '16px' }}>
-                  Share your requirements and our design experts will get in touch with you.
+                <p style={{ color: '#555', lineHeight: 1.5, fontSize: '12px' }}>
+                  Share your requirements and our design experts will get in touch.
                 </p>
               </div>
 
               <form onSubmit={handle} style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{
-                  height: '78px',
-                  background: '#fff',
-                  border: '1.5px solid #e4d9f5',
-                  borderRadius: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '24px',
-                  padding: '0 25px',
-                  transition: '.3s',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#9b5fe0'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e4d9f5'}
-                >
-                  <span style={{ fontSize: '24px', marginRight: '18px', color: '#7f4ca5' }}>👤</span>
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    required
-                    style={{
-                      width: '100%',
-                      border: 'none',
-                      outline: 'none',
-                      background: 'transparent',
-                      fontSize: '18px',
-                      color: '#444',
-                      fontFamily: 'Poppins, sans-serif',
-                    }}
-                  />
-                </div>
+                {[
+                  { icon: '👤', type: 'text', placeholder: 'Your Name', field: 'name' },
+                  { icon: '✉️', type: 'email', placeholder: 'Email Address', field: 'email' },
+                  { icon: '📞', type: 'text', placeholder: 'Phone Number', field: 'phone' },
+                ].map((input, i) => (
+                  <div key={i} style={{
+                    height: '55px',
+                    background: '#fff',
+                    border: '1.5px solid #e4d9f5',
+                    borderRadius: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '16px',
+                    padding: '0 18px',
+                    transition: '.3s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#9b5fe0'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e4d9f5'}
+                  >
+                    <span style={{ fontSize: '20px', marginRight: '14px', color: '#7f4ca5' }}>{input.icon}</span>
+                    <input
+                      type={input.type}
+                      placeholder={input.placeholder}
+                      value={form[input.field as keyof typeof form] as string}
+                      onChange={(e) => setForm({ ...form, [input.field]: e.target.value })}
+                      required
+                      style={{
+                        width: '100%',
+                        border: 'none',
+                        outline: 'none',
+                        background: 'transparent',
+                        fontSize: '15px',
+                        color: '#444',
+                        fontFamily: 'Poppins, sans-serif',
+                      }}
+                    />
+                  </div>
+                ))}
 
                 <div style={{
-                  height: '78px',
+                  height: '55px',
                   background: '#fff',
                   border: '1.5px solid #e4d9f5',
-                  borderRadius: '18px',
+                  borderRadius: '14px',
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: '24px',
-                  padding: '0 25px',
+                  marginBottom: '16px',
+                  padding: '0 18px',
                   transition: '.3s',
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = '#9b5fe0'}
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e4d9f5'}
                 >
-                  <span style={{ fontSize: '24px', marginRight: '18px', color: '#7f4ca5' }}>✉️</span>
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    required
-                    style={{
-                      width: '100%',
-                      border: 'none',
-                      outline: 'none',
-                      background: 'transparent',
-                      fontSize: '18px',
-                      color: '#444',
-                      fontFamily: 'Poppins, sans-serif',
-                    }}
-                  />
-                </div>
-
-                <div style={{
-                  height: '78px',
-                  background: '#fff',
-                  border: '1.5px solid #e4d9f5',
-                  borderRadius: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '24px',
-                  padding: '0 25px',
-                  transition: '.3s',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#9b5fe0'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e4d9f5'}
-                >
-                  <span style={{ fontSize: '24px', marginRight: '18px', color: '#7f4ca5' }}>📞</span>
-                  <input
-                    type="text"
-                    placeholder="Phone Number"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    required
-                    style={{
-                      width: '100%',
-                      border: 'none',
-                      outline: 'none',
-                      background: 'transparent',
-                      fontSize: '18px',
-                      color: '#444',
-                      fontFamily: 'Poppins, sans-serif',
-                    }}
-                  />
-                </div>
-
-                <div style={{
-                  height: '78px',
-                  background: '#fff',
-                  border: '1.5px solid #e4d9f5',
-                  borderRadius: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '24px',
-                  padding: '0 25px',
-                  transition: '.3s',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#9b5fe0'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e4d9f5'}
-                >
-                  <span style={{ fontSize: '24px', marginRight: '18px', color: '#7f4ca5' }}>📍</span>
+                  <span style={{ fontSize: '20px', marginRight: '14px', color: '#7f4ca5' }}>📍</span>
                   <select
                     value={form.city}
                     onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -235,7 +179,7 @@ export default function Contact() {
                       border: 'none',
                       outline: 'none',
                       background: 'transparent',
-                      fontSize: '18px',
+                      fontSize: '15px',
                       color: '#444',
                       fontFamily: 'Poppins, sans-serif',
                     }}
@@ -251,17 +195,17 @@ export default function Contact() {
                 <label style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  margin: '15px 0 35px',
+                  gap: '10px',
+                  margin: '12px 0 20px',
                   color: '#444',
-                  fontSize: '16px',
+                  fontSize: '13px',
                   cursor: 'pointer',
                 }}>
                   <input
                     type="checkbox"
                     checked={form.whatsapp}
                     onChange={(e) => setForm({ ...form, whatsapp: e.target.checked })}
-                    style={{ width: '20px', height: '20px', accentColor: '#7b2cbf' }}
+                    style={{ width: '18px', height: '18px', accentColor: '#7b2cbf' }}
                   />
                   <span>Send me updates on WhatsApp</span>
                 </label>
@@ -270,12 +214,12 @@ export default function Contact() {
                   type="submit"
                   style={{
                     width: '100%',
-                    height: '76px',
+                    height: '56px',
                     border: 'none',
-                    borderRadius: '18px',
+                    borderRadius: '14px',
                     background: 'linear-gradient(135deg,#7b2cbf,#5a189a)',
                     color: 'white',
-                    fontSize: '20px',
+                    fontSize: '16px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: '.4s',
@@ -294,11 +238,11 @@ export default function Contact() {
                 </button>
 
                 <p style={{
-                  marginTop: '25px',
+                  marginTop: '16px',
                   textAlign: 'center',
                   color: '#777',
-                  fontSize: '14px',
-                  lineHeight: 1.8,
+                  fontSize: '11px',
+                  lineHeight: 1.6,
                 }}>
                   We respect your privacy. Your information is safe with us.
                 </p>
