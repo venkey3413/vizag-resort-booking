@@ -23,7 +23,7 @@ export default function Contact() {
         {/* LEFT IMAGE AREA */}
         <div style={{ position: 'relative', minHeight: '850px' }}>
           <img
-            src="/wooden_luxury_interior_only.png"
+            src="https://raw.githubusercontent.com/venkey3413/vizag-resort-booking/main/interior-service/wooden_luxury_interior_only.png"
             alt="Luxury Interior"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
