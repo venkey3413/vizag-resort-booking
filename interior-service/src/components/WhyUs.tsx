@@ -36,8 +36,19 @@ export default function WhyUs() {
     <section id="about" className="vrb-soft-bg">
       <div className="vrb-premium-area">
         <div className="vrb-wrap vrb-anim">
-          <h2 className="vrb-heading">Why Choose Interiors?</h2>
-          <p className="vrb-desc">We don't just design rooms — we craft experiences that reflect who you are.</p>
+          <h2 className="vrb-heading" style={{
+            fontSize: '52px',
+            fontFamily: 'Playfair Display, serif',
+            fontWeight: 700,
+            letterSpacing: '-1px',
+            color: '#2f1d14'
+          }}>Why Choose Interiors?</h2>
+          <p className="vrb-desc" style={{
+            fontSize: '17px',
+            fontWeight: 400,
+            lineHeight: 1.9,
+            color: '#666'
+          }}>We don't just design rooms — we craft experiences that reflect who you are.</p>
 
           <div className="vrb-feature-grid">
             {FEATURES.map((f, i) => (

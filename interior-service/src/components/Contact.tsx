@@ -10,18 +10,20 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ padding: '80px 6%', background: 'linear-gradient(135deg,#f8f2ff,#f4ecff)' }}>
+    <section id="contact" style={{ padding: '60px 6%', background: 'linear-gradient(135deg,#f8f2ff,#f4ecff)' }}>
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1.2fr 0.9fr',
         background: '#fff',
-        borderRadius: '32px',
+        borderRadius: '28px',
         overflow: 'hidden',
         boxShadow: '0 20px 60px rgba(125,87,175,.12)',
+        maxWidth: '1200px',
+        margin: 'auto'
       }}>
         
         {/* LEFT IMAGE AREA */}
-        <div style={{ position: 'relative', minHeight: '850px' }}>
+        <div style={{ position: 'relative', minHeight: '700px' }}>
           <img
             src="https://raw.githubusercontent.com/venkey3413/vizag-resort-booking/main/interior-service/wooden_luxury_interior_only.png"
             alt="Luxury Interior"
@@ -36,17 +38,17 @@ export default function Contact() {
           {/* FEATURES */}
           <div style={{
             position: 'absolute',
-            bottom: '35px',
-            left: '35px',
-            right: '35px',
+            bottom: '30px',
+            left: '30px',
+            right: '30px',
             zIndex: 2,
             background: 'rgba(255,255,255,.88)',
             backdropFilter: 'blur(10px)',
-            borderRadius: '26px',
+            borderRadius: '22px',
             display: 'grid',
             gridTemplateColumns: 'repeat(3,1fr)',
-            gap: '20px',
-            padding: '28px',
+            gap: '16px',
+            padding: '22px',
           }}>
             {[
               { icon: '🪑', title: 'Expert Designers', desc: 'Luxury interiors crafted with precision.' },
@@ -55,23 +57,23 @@ export default function Contact() {
             ].map((feature, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{
-                  width: '70px',
-                  height: '70px',
+                  width: '60px',
+                  height: '60px',
                   margin: 'auto',
-                  marginBottom: '18px',
+                  marginBottom: '14px',
                   borderRadius: '50%',
                   border: '2px solid #8a45d1',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '28px',
+                  fontSize: '24px',
                   color: '#8a45d1',
                   background: '#f8f2ff',
                 }}>
                   {feature.icon}
                 </div>
-                <h4 style={{ fontSize: '20px', color: '#4b2367', marginBottom: '10px' }}>{feature.title}</h4>
-                <p style={{ color: '#666', lineHeight: 1.7, fontSize: '14px' }}>{feature.desc}</p>
+                <h4 style={{ fontSize: '17px', color: '#4b2367', marginBottom: '8px' }}>{feature.title}</h4>
+                <p style={{ color: '#666', lineHeight: 1.6, fontSize: '13px' }}>{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -79,32 +81,32 @@ export default function Contact() {
 
         {/* RIGHT FORM AREA */}
         <div style={{
-          padding: '70px 55px',
+          padding: '50px 45px',
           background: 'linear-gradient(180deg,#f9f5ff,#f5effd)',
           position: 'relative',
         }}>
           {submitted ? (
-            <div style={{ textAlign: 'center', padding: '100px 0' }}>
-              <div style={{ fontSize: 64, marginBottom: 16 }}>✅</div>
-              <h3 style={{ fontSize: 32, fontWeight: 900, marginBottom: 12, color: '#5f238b' }}>Thank You!</h3>
-              <p style={{ color: '#555', fontSize: 18 }}>We've received your inquiry. Our design expert will reach out within 24 hours.</p>
+            <div style={{ textAlign: 'center', padding: '80px 0' }}>
+              <div style={{ fontSize: 56, marginBottom: 14 }}>✅</div>
+              <h3 style={{ fontSize: 28, fontWeight: 900, marginBottom: 10, color: '#5f238b' }}>Thank You!</h3>
+              <p style={{ color: '#555', fontSize: 16 }}>We've received your inquiry. Our design expert will reach out within 24 hours.</p>
             </div>
           ) : (
             <>
-              <div style={{ textAlign: 'center', marginBottom: '45px', position: 'relative', zIndex: 2 }}>
-                <span style={{ color: '#b07a2d', letterSpacing: '4px', fontSize: '15px', fontWeight: 600 }}>
+              <div style={{ textAlign: 'center', marginBottom: '35px', position: 'relative', zIndex: 2 }}>
+                <span style={{ color: '#b07a2d', letterSpacing: '3px', fontSize: '13px', fontWeight: 600 }}>
                   BOOK FREE
                 </span>
                 <h2 style={{
-                  fontSize: '78px',
+                  fontSize: '62px',
                   lineHeight: 1,
-                  margin: '20px 0',
+                  margin: '16px 0',
                   color: '#5f238b',
                   fontFamily: 'Playfair Display, serif',
                 }}>
                   Consultation
                 </h2>
-                <p style={{ color: '#555', lineHeight: 1.9, fontSize: '18px' }}>
+                <p style={{ color: '#555', lineHeight: 1.8, fontSize: '16px' }}>
                   Share your requirements and our design experts will get in touch with you.
                 </p>
               </div>

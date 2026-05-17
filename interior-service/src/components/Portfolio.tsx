@@ -30,32 +30,59 @@ export default function Portfolio() {
   const [activeTab, setActiveTab] = useState('All Projects');
 
   return (
-    <section id="portfolio" style={{ padding: '100px 7%', background: '#f8f4ef', fontFamily: 'Poppins, sans-serif' }}>
-      <div style={{ maxWidth: '1350px', margin: 'auto' }}>
-        <span style={{ display: 'block', textAlign: 'center', color: '#a06f4b', letterSpacing: '3px', fontSize: '14px', marginBottom: '12px', fontWeight: 600 }}>
+    <section id="portfolio" style={{ padding: '60px 7%', background: '#f8f4ef', fontFamily: 'Poppins, sans-serif' }}>
+      <div style={{ maxWidth: '1200px', margin: 'auto' }}>
+        <span style={{ 
+          display: 'block', 
+          textAlign: 'center', 
+          color: '#a06f4b', 
+          letterSpacing: '3px', 
+          fontSize: '12px', 
+          marginBottom: '12px', 
+          fontWeight: 700,
+          textTransform: 'uppercase'
+        }}>
           OUR PORTFOLIO
         </span>
-        <h2 style={{ textAlign: 'center', fontSize: '56px', marginBottom: '18px', color: '#2f1d14', fontFamily: 'Playfair Display, serif' }}>
+        <h2 style={{ 
+          textAlign: 'center', 
+          fontSize: '42px', 
+          marginBottom: '16px', 
+          color: '#2f1d14', 
+          fontFamily: 'Playfair Display, serif',
+          fontWeight: 700,
+          letterSpacing: '-1px'
+        }}>
           Spaces We've Transformed
         </h2>
-        <p style={{ textAlign: 'center', maxWidth: '700px', margin: 'auto', color: '#666', lineHeight: 1.8, marginBottom: '45px' }}>
+        <p style={{ 
+          textAlign: 'center', 
+          maxWidth: '650px', 
+          margin: 'auto', 
+          color: '#666', 
+          lineHeight: 1.7, 
+          marginBottom: '40px',
+          fontSize: '15px',
+          fontWeight: 400
+        }}>
           Explore our curated collection of luxury interior projects.
         </p>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap', margin: '45px 0 60px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', margin: '40px 0 50px' }}>
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveTab(cat)}
               style={{
                 border: 'none',
-                padding: '14px 28px',
+                padding: '12px 24px',
                 borderRadius: '40px',
                 background: activeTab === cat ? '#a06f4b' : '#fff',
                 color: activeTab === cat ? 'white' : '#000',
                 cursor: 'pointer',
                 fontWeight: 600,
                 transition: '.3s',
+                fontSize: '14px'
               }}
               onMouseEnter={(e) => {
                 if (activeTab !== cat) {
@@ -75,7 +102,7 @@ export default function Portfolio() {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px,1fr))', gap: '35px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px,1fr))', gap: '25px' }}>
           {PROJECTS.map((project, i) => (
             <div
               key={i}
@@ -94,45 +121,63 @@ export default function Portfolio() {
                 <img
                   src={project.img}
                   alt={project.title}
-                  style={{ width: '100%', height: '270px', objectFit: 'cover' }}
+                  style={{ width: '100%', height: '220px', objectFit: 'cover' }}
                 />
                 <span style={{
                   position: 'absolute',
-                  top: '20px',
-                  right: '20px',
+                  top: '16px',
+                  right: '16px',
                   background: 'rgba(76,50,35,.9)',
                   color: 'white',
-                  padding: '10px 18px',
+                  padding: '8px 16px',
                   borderRadius: '30px',
-                  fontSize: '13px',
+                  fontSize: '12px',
                 }}>
                   {project.category}
                 </span>
               </div>
 
-              <div style={{ padding: '28px' }}>
-                <h3 style={{ fontSize: '30px', marginBottom: '10px', color: '#2f1d14', fontFamily: 'Playfair Display, serif' }}>
+              <div style={{ padding: '24px' }}>
+                <h3 style={{ 
+                  fontSize: '24px', 
+                  marginBottom: '8px', 
+                  color: '#2f1d14', 
+                  fontFamily: 'Playfair Display, serif',
+                  fontWeight: 700,
+                  letterSpacing: '-0.5px'
+                }}>
                   {project.title}
                 </h3>
-                <p style={{ color: '#777', marginBottom: '18px' }}>
+                <p style={{ 
+                  color: '#777', 
+                  marginBottom: '16px',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}>
                   {project.location}
                 </p>
 
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '22px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '18px' }}>
                   {project.tags.map((tag) => (
                     <span key={tag} style={{
                       background: '#f3ebe4',
                       color: '#8b5e3c',
-                      padding: '8px 14px',
+                      padding: '6px 12px',
                       borderRadius: '30px',
-                      fontSize: '13px',
+                      fontSize: '12px',
                     }}>
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <a href="#contact" style={{ color: '#a06f4b', textDecoration: 'none', fontWeight: 600 }}>
+                <a href="#contact" style={{ 
+                  color: '#a06f4b', 
+                  textDecoration: 'none', 
+                  fontWeight: 700,
+                  fontSize: '15px',
+                  letterSpacing: '0.5px'
+                }}>
                   View Case Study →
                 </a>
               </div>
@@ -140,18 +185,19 @@ export default function Portfolio() {
           ))}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '60px' }}>
+        <div style={{ textAlign: 'center', marginTop: '50px' }}>
           <a
             href="#contact"
             style={{
               background: '#a06f4b',
               color: 'white',
-              padding: '18px 40px',
+              padding: '14px 36px',
               borderRadius: '50px',
               textDecoration: 'none',
               display: 'inline-block',
               fontWeight: 600,
               transition: '.3s',
+              fontSize: '15px'
             }}
             onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-3px)'}
             onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
