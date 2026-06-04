@@ -10,22 +10,21 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ padding: '40px 5%', background: 'linear-gradient(135deg,#f8f2ff,#f4ecff)' }}>
+    <section id="contact" style={{ padding: '40px 2%', background: 'linear-gradient(135deg,#f8f2ff,#f4ecff)' }}>
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: window.innerWidth > 1024 ? '1fr 1fr' : '1fr',
         background: '#fff',
-        borderRadius: '24px',
+        borderRadius: '20px',
         overflow: 'hidden',
         boxShadow: '0 20px 60px rgba(125,87,175,.12)',
-        maxWidth: '1100px',
+        maxWidth: '1000px',
         margin: 'auto',
-        height: '85vh',
-        maxHeight: '650px'
+        minHeight: window.innerWidth > 1024 ? '600px' : 'auto'
       }}>
         
         {/* LEFT IMAGE AREA */}
-        <div style={{ position: 'relative', height: '100%' }}>
+        <div style={{ position: 'relative', minHeight: '400px' }}>
           <img
             src="https://raw.githubusercontent.com/venkey3413/vizag-resort-booking/main/interior-service/wooden_luxury_interior_only.png"
             alt="Luxury Interior"
@@ -37,45 +36,45 @@ export default function Contact() {
             background: 'linear-gradient(to top, rgba(62,31,87,.35), rgba(0,0,0,0.05))',
           }} />
 
-          {/* FEATURES */}
+          {/* FEATURES - Now at bottom with smaller size */}
           <div style={{
             position: 'absolute',
-            bottom: '20px',
-            left: '20px',
-            right: '20px',
+            bottom: '15px',
+            left: '15px',
+            right: '15px',
             zIndex: 2,
-            background: 'rgba(255,255,255,.88)',
+            background: 'rgba(255,255,255,.9)',
             backdropFilter: 'blur(10px)',
-            borderRadius: '18px',
+            borderRadius: '14px',
             display: 'grid',
             gridTemplateColumns: 'repeat(3,1fr)',
-            gap: '12px',
-            padding: '16px',
+            gap: '8px',
+            padding: '10px',
           }}>
             {[
-              { icon: '🪑', title: 'Expert Designers', desc: 'Luxury interiors crafted.' },
-              { icon: '✨', title: 'Personalized Ideas', desc: 'Tailored concepts.' },
+              { icon: '🪑', title: 'Expert Designers', desc: 'Luxury interiors.' },
+              { icon: '✨', title: 'Personalized', desc: 'Tailored concepts.' },
               { icon: '🏆', title: 'Premium Quality', desc: 'High-end finishes.' },
             ].map((feature, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{
-                  width: '50px',
-                  height: '50px',
+                  width: '40px',
+                  height: '40px',
                   margin: 'auto',
-                  marginBottom: '10px',
+                  marginBottom: '6px',
                   borderRadius: '50%',
                   border: '2px solid #8a45d1',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px',
+                  fontSize: '16px',
                   color: '#8a45d1',
                   background: '#f8f2ff',
                 }}>
                   {feature.icon}
                 </div>
-                <h4 style={{ fontSize: '14px', color: '#4b2367', marginBottom: '6px', fontWeight: 700 }}>{feature.title}</h4>
-                <p style={{ color: '#666', lineHeight: 1.5, fontSize: '11px' }}>{feature.desc}</p>
+                <h4 style={{ fontSize: '11px', color: '#4b2367', marginBottom: '4px', fontWeight: 700 }}>{feature.title}</h4>
+                <p style={{ color: '#666', lineHeight: 1.4, fontSize: '9px' }}>{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -83,34 +82,34 @@ export default function Contact() {
 
         {/* RIGHT FORM AREA */}
         <div style={{
-          padding: '30px 35px',
+          padding: '25px 30px',
           background: 'linear-gradient(180deg,#f9f5ff,#f5effd)',
           position: 'relative',
-          height: '100%',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          maxHeight: window.innerWidth > 1024 ? '600px' : 'none'
         }}>
           {submitted ? (
-            <div style={{ textAlign: 'center', padding: '60px 0' }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
-              <h3 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8, color: '#5f238b' }}>Thank You!</h3>
-              <p style={{ color: '#555', fontSize: 14 }}>We've received your inquiry. Our design expert will reach out within 24 hours.</p>
+            <div style={{ textAlign: 'center', padding: '50px 0' }}>
+              <div style={{ fontSize: 42, marginBottom: 10 }}>✅</div>
+              <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8, color: '#5f238b' }}>Thank You!</h3>
+              <p style={{ color: '#555', fontSize: 13 }}>We've received your inquiry. Our design expert will reach out within 24 hours.</p>
             </div>
           ) : (
             <>
-              <div style={{ textAlign: 'center', marginBottom: '20px', position: 'relative', zIndex: 2 }}>
-                <span style={{ color: '#b07a2d', letterSpacing: '2px', fontSize: '11px', fontWeight: 600 }}>
+              <div style={{ textAlign: 'center', marginBottom: '16px', position: 'relative', zIndex: 2 }}>
+                <span style={{ color: '#b07a2d', letterSpacing: '2px', fontSize: '10px', fontWeight: 600 }}>
                   BOOK FREE
                 </span>
                 <h2 style={{
-                  fontSize: '42px',
+                  fontSize: '32px',
                   lineHeight: 1,
-                  margin: '10px 0',
+                  margin: '8px 0',
                   color: '#5f238b',
                   fontFamily: 'Playfair Display, serif',
                 }}>
                   Consultation
                 </h2>
-                <p style={{ color: '#555', lineHeight: 1.5, fontSize: '12px' }}>
+                <p style={{ color: '#555', lineHeight: 1.5, fontSize: '11px' }}>
                   Share your requirements and our design experts will get in touch.
                 </p>
               </div>
@@ -122,20 +121,20 @@ export default function Contact() {
                   { icon: '📞', type: 'text', placeholder: 'Phone Number', field: 'phone' },
                 ].map((input, i) => (
                   <div key={i} style={{
-                    height: '55px',
+                    height: '48px',
                     background: '#fff',
                     border: '1.5px solid #e4d9f5',
-                    borderRadius: '14px',
+                    borderRadius: '12px',
                     display: 'flex',
                     alignItems: 'center',
-                    marginBottom: '16px',
-                    padding: '0 18px',
+                    marginBottom: '12px',
+                    padding: '0 16px',
                     transition: '.3s',
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = '#9b5fe0'}
                   onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e4d9f5'}
                   >
-                    <span style={{ fontSize: '20px', marginRight: '14px', color: '#7f4ca5' }}>{input.icon}</span>
+                    <span style={{ fontSize: '18px', marginRight: '12px', color: '#7f4ca5' }}>{input.icon}</span>
                     <input
                       type={input.type}
                       placeholder={input.placeholder}
@@ -147,7 +146,7 @@ export default function Contact() {
                         border: 'none',
                         outline: 'none',
                         background: 'transparent',
-                        fontSize: '15px',
+                        fontSize: '14px',
                         color: '#444',
                         fontFamily: 'Poppins, sans-serif',
                       }}
@@ -156,20 +155,20 @@ export default function Contact() {
                 ))}
 
                 <div style={{
-                  height: '55px',
+                  height: '48px',
                   background: '#fff',
                   border: '1.5px solid #e4d9f5',
-                  borderRadius: '14px',
+                  borderRadius: '12px',
                   display: 'flex',
                   alignItems: 'center',
-                  marginBottom: '16px',
-                  padding: '0 18px',
+                  marginBottom: '12px',
+                  padding: '0 16px',
                   transition: '.3s',
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = '#9b5fe0'}
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e4d9f5'}
                 >
-                  <span style={{ fontSize: '20px', marginRight: '14px', color: '#7f4ca5' }}>📍</span>
+                  <span style={{ fontSize: '18px', marginRight: '12px', color: '#7f4ca5' }}>📍</span>
                   <select
                     value={form.city}
                     onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -179,7 +178,7 @@ export default function Contact() {
                       border: 'none',
                       outline: 'none',
                       background: 'transparent',
-                      fontSize: '15px',
+                      fontSize: '14px',
                       color: '#444',
                       fontFamily: 'Poppins, sans-serif',
                     }}
@@ -195,17 +194,17 @@ export default function Contact() {
                 <label style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
-                  margin: '12px 0 20px',
+                  gap: '8px',
+                  margin: '10px 0 16px',
                   color: '#444',
-                  fontSize: '13px',
+                  fontSize: '12px',
                   cursor: 'pointer',
                 }}>
                   <input
                     type="checkbox"
                     checked={form.whatsapp}
                     onChange={(e) => setForm({ ...form, whatsapp: e.target.checked })}
-                    style={{ width: '18px', height: '18px', accentColor: '#7b2cbf' }}
+                    style={{ width: '16px', height: '16px', accentColor: '#7b2cbf' }}
                   />
                   <span>Send me updates on WhatsApp</span>
                 </label>
@@ -214,19 +213,19 @@ export default function Contact() {
                   type="submit"
                   style={{
                     width: '100%',
-                    height: '56px',
+                    height: '50px',
                     border: 'none',
-                    borderRadius: '14px',
+                    borderRadius: '12px',
                     background: 'linear-gradient(135deg,#7b2cbf,#5a189a)',
                     color: 'white',
-                    fontSize: '16px',
+                    fontSize: '15px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: '.4s',
                     boxShadow: '0 15px 30px rgba(123,44,191,.25)',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
                     e.currentTarget.style.boxShadow = '0 20px 40px rgba(123,44,191,.35)';
                   }}
                   onMouseLeave={(e) => {
@@ -238,10 +237,10 @@ export default function Contact() {
                 </button>
 
                 <p style={{
-                  marginTop: '16px',
+                  marginTop: '14px',
                   textAlign: 'center',
                   color: '#777',
-                  fontSize: '11px',
+                  fontSize: '10px',
                   lineHeight: 1.6,
                 }}>
                   We respect your privacy. Your information is safe with us.
