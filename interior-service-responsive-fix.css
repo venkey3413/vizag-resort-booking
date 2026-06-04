@@ -1,0 +1,63 @@
+/* ========================================
+   RESPONSIVE FIX FOR INTERIOR SERVICE
+   Fixes overflow issues at 100% zoom
+======================================== */
+
+/* Fix Contact Section Grid Overflow */
+@media (max-width: 1400px) {
+  #contact > div {
+    grid-template-columns: 1fr !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+  
+  /* Stack features vertically on smaller screens */
+  #contact > div > div:first-child > div:last-child {
+    position: relative !important;
+    bottom: auto !important;
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Fix Hero Stats Overflow */
+@media (max-width: 1200px) {
+  .vrb-hero-content > div {
+    gap: 20px !important;
+  }
+}
+
+/* Ensure no horizontal scroll */
+body, html {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+* {
+  box-sizing: border-box !important;
+}
+
+/* Fix any containers that might overflow */
+section, div {
+  max-width: 100% !important;
+}
+
+/* Responsive typography */
+@media (max-width: 1200px) {
+  h1 {
+    font-size: 42px !important;
+  }
+  
+  h2 {
+    font-size: 32px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 32px !important;
+  }
+  
+  h2 {
+    font-size: 24px !important;
+  }
+}
