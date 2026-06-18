@@ -19,30 +19,38 @@
   <style>
     html { scroll-behavior: smooth; }
     
-    /* ✅ Partner Poster Styles */
+    /* ✅ Partner Poster Styles - Half Size & Left Corner */
+    .partner-poster-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
     .poster {
-      width: 800px;
+      width: 100%;
       max-width: 100%;
       background: #0a1628;
-      border-radius: 24px;
+      border-radius: 18px;
       overflow: hidden;
       position: relative;
       border: 1px solid rgba(255,255,255,0.08);
-      margin: 0 auto;
     }
 
     /* Ocean wave bg */
     .poster::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0; height: 420px;
+      top: 0; left: 0; right: 0; height: 210px;
       background: linear-gradient(160deg, #0d3b6e 0%, #1a5fa8 40%, #0a7a5a 80%, #0a1628 100%);
       z-index: 0;
     }
 
     .wave-overlay {
       position: absolute;
-      top: 0; left: 0; right: 0; height: 420px;
+      top: 0; left: 0; right: 0; height: 210px;
       background-image: repeating-linear-gradient(
         -30deg,
         rgba(255,255,255,0.015) 0px,
@@ -57,46 +65,41 @@
     .hero {
       position: relative;
       z-index: 2;
-      padding: 36px 52px 0;
+      padding: 18px 26px 0;
     }
 
     .eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
       background: rgba(245,166,35,0.15);
       border: 1px solid rgba(245,166,35,0.3);
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 11px;
+      border-radius: 10px;
+      padding: 3px 7px;
+      font-size: 9px;
       color: #f5c842;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .eyebrow::before {
       content: '';
-      width: 6px; height: 6px;
+      width: 4px; height: 4px;
       background: #f5c842;
       border-radius: 50%;
       animation: pulse 1.8s ease-in-out infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
-    }
-
     .headline {
       font-family: 'Playfair Display', serif;
-      font-size: 54px;
+      font-size: 27px;
       font-weight: 900;
       color: #ffffff;
       line-height: 1.05;
-      letter-spacing: -1.5px;
-      margin-bottom: 10px;
+      letter-spacing: -0.8px;
+      margin-bottom: 5px;
     }
 
     .headline em {
@@ -107,23 +110,23 @@
     }
 
     .subline {
-      font-size: 15px;
+      font-size: 11px;
       color: rgba(255,255,255,0.55);
       font-weight: 300;
-      margin-top: 12px;
-      line-height: 1.6;
-      max-width: 440px;
+      margin-top: 6px;
+      line-height: 1.5;
+      max-width: 100%;
     }
 
     /* Offer highlight strip */
     .offer-strip {
       position: relative;
       z-index: 2;
-      margin: 30px 52px;
+      margin: 15px 26px;
       background: linear-gradient(90deg, rgba(245,166,35,0.12), rgba(245,230,66,0.06));
       border: 1px solid rgba(245,166,35,0.25);
-      border-radius: 16px;
-      padding: 20px 28px;
+      border-radius: 10px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       gap: 0;
@@ -133,17 +136,17 @@
       flex: 1;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 7px;
     }
 
     .offer-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 12px;
       flex-shrink: 0;
     }
 
@@ -151,84 +154,84 @@
     .offer-icon.teal { background: rgba(20,200,140,0.12); }
 
     .offer-label {
-      font-size: 10px;
+      font-size: 8px;
       color: rgba(255,255,255,0.4);
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: 0.6px;
       font-weight: 600;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
 
     .offer-value {
       font-family: 'Playfair Display', serif;
-      font-size: 26px;
+      font-size: 13px;
       font-weight: 700;
       color: #fff;
       line-height: 1;
     }
 
     .offer-value span {
-      font-size: 13px;
+      font-size: 9px;
       font-family: 'DM Sans', sans-serif;
       color: rgba(255,255,255,0.5);
       font-weight: 400;
-      margin-left: 4px;
+      margin-left: 2px;
     }
 
     .offer-divider {
       width: 1px;
-      height: 44px;
+      height: 22px;
       background: rgba(255,255,255,0.1);
-      margin: 0 28px;
+      margin: 0 14px;
     }
 
     .offer-arrow {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 5px;
       color: rgba(255,255,255,0.25);
-      font-size: 22px;
+      font-size: 11px;
     }
 
     .arrow-label {
-      font-size: 11px;
+      font-size: 9px;
       color: rgba(255,255,255,0.3);
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
     }
 
     /* Features grid */
     .features {
       position: relative;
       z-index: 2;
-      padding: 0 52px;
+      padding: 0 26px;
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 28px;
+      gap: 6px;
+      margin-bottom: 14px;
     }
 
-    .feature-card {
+    .poster .feature-card {
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 14px;
-      padding: 18px 18px 16px;
+      border-radius: 8px;
+      padding: 9px 9px 8px;
       transition: border-color 0.2s;
     }
 
-    .feature-card:hover {
+    .poster .feature-card:hover {
       border-color: rgba(255,255,255,0.15);
     }
 
     .feature-icon-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: 9px;
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
-      margin-bottom: 12px;
+      font-size: 10px;
+      margin-bottom: 6px;
     }
 
     .fi-blue { background: rgba(24,95,165,0.3); }
@@ -236,17 +239,17 @@
     .fi-amber { background: rgba(185,117,23,0.3); }
 
     .feature-title {
-      font-size: 13px;
+      font-size: 10px;
       font-weight: 600;
       color: rgba(255,255,255,0.85);
-      margin-bottom: 4px;
-      letter-spacing: -0.2px;
+      margin-bottom: 2px;
+      letter-spacing: -0.1px;
     }
 
     .feature-desc {
-      font-size: 11px;
+      font-size: 8px;
       color: rgba(255,255,255,0.38);
-      line-height: 1.5;
+      line-height: 1.4;
       font-weight: 300;
     }
 
@@ -254,17 +257,17 @@
     .compare-section {
       position: relative;
       z-index: 2;
-      padding: 0 52px;
-      margin-bottom: 28px;
+      padding: 0 26px;
+      margin-bottom: 14px;
     }
 
     .compare-label {
-      font-size: 10px;
+      font-size: 8px;
       color: rgba(255,255,255,0.3);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.8px;
       font-weight: 600;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
 
     .compare-row {
@@ -273,13 +276,13 @@
       gap: 0;
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 10px;
+      border-radius: 6px;
       overflow: hidden;
     }
 
     .compare-item {
       flex: 1;
-      padding: 12px 14px;
+      padding: 6px 7px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -294,7 +297,7 @@
     }
 
     .compare-name {
-      font-size: 11px;
+      font-size: 9px;
       color: rgba(255,255,255,0.45);
     }
 
@@ -304,39 +307,39 @@
     }
 
     .compare-pct {
-      font-size: 14px;
+      font-size: 10px;
       font-weight: 600;
       color: rgba(255,255,255,0.35);
     }
 
     .compare-item.highlight .compare-pct {
       color: #f5c842;
-      font-size: 16px;
+      font-size: 11px;
     }
 
     /* CTA Footer */
     .cta-footer {
       position: relative;
       z-index: 2;
-      margin: 0 52px 44px;
+      margin: 0 26px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: linear-gradient(135deg, #14c88c 0%, #0a7a5a 100%);
-      border-radius: 16px;
-      padding: 24px 28px;
+      border-radius: 10px;
+      padding: 12px 14px;
     }
 
     .cta-left .cta-big {
       font-family: 'Playfair Display', serif;
-      font-size: 22px;
+      font-size: 14px;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .cta-left .cta-small {
-      font-size: 13px;
+      font-size: 10px;
       color: rgba(255,255,255,0.65);
       font-weight: 300;
     }
@@ -345,25 +348,25 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 6px;
+      gap: 3px;
     }
 
-    .cta-btn {
+    .poster .cta-btn {
       background: #fff;
       color: #0a7a5a;
-      border-radius: 10px;
-      padding: 10px 22px;
-      font-size: 13px;
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 4px;
       text-decoration: none;
     }
 
     .cta-phone {
-      font-size: 12px;
+      font-size: 9px;
       color: rgba(255,255,255,0.6);
     }
 
@@ -372,10 +375,10 @@
       position: relative;
       z-index: 2;
       text-align: center;
-      padding-bottom: 24px;
-      font-size: 11px;
+      padding-bottom: 12px;
+      font-size: 8px;
       color: rgba(255,255,255,0.2);
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
     }
 
     .site-tag strong { color: rgba(255,255,255,0.35); }
@@ -700,7 +703,9 @@
   <!-- ✅ PARTNER POSTER SECTION -->
   <section class="vrb-section">
     <div class="vrb-container">
-      <div class="poster">
+      <div class="partner-poster-wrapper">
+        <!-- Left: Partner Poster (Half Size) -->
+        <div class="poster">
         <div class="wave-overlay"></div>
 
         <!-- Hero -->
@@ -792,6 +797,121 @@
 
         <!-- Site Tag -->
         <div class="site-tag">Powered by <strong>vshakago.in</strong> — Vizag's Premier Resort Booking Platform</div>
+      </div>
+
+      <!-- Right: Owner Section -->
+      <section class="owner-section" style="margin: 0; padding: 0;">
+        <div class="owner-container" style="max-width: 100%; padding: 0; display: block;">
+
+            <!-- Left -->
+            <div class="owner-benefits">
+                <h2>For Resort Owners</h2>
+                <p>Grow your resort business with VshakaGo</p>
+
+                <div class="benefits-grid">
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon blue">
+                            <i class="fas fa-percent"></i>
+                        </div>
+                        <h4>Lowest Commission</h4>
+                        <span>Only 6%</span>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon sky">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <h4>Local Marketing</h4>
+                        <span>More Visibility</span>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon green">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <h4>WhatsApp Leads</h4>
+                        <span>Direct Enquiries</span>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon blue">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h4>24/7 Support</h4>
+                        <span>Always with you</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Middle -->
+            <div class="comparison-card">
+                <h3>VshakaGo vs Others</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Features</th>
+                            <th>VshakaGo</th>
+                            <th>Others</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Commission</td>
+                            <td>6%</td>
+                            <td>20-25%</td>
+                        </tr>
+
+                        <tr>
+                            <td>Local Marketing</td>
+                            <td class="tick">✔</td>
+                            <td class="cross">✖</td>
+                        </tr>
+
+                        <tr>
+                            <td>WhatsApp Leads</td>
+                            <td class="tick">✔</td>
+                            <td class="cross">✖</td>
+                        </tr>
+
+                        <tr>
+                            <td>Personal Support</td>
+                            <td class="tick">✔</td>
+                            <td class="cross">✖</td>
+                        </tr>
+
+                        <tr>
+                            <td>Faster Payments</td>
+                            <td class="tick">✔</td>
+                            <td class="cross">✖</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Right -->
+            <div class="owner-cta">
+                <div class="cta-content">
+                    <h3>List Your Property Today!</h3>
+                    <p>
+                        Reach more guests and increase bookings
+                    </p>
+
+                    <a href="/owner-dashboard" class="cta-btn">
+                        List Your Property
+                    </a>
+                </div>
+
+                <img src="images/resort-owner-banner.jpg"
+                    alt="Resort Owner">
+            </div>
+
+        </div>
+    </section>
+
       </div>
     </div>
   </section>
