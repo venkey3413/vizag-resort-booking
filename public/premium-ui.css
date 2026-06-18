@@ -392,7 +392,17 @@ img{ max-width:100%; display:block; }
 
 .vrb-section{
   padding: 100px 0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: url('resort-bgm.jpg') center/cover fixed, linear-gradient(135deg, rgba(245,247,250,0.95) 0%, rgba(195,207,226,0.95) 100%);
+  background-blend-mode: overlay;
+  position: relative;
+}
+
+.vrb-section::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.7);
+  pointer-events: none;
 }
 
 .vrb-container{
