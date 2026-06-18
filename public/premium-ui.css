@@ -232,11 +232,11 @@ img{ max-width:100%; display:block; }
 
 .vrb-hero{
   position: relative;
-  min-height: 560px;
+  min-height: 280px;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 70px 14px;
+  padding: 35px 14px;
   background: url("https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800")
     center/cover no-repeat;
   border-bottom-left-radius: 24px;
@@ -391,7 +391,7 @@ img{ max-width:100%; display:block; }
 ========================= */
 
 .vrb-section{
-  padding: 100px 0;
+  padding: 50px 0;
   background: url('resort-bgm.jpg') center/cover fixed, linear-gradient(135deg, rgba(245,247,250,0.95) 0%, rgba(195,207,226,0.95) 100%);
   background-blend-mode: overlay;
   position: relative;
@@ -503,7 +503,7 @@ img{ max-width:100%; display:block; }
 
 .vrb-img{
   position: relative;
-  height: 200px;
+  height: 100px;
   overflow: hidden;
 }
 
@@ -532,36 +532,36 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-body{
-  padding: 18px;
+  padding: 9px;
 }
 
 .vrb-body h3{
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   color: var(--dark);
 }
 
 .vrb-meta{
   color: var(--muted);
   font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 16px;
+  font-size: 12px;
+  margin-bottom: 8px;
 }
 
 .vrb-tags{
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 4px;
+  margin-bottom: 10px;
 }
 
 .vrb-tags span{
   background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(0,168,255,0.1));
   color: var(--brand);
-  padding: 6px 12px;
+  padding: 3px 6px;
   border-radius: 15px;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
   border: 1px solid rgba(102,126,234,0.2);
 }
@@ -574,13 +574,13 @@ img{ max-width:100%; display:block; }
 }
 
 .vrb-price{
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--dark);
 }
 
 .vrb-price span{
-  font-size: 14px;
+  font-size: 11px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -596,7 +596,7 @@ img{ max-width:100%; display:block; }
   background: linear-gradient(135deg, var(--accent), #ff8a65);
   color: #fff;
   border: none;
-  padding: 12px 20px;
+  padding: 8px 14px;
   border-radius: 20px;
   font-weight: 700;
   cursor: pointer;
@@ -916,7 +916,7 @@ img{ max-width:100%; display:block; }
 ========================= */
 
 .vrb-footer{
-  padding: 75px 0 25px;
+  padding: 40px 0 15px;
   background: #050b18;
   color:#fff;
   position: relative;
@@ -1595,7 +1595,7 @@ img{ max-width:100%; display:block; }
 ========================================== */
 
 .vrb-soft-bg{
-  padding: 90px 0;
+  padding: 45px 0;
   background: radial-gradient(circle at top, #eef8ff 0%, #ffffff 55%, #f7fbff 100%);
 }
 
