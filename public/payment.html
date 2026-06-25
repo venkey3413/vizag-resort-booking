@@ -5,96 +5,245 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VshakaGo Payment</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+
 <style>
-body {
-  font-family: Arial;
-  background: #f5f7fb;
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
 }
 
 .container {
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo h1 {
+  font-family: 'Playfair Display', serif;
+  color: white;
+  font-size: 32px;
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  margin-top: 20px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
 h2, h3 {
   text-align: center;
+  color: #0f172a;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 24px;
+  font-family: 'Playfair Display', serif;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+.booking-details p {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(15,23,42,0.1);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.booking-details p b {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.booking-details p span {
+  color: #0f172a;
+  font-weight: 800;
 }
 
 .price {
-  font-size: 30px;
-  font-weight: bold;
+  font-size: 42px;
+  font-weight: 900;
   text-align: center;
-  color: green;
+  margin: 25px 0 15px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 button {
   width: 100%;
-  padding: 14px;
-  margin: 8px 0;
+  padding: 16px;
+  margin: 10px 0;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
-.phonepe { background: #5f259f; color: white; }
-.gpay { background: black; color: white; }
-.paytm { background: #00baf2; color: white; }
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.phonepe { 
+  background: linear-gradient(135deg, #5f259f, #7c3aed);
+  color: white;
+}
+
+.gpay { 
+  background: linear-gradient(135deg, #1a1a1a, #404040);
+  color: white;
+}
+
+.paytm { 
+  background: linear-gradient(135deg, #00baf2, #0ea5e9);
+  color: white;
+}
 
 input {
   width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 14px 16px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 2px solid rgba(15,23,42,0.1);
   box-sizing: border-box;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
 }
 
 .submit {
-  background: green;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
   color: white;
+  margin-top: 15px;
 }
 
 .note {
   font-size: 13px;
-  color: gray;
+  color: #64748b;
   text-align: center;
+  margin-top: 12px;
+  font-weight: 600;
 }
 
 .qr-section {
   text-align: center;
-  margin-top: 20px;
 }
 
 .qr-section img {
-  max-width: 200px;
+  max-width: 220px;
   height: auto;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin: 15px 0;
+  border: 3px solid rgba(102,126,234,0.2);
+  border-radius: 16px;
+  margin: 20px auto;
+  display: block;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
 .upi-details {
-  background: #f0f0f0;
-  padding: 15px;
-  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+  padding: 20px;
+  border-radius: 12px;
   margin-top: 15px;
-  text-align: center;
+  border: 1px solid rgba(102,126,234,0.2);
 }
 
 .upi-details p {
-  margin: 8px 0;
-  font-weight: bold;
+  margin: 10px 0;
+  font-weight: 700;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.divider {
+  text-align: center;
+  margin: 25px 0;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: rgba(15,23,42,0.1);
+}
+
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+.divider span {
+  background: white;
+  padding: 0 15px;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.success-msg {
+  background: linear-gradient(135deg, rgba(22,163,74,0.1), rgba(34,197,94,0.1));
+  border: 2px solid rgba(22,163,74,0.3);
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  color: #16a34a;
+  font-weight: 700;
+  margin-top: 15px;
+}
+
+@media (max-width: 480px) {
+  .logo h1 {
+    font-size: 26px;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .price {
+    font-size: 36px;
+  }
 }
 </style>
 </head>
@@ -103,54 +252,74 @@ input {
 
 <div class="container">
 
+  <!-- Logo -->
+  <div class="logo">
+    <h1>VshakaGo</h1>
+  </div>
+
   <!-- Booking Details -->
   <div class="card">
     <h2>Complete Payment</h2>
 
-    <p><b>Booking ID:</b> <span id="bookingId"></span></p>
-    <p><b>Resort:</b> <span id="resort"></span></p>
-    <p><b>Date:</b> <span id="date"></span></p>
+    <div class="booking-details">
+      <p><b>Booking ID:</b> <span id="bookingId"></span></p>
+      <p><b>Resort:</b> <span id="resort"></span></p>
+      <p><b>Date:</b> <span id="date"></span></p>
+    </div>
 
     <div class="price">₹<span id="amount"></span></div>
 
-    <p class="note">Pay exact amount only</p>
+    <p class="note">💳 Pay exact amount only</p>
   </div>
 
   <!-- UPI Buttons -->
   <div class="card">
     <h3>Select Payment App</h3>
 
-    <button class="phonepe" onclick="pay('phonepe')">PhonePe</button>
-    <button class="gpay" onclick="pay('gpay')">Google Pay</button>
-    <button class="paytm" onclick="pay('paytm')">Paytm</button>
+    <button class="phonepe" onclick="pay('phonepe')">
+      <span>📱</span> Pay with PhonePe
+    </button>
+    <button class="gpay" onclick="pay('gpay')">
+      <span>💳</span> Pay with Google Pay
+    </button>
+    <button class="paytm" onclick="pay('paytm')">
+      <span>💰</span> Pay with Paytm
+    </button>
 
-    <p class="note">You will be redirected to UPI app</p>
+    <p class="note">✅ You will be redirected to UPI app</p>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider">
+    <span>OR</span>
   </div>
 
   <!-- QR Code Section -->
   <div class="card qr-section">
-    <h3>Scan to Pay</h3>
+    <h3>Scan QR to Pay</h3>
     <img src="qr-code.png.jpeg.png" alt="UPI QR Code" />
     
     <div class="upi-details">
-      <p>UPI ID: vshakago@ybl</p>
-      <p>Amount: ₹<span id="qrAmount"></span></p>
+      <p>💳 UPI ID: <strong>vshakago@ybl</strong></p>
+      <p>💰 Amount: <strong>₹<span id="qrAmount"></span></strong></p>
     </div>
   </div>
 
   <!-- UTR Form -->
   <div class="card">
-    <h3>Submit Payment</h3>
+    <h3>Submit Payment Proof</h3>
 
     <form onsubmit="submitPayment(event)">
-      <input type="text" id="name" placeholder="Your Name" required />
-      <input type="text" id="phone" placeholder="Mobile Number" required />
-      <input type="text" id="utr" placeholder="Enter UTR Number" required />
+      <input type="text" id="name" placeholder="Your Full Name" required />
+      <input type="tel" id="phone" placeholder="Mobile Number" required pattern="[0-9]{10}" />
+      <input type="text" id="utr" placeholder="Enter 12-digit UTR/Transaction ID" required />
 
-      <button class="submit">Submit Payment</button>
+      <button class="submit" type="submit">
+        <span>✓</span> Submit Payment
+      </button>
     </form>
 
-    <p class="note">We will verify and confirm your booking</p>
+    <p class="note">⏱ We will verify and confirm within 30 minutes</p>
   </div>
 
 </div>
@@ -165,15 +334,14 @@ const MERCHANT_NAME = "VshakaGo";
 
 // ==========================
 // 🔥 GET BOOKING DATA
-// (Replace this with backend/API)
 // ==========================
+const urlParams = new URLSearchParams(window.location.search);
 
-// Example dynamic data
 const bookingData = {
-  bookingId: "VS12345",
-  resort: "Beach View Resort",
-  date: "10 May 2026",
-  amount: 1850
+  bookingId: urlParams.get('bookingId') || "VS12345",
+  resort: urlParams.get('resort') || "Beach View Resort",
+  date: urlParams.get('date') || "10 May 2026",
+  amount: urlParams.get('amount') || 1850
 };
 
 // Fill UI
@@ -188,15 +356,27 @@ document.getElementById("qrAmount").innerText = bookingData.amount;
 // 💰 PAYMENT FUNCTION
 // ==========================
 function pay(app) {
+  const amount = parseFloat(bookingData.amount).toFixed(2);
+  const payeeName = encodeURIComponent(MERCHANT_NAME);
+  const txnNote = encodeURIComponent(("Booking-" + bookingData.bookingId).substring(0, 50));
 
-  const amount = Math.floor(bookingData.amount); // Ensure integer
-  const bookingId = bookingData.bookingId;
+  const baseUrl = `upi://pay?pa=${UPI_ID}&pn=${payeeName}&am=${amount}&cu=INR&tn=${txnNote}`;
 
-  // Always use standard UPI link - works with all UPI apps
-  const url = `upi://pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR&tn=${bookingId}`;
+  let url;
+  if (app === 'phonepe') {
+    url = `phonepe://pay?pa=${UPI_ID}&pn=${payeeName}&am=${amount}&cu=INR&tn=${txnNote}`;
+  } else if (app === 'gpay') {
+    url = `tez://upi/pay?pa=${UPI_ID}&pn=${payeeName}&am=${amount}&cu=INR&tn=${txnNote}`;
+  } else if (app === 'paytm') {
+    url = `paytmmp://pay?pa=${UPI_ID}&pn=${payeeName}&am=${amount}&cu=INR&tn=${txnNote}`;
+  } else {
+    url = baseUrl;
+  }
 
-  // Redirect
   window.location.href = url;
+  setTimeout(() => {
+    window.location.href = baseUrl;
+  }, 1500);
 }
 
 
@@ -216,7 +396,6 @@ function submitPayment(e) {
 
   console.log("Submitting:", data);
 
-  // 🔥 CONNECT YOUR BACKEND HERE
   fetch('/api/save-payment', {
     method: 'POST',
     headers: {
@@ -226,10 +405,11 @@ function submitPayment(e) {
   })
   .then(res => res.json())
   .then(() => {
-    alert("Payment submitted successfully!");
+    alert("✅ Payment submitted successfully! We will verify and confirm your booking shortly.");
+    window.location.href = '/';
   })
   .catch(() => {
-    alert("Error submitting payment");
+    alert("❌ Error submitting payment. Please try again or contact support.");
   });
 }
 
