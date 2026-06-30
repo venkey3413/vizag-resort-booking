@@ -475,7 +475,29 @@
 
   <!-- ✅ HERO (HOME) -->
   <section id="home" class="vrb-hero">
+    <div class="bg"></div>
     <div class="vrb-overlay"></div>
+
+    <!-- sparkles -->
+    <span class="sparkle" style="top:30%; left:12%; width:4px; height:4px; animation-delay:0s;"></span>
+    <span class="sparkle" style="top:55%; left:25%; width:3px; height:3px; animation-delay:1s;"></span>
+    <span class="sparkle" style="top:65%; left:60%; width:5px; height:5px; animation-delay:2s;"></span>
+    <span class="sparkle" style="top:48%; left:80%; width:3px; height:3px; animation-delay:0.5s;"></span>
+    <span class="sparkle" style="top:70%; left:40%; width:4px; height:4px; animation-delay:1.5s;"></span>
+    <span class="sparkle" style="top:60%; left:90%; width:3px; height:3px; animation-delay:2.5s;"></span>
+
+    <!-- animated drifting waves -->
+    <div class="wave-wrap">
+      <svg class="wave1" viewBox="0 0 2800 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 150 C 350 80, 700 220, 1050 140 C 1400 60, 1750 220, 2100 140 C 2450 60, 2700 200, 2800 150 L2800 300 L0 300 Z"/>
+      </svg>
+      <svg class="wave2" viewBox="0 0 2800 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 200 C 400 140, 800 260, 1200 190 C 1600 120, 2000 260, 2400 190 C 2600 160, 2700 220, 2800 200 L2800 300 L0 300 Z"/>
+      </svg>
+      <svg class="wave3" viewBox="0 0 2800 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 240 C 500 200, 900 280, 1300 230 C 1700 180, 2100 280, 2500 230 C 2650 210, 2750 250, 2800 240 L2800 300 L0 300 Z"/>
+      </svg>
+    </div>
 
     <div class="vrb-hero-content vrb-anim">
       <h1>Book Resorts & Events in Vizag</h1>
@@ -615,73 +637,103 @@
 
   <!-- ✅ WHY CHOOSE VSHAKAGO SECTION -->
   <section class="why-vshakago">
-    <div class="container">
-        <h2 class="section-title">Why Choose VshakaGo?</h2>
 
-        <div class="features-grid">
+    <svg class="palm-leaf top-left" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+        <path d="M0 200 C 80 190 130 150 190 110 C 140 150 100 190 0 200 Z" opacity="0.55"/>
+      </g>
+    </svg>
 
-            <div class="feature-card">
-                <div class="icon blue">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <div class="content">
-                    <h4>Verified Properties</h4>
-                    <p>100% verified resorts & stays</p>
-                </div>
-            </div>
+    <svg class="palm-leaf top-right" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+        <path d="M0 200 C 80 190 130 150 190 110 C 140 150 100 190 0 200 Z" opacity="0.55"/>
+      </g>
+    </svg>
 
-            <div class="feature-card">
-                <div class="icon yellow">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <div class="content">
-                    <h4>Instant Booking</h4>
-                    <p>Book in 2 minutes get confirmation</p>
-                </div>
-            </div>
+    <svg class="mountain" viewBox="0 0 600 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 400 L120 220 L220 300 L340 140 L460 280 L600 180 L600 400 Z" fill="#4a6b8a"/>
+    </svg>
 
-            <div class="feature-card">
-                <div class="icon green">
-                    <i class="fas fa-tags"></i>
-                </div>
-                <div class="content">
-                    <h4>Best Price Guarantee</h4>
-                    <p>Lowest price always</p>
-                </div>
-            </div>
+    <div class="why-inner">
+      <div class="badge-row">
+        <span class="badge-line"></span>
+        <svg class="palm-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="46" rx="14" ry="5" fill="#2f8fe0"/>
+          <path d="M32 46 L32 22" stroke="#0b2e6b" stroke-width="2.5" stroke-linecap="round"/>
+          <g fill="#2f8fe0">
+            <path d="M32 22 C 24 16 16 18 12 24 C 20 22 26 24 32 22 Z"/>
+            <path d="M32 22 C 40 16 48 18 52 24 C 44 22 38 24 32 22 Z"/>
+            <path d="M32 22 C 28 14 22 10 14 12 C 22 14 26 18 32 22 Z"/>
+            <path d="M32 22 C 36 14 42 10 50 12 C 42 14 38 18 32 22 Z"/>
+          </g>
+          <path d="M18 44 Q32 38 46 44" stroke="#2f8fe0" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M44 16 q4 -3 8 0 M50 13 q4 -3 8 0" stroke="#2f8fe0" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="badge-line right"></span>
+      </div>
 
-            <div class="feature-card">
-                <div class="icon blue">
-                    <i class="fas fa-map-marker-alt"></i>
-                </div>
-                <div class="content">
-                    <h4>Local Expertise</h4>
-                    <p>We are Vizag travel experts</p>
-                </div>
-            </div>
+      <h2 class="why-title">Why Choose VshakaGo?</h2>
+      <p class="why-sub">Trusted by thousands of travelers for unforgettable experiences in Vizag</p>
 
-            <div class="feature-card">
-                <div class="icon sky">
-                    <i class="fas fa-headset"></i>
-                </div>
-                <div class="content">
-                    <h4>24/7 Local Support</h4>
-                    <p>Call or WhatsApp we are here</p>
-                </div>
-            </div>
+      <div class="card-row">
 
-            <div class="feature-card">
-                <div class="icon pink">
-                    <i class="fas fa-gift"></i>
-                </div>
-                <div class="content">
-                    <h4>Exclusive Offers</h4>
-                    <p>Get best deals only on VshakaGo</p>
-                </div>
-            </div>
-
+        <div class="why-card c-blue">
+          <div class="icon-wrap">🛡️</div>
+          <h3>Verified Properties</h3>
+          <div class="underline"></div>
+          <p>100% verified resorts & stays for a safe and comfortable experience.</p>
+          <div class="dot"></div>
         </div>
+
+        <div class="why-card c-amber">
+          <div class="icon-wrap">⚡</div>
+          <h3>Instant Booking</h3>
+          <div class="underline"></div>
+          <p>Book in just 2 minutes and get instant confirmation without any hassle.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-green">
+          <div class="icon-wrap">🏷️</div>
+          <h3>Best Price Guarantee</h3>
+          <div class="underline"></div>
+          <p>We guarantee the lowest price always on all resorts and stays.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-skyblue">
+          <div class="icon-wrap">📍</div>
+          <h3>Local Expertise</h3>
+          <div class="underline"></div>
+          <p>We are Vizag travel experts with local insights and support.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-purple">
+          <div class="icon-wrap">🎧</div>
+          <h3>24/7 Local Support</h3>
+          <div class="underline"></div>
+          <p>Call or WhatsApp us anytime. We are here for you 24/7.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-pink">
+          <div class="icon-wrap">🎁</div>
+          <h3>Exclusive Offers</h3>
+          <div class="underline"></div>
+          <p>Get best deals and exclusive offers only on VshakaGo.</p>
+          <div class="dot"></div>
+        </div>
+
+      </div>
     </div>
+
   </section>
 
   <!-- ✅ LOCATIONS SECTION -->
