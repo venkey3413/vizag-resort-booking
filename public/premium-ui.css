@@ -3848,3 +3848,190 @@ button[onclick*="Book"]:hover,
     font-size: 13px;
   }
 }
+
+
+/* =========================================================
+   ✅ RESORT BANNER SECTION (Between Hero and Resorts)
+   Popular Resorts in Vizag with Palm Trees & Waves
+========================================================= */
+
+.resort-banner {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffffff 0%, #eef6fc 55%, #dceefb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+/* ---- Wavy bottom layer ---- */
+.resort-banner .wave-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 55%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---- Palm leaf corners (CSS-drawn, no images needed) ---- */
+.palm-leaf {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.palm-leaf.top-left {
+  top: -40px;
+  left: -50px;
+  width: 260px;
+  height: 260px;
+  transform: rotate(15deg);
+}
+
+.palm-leaf.top-right {
+  top: -50px;
+  right: -60px;
+  width: 280px;
+  height: 280px;
+  transform: scaleX(-1) rotate(10deg);
+}
+
+.palm-leaf.bottom-left {
+  bottom: -60px;
+  left: -60px;
+  width: 300px;
+  height: 300px;
+  transform: rotate(-10deg);
+}
+
+.palm-leaf.faded {
+  opacity: 0.18;
+  filter: saturate(0) brightness(1.6);
+}
+
+/* dotted accents */
+.dots {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, 6px);
+  gap: 8px;
+}
+
+.dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #bcd6ef;
+}
+
+.dots.dots-left {
+  top: 46%;
+  left: 9%;
+}
+
+.dots.dots-right {
+  top: 28%;
+  right: 9%;
+}
+
+/* ---- Content ---- */
+.resort-banner .content {
+  position: relative;
+  z-index: 3;
+  max-width: 900px;
+}
+
+.badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.badge-row .line {
+  width: 130px;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(24,124,219,0) 0%, #2f8fe0 100%);
+}
+
+.badge-row .line.right {
+  background: linear-gradient(90deg, #2f8fe0 0%, rgba(24,124,219,0) 100%);
+}
+
+.palm-icon {
+  width: 56px;
+  height: 56px;
+}
+
+h1.headline {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: #0b2e6b;
+  margin-bottom: 18px;
+}
+
+h1.headline .accent {
+  color: #2f8fe0;
+}
+
+.resort-banner .subtitle {
+  font-size: 19px;
+  font-weight: 500;
+  color: #5b6b7d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.resort-banner .subtitle .sep {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2f8fe0;
+  display: inline-block;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .resort-banner {
+    min-height: 320px;
+    padding: 40px 20px;
+  }
+  
+  h1.headline {
+    font-size: 34px;
+  }
+  
+  .resort-banner .subtitle {
+    font-size: 15px;
+    gap: 8px;
+  }
+  
+  .badge-row .line {
+    width: 50px;
+  }
+  
+  .palm-leaf.top-left,
+  .palm-leaf.top-right,
+  .palm-leaf.bottom-left {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .dots.dots-left,
+  .dots.dots-right {
+    display: none;
+  }
+}

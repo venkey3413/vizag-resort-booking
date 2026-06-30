@@ -515,19 +515,91 @@
     </div>
   </section>
 
-  <!-- ✅ BANNER SECTION -->
-  <section class="banner-section">
-    <div class="banner-container">
-      <div class="banner-content">
-        <div class="banner-icon">
-          <i class="fa-solid fa-umbrella-beach"></i>
-        </div>
-        <div class="banner-text">
-          <h2>Discover <span>Amazing Resorts</span> in Vizag</h2>
-          <p>Experience luxury, comfort, and the best coastal views</p>
-        </div>
-      </div>
+  <!-- ✅ RESORT BANNER SECTION -->
+  <section class="resort-banner">
+
+    <!-- decorative wave background -->
+    <svg class="wave-layer" viewBox="0 0 1400 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 120 C 200 60, 400 180, 700 110 C 1000 40, 1200 160, 1400 90 L1400 260 L0 260 Z" fill="#cfe7fb" opacity="0.6"/>
+      <path d="M0 160 C 250 100, 450 200, 750 150 C 1050 100, 1250 200, 1400 150 L1400 260 L0 260 Z" fill="#bfe0fa" opacity="0.55"/>
+      <path d="M0 200 C 300 160, 500 230, 800 190 C 1100 150, 1300 220, 1400 200 L1400 260 L0 260 Z" fill="#aed6f8" opacity="0.5"/>
+    </svg>
+
+    <!-- green palm leaves, top-left and top-right -->
+    <svg class="palm-leaf top-left" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+        <path d="M0 200 C 80 190 130 150 190 110 C 140 150 100 190 0 200 Z" opacity="0.55"/>
+      </g>
+    </svg>
+
+    <svg class="palm-leaf top-right" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+        <path d="M0 200 C 80 190 130 150 190 110 C 140 150 100 190 0 200 Z" opacity="0.55"/>
+      </g>
+    </svg>
+
+    <!-- faded blue palm leaf, far top-left (behind) -->
+    <svg class="palm-leaf top-left faded" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="left:-90px; top:10px;">
+      <g fill="#2f8fe0">
+        <path d="M0 200 C 30 130 20 60 90 0 C 60 70 50 140 0 200 Z"/>
+        <path d="M0 200 C 60 160 70 90 140 30 C 100 100 70 160 0 200 Z" opacity="0.8"/>
+      </g>
+    </svg>
+
+    <!-- green palm leaf, bottom-left -->
+    <svg class="palm-leaf bottom-left" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M220 0 C 180 40 150 90 110 130 C 150 100 190 60 220 0 Z"/>
+        <path d="M220 30 C 160 70 110 120 60 170 C 110 140 170 90 220 30 Z" opacity="0.9"/>
+        <path d="M220 70 C 150 110 90 160 30 210 C 90 180 160 130 220 70 Z" opacity="0.75"/>
+        <path d="M220 120 C 140 150 70 190 0 220 C 70 200 150 170 220 120 Z" opacity="0.6"/>
+      </g>
+    </svg>
+
+    <div class="dots dots-left">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
     </div>
+    <div class="dots dots-right">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+
+    <div class="content">
+      <div class="badge-row">
+        <span class="line"></span>
+        <svg class="palm-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="46" rx="14" ry="5" fill="#2f8fe0"/>
+          <path d="M32 46 L32 22" stroke="#0b2e6b" stroke-width="2.5" stroke-linecap="round"/>
+          <g fill="#2f8fe0">
+            <path d="M32 22 C 24 16 16 18 12 24 C 20 22 26 24 32 22 Z"/>
+            <path d="M32 22 C 40 16 48 18 52 24 C 44 22 38 24 32 22 Z"/>
+            <path d="M32 22 C 28 14 22 10 14 12 C 22 14 26 18 32 22 Z"/>
+            <path d="M32 22 C 36 14 42 10 50 12 C 42 14 38 18 32 22 Z"/>
+          </g>
+          <path d="M18 44 Q32 38 46 44" stroke="#2f8fe0" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M44 16 q4 -3 8 0 M50 13 q4 -3 8 0" stroke="#2f8fe0" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="line right"></span>
+      </div>
+
+      <h1 class="headline">Popular Resorts <span class="accent">in Vizag</span></h1>
+
+      <p class="subtitle">
+        <span>Verified listings</span>
+        <span class="sep"></span>
+        <span>Best prices</span>
+        <span class="sep"></span>
+        <span>Instant booking</span>
+      </p>
+    </div>
+
   </section>
 
   <!-- ✅ RESORTS SECTION -->
