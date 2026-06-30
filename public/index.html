@@ -20,15 +20,17 @@
   <style>
     html { scroll-behavior: smooth; }
     
-    /* ✅ Partner Poster Styles - Half Size & Left Corner */
+    /* ✅ Partner Poster Styles - Full Width Extended */
     .partner-poster-wrapper {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 25px;
-      max-width: 1320px;
+      gap: 0;
+      max-width: 100%;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0;
       align-items: stretch;
+      background: linear-gradient(135deg, #f5f7fa 0%, #eef5fc 100%);
+      min-height: 100vh;
     }
 
     .poster {
@@ -795,7 +797,7 @@
       </div>
 
       <h2 class="offers-title">Offers <span class="accent">&amp; Deals</span></h2>
-      <p class="offers-sub">Apply coupon codes and save more on booking.</p>
+      <p class="offers-sub">Trusted deals and exclusive offers just for you</p>
 
       <svg class="squiggle" width="40" height="10" viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg">
         <path d="M2 5 Q 10 -2 18 5 T 38 5" stroke="#2f8fe0" stroke-width="2" fill="none" stroke-linecap="round"/>
