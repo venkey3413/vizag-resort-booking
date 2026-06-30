@@ -41,20 +41,21 @@
       border: 1px solid rgba(255,255,255,0.08);
       display: flex;
       flex-direction: column;
+      min-height: auto;
     }
 
     /* Ocean wave bg */
     .poster::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0; height: 210px;
+      top: 0; left: 0; right: 0; height: 180px;
       background: linear-gradient(160deg, #0d3b6e 0%, #1a5fa8 40%, #0a7a5a 80%, #0a1628 100%);
       z-index: 0;
     }
 
     .wave-overlay {
       position: absolute;
-      top: 0; left: 0; right: 0; height: 210px;
+      top: 0; left: 0; right: 0; height: 180px;
       background-image: repeating-linear-gradient(
         -30deg,
         rgba(255,255,255,0.015) 0px,
@@ -325,7 +326,7 @@
     .cta-footer {
       position: relative;
       z-index: 2;
-      margin: 0 26px 22px;
+      margin: 0 26px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -736,103 +737,292 @@
 
   </section>
 
-  <!-- ✅ LOCATIONS SECTION -->
-  <section class="vrb-section vrb-soft-bg">
-    <div class="vrb-premium-area">
-
-      <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
-        <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
-        <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
-
-        <div class="vrb-location-grid">
-          <div class="vrb-feature-card">
-            <div class="vrb-icon">🏖</div>
-            <h3>Beach Resorts</h3>
-            <p>Best beach stays near RK Beach, Rushikonda, Yarada and more.</p>
-          </div>
-
-          <div class="vrb-feature-card">
-            <div class="vrb-icon">👨‍👩‍👧‍👦</div>
-            <h3>Family Friendly</h3>
-            <p>Safe and comfortable resorts perfect for families with kids.</p>
-          </div>
-
-          <div class="vrb-feature-card">
-            <div class="vrb-icon">🏢</div>
-            <h3>Corporate Stays</h3>
-            <p>Conference-friendly resorts for meetings, offsites & team outings.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
-        <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
-        <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
-
-        <div class="vrb-location-grid">
-          <div class="vrb-location-card">
-            <h3>S.R Puram Resorts</h3>
-            <p>Premium resorts in S.R Puram area with modern amenities.</p>
-            <button class="vrb-mini-btn">Explore →</button>
-          </div>
-
-          <div class="vrb-location-card">
-            <h3>S Kota Resort</h3>
-            <p>Beachside resorts in S Kota with stunning sea views.</p>
-            <button class="vrb-mini-btn">Explore →</button>
-          </div>
-
-          <div class="vrb-location-card">
-            <h3>Narava Resort</h3>
-            <p>Peaceful retreat in Narava with natural surroundings.</p>
-            <button class="vrb-mini-btn">Explore →</button>
-          </div>
-
-          <div class="vrb-location-card">
-            <h3>Pinagadi Resort</h3>
-            <p>Best resorts near Araku & hill route for weekend stay.</p>
-            <button class="vrb-mini-btn">Explore →</button>
-          </div>
-
-          <div class="vrb-location-card">
-            <h3>Pendurthi Resort</h3>
-            <p>Comfort stay resorts with family-friendly amenities.</p>
-            <button class="vrb-mini-btn">Explore →</button>
-          </div>
-
-          <div class="vrb-location-card vrb-location-highlight">
-            <h3>All Resorts in Vizag</h3>
-            <p>Browse all available resorts in Vizag at best prices.</p>
-            <button class="vrb-mini-btn vrb-mini-btn-accent">View All →</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
   <!-- ✅ OFFERS SECTION -->
-  <section id="offers" class="vrb-section">
-    <div class="vrb-container vrb-anim">
-      <div class="vrb-section-head">
-        <h2 class="vrb-title">Offers & Deals</h2>
-        <p class="vrb-subtitle">Apply coupon codes and save more on booking.</p>
+  <section class="offers-section" id="offers">
+
+    <svg class="bg-waves" viewBox="0 0 1400 500" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 300 C 250 250, 450 350, 700 300 C 950 250, 1150 350, 1400 300" stroke="#bcd9f0" stroke-width="2" fill="none"/>
+      <path d="M0 360 C 250 320, 450 400, 700 360 C 950 320, 1150 400, 1400 360" stroke="#bcd9f0" stroke-width="2" fill="none"/>
+    </svg>
+
+    <svg class="island" viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="150" cy="140" rx="60" ry="14" fill="#7fb6e0"/>
+      <circle cx="60" cy="40" r="22" fill="#dceefb"/>
+      <path d="M150 140 L150 70" stroke="#5a8fc4" stroke-width="4" stroke-linecap="round"/>
+      <path d="M150 70 C 138 58 122 60 114 70 C 128 66 138 70 150 70 Z" fill="#5a8fc4"/>
+      <path d="M150 70 C 162 58 178 60 186 70 C 172 66 162 70 150 70 Z" fill="#5a8fc4"/>
+      <path d="M178 140 L178 90" stroke="#7fb6e0" stroke-width="3" stroke-linecap="round"/>
+      <path d="M178 90 C 168 80 156 82 150 90 C 160 87 168 90 178 90 Z" fill="#7fb6e0"/>
+      <path d="M178 90 C 188 80 200 82 206 90 C 196 87 188 90 178 90 Z" fill="#7fb6e0"/>
+    </svg>
+
+    <svg class="palm-leaf top-left" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f8fe0">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+      </g>
+    </svg>
+
+    <svg class="palm-leaf top-right" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f8fe0">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+      </g>
+    </svg>
+
+    <svg class="palm-leaf bottom-left green" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M200 200 C 150 160 110 150 60 180 C 110 150 150 110 200 70 Z"/>
+        <path d="M200 200 C 140 180 90 190 40 220 C 100 190 150 150 200 110 Z" opacity="0.85"/>
+      </g>
+    </svg>
+
+    <div class="inner">
+      <div class="badge-row">
+        <span class="line"></span>
+        <div class="gift-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="9" width="16" height="11" rx="1.5" stroke="#2f8fe0" stroke-width="1.6"/>
+            <path d="M4 9 H20 V12 H4 Z" stroke="#2f8fe0" stroke-width="1.6"/>
+            <path d="M12 9 V20" stroke="#2f8fe0" stroke-width="1.6"/>
+            <path d="M12 9 C 10 4 6 5 6 7.5 C 6 9.5 9 9.5 12 9 Z" stroke="#2f8fe0" stroke-width="1.6"/>
+            <path d="M12 9 C 14 4 18 5 18 7.5 C 18 9.5 15 9.5 12 9 Z" stroke="#2f8fe0" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <span class="line right"></span>
       </div>
 
-      <div class="vrb-coupon-slider-wrap">
-        <div class="vrb-coupon-slider" id="couponSlider">
-          <div class="vrb-coupon-loading">
-            Loading coupons...
+      <h2 class="offers-title">Offers <span class="accent">&amp; Deals</span></h2>
+      <p class="offers-sub">Apply coupon codes and save more on booking.</p>
+
+      <svg class="squiggle" width="40" height="10" viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 5 Q 10 -2 18 5 T 38 5" stroke="#2f8fe0" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+
+      <div class="offers-card-outer">
+        <div class="coupon-card" id="couponSlider">
+          <div class="photo">
+            <span class="badge">&#8377;1000 OFF</span>
+          </div>
+          <div class="body">
+            <h3>All Resorts</h3>
+            <div class="valid"><span class="check">&#10003;</span> Valid: Weekend (Sat&ndash;Sun)</div>
+            <div class="coupon-box">
+              <label>Coupon Code</label>
+              <div class="coupon-row">
+                <span class="code">SILVER10</span>
+                <button class="copy-btn">Copy</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="vrb-coupon-controls">
-          <button class="vrb-coupon-nav" id="couponPrevBtn">‹</button>
-          <button class="vrb-coupon-nav" id="couponNextBtn">›</button>
+        <div class="nav-arrows">
+          <button aria-label="Previous" id="couponPrevBtn">&#8249;</button>
+          <button aria-label="Next" id="couponNextBtn">&#8250;</button>
         </div>
       </div>
     </div>
+
   </section>
+
+  <style>
+    .offers-section {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding: 34px 20px 36px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(221,238,250,0.55) 50%, rgba(221,238,250,0.6) 100%),
+        linear-gradient(120deg, #eef6fc 0%, #dceefb 60%, #cfe8f8 100%);
+      border-radius: 28px;
+      margin: 40px auto;
+      max-width: 1320px;
+    }
+
+    .offers-section .bg-waves {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .offers-section .island {
+      position: absolute;
+      right: 6%;
+      bottom: 8%;
+      width: 220px;
+      opacity: 0.35;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .offers-section .palm-leaf { position: absolute; z-index: 1; pointer-events: none; opacity: 0.3; }
+    .offers-section .palm-leaf.top-left  { top: -30px; left: -40px; width: 220px; height: 220px; transform: rotate(10deg); }
+    .offers-section .palm-leaf.top-right { top: -35px; right: -45px; width: 230px; height: 230px; transform: scaleX(-1) rotate(8deg); }
+    .offers-section .palm-leaf.bottom-left{ bottom: -30px; left: -30px; width: 170px; height: 170px; transform: rotate(-8deg); opacity: 0.55; }
+    .offers-section .palm-leaf.green { opacity: 0.55; }
+
+    .offers-section .inner { position: relative; z-index: 3; max-width: 1300px; margin: 0 auto; text-align: center; }
+
+    .offers-section .badge-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
+    .offers-section .badge-row .line { width: 90px; height: 1.5px; background: linear-gradient(90deg, rgba(24,124,219,0) 0%, #2f8fe0 100%); position: relative; }
+    .offers-section .badge-row .line::after { content:""; position:absolute; right:-4px; top:-2.5px; width:6px; height:6px; border-radius:50%; background:#2f8fe0; }
+    .offers-section .badge-row .line.right { background: linear-gradient(90deg, #2f8fe0 0%, rgba(24,124,219,0) 100%); }
+    .offers-section .badge-row .line.right::after { left:-4px; right:auto; }
+
+    .offers-section .gift-icon-wrap {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    h2.offers-title {
+      font-size: 38px;
+      font-weight: 800;
+      color: #0b2e6b;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    h2.offers-title .accent { color: #2f8fe0; }
+
+    .offers-sub {
+      font-size: 15.5px;
+      font-weight: 400;
+      color: #6b7a8d;
+      margin-bottom: 4px;
+    }
+
+    .squiggle { margin: 6px auto 22px; display:block; }
+
+    .offers-card-outer {
+      position: relative;
+      background: rgba(255,255,255,0.55);
+      border-radius: 22px;
+      box-shadow: 0 12px 30px rgba(20,40,70,0.08);
+      padding: 22px;
+      min-height: 230px;
+      text-align: left;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .coupon-card {
+      width: 230px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 22px rgba(20,40,70,0.12);
+      overflow: hidden;
+    }
+
+    .coupon-card .photo {
+      position: relative;
+      height: 110px;
+      background-image: url('https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?q=80&w=600&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+    }
+    .coupon-card .badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: linear-gradient(90deg, #ff5e3a, #ff9d3d);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+    }
+
+    .coupon-card .body { padding: 12px 14px 14px; }
+    .coupon-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #14213d;
+      margin-bottom: 6px;
+    }
+    .coupon-card .valid {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11.5px;
+      color: #4a5568;
+      margin-bottom: 10px;
+    }
+    .coupon-card .valid .check {
+      width: 15px; height: 15px;
+      background:#16a34a; color:#fff;
+      border-radius: 4px;
+      display:flex; align-items:center; justify-content:center;
+      font-size: 10px;
+    }
+
+    .coupon-box {
+      background: #eef4fb;
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    .coupon-box label {
+      display:block;
+      font-size: 10px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 5px;
+    }
+    .coupon-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .coupon-row .code {
+      flex: 1;
+      border: 1.5px dashed #9db8d6;
+      border-radius: 7px;
+      background: #fff;
+      text-align: center;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      color: #14213d;
+      padding: 7px 6px;
+    }
+    .coupon-row .copy-btn {
+      border: none;
+      background: linear-gradient(90deg, #2f8fe0, #4aa8f0);
+      color: #fff;
+      font-weight: 600;
+      font-size: 11.5px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .nav-arrows {
+      position: absolute;
+      right: 18px; bottom: 18px;
+      display: flex;
+      gap: 8px;
+      z-index: 4;
+    }
+    .nav-arrows button {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(20,40,70,0.18);
+      color: #14213d;
+      font-size: 15px;
+      cursor: pointer;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    @media (max-width: 640px) {
+      h2.offers-title { font-size: 26px; }
+      .coupon-card { width: 100%; max-width: 230px; }
+    }
+  </style>
 
 
 
@@ -932,7 +1122,7 @@
         </div>
 
         <!-- Site Tag -->
-        <div class="site-tag">Powered by <strong>vshakago.in</strong> — Vizag's Premier Resort Booking Platform</div>
+        <div class="site-tag" style="padding-bottom: 18px;">Powered by <strong>vshakago.in</strong> — Vizag's Premier Resort Booking Platform</div>
       </div>
 
       <!-- Right: Owner Section -->
