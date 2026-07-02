@@ -20,418 +20,209 @@
   <style>
     html { scroll-behavior: smooth; }
     
-    /* ✅ Partner Poster Styles - Half Size & Left Corner */
-    .partner-poster-wrapper {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 25px;
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 0 20px;
-      align-items: stretch;
-    }
+  </style>
 
-    .poster {
-      width: 100%;
-      max-width: 100%;
-      background: #0a1628;
-      border-radius: 18px;
+  <!-- Partner Section Styles -->
+  <style>
+    /* ── Partner Page Wrapper ── */
+    .partner-page-wrap {
+      max-width: 1260px;
+      margin: 32px auto;
+      border-radius: 24px;
       overflow: hidden;
+      box-shadow: 0 16px 50px rgba(10,20,60,0.15);
+      background: #fff;
+    }
+
+    /* ── HERO ── */
+    .pp-hero {
       position: relative;
-      border: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      flex-direction: column;
-      min-height: auto;
+      background: linear-gradient(115deg,
+        #030d2a 0%, #071840 20%, #0b2a6b 40%,
+        #093550 65%, #071a35 85%, #030d2a 100%);
+      min-height: 360px;
+      overflow: hidden;
     }
-
-    /* Ocean wave bg */
-    .poster::before {
-      content: '';
+    .pp-hero-photo {
       position: absolute;
-      top: 0; left: 0; right: 0; height: 180px;
-      background: linear-gradient(160deg, #0d3b6e 0%, #1a5fa8 40%, #0a7a5a 80%, #0a1628 100%);
-      z-index: 0;
-    }
-
-    .wave-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 180px;
-      background-image: repeating-linear-gradient(
-        -30deg,
-        rgba(255,255,255,0.015) 0px,
-        rgba(255,255,255,0.015) 1px,
-        transparent 1px,
-        transparent 40px
-      );
+      top: 0; right: 0;
+      width: 52%; height: 100%;
+      overflow: hidden;
+      pointer-events: none;
       z-index: 1;
     }
-
-    /* Hero */
-    .hero {
-      position: relative;
-      z-index: 2;
-      padding: 18px 26px 0;
+    .pp-hero-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 55%;
+      display: block;
+      -webkit-mask-image: linear-gradient(to right,
+        transparent 0%, rgba(0,0,0,0.2) 10%,
+        rgba(0,0,0,0.65) 22%, rgba(0,0,0,0.92) 36%, #000 50%);
+      mask-image: linear-gradient(to right,
+        transparent 0%, rgba(0,0,0,0.2) 10%,
+        rgba(0,0,0,0.65) 22%, rgba(0,0,0,0.92) 36%, #000 50%);
     }
-
-    .eyebrow {
+    .pp-hero-body {
+      position: relative;
+      z-index: 3;
+      padding: 38px 44px 30px;
+      max-width: 580px;
+    }
+    .pp-badge-pill {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      background: rgba(245,166,35,0.15);
-      border: 1px solid rgba(245,166,35,0.3);
-      border-radius: 10px;
-      padding: 3px 7px;
-      font-size: 9px;
-      color: #f5c842;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    .eyebrow::before {
-      content: '';
-      width: 4px; height: 4px;
-      background: #f5c842;
-      border-radius: 50%;
-      animation: pulse 1.8s ease-in-out infinite;
-    }
-
-    .headline {
-      font-family: 'Playfair Display', serif;
-      font-size: 27px;
-      font-weight: 900;
-      color: #ffffff;
-      line-height: 1.05;
-      letter-spacing: -0.8px;
-      margin-bottom: 5px;
-    }
-
-    .headline em {
-      font-style: normal;
-      background: linear-gradient(90deg, #f5a623, #f5e642);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .subline {
-      font-size: 11px;
-      color: rgba(255,255,255,0.55);
-      font-weight: 300;
-      margin-top: 6px;
-      line-height: 1.5;
-      max-width: 100%;
-    }
-
-    /* Offer highlight strip */
-    .offer-strip {
-      position: relative;
-      z-index: 2;
-      margin: 15px 26px;
-      background: linear-gradient(90deg, rgba(245,166,35,0.12), rgba(245,230,66,0.06));
-      border: 1px solid rgba(245,166,35,0.25);
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 0;
-    }
-
-    .offer-item {
-      flex: 1;
-      display: flex;
-      align-items: center;
       gap: 7px;
-    }
-
-    .offer-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      flex-shrink: 0;
-    }
-
-    .offer-icon.orange { background: rgba(245,166,35,0.15); }
-    .offer-icon.teal { background: rgba(20,200,140,0.12); }
-
-    .offer-label {
-      font-size: 8px;
-      color: rgba(255,255,255,0.4);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    .offer-value {
-      font-family: 'Playfair Display', serif;
-      font-size: 13px;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1;
-    }
-
-    .offer-value span {
-      font-size: 9px;
-      font-family: 'DM Sans', sans-serif;
-      color: rgba(255,255,255,0.5);
-      font-weight: 400;
-      margin-left: 2px;
-    }
-
-    .offer-divider {
-      width: 1px;
-      height: 22px;
-      background: rgba(255,255,255,0.1);
-      margin: 0 14px;
-    }
-
-    .offer-arrow {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: rgba(255,255,255,0.25);
+      border: 1.5px solid #e8b923;
+      color: #e8b923;
       font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+    .pp-hero h1 {
+      font-size: 50px;
+      font-weight: 900;
+      line-height: 1.1;
+      color: #fff;
+    }
+    .pp-hero h1 .pp-gold {
+      color: #e8b923;
+      display: block;
+      margin-bottom: 16px;
+    }
+    .pp-hero-desc {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #b8cce0;
+      max-width: 480px;
     }
 
-    .arrow-label {
-      font-size: 9px;
-      color: rgba(255,255,255,0.3);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Features grid */
-    .features {
+    /* ── Phase Bar ── */
+    .pp-phase-bar {
       position: relative;
-      z-index: 2;
-      padding: 0 26px;
+      z-index: 3;
+      margin: 24px 28px 28px;
+      background: rgba(5,15,42,0.75);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+    }
+    .pp-phase-block { display: flex; align-items: center; gap: 16px; flex: 1; }
+    .pp-phase-ico {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .pp-phase-ico.red  { background: radial-gradient(circle, #c0392b, #922b21); }
+    .pp-phase-ico.teal { background: radial-gradient(circle, #148a6b, #0e6b53); }
+    .pp-phase-lbl { font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; color: #7a9ab4; margin-bottom: 3px; }
+    .pp-phase-val { font-size: 26px; font-weight: 800; color: #fff; line-height: 1; }
+    .pp-phase-val sub { font-size: 14px; font-weight: 400; color: #a0b8cc; vertical-align: middle; margin-left: 4px; }
+    .pp-phase-sep { padding: 0 28px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #6a8aaa; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+    /* ── Middle Grid ── */
+    .pp-mid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      background: #f1f3f8;
+    }
+    .pp-left-card {
+      background: #fff;
+      padding: 30px 28px;
+      border-right: 1px solid #e8ecf4;
+    }
+    .pp-left-card h2, .pp-right-card h2 {
+      font-size: 18px; font-weight: 800; color: #0f1f3d; margin-bottom: 20px;
+    }
+    .pp-feats {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 14px;
+      gap: 12px;
     }
-
-    .poster .feature-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 8px;
-      padding: 9px 9px 8px;
-      transition: border-color 0.2s;
+    .pp-feat {
+      background: #f7f9fc;
+      border-radius: 12px;
+      padding: 14px 12px 16px;
+      border: 1px solid #edf0f7;
     }
-
-    .poster .feature-card:hover {
-      border-color: rgba(255,255,255,0.15);
+    .pp-ficon {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px; font-size: 16px;
     }
+    .pp-ficon.c1 { background: #eaedfe; }
+    .pp-ficon.c2 { background: #fff4de; }
+    .pp-ficon.c3 { background: #e2f7ee; }
+    .pp-ficon.c4 { background: #ede8fe; }
+    .pp-ficon.c5 { background: #e2f7ee; }
+    .pp-ficon.c6 { background: #ddf0ff; }
+    .pp-feat h4 { font-size: 12.5px; font-weight: 700; color: #0f1f3d; margin-bottom: 5px; line-height: 1.3; }
+    .pp-feat p  { font-size: 11.5px; color: #748090; line-height: 1.5; }
 
-    .feature-icon-wrap {
-      width: 18px;
-      height: 18px;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      margin-bottom: 6px;
-    }
+    /* ── Compare Table ── */
+    .pp-right-card { background: #fff; padding: 30px 28px; }
+    .pp-ctable { width: 100%; border-collapse: collapse; }
+    .pp-ctable thead th { font-size: 13px; font-weight: 700; color: #9aa8bc; padding-bottom: 10px; text-align: left; border-bottom: 2px solid #edf0f7; }
+    .pp-ctable thead th.pp-blue { color: #2f7fe0; }
+    .pp-ctable tbody tr { border-bottom: 1px solid #f0f2f7; }
+    .pp-ctable tbody tr:last-child { border-bottom: none; }
+    .pp-ctable tbody td { padding: 12px 0; font-size: 14px; color: #2d3a50; vertical-align: middle; }
+    .pp-ctable td.pp-pct-blue { color: #2f7fe0; font-weight: 700; }
+    .pp-ctable td.pp-pct-gray { color: #9aa8bc; }
+    .pp-ctable td.pp-yes { color: #16a34a; font-size: 18px; font-weight: 700; }
+    .pp-ctable td.pp-no  { color: #e53e3e; font-size: 18px; font-weight: 700; }
 
-    .fi-blue { background: rgba(24,95,165,0.3); }
-    .fi-teal { background: rgba(15,110,86,0.3); }
-    .fi-amber { background: rgba(185,117,23,0.3); }
-
-    .feature-title {
-      font-size: 10px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.85);
-      margin-bottom: 2px;
-      letter-spacing: -0.1px;
-    }
-
-    .feature-desc {
-      font-size: 8px;
-      color: rgba(255,255,255,0.38);
-      line-height: 1.4;
-      font-weight: 300;
-    }
-
-    /* Comparison section */
-    .compare-section {
-      position: relative;
-      z-index: 2;
-      padding: 0 26px;
-      margin-bottom: 14px;
-    }
-
-    .compare-label {
-      font-size: 8px;
-      color: rgba(255,255,255,0.3);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .compare-row {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-
-    .compare-item {
-      flex: 1;
-      padding: 6px 7px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-right: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .compare-item:last-child { border-right: none; }
-
-    .compare-item.highlight {
-      background: rgba(245,166,35,0.08);
-      border-right: 1px solid rgba(245,166,35,0.12);
-    }
-
-    .compare-name {
-      font-size: 9px;
-      color: rgba(255,255,255,0.45);
-    }
-
-    .compare-item.highlight .compare-name {
-      color: #f5c842;
-      font-weight: 600;
-    }
-
-    .compare-pct {
-      font-size: 10px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.35);
-    }
-
-    .compare-item.highlight .compare-pct {
-      color: #f5c842;
-      font-size: 11px;
-    }
-
-    /* CTA Footer */
-    .cta-footer {
-      position: relative;
-      z-index: 2;
-      margin: 0 26px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: linear-gradient(135deg, #14c88c 0%, #0a7a5a 100%);
-      border-radius: 10px;
-      padding: 12px 14px;
-    }
-
-    .cta-left .cta-big {
-      font-family: 'Playfair Display', serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 2px;
-    }
-
-    .cta-left .cta-small {
-      font-size: 10px;
-      color: rgba(255,255,255,0.65);
-      font-weight: 300;
-    }
-
-    .cta-contact {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 3px;
-    }
-
-    .poster .cta-btn {
+    /* ── CTA Bar ── */
+    .pp-cta-bar {
       background: #fff;
-      color: #0a7a5a;
-      border-radius: 6px;
-      padding: 6px 11px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.2px;
+      border-top: 1px solid #edf0f7;
+      padding: 24px 36px;
       display: flex;
       align-items: center;
-      gap: 4px;
-      text-decoration: none;
+      gap: 20px;
     }
-
-    .cta-phone {
-      font-size: 9px;
-      color: rgba(255,255,255,0.6);
+    .pp-cta-ico {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; flex-shrink: 0;
     }
-
-    /* Website tag */
-    .site-tag {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      padding-bottom: 12px;
-      font-size: 8px;
-      color: rgba(255,255,255,0.2);
-      letter-spacing: 0.5px;
+    .pp-cta-txt { flex: 1; }
+    .pp-cta-txt h3 { font-size: 18px; font-weight: 800; color: #0f1f3d; margin-bottom: 3px; }
+    .pp-cta-txt p  { font-size: 13.5px; color: #748090; }
+    .pp-cta-btns { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .pp-btn-green {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #16a34a; color: #fff;
+      font-weight: 700; font-size: 14px;
+      padding: 13px 24px; border-radius: 999px;
+      text-decoration: none; white-space: nowrap;
+      box-shadow: 0 6px 18px rgba(22,163,74,0.35);
     }
-
-    .site-tag strong { color: rgba(255,255,255,0.35); }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .poster {
-        border-radius: 16px;
-      }
-      
-      .headline {
-        font-size: 36px;
-      }
-      
-      .hero, .offer-strip, .features, .compare-section, .cta-footer {
-        padding-left: 24px;
-        padding-right: 24px;
-      }
-      
-      .features {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-      
-      .offer-strip {
-        flex-direction: column;
-        gap: 20px;
-      }
-      
-      .offer-divider {
-        width: 100%;
-        height: 1px;
-        margin: 0;
-      }
-      
-      .offer-arrow {
-        transform: rotate(90deg);
-      }
-      
-      .cta-footer {
-        flex-direction: column;
-        gap: 20px;
-        text-align: center;
-      }
-      
-      .cta-contact {
-        align-items: center;
-      }
+    .pp-btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: #0f1f3d;
+      font-weight: 600; font-size: 13.5px;
+      padding: 12px 20px; border-radius: 999px;
+      border: 1.5px solid #cdd5e2;
+      text-decoration: none; white-space: nowrap;
+    }
+    @media (max-width: 900px) {
+      .pp-mid { grid-template-columns: 1fr; }
+      .pp-feats { grid-template-columns: 1fr 1fr; }
+      .pp-hero h1 { font-size: 32px; }
+      .pp-hero-photo { width: 100%; opacity: 0.25; }
+      .pp-phase-bar { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .pp-cta-bar { flex-direction: column; align-items: flex-start; }
+      .pp-cta-btns { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
@@ -1026,223 +817,141 @@
 
 
 
-  <!-- ✅ PARTNER POSTER SECTION -->
-  <section class="vrb-section">
-    <div class="vrb-container">
-      <div class="partner-poster-wrapper">
-        <!-- Left: Partner Poster (Half Size) -->
-        <div class="poster">
-        <div class="wave-overlay"></div>
+  <!-- ✅ PARTNER SECTION (updated) -->
+  <div class="partner-page-wrap">
 
-        <!-- Hero -->
-        <div class="hero">
-          <div class="eyebrow">Exclusive Partner Offer</div>
-          <div class="headline">List Your Resort.<br><em>Earn More.</em></div>
-          <div class="subline">Join Vizag's fastest-growing resort & event booking platform. Zero risk. Zero cost to start. Just more bookings at your doorstep.</div>
-        </div>
-
-        <!-- Offer Strip -->
-        <div class="offer-strip">
-          <div class="offer-item">
-            <div class="offer-icon orange">🎁</div>
-            <div>
-              <div class="offer-label">Phase 1 — Free Period</div>
-              <div class="offer-value">3 Months <span>free listing</span></div>
-            </div>
-          </div>
-          <div class="offer-divider"></div>
-          <div class="offer-arrow">
-            <div class="arrow-label">then</div>
-            <div>→</div>
-          </div>
-          <div class="offer-divider"></div>
-          <div class="offer-item">
-            <div class="offer-icon teal">💰</div>
-            <div>
-              <div class="offer-label">Phase 2 — Commission</div>
-              <div class="offer-value">Only 6% <span>per booking</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature Cards -->
-        <div class="features">
-          <div class="feature-card">
-            <div class="feature-icon-wrap fi-blue">📲</div>
-            <div class="feature-title">Instant Bookings</div>
-            <div class="feature-desc">Customers book & pay online 24/7. You just confirm.</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon-wrap fi-teal">📣</div>
-            <div class="feature-title">Free Marketing</div>
-            <div class="feature-desc">We promote your resort via WhatsApp, Google & social media.</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon-wrap fi-amber">🛡️</div>
-            <div class="feature-title">Zero Risk</div>
-            <div class="feature-desc">No booking, no commission. Pay only when we deliver guests.</div>
-          </div>
-        </div>
-
-        <!-- Commission Comparison -->
-        <div class="compare-section">
-          <div class="compare-label">Commission Comparison — Why Choose Us</div>
-          <div class="compare-row">
-            <div class="compare-item highlight">
-              <div class="compare-name">🌊 VshakaGo</div>
-              <div class="compare-pct">6%</div>
-            </div>
-            <div class="compare-item">
-              <div class="compare-name">Platform A</div>
-              <div class="compare-pct">20%</div>
-            </div>
-            <div class="compare-item">
-              <div class="compare-name">Platform B</div>
-              <div class="compare-pct">25%</div>
-            </div>
-            <div class="compare-item">
-              <div class="compare-name">Platform C</div>
-              <div class="compare-pct">18%</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CTA Footer -->
-        <div class="cta-footer">
-          <div class="cta-left">
-            <div class="cta-big">Ready to Partner With Us?</div>
-            <div class="cta-small">List your resort for FREE — start getting bookings this week</div>
-          </div>
-          <div class="cta-contact">
-            <a href="https://wa.me/918341674465" class="cta-btn">
-              💬 WhatsApp Us
-            </a>
-            <div class="cta-phone">📞 +91 83416 74465</div>
-          </div>
-        </div>
-
-        <!-- Site Tag -->
-        <div class="site-tag" style="padding-bottom: 18px;">Powered by <strong>vshakago.in</strong> — Vizag's Premier Resort Booking Platform</div>
+    <!-- Hero -->
+    <div class="pp-hero">
+      <div class="pp-hero-photo">
+        <img src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?fm=jpg&q=85&w=1400&auto=format&fit=crop" alt="Luxury Resort Vizag">
       </div>
-
-      <!-- Right: Owner Section -->
-      <section class="owner-section" style="margin: 0; padding: 0;">
-        <div class="owner-container" style="max-width: 100%; padding: 0; display: block;">
-
-            <!-- Left -->
-            <div class="owner-benefits">
-                <h2>For Resort Owners</h2>
-                <p>Grow your resort business with VshakaGo</p>
-
-                <div class="benefits-grid">
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon blue">
-                            <i class="fas fa-percent"></i>
-                        </div>
-                        <h4>Lowest Commission</h4>
-                        <span>Only 6%</span>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon sky">
-                            <i class="fas fa-paper-plane"></i>
-                        </div>
-                        <h4>Local Marketing</h4>
-                        <span>More Visibility</span>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon green">
-                            <i class="fab fa-whatsapp"></i>
-                        </div>
-                        <h4>WhatsApp Leads</h4>
-                        <span>Direct Enquiries</span>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon blue">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                        <h4>24/7 Support</h4>
-                        <span>Always with you</span>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Middle -->
-            <div class="comparison-card">
-                <h3>VshakaGo vs Others</h3>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Features</th>
-                            <th>VshakaGo</th>
-                            <th>Others</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr>
-                            <td>Commission</td>
-                            <td>6%</td>
-                            <td>20-25%</td>
-                        </tr>
-
-                        <tr>
-                            <td>Local Marketing</td>
-                            <td class="tick">✔</td>
-                            <td class="cross">✖</td>
-                        </tr>
-
-                        <tr>
-                            <td>WhatsApp Leads</td>
-                            <td class="tick">✔</td>
-                            <td class="cross">✖</td>
-                        </tr>
-
-                        <tr>
-                            <td>Personal Support</td>
-                            <td class="tick">✔</td>
-                            <td class="cross">✖</td>
-                        </tr>
-
-                        <tr>
-                            <td>Faster Payments</td>
-                            <td class="tick">✔</td>
-                            <td class="cross">✖</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Right -->
-            <div class="owner-cta">
-                <div class="cta-content">
-                    <h3>List Your Property Today!</h3>
-                    <p>
-                        Reach more guests and increase bookings
-                    </p>
-
-                    <a href="/owner-dashboard" class="cta-btn">
-                        List Your Property
-                    </a>
-                </div>
-
-                <img src="images/resort-owner-banner.jpg"
-                    alt="Resort Owner">
-            </div>
-
+      <div class="pp-hero-body">
+        <div class="pp-badge-pill">&#9733; EXCLUSIVE PARTNER OFFER</div>
+        <h1>List Your Resort.<span class="pp-gold">Earn More.</span></h1>
+        <p class="pp-hero-desc">
+          Join Vizag's fastest-growing resort &amp; event booking platform.<br>
+          Zero risk. Zero cost to start. Just more bookings at your doorstep.
+        </p>
+      </div>
+      <!-- Phase Bar -->
+      <div class="pp-phase-bar">
+        <div class="pp-phase-block">
+          <div class="pp-phase-ico red">&#127873;</div>
+          <div>
+            <div class="pp-phase-lbl">PHASE 1 — FREE PERIOD</div>
+            <div class="pp-phase-val">3 Months <sub>free listing</sub></div>
+          </div>
         </div>
-    </section>
-
+        <div class="pp-phase-sep">THEN &nbsp;&#8594;</div>
+        <div class="pp-phase-block">
+          <div class="pp-phase-ico teal">&#128176;</div>
+          <div>
+            <div class="pp-phase-lbl">PHASE 2 — COMMISSION</div>
+            <div class="pp-phase-val">Only 6% <sub>per booking</sub></div>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <!-- ✅ FOOTER -->
+    <!-- Middle Grid -->
+    <div class="pp-mid">
+
+      <!-- Left: Why Partner -->
+      <div class="pp-left-card">
+        <h2>Why Partner With VshakaGo?</h2>
+        <div class="pp-feats">
+          <div class="pp-feat">
+            <div class="pp-ficon c1">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v5c0 5.25 3.4 9.74 8 10.9C16.6 20.74 20 16.25 20 11V6z" fill="#3b5fe2" opacity="0.25" stroke="#3b5fe2" stroke-width="1.8"/><polyline points="9,12 11,14 15,10" stroke="#3b5fe2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h4>Verified Platform</h4>
+            <p>Trusted by thousands of travelers.</p>
+          </div>
+          <div class="pp-feat">
+            <div class="pp-ficon c2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="#f59e0b" opacity="0.3" stroke="#f59e0b" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </div>
+            <h4>Instant Bookings</h4>
+            <p>Customers book &amp; pay online 24/7.</p>
+          </div>
+          <div class="pp-feat">
+            <div class="pp-ficon c3">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" fill="#16a34a" opacity="0.2" stroke="#16a34a" stroke-width="1.8"/><circle cx="7" cy="7" r="1.3" fill="#16a34a"/></svg>
+            </div>
+            <h4>Lowest Commission</h4>
+            <p>Only 6% per booking (Industry lowest).</p>
+          </div>
+          <div class="pp-feat">
+            <div class="pp-ficon c4">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 11l19-9-9 19-2-8-8-2z" fill="#7c3aed" opacity="0.2" stroke="#7c3aed" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </div>
+            <h4>Local Marketing</h4>
+            <p>We promote your resort on Google &amp; social media.</p>
+          </div>
+          <div class="pp-feat">
+            <div class="pp-ficon c5">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" fill="#16a34a" opacity="0.2" stroke="#16a34a" stroke-width="1.8"/></svg>
+            </div>
+            <h4>WhatsApp Leads</h4>
+            <p>Direct enquiries delivered to you instantly.</p>
+          </div>
+          <div class="pp-feat">
+            <div class="pp-ficon c6">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 18v-6a9 9 0 0118 0v6" stroke="#2f7fe0" stroke-width="1.8"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z" fill="#2f7fe0" opacity="0.2" stroke="#2f7fe0" stroke-width="1.8"/></svg>
+            </div>
+            <h4>24/7 Support</h4>
+            <p>Our team is always here to help you.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Comparison Table -->
+      <div class="pp-right-card">
+        <h2>VshakaGo vs Others</h2>
+        <table class="pp-ctable">
+          <thead>
+            <tr>
+              <th>Features</th>
+              <th class="pp-blue">VshakaGo</th>
+              <th>Others</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Commission</td><td class="pp-pct-blue">6%</td><td class="pp-pct-gray">20% – 25%</td></tr>
+            <tr><td>Local Marketing</td><td class="pp-yes">&#10003;</td><td class="pp-no">&#10005;</td></tr>
+            <tr><td>WhatsApp Leads</td><td class="pp-yes">&#10003;</td><td class="pp-no">&#10005;</td></tr>
+            <tr><td>24/7 Support</td><td class="pp-yes">&#10003;</td><td class="pp-no">&#10005;</td></tr>
+            <tr><td>Faster Payments</td><td class="pp-yes">&#10003;</td><td class="pp-no">&#10005;</td></tr>
+            <tr><td>No Joining Fees</td><td class="pp-yes">&#10003;</td><td class="pp-no">&#10005;</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- CTA Bar -->
+    <div class="pp-cta-bar">
+      <div class="pp-cta-ico">&#127960;</div>
+      <div class="pp-cta-txt">
+        <h3>Ready to Partner With Us?</h3>
+        <p>List your resort for FREE — start getting bookings this week.</p>
+      </div>
+      <div class="pp-cta-btns">
+        <a href="https://wa.me/918341674465" class="pp-btn-green">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="white" stroke-width="2" fill="rgba(255,255,255,0.15)"/></svg>
+          WhatsApp Us
+        </a>
+        <a href="tel:+918341674465" class="pp-btn-outline">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.18 2 2 0 012.08 0h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 14.92z" stroke="#0f1f3d" stroke-width="1.8"/></svg>
+          +91 83416 74465
+        </a>
+      </div>
+    </div>
+
+  </div>
+  <!-- end partner-page-wrap -->
+
+    <!-- ✅ FOOTER -->
   <footer id="contact" class="vrb-footer">
     <div class="vrb-container vrb-footer-grid vrb-anim">
 
