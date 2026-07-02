@@ -7,12 +7,432 @@
 
   <link rel="icon" type="image/png" href="logo.png" />
 
+  <!-- ✅ Premium Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <!-- ✅ Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <!-- ✅ Load your premium UI -->
   <link rel="stylesheet" href="premium-ui.css" />
+  <link rel="stylesheet" href="owner-premium.css" />
 
   <style>
-    /* Small fallback */
     html { scroll-behavior: smooth; }
+    
+    /* ✅ Partner Poster Styles - Half Size & Left Corner */
+    .partner-poster-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 20px;
+      align-items: stretch;
+    }
+
+    .poster {
+      width: 100%;
+      max-width: 100%;
+      background: #0a1628;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      min-height: auto;
+    }
+
+    /* Ocean wave bg */
+    .poster::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 180px;
+      background: linear-gradient(160deg, #0d3b6e 0%, #1a5fa8 40%, #0a7a5a 80%, #0a1628 100%);
+      z-index: 0;
+    }
+
+    .wave-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 180px;
+      background-image: repeating-linear-gradient(
+        -30deg,
+        rgba(255,255,255,0.015) 0px,
+        rgba(255,255,255,0.015) 1px,
+        transparent 1px,
+        transparent 40px
+      );
+      z-index: 1;
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      z-index: 2;
+      padding: 18px 26px 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(245,166,35,0.15);
+      border: 1px solid rgba(245,166,35,0.3);
+      border-radius: 10px;
+      padding: 3px 7px;
+      font-size: 9px;
+      color: #f5c842;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 4px; height: 4px;
+      background: #f5c842;
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    .headline {
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.05;
+      letter-spacing: -0.8px;
+      margin-bottom: 5px;
+    }
+
+    .headline em {
+      font-style: normal;
+      background: linear-gradient(90deg, #f5a623, #f5e642);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subline {
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+      font-weight: 300;
+      margin-top: 6px;
+      line-height: 1.5;
+      max-width: 100%;
+    }
+
+    /* Offer highlight strip */
+    .offer-strip {
+      position: relative;
+      z-index: 2;
+      margin: 15px 26px;
+      background: linear-gradient(90deg, rgba(245,166,35,0.12), rgba(245,230,66,0.06));
+      border: 1px solid rgba(245,166,35,0.25);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .offer-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .offer-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .offer-icon.orange { background: rgba(245,166,35,0.15); }
+    .offer-icon.teal { background: rgba(20,200,140,0.12); }
+
+    .offer-label {
+      font-size: 8px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .offer-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .offer-value span {
+      font-size: 9px;
+      font-family: 'DM Sans', sans-serif;
+      color: rgba(255,255,255,0.5);
+      font-weight: 400;
+      margin-left: 2px;
+    }
+
+    .offer-divider {
+      width: 1px;
+      height: 22px;
+      background: rgba(255,255,255,0.1);
+      margin: 0 14px;
+    }
+
+    .offer-arrow {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: rgba(255,255,255,0.25);
+      font-size: 11px;
+    }
+
+    .arrow-label {
+      font-size: 9px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Features grid */
+    .features {
+      position: relative;
+      z-index: 2;
+      padding: 0 26px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .poster .feature-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      padding: 9px 9px 8px;
+      transition: border-color 0.2s;
+    }
+
+    .poster .feature-card:hover {
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .feature-icon-wrap {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      margin-bottom: 6px;
+    }
+
+    .fi-blue { background: rgba(24,95,165,0.3); }
+    .fi-teal { background: rgba(15,110,86,0.3); }
+    .fi-amber { background: rgba(185,117,23,0.3); }
+
+    .feature-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 2px;
+      letter-spacing: -0.1px;
+    }
+
+    .feature-desc {
+      font-size: 8px;
+      color: rgba(255,255,255,0.38);
+      line-height: 1.4;
+      font-weight: 300;
+    }
+
+    /* Comparison section */
+    .compare-section {
+      position: relative;
+      z-index: 2;
+      padding: 0 26px;
+      margin-bottom: 14px;
+    }
+
+    .compare-label {
+      font-size: 8px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .compare-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .compare-item {
+      flex: 1;
+      padding: 6px 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .compare-item:last-child { border-right: none; }
+
+    .compare-item.highlight {
+      background: rgba(245,166,35,0.08);
+      border-right: 1px solid rgba(245,166,35,0.12);
+    }
+
+    .compare-name {
+      font-size: 9px;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .compare-item.highlight .compare-name {
+      color: #f5c842;
+      font-weight: 600;
+    }
+
+    .compare-pct {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .compare-item.highlight .compare-pct {
+      color: #f5c842;
+      font-size: 11px;
+    }
+
+    /* CTA Footer */
+    .cta-footer {
+      position: relative;
+      z-index: 2;
+      margin: 0 26px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #14c88c 0%, #0a7a5a 100%);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .cta-left .cta-big {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .cta-left .cta-small {
+      font-size: 10px;
+      color: rgba(255,255,255,0.65);
+      font-weight: 300;
+    }
+
+    .cta-contact {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .poster .cta-btn {
+      background: #fff;
+      color: #0a7a5a;
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+    }
+
+    .cta-phone {
+      font-size: 9px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Website tag */
+    .site-tag {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding-bottom: 12px;
+      font-size: 8px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.5px;
+    }
+
+    .site-tag strong { color: rgba(255,255,255,0.35); }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .poster {
+        border-radius: 16px;
+      }
+      
+      .headline {
+        font-size: 36px;
+      }
+      
+      .hero, .offer-strip, .features, .compare-section, .cta-footer {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+      
+      .features {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      
+      .offer-strip {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .offer-divider {
+        width: 100%;
+        height: 1px;
+        margin: 0;
+      }
+      
+      .offer-arrow {
+        transform: rotate(90deg);
+      }
+      
+      .cta-footer {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+      
+      .cta-contact {
+        align-items: center;
+      }
+    }
   </style>
 </head>
 
@@ -24,16 +444,12 @@
 
       <a href="#home" class="vrb-logo">
         <img src="logo.png" alt="Logo">
-        <span>Vizag Resort Booking</span>
+        <div class="logo-caption">
+          <span>Vizag Starts Here & Go</span>
+        </div>
       </a>
 
       <nav class="vrb-nav-links" id="vrbNavLinks">
-        <a class="active" href="#home">Home</a>
-        <a href="#resorts">Resorts</a>
-        <a href="#travel">Cabs / Travel</a>
-        <a href="#events">Events</a>
-        <a href="#offers">Offers</a>
-        <a href="#contact">Contact</a>
       </nav>
 
       <div class="vrb-nav-actions">
@@ -44,29 +460,61 @@
     </div>
   </header>
 
+  <!-- ✅ ICON BUTTONS SECTION -->
+  <section class="vrb-icon-buttons">
+    <div class="vrb-icon-container">
+      <button class="vrb-icon-btn" onclick="window.location.href='/events'">
+        <span class="icon">🎉</span>
+        <span class="text">Events</span>
+      </button>
+      <button class="vrb-icon-btn" onclick="window.location.href='https://vshakago.in/vshinteriors/'">
+        <span class="icon">🏠</span>
+        <span class="text">Interior Works</span>
+      </button>
+    </div>
+  </section>
+
   <!-- ✅ HERO (HOME) -->
   <section id="home" class="vrb-hero">
+    <div class="bg"></div>
     <div class="vrb-overlay"></div>
 
+    <!-- sparkles -->
+    <span class="sparkle" style="top:30%; left:12%; width:4px; height:4px; animation-delay:0s;"></span>
+    <span class="sparkle" style="top:55%; left:25%; width:3px; height:3px; animation-delay:1s;"></span>
+    <span class="sparkle" style="top:65%; left:60%; width:5px; height:5px; animation-delay:2s;"></span>
+    <span class="sparkle" style="top:48%; left:80%; width:3px; height:3px; animation-delay:0.5s;"></span>
+    <span class="sparkle" style="top:70%; left:40%; width:4px; height:4px; animation-delay:1.5s;"></span>
+    <span class="sparkle" style="top:60%; left:90%; width:3px; height:3px; animation-delay:2.5s;"></span>
+
+    <!-- animated drifting waves -->
+    <div class="wave-wrap">
+      <svg class="wave1" viewBox="0 0 2800 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 150 C 350 80, 700 220, 1050 140 C 1400 60, 1750 220, 2100 140 C 2450 60, 2700 200, 2800 150 L2800 300 L0 300 Z"/>
+      </svg>
+      <svg class="wave2" viewBox="0 0 2800 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 200 C 400 140, 800 260, 1200 190 C 1600 120, 2000 260, 2400 190 C 2600 160, 2700 220, 2800 200 L2800 300 L0 300 Z"/>
+      </svg>
+      <svg class="wave3" viewBox="0 0 2800 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 240 C 500 200, 900 280, 1300 230 C 1700 180, 2100 280, 2500 230 C 2650 210, 2750 250, 2800 240 L2800 300 L0 300 Z"/>
+      </svg>
+    </div>
+
     <div class="vrb-hero-content vrb-anim">
-      <h1>Book Resorts & Travel in Vizag</h1>
-      <p>Resorts • Cabs • Events • Best Deals • 24/7 Support</p>
+      <h1>Book Resorts & Events in Vizag</h1>
+      <p>Resorts • Food • Events • Best Deals • 24/7 Support</p>
 
       <!-- Tabs -->
       <div class="vrb-tabs">
         <button class="vrb-tab-btn active" onclick="vrbShowTab('resort')">🏖 Resort Booking</button>
-        <button class="vrb-tab-btn" onclick="vrbShowTab('cab')">🚖 Cab / Travel</button>
       </div>
 
       <!-- Resort Booking Form -->
       <div class="vrb-search-box vrb-tab-content active" id="vrb-resort">
         <div class="vrb-field">
           <label>Location</label>
-          <select>
-            <option>Visakhapatnam</option>
-            <option>Rushikonda</option>
-            <option>Araku</option>
-            <option>Yarada</option>
+          <select id="locationSelect">
+            <option>Loading locations...</option>
           </select>
         </div>
 
@@ -80,281 +528,728 @@
           <input type="date" />
         </div>
 
-        <div class="vrb-field">
-          <label>Guests</label>
-          <select>
-            <option>2 Adults</option>
-            <option>3 Adults</option>
-            <option>4 Adults</option>
-            <option>Family (2+2)</option>
-          </select>
-        </div>
-
-        <button class="vrb-btn vrb-btn-orange">Search Resorts</button>
+        <!-- ✅ Added ID to button -->
+        <button class="vrb-btn vrb-btn-orange" id="heroSearchBtn">Search Resorts</button>
       </div>
-
-      <!-- Cab / Travel Booking Form -->
-      <div class="vrb-search-box vrb-tab-content" id="vrb-cab">
-        <div class="vrb-field">
-          <label>Pickup</label>
-          <input type="text" placeholder="Enter pickup location" />
-        </div>
-
-        <div class="vrb-field">
-          <label>Drop</label>
-          <input type="text" placeholder="Enter drop location" />
-        </div>
-
-        <div class="vrb-field">
-          <label>Date</label>
-          <input type="date" />
-        </div>
-
-        <div class="vrb-field">
-          <label>Trip Type</label>
-          <select>
-            <option>One Way</option>
-            <option>Round Trip</option>
-            <option>Hourly Rental</option>
-          </select>
-        </div>
-
-        <button class="vrb-btn vrb-btn-orange">Book Cab</button>
+      
+      <div style="text-align: center; margin-top: 15px; margin-bottom: 10px;">
+        <button class="vrb-btn vrb-btn-light" id="heroClearBtn" style="font-size: 13px; padding: 10px 16px; background: rgba(255,255,255,0.9); color: #333; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; font-weight: 600;">🔄 Clear Search</button>
       </div>
     </div>
+  </section>
+
+  <!-- ✅ RESORT BANNER SECTION -->
+  <section class="resort-banner">
+
+    <!-- decorative wave background -->
+    <svg class="wave-layer" viewBox="0 0 1400 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 120 C 200 60, 400 180, 700 110 C 1000 40, 1200 160, 1400 90 L1400 260 L0 260 Z" fill="#cfe7fb" opacity="0.6"/>
+      <path d="M0 160 C 250 100, 450 200, 750 150 C 1050 100, 1250 200, 1400 150 L1400 260 L0 260 Z" fill="#bfe0fa" opacity="0.55"/>
+      <path d="M0 200 C 300 160, 500 230, 800 190 C 1100 150, 1300 220, 1400 200 L1400 260 L0 260 Z" fill="#aed6f8" opacity="0.5"/>
+    </svg>
+
+    <!-- green palm leaves, top-left and top-right -->
+    <svg class="palm-leaf top-left" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+        <path d="M0 200 C 80 190 130 150 190 110 C 140 150 100 190 0 200 Z" opacity="0.55"/>
+      </g>
+    </svg>
+
+    <svg class="palm-leaf top-right" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+        <path d="M0 200 C 80 190 130 150 190 110 C 140 150 100 190 0 200 Z" opacity="0.55"/>
+      </g>
+    </svg>
+
+    <!-- faded blue palm leaf, far top-left (behind) -->
+    <svg class="palm-leaf top-left faded" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="left:-90px; top:10px;">
+      <g fill="#2f8fe0">
+        <path d="M0 200 C 30 130 20 60 90 0 C 60 70 50 140 0 200 Z"/>
+        <path d="M0 200 C 60 160 70 90 140 30 C 100 100 70 160 0 200 Z" opacity="0.8"/>
+      </g>
+    </svg>
+
+    <!-- green palm leaf, bottom-left -->
+    <svg class="palm-leaf bottom-left" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M220 0 C 180 40 150 90 110 130 C 150 100 190 60 220 0 Z"/>
+        <path d="M220 30 C 160 70 110 120 60 170 C 110 140 170 90 220 30 Z" opacity="0.9"/>
+        <path d="M220 70 C 150 110 90 160 30 210 C 90 180 160 130 220 70 Z" opacity="0.75"/>
+        <path d="M220 120 C 140 150 70 190 0 220 C 70 200 150 170 220 120 Z" opacity="0.6"/>
+      </g>
+    </svg>
+
+    <div class="dots dots-left">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+    <div class="dots dots-right">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+
+    <div class="content">
+      <div class="badge-row">
+        <span class="line"></span>
+        <svg class="palm-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="46" rx="14" ry="5" fill="#2f8fe0"/>
+          <path d="M32 46 L32 22" stroke="#0b2e6b" stroke-width="2.5" stroke-linecap="round"/>
+          <g fill="#2f8fe0">
+            <path d="M32 22 C 24 16 16 18 12 24 C 20 22 26 24 32 22 Z"/>
+            <path d="M32 22 C 40 16 48 18 52 24 C 44 22 38 24 32 22 Z"/>
+            <path d="M32 22 C 28 14 22 10 14 12 C 22 14 26 18 32 22 Z"/>
+            <path d="M32 22 C 36 14 42 10 50 12 C 42 14 38 18 32 22 Z"/>
+          </g>
+          <path d="M18 44 Q32 38 46 44" stroke="#2f8fe0" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M44 16 q4 -3 8 0 M50 13 q4 -3 8 0" stroke="#2f8fe0" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="line right"></span>
+      </div>
+
+      <h1 class="headline">Popular Resorts <span class="accent">in Vizag</span></h1>
+
+      <p class="subtitle">
+        <span>Verified listings</span>
+        <span class="sep"></span>
+        <span>Best prices</span>
+        <span class="sep"></span>
+        <span>Instant booking</span>
+      </p>
+    </div>
+
   </section>
 
   <!-- ✅ RESORTS SECTION -->
   <section id="resorts" class="vrb-section">
     <div class="vrb-container">
-      <div class="vrb-section-head vrb-anim">
-        <h2 class="vrb-title">Popular Resorts in Vizag</h2>
-        <p class="vrb-subtitle">
-          Verified listings • Best prices • Instant booking
-        </p>
+      <div class="vrb-grid" id="resortsGrid">
+        <div style="text-align:center;padding:2rem;color:#666;">
+          Loading resorts...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ✅ WHY CHOOSE VSHAKAGO SECTION -->
+  <section class="why-vshakago">
+
+    <svg class="palm-leaf top-left" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+        <path d="M0 200 C 80 190 130 150 190 110 C 140 150 100 190 0 200 Z" opacity="0.55"/>
+      </g>
+    </svg>
+
+    <svg class="palm-leaf top-right" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+        <path d="M0 200 C 80 190 130 150 190 110 C 140 150 100 190 0 200 Z" opacity="0.55"/>
+      </g>
+    </svg>
+
+    <svg class="mountain" viewBox="0 0 600 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 400 L120 220 L220 300 L340 140 L460 280 L600 180 L600 400 Z" fill="#4a6b8a"/>
+    </svg>
+
+    <div class="why-inner">
+      <div class="badge-row">
+        <span class="badge-line"></span>
+        <svg class="palm-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="46" rx="14" ry="5" fill="#2f8fe0"/>
+          <path d="M32 46 L32 22" stroke="#0b2e6b" stroke-width="2.5" stroke-linecap="round"/>
+          <g fill="#2f8fe0">
+            <path d="M32 22 C 24 16 16 18 12 24 C 20 22 26 24 32 22 Z"/>
+            <path d="M32 22 C 40 16 48 18 52 24 C 44 22 38 24 32 22 Z"/>
+            <path d="M32 22 C 28 14 22 10 14 12 C 22 14 26 18 32 22 Z"/>
+            <path d="M32 22 C 36 14 42 10 50 12 C 42 14 38 18 32 22 Z"/>
+          </g>
+          <path d="M18 44 Q32 38 46 44" stroke="#2f8fe0" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M44 16 q4 -3 8 0 M50 13 q4 -3 8 0" stroke="#2f8fe0" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="badge-line right"></span>
       </div>
 
-      <div class="vrb-filters vrb-anim">
-        <button class="vrb-chip active">All</button>
-        <button class="vrb-chip">Beach</button>
-        <button class="vrb-chip">Family</button>
-        <button class="vrb-chip">Couple</button>
-        <button class="vrb-chip">Luxury</button>
-        <button class="vrb-chip">Budget</button>
+      <h2 class="why-title">Why Choose VshakaGo?</h2>
+      <p class="why-sub">Trusted by thousands of travelers for unforgettable experiences in Vizag</p>
+
+      <div class="card-row">
+
+        <div class="why-card c-blue">
+          <div class="icon-wrap">🛡️</div>
+          <h3>Verified Properties</h3>
+          <div class="underline"></div>
+          <p>100% verified resorts & stays for a safe and comfortable experience.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-amber">
+          <div class="icon-wrap">⚡</div>
+          <h3>Instant Booking</h3>
+          <div class="underline"></div>
+          <p>Book in just 2 minutes and get instant confirmation without any hassle.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-green">
+          <div class="icon-wrap">🏷️</div>
+          <h3>Best Price Guarantee</h3>
+          <div class="underline"></div>
+          <p>We guarantee the lowest price always on all resorts and stays.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-skyblue">
+          <div class="icon-wrap">📍</div>
+          <h3>Local Expertise</h3>
+          <div class="underline"></div>
+          <p>We are Vizag travel experts with local insights and support.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-purple">
+          <div class="icon-wrap">🎧</div>
+          <h3>24/7 Local Support</h3>
+          <div class="underline"></div>
+          <p>Call or WhatsApp us anytime. We are here for you 24/7.</p>
+          <div class="dot"></div>
+        </div>
+
+        <div class="why-card c-pink">
+          <div class="icon-wrap">🎁</div>
+          <h3>Exclusive Offers</h3>
+          <div class="underline"></div>
+          <p>Get best deals and exclusive offers only on VshakaGo.</p>
+          <div class="dot"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ✅ OFFERS SECTION -->
+  <section class="offers-section" id="offers">
+
+    <svg class="bg-waves" viewBox="0 0 1400 500" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 300 C 250 250, 450 350, 700 300 C 950 250, 1150 350, 1400 300" stroke="#bcd9f0" stroke-width="2" fill="none"/>
+      <path d="M0 360 C 250 320, 450 400, 700 360 C 950 320, 1150 400, 1400 360" stroke="#bcd9f0" stroke-width="2" fill="none"/>
+    </svg>
+
+    <svg class="island" viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="150" cy="140" rx="60" ry="14" fill="#7fb6e0"/>
+      <circle cx="60" cy="40" r="22" fill="#dceefb"/>
+      <path d="M150 140 L150 70" stroke="#5a8fc4" stroke-width="4" stroke-linecap="round"/>
+      <path d="M150 70 C 138 58 122 60 114 70 C 128 66 138 70 150 70 Z" fill="#5a8fc4"/>
+      <path d="M150 70 C 162 58 178 60 186 70 C 172 66 162 70 150 70 Z" fill="#5a8fc4"/>
+      <path d="M178 140 L178 90" stroke="#7fb6e0" stroke-width="3" stroke-linecap="round"/>
+      <path d="M178 90 C 168 80 156 82 150 90 C 160 87 168 90 178 90 Z" fill="#7fb6e0"/>
+      <path d="M178 90 C 188 80 200 82 206 90 C 196 87 188 90 178 90 Z" fill="#7fb6e0"/>
+    </svg>
+
+    <svg class="palm-leaf top-left" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f8fe0">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+      </g>
+    </svg>
+
+    <svg class="palm-leaf top-right" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f8fe0">
+        <path d="M0 200 C 20 140 10 70 70 0 C 50 70 40 140 0 200 Z"/>
+        <path d="M0 200 C 40 150 50 80 110 20 C 80 90 60 150 0 200 Z" opacity="0.85"/>
+        <path d="M0 200 C 60 170 90 110 150 60 C 110 120 80 170 0 200 Z" opacity="0.7"/>
+      </g>
+    </svg>
+
+    <svg class="palm-leaf bottom-left green" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#2f9e44">
+        <path d="M200 200 C 150 160 110 150 60 180 C 110 150 150 110 200 70 Z"/>
+        <path d="M200 200 C 140 180 90 190 40 220 C 100 190 150 150 200 110 Z" opacity="0.85"/>
+      </g>
+    </svg>
+
+    <div class="inner">
+      <div class="badge-row">
+        <span class="line"></span>
+        <div class="gift-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="9" width="16" height="11" rx="1.5" stroke="#2f8fe0" stroke-width="1.6"/>
+            <path d="M4 9 H20 V12 H4 Z" stroke="#2f8fe0" stroke-width="1.6"/>
+            <path d="M12 9 V20" stroke="#2f8fe0" stroke-width="1.6"/>
+            <path d="M12 9 C 10 4 6 5 6 7.5 C 6 9.5 9 9.5 12 9 Z" stroke="#2f8fe0" stroke-width="1.6"/>
+            <path d="M12 9 C 14 4 18 5 18 7.5 C 18 9.5 15 9.5 12 9 Z" stroke="#2f8fe0" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <span class="line right"></span>
       </div>
 
-      <div class="vrb-grid">
+      <h2 class="offers-title">Offers <span class="accent">&amp; Deals</span></h2>
+      <p class="offers-sub">Apply coupon codes and save more on booking.</p>
 
-        <article class="vrb-card vrb-anim">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1400" alt="Resort">
-            <span class="vrb-badge">⭐ 4.6</span>
+      <svg class="squiggle" width="40" height="10" viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 5 Q 10 -2 18 5 T 38 5" stroke="#2f8fe0" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+
+      <div class="offers-card-outer">
+        <div class="coupon-card" id="couponSlider">
+          <div class="photo">
+            <span class="badge">&#8377;1000 OFF</span>
           </div>
-          <div class="vrb-body">
-            <h3>Silver Stay Resort</h3>
-            <p class="vrb-meta">📍 Rushikonda, Vizag • Beach view</p>
-
-            <div class="vrb-tags">
-              <span>Pool</span><span>AC</span><span>Couple</span><span>WiFi</span>
-            </div>
-
-            <div class="vrb-bottom">
-              <div>
-                <p class="vrb-price">₹3500 <span>/ night</span></p>
-                <p class="vrb-small">Free cancellation</p>
+          <div class="body">
+            <h3>All Resorts</h3>
+            <div class="valid"><span class="check">&#10003;</span> Valid: Weekend (Sat&ndash;Sun)</div>
+            <div class="coupon-box">
+              <label>Coupon Code</label>
+              <div class="coupon-row">
+                <span class="code">SILVER10</span>
+                <button class="copy-btn">Copy</button>
               </div>
-
-              <button class="vrb-btn vrb-btn-primary"
-                onclick="openBookingPopup('Silver Stay Resort','Rushikonda, Vizag','3500')">
-                Book Now
-              </button>
             </div>
           </div>
-        </article>
-
-        <article class="vrb-card vrb-anim">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1400" alt="Resort">
-            <span class="vrb-badge">⭐ 4.5</span>
-          </div>
-          <div class="vrb-body">
-            <h3>Royal Orchid</h3>
-            <p class="vrb-meta">📍 S.R Puram, Vizag • Premium stay</p>
-
-            <div class="vrb-tags">
-              <span>Luxury</span><span>Parking</span><span>Breakfast</span>
-            </div>
-
-            <div class="vrb-bottom">
-              <div>
-                <p class="vrb-price">₹5200 <span>/ night</span></p>
-                <p class="vrb-small">Instant confirmation</p>
-              </div>
-
-              <button class="vrb-btn vrb-btn-primary"
-                onclick="openBookingPopup('Royal Orchid','S.R Puram, Vizag','5200')">
-                Book Now
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <article class="vrb-card vrb-anim">
-          <div class="vrb-img">
-            <img src="https://images.unsplash.com/photo-1501117716987-c8e1ecb210d1?w=1400" alt="Resort">
-            <span class="vrb-badge">⭐ 4.7</span>
-          </div>
-          <div class="vrb-body">
-            <h3>Sun Vacation Resort</h3>
-            <p class="vrb-meta">📍 Narava, Vizag • Family friendly</p>
-
-            <div class="vrb-tags">
-              <span>Family</span><span>Play Area</span><span>Pool</span>
-            </div>
-
-            <div class="vrb-bottom">
-              <div>
-                <p class="vrb-price">₹4100 <span>/ night</span></p>
-                <p class="vrb-small">Best price guarantee</p>
-              </div>
-
-              <button class="vrb-btn vrb-btn-primary"
-                onclick="openBookingPopup('Sun Vacation Resort','Narava, Vizag','4100')">
-                Book Now
-              </button>
-            </div>
-          </div>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ✅ WHY BOOK + LOCATIONS -->
-  <section class="vrb-section vrb-soft-bg">
-
-    <div class="vrb-wrap vrb-anim">
-      <h2 class="vrb-heading">Why Book Resorts with Vizag Resort Booking?</h2>
-      <p class="vrb-desc">Premium stays • Verified listings • Instant support</p>
-
-      <div class="vrb-feature-grid">
-        <div class="vrb-feature-card">
-          <div class="vrb-icon">🏖</div>
-          <h3>Beach Resorts</h3>
-          <p>Best beach stays near RK Beach, Rushikonda, Yarada and more.</p>
         </div>
 
-        <div class="vrb-feature-card">
-          <div class="vrb-icon">👨‍👩‍👧‍👦</div>
-          <h3>Family Friendly</h3>
-          <p>Safe and comfortable resorts perfect for families with kids.</p>
-        </div>
-
-        <div class="vrb-feature-card">
-          <div class="vrb-icon">🏢</div>
-          <h3>Corporate Stays</h3>
-          <p>Conference-friendly resorts for meetings, offsites & team outings.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
-      <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
-      <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
-
-      <div class="vrb-location-grid">
-        <div class="vrb-location-card">
-          <h3>S.R Puram Resorts</h3>
-          <p>Premium resorts in S.R Puram area with modern amenities.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card">
-          <h3>S Kota Resort</h3>
-          <p>Beachside resorts in S Kota with stunning sea views.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card">
-          <h3>Narava Resort</h3>
-          <p>Peaceful retreat in Narava with natural surroundings.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card">
-          <h3>Pinagadi Resort</h3>
-          <p>Best resorts near Araku & hill route for weekend stay.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card">
-          <h3>Pendurthi Resort</h3>
-          <p>Comfort stay resorts with family-friendly amenities.</p>
-          <button class="vrb-mini-btn">Explore →</button>
-        </div>
-
-        <div class="vrb-location-card vrb-location-highlight">
-          <h3>All Resorts in Vizag</h3>
-          <p>Browse all available resorts in Vizag at best prices.</p>
-          <button class="vrb-mini-btn vrb-mini-btn-accent">View All →</button>
+        <div class="nav-arrows">
+          <button aria-label="Previous" id="couponPrevBtn">&#8249;</button>
+          <button aria-label="Next" id="couponNextBtn">&#8250;</button>
         </div>
       </div>
     </div>
 
   </section>
 
-  <!-- ✅ OFFERS & DEALS SECTION WITH HORIZONTAL COUPONS -->
-  <section id="offers" class="vrb-section">
-    <div class="vrb-container vrb-anim">
-      <div class="vrb-section-head">
-        <h2 class="vrb-title">Offers & Deals</h2>
-        <p class="vrb-subtitle">Apply coupon codes and save more on booking.</p>
-      </div>
+  <style>
+    .offers-section {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding: 34px 20px 36px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(221,238,250,0.55) 50%, rgba(221,238,250,0.6) 100%),
+        linear-gradient(120deg, #eef6fc 0%, #dceefb 60%, #cfe8f8 100%);
+      border-radius: 28px;
+      margin: 40px auto;
+      max-width: 1320px;
+    }
 
-      <!-- ✅ HORIZONTAL COUPON SLIDER -->
-      <div class="vrb-coupon-slider-wrap">
-        <div class="vrb-coupon-slider" id="vrb-coupon-slider">
-          <!-- Coupons will be loaded dynamically from API -->
+    .offers-section .bg-waves {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .offers-section .island {
+      position: absolute;
+      right: 6%;
+      bottom: 8%;
+      width: 220px;
+      opacity: 0.35;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .offers-section .palm-leaf { position: absolute; z-index: 1; pointer-events: none; opacity: 0.3; }
+    .offers-section .palm-leaf.top-left  { top: -30px; left: -40px; width: 220px; height: 220px; transform: rotate(10deg); }
+    .offers-section .palm-leaf.top-right { top: -35px; right: -45px; width: 230px; height: 230px; transform: scaleX(-1) rotate(8deg); }
+    .offers-section .palm-leaf.bottom-left{ bottom: -30px; left: -30px; width: 170px; height: 170px; transform: rotate(-8deg); opacity: 0.55; }
+    .offers-section .palm-leaf.green { opacity: 0.55; }
+
+    .offers-section .inner { position: relative; z-index: 3; max-width: 1300px; margin: 0 auto; text-align: center; }
+
+    .offers-section .badge-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
+    .offers-section .badge-row .line { width: 90px; height: 1.5px; background: linear-gradient(90deg, rgba(24,124,219,0) 0%, #2f8fe0 100%); position: relative; }
+    .offers-section .badge-row .line::after { content:""; position:absolute; right:-4px; top:-2.5px; width:6px; height:6px; border-radius:50%; background:#2f8fe0; }
+    .offers-section .badge-row .line.right { background: linear-gradient(90deg, #2f8fe0 0%, rgba(24,124,219,0) 100%); }
+    .offers-section .badge-row .line.right::after { left:-4px; right:auto; }
+
+    .offers-section .gift-icon-wrap {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    h2.offers-title {
+      font-size: 38px;
+      font-weight: 800;
+      color: #0b2e6b;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    h2.offers-title .accent { color: #2f8fe0; }
+
+    .offers-sub {
+      font-size: 15.5px;
+      font-weight: 400;
+      color: #6b7a8d;
+      margin-bottom: 4px;
+    }
+
+    .squiggle { margin: 6px auto 22px; display:block; }
+
+    .offers-card-outer {
+      position: relative;
+      background: rgba(255,255,255,0.55);
+      border-radius: 22px;
+      box-shadow: 0 12px 30px rgba(20,40,70,0.08);
+      padding: 22px;
+      min-height: 230px;
+      text-align: left;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .coupon-card {
+      width: 230px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 22px rgba(20,40,70,0.12);
+      overflow: hidden;
+    }
+
+    .coupon-card .photo {
+      position: relative;
+      height: 110px;
+      background-image: url('https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?q=80&w=600&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+    }
+    .coupon-card .badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: linear-gradient(90deg, #ff5e3a, #ff9d3d);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+    }
+
+    .coupon-card .body { padding: 12px 14px 14px; }
+    .coupon-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #14213d;
+      margin-bottom: 6px;
+    }
+    .coupon-card .valid {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11.5px;
+      color: #4a5568;
+      margin-bottom: 10px;
+    }
+    .coupon-card .valid .check {
+      width: 15px; height: 15px;
+      background:#16a34a; color:#fff;
+      border-radius: 4px;
+      display:flex; align-items:center; justify-content:center;
+      font-size: 10px;
+    }
+
+    .coupon-box {
+      background: #eef4fb;
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    .coupon-box label {
+      display:block;
+      font-size: 10px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 5px;
+    }
+    .coupon-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .coupon-row .code {
+      flex: 1;
+      border: 1.5px dashed #9db8d6;
+      border-radius: 7px;
+      background: #fff;
+      text-align: center;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      color: #14213d;
+      padding: 7px 6px;
+    }
+    .coupon-row .copy-btn {
+      border: none;
+      background: linear-gradient(90deg, #2f8fe0, #4aa8f0);
+      color: #fff;
+      font-weight: 600;
+      font-size: 11.5px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .nav-arrows {
+      position: absolute;
+      right: 18px; bottom: 18px;
+      display: flex;
+      gap: 8px;
+      z-index: 4;
+    }
+    .nav-arrows button {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(20,40,70,0.18);
+      color: #14213d;
+      font-size: 15px;
+      cursor: pointer;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    @media (max-width: 640px) {
+      h2.offers-title { font-size: 26px; }
+      .coupon-card { width: 100%; max-width: 230px; }
+    }
+  </style>
+
+
+
+  <!-- ✅ PARTNER POSTER SECTION -->
+  <section class="vrb-section">
+    <div class="vrb-container">
+      <div class="partner-poster-wrapper">
+        <!-- Left: Partner Poster (Half Size) -->
+        <div class="poster">
+        <div class="wave-overlay"></div>
+
+        <!-- Hero -->
+        <div class="hero">
+          <div class="eyebrow">Exclusive Partner Offer</div>
+          <div class="headline">List Your Resort.<br><em>Earn More.</em></div>
+          <div class="subline">Join Vizag's fastest-growing resort & event booking platform. Zero risk. Zero cost to start. Just more bookings at your doorstep.</div>
         </div>
 
-        <!-- Navigation Controls -->
-        <div class="vrb-coupon-controls">
-          <button class="vrb-coupon-nav" onclick="scrollCouponLeft()">← Prev</button>
-          <button class="vrb-coupon-nav" onclick="scrollCouponRight()">Next →</button>
+        <!-- Offer Strip -->
+        <div class="offer-strip">
+          <div class="offer-item">
+            <div class="offer-icon orange">🎁</div>
+            <div>
+              <div class="offer-label">Phase 1 — Free Period</div>
+              <div class="offer-value">3 Months <span>free listing</span></div>
+            </div>
+          </div>
+          <div class="offer-divider"></div>
+          <div class="offer-arrow">
+            <div class="arrow-label">then</div>
+            <div>→</div>
+          </div>
+          <div class="offer-divider"></div>
+          <div class="offer-item">
+            <div class="offer-icon teal">💰</div>
+            <div>
+              <div class="offer-label">Phase 2 — Commission</div>
+              <div class="offer-value">Only 6% <span>per booking</span></div>
+            </div>
+          </div>
         </div>
+
+        <!-- Feature Cards -->
+        <div class="features">
+          <div class="feature-card">
+            <div class="feature-icon-wrap fi-blue">📲</div>
+            <div class="feature-title">Instant Bookings</div>
+            <div class="feature-desc">Customers book & pay online 24/7. You just confirm.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap fi-teal">📣</div>
+            <div class="feature-title">Free Marketing</div>
+            <div class="feature-desc">We promote your resort via WhatsApp, Google & social media.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap fi-amber">🛡️</div>
+            <div class="feature-title">Zero Risk</div>
+            <div class="feature-desc">No booking, no commission. Pay only when we deliver guests.</div>
+          </div>
+        </div>
+
+        <!-- Commission Comparison -->
+        <div class="compare-section">
+          <div class="compare-label">Commission Comparison — Why Choose Us</div>
+          <div class="compare-row">
+            <div class="compare-item highlight">
+              <div class="compare-name">🌊 VshakaGo</div>
+              <div class="compare-pct">6%</div>
+            </div>
+            <div class="compare-item">
+              <div class="compare-name">Platform A</div>
+              <div class="compare-pct">20%</div>
+            </div>
+            <div class="compare-item">
+              <div class="compare-name">Platform B</div>
+              <div class="compare-pct">25%</div>
+            </div>
+            <div class="compare-item">
+              <div class="compare-name">Platform C</div>
+              <div class="compare-pct">18%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Footer -->
+        <div class="cta-footer">
+          <div class="cta-left">
+            <div class="cta-big">Ready to Partner With Us?</div>
+            <div class="cta-small">List your resort for FREE — start getting bookings this week</div>
+          </div>
+          <div class="cta-contact">
+            <a href="https://wa.me/918341674465" class="cta-btn">
+              💬 WhatsApp Us
+            </a>
+            <div class="cta-phone">📞 +91 83416 74465</div>
+          </div>
+        </div>
+
+        <!-- Site Tag -->
+        <div class="site-tag" style="padding-bottom: 18px;">Powered by <strong>vshakago.in</strong> — Vizag's Premier Resort Booking Platform</div>
       </div>
 
+      <!-- Right: Owner Section -->
+      <section class="owner-section" style="margin: 0; padding: 0;">
+        <div class="owner-container" style="max-width: 100%; padding: 0; display: block;">
+
+            <!-- Left -->
+            <div class="owner-benefits">
+                <h2>For Resort Owners</h2>
+                <p>Grow your resort business with VshakaGo</p>
+
+                <div class="benefits-grid">
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon blue">
+                            <i class="fas fa-percent"></i>
+                        </div>
+                        <h4>Lowest Commission</h4>
+                        <span>Only 6%</span>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon sky">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <h4>Local Marketing</h4>
+                        <span>More Visibility</span>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon green">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <h4>WhatsApp Leads</h4>
+                        <span>Direct Enquiries</span>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon blue">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h4>24/7 Support</h4>
+                        <span>Always with you</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Middle -->
+            <div class="comparison-card">
+                <h3>VshakaGo vs Others</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Features</th>
+                            <th>VshakaGo</th>
+                            <th>Others</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Commission</td>
+                            <td>6%</td>
+                            <td>20-25%</td>
+                        </tr>
+
+                        <tr>
+                            <td>Local Marketing</td>
+                            <td class="tick">✔</td>
+                            <td class="cross">✖</td>
+                        </tr>
+
+                        <tr>
+                            <td>WhatsApp Leads</td>
+                            <td class="tick">✔</td>
+                            <td class="cross">✖</td>
+                        </tr>
+
+                        <tr>
+                            <td>Personal Support</td>
+                            <td class="tick">✔</td>
+                            <td class="cross">✖</td>
+                        </tr>
+
+                        <tr>
+                            <td>Faster Payments</td>
+                            <td class="tick">✔</td>
+                            <td class="cross">✖</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Right -->
+            <div class="owner-cta">
+                <div class="cta-content">
+                    <h3>List Your Property Today!</h3>
+                    <p>
+                        Reach more guests and increase bookings
+                    </p>
+
+                    <a href="/owner-dashboard" class="cta-btn">
+                        List Your Property
+                    </a>
+                </div>
+
+                <img src="images/resort-owner-banner.jpg"
+                    alt="Resort Owner">
+            </div>
+
+        </div>
+    </section>
+
+      </div>
     </div>
   </section>
 
-  <!-- ✅ EVENTS PLACEHOLDER -->
-  <section id="events" class="vrb-section">
-    <div class="vrb-container vrb-anim">
-      <div class="vrb-section-head">
-        <h2 class="vrb-title">Events & Party Bookings</h2>
-        <p class="vrb-subtitle">Birthday • Engagement • Corporate Parties</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ✅ TRAVEL PLACEHOLDER -->
-  <section id="travel" class="vrb-section">
-    <div class="vrb-container vrb-anim">
-      <div class="vrb-section-head">
-        <h2 class="vrb-title">Cab / Travel Booking</h2>
-        <p class="vrb-subtitle">Airport pickup • City rides • Araku trip</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ✅ PREMIUM FOOTER -->
+  <!-- ✅ FOOTER -->
   <footer id="contact" class="vrb-footer">
     <div class="vrb-container vrb-footer-grid vrb-anim">
 
       <div>
-        <h3>Vizag Resort Booking</h3>
+        <h3>Vizag Starts Here & Go</h3>
         <p>
-          Resorts + Cabs + Events booking in Vizag.<br>
+          Resorts + Events booking in Vizag.<br>
           Premium verified listings with best deals.
         </p>
 
@@ -369,26 +1264,26 @@
         <h4>Quick Links</h4>
         <a href="#home">Home</a>
         <a href="#resorts">Resorts</a>
-        <a href="#travel">Cabs / Travel</a>
+        <a href="#food">Food</a>
         <a href="#events">Events</a>
         <a href="#offers">Offers</a>
+        <a href="/owner-dashboard">Owner Dashboard</a>
       </div>
 
       <div>
         <h4>Support</h4>
         <a href="tel:+918341674465">📞 +91 8341674465</a>
-        <a href="mailto:support@vizagresortbooking.in">✉️ support@vizagresortbooking.in</a>
+        <a href="mailto:vizagresortbooking@gmail.com">✉️ vizagresortbooking@gmail.com</a>
         <a href="https://wa.me/918341674465" target="_blank">💬 WhatsApp Support</a>
       </div>
 
     </div>
 
     <div class="vrb-footer-bottom">
-      © 2026 Vizag Resort Booking • Built with ❤️ in Vizag
+      © 2026 Vizag Starts Here & Go • Built with ❤️ in Vizag
     </div>
   </footer>
 
-  <!-- ✅ POLICY BUTTON -->
   <a class="vrb-policy-btn" href="Cancellation & terms and conditions (1).pdf" target="_blank">
     📄 Policy
   </a>
@@ -396,20 +1291,16 @@
   <!-- ✅ BOOKING MODAL -->
   <div class="vrb-modal" id="bookingModal">
     <div class="vrb-modal-card">
-      <button class="vrb-close" onclick="closeBookingPopup()">✕</button>
+      <button class="vrb-close" onclick="closeBookingModal()">✕</button>
 
       <div class="vrb-modal-head">
-        <h2>Confirm Booking</h2>
+        <h2 id="modalResortName">Confirm Booking</h2>
         <p>Secure booking with instant confirmation</p>
       </div>
 
       <div class="vrb-modal-summary">
         <div>
           <span class="label">Resort</span>
-          <b id="modalResortName">-</b>
-        </div>
-        <div>
-          <span class="label">Location</span>
           <b id="modalResortLocation">-</b>
         </div>
         <div>
@@ -420,45 +1311,52 @@
 
       <div class="vrb-coupon-row">
         <input id="couponCode" type="text" placeholder="Enter Coupon Code" />
-        <button class="vrb-btn vrb-btn-light" onclick="applyCouponCode()">Apply</button>
+        <button class="vrb-btn vrb-btn-light" id="applyCouponBtn">Apply</button>
       </div>
+      <div id="couponMessage"></div>
+      <div id="availableCoupons" style="display:none;"></div>
 
       <div class="vrb-price-box">
         <div class="line">
-          <span>Subtotal</span>
-          <b id="subtotalAmount">₹0</b>
+          <span>Base Amount</span>
+          <b id="baseAmount">₹0</b>
         </div>
         <div class="line">
+          <span>Platform Fee</span>
+          <b id="platformFee">₹0</b>
+        </div>
+        <div class="line" id="discountRow" style="display:none;">
           <span>Discount</span>
           <b id="discountAmount" class="green">-₹0</b>
         </div>
         <div class="line total">
           <span>Total Pay</span>
-          <b id="finalAmount">₹0</b>
+          <b id="totalAmount">₹0</b>
         </div>
       </div>
 
       <form id="bookingForm" class="vrb-form">
-        <input id="customerName" type="text" placeholder="Full Name" required />
-        <input id="customerMobile" type="tel" placeholder="Mobile Number" required />
+        <input type="hidden" id="resortId" />
+        <input type="hidden" id="resortPrice" />
+
+        <input id="guestName" type="text" placeholder="Full Name" required />
+        <input id="email" type="email" placeholder="Email Address" required />
+        <input id="phone" type="tel" placeholder="Phone Number" required />
 
         <div class="vrb-form-grid">
-          <input id="checkinDate" type="date" required />
-          <input id="checkoutDate" type="date" required />
+          <input id="checkIn" type="date" required />
+          <input id="checkOut" type="date" required />
         </div>
 
-        <select id="guestCount" required>
-          <option value="2 Adults">2 Adults</option>
-          <option value="3 Adults">3 Adults</option>
-          <option value="4 Adults">4 Adults</option>
-          <option value="Family (2+2)">Family (2+2)</option>
-        </select>
+        <label id="guestsLabel">Number of Guests:</label>
+        <input id="guests" type="number" min="1" max="20" value="2" required />
+        <div id="guestWarning" style="display:none;color:#dc3545;font-size:0.9rem;">⚠️ Guest count exceeds maximum capacity</div>
 
-        <button type="submit" class="vrb-btn vrb-btn-primary">
+        <button type="submit" class="vrb-btn vrb-btn-primary book-btn">
           Proceed to Payment
         </button>
 
-        <button type="button" class="vrb-btn vrb-btn-light" onclick="closeBookingPopup()">
+        <button type="button" class="vrb-btn vrb-btn-light" onclick="closeBookingModal()">
           Cancel
         </button>
       </form>
@@ -469,50 +1367,458 @@
     </div>
   </div>
 
-  <!-- ✅ CHAT WIDGET -->
-  <div class="vrb-chat-widget">
-    <button class="vrb-chat-fab" id="vrbChatFab">
-      <img src="logo.png" alt="Chat Logo">
-    </button>
+  <!-- ✅ APP DOWNLOAD POPUP -->
+  <div class="app-modal-overlay" id="appDownloadModal" style="display: none;">
+    <div class="app-modal-container">
+      <button class="app-close-btn" onclick="closeAppModal()">✕</button>
 
-    <div class="vrb-chat-box" id="vrbChatBox">
-      <div class="vrb-chat-header">
-        <div class="vrb-chat-title">
-          <img src="logo.png" alt="Logo">
-          <div>
-            <h4>Vizag Support</h4>
-            <p>Online • Reply in minutes</p>
-          </div>
+      <div class="app-logo">
+        <img src="logo.png" alt="vshakaGo Logo">
+      </div>
+
+      <h1 class="app-title">vshakaGo</h1>
+      <p class="app-subtitle">Book Resorts, Events & Experiences</p>
+      
+      <div class="app-features">
+        <div class="app-feature">
+          <span class="feature-icon">🏖️</span>
+          <span class="feature-text">Premium Resorts</span>
         </div>
-        <button class="vrb-chat-close" id="vrbChatClose">✕</button>
+        <div class="app-feature">
+          <span class="feature-icon">🎉</span>
+          <span class="feature-text">Event Bookings</span>
+        </div>
+        <div class="app-feature">
+          <span class="feature-icon">💰</span>
+          <span class="feature-text">Best Deals</span>
+        </div>
       </div>
 
-      <div class="vrb-chat-body" id="vrbChatBody">
-        <div class="vrb-msg vrb-bot">👋 Hi! Welcome to Vizag Resort Booking.</div>
-        <div class="vrb-msg vrb-bot">How can I help you today?</div>
+      <a href="/app-release.apk" class="app-download-btn" download>
+        <span class="btn-icon">📱</span>
+        <span class="btn-text">Download Android App</span>
+        <span class="btn-badge">FREE</span>
+      </a>
+      
+      <div class="app-stats">
+        <div class="stat-item">
+          <div class="stat-value">500+</div>
+          <div class="stat-label">Downloads</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value">4.8★</div>
+          <div class="stat-label">Rating</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value">5MB</div>
+          <div class="stat-label">Size</div>
+        </div>
       </div>
 
-      <div class="vrb-chat-footer">
-        <input id="vrbChatInput" type="text" placeholder="Type your message..." />
-        <button class="vrb-chat-send" id="vrbChatSend">➤</button>
-      </div>
-
-      <div class="vrb-chat-quick">
-        <button class="vrb-q" data-msg="I want to book resort">🏖 Book Resort</button>
-        <button class="vrb-q" data-msg="I want cab booking">🚖 Book Cab</button>
-        <button class="vrb-q" data-msg="I want event booking">🎉 Book Event</button>
+      <div class="app-footer">
+        © 2026 vshakaGo. All rights reserved.
       </div>
     </div>
   </div>
 
-  <!-- ✅ COUPON LOADER -->
-  <script src="coupons-loader.js"></script>
+  <style>
+    .app-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: appFadeIn 0.3s ease;
+    }
 
-  <!-- ✅ COUPON FUNCTIONS -->
-  <script src="coupon-functions.js"></script>
+    @keyframes appFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes appSlideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes appFadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @keyframes appPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .app-modal-container {
+      max-width: 420px;
+      max-height: 85vh;
+      width: 90%;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 24px;
+      padding: 35px 30px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      text-align: center;
+      position: relative;
+      animation: appSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 1px solid rgba(255,255,255,0.8);
+      overflow-y: auto;
+    }
+
+    .app-close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(0,0,0,0.05);
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      color: #666;
+      font-weight: 300;
+    }
+
+    .app-close-btn:hover {
+      background: rgba(0,0,0,0.1);
+      transform: rotate(90deg) scale(1.1);
+      color: #333;
+    }
+
+    .app-logo {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 15px;
+      border-radius: 20px;
+      padding: 10px;
+      background: linear-gradient(135deg, #1e5f74, #2d7a92);
+      box-shadow: 0 10px 30px rgba(30, 95, 116, 0.3);
+      animation: appPulse 2s ease-in-out infinite;
+    }
+
+    .app-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: white;
+      border-radius: 16px;
+      padding: 8px;
+    }
+
+    .app-title {
+      font-family: 'Playfair Display', serif;
+      margin-top: 0;
+      margin-bottom: 6px;
+      color: #164654;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .app-subtitle {
+      color: #6b7c8d;
+      margin-bottom: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .app-features {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .app-feature {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(30, 95, 116, 0.08);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #164654;
+      font-weight: 600;
+    }
+
+    .feature-icon {
+      font-size: 16px;
+    }
+
+    .app-download-btn {
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #1e5f74, #2d7a92);
+      color: white;
+      text-decoration: none;
+      border-radius: 14px;
+      font-weight: 700;
+      transition: all 0.3s;
+      font-size: 15px;
+      box-shadow: 0 8px 25px rgba(30, 95, 116, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-download-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .app-download-btn:hover::before {
+      left: 100%;
+    }
+
+    .app-download-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(30, 95, 116, 0.45);
+    }
+
+    .btn-icon {
+      font-size: 22px;
+    }
+
+    .btn-badge {
+      background: rgba(255,255,255,0.25);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .app-stats {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(30, 95, 116, 0.05);
+      border-radius: 14px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1e5f74;
+      margin-bottom: 3px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #6b7c8d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 35px;
+      background: rgba(30, 95, 116, 0.15);
+    }
+
+    .app-footer {
+      font-size: 11px;
+      color: #999;
+      font-weight: 500;
+    }
+
+    @media (min-width: 769px) {
+      .app-modal-container {
+        max-width: 400px;
+        max-height: 80vh;
+        padding: 30px 25px;
+      }
+      
+      .app-logo {
+        width: 80px;
+        height: 80px;
+      }
+      
+      .app-title {
+        font-size: 26px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app-modal-container {
+        padding: 35px 25px;
+      }
+
+      .app-title {
+        font-size: 28px;
+      }
+
+      .app-features {
+        gap: 10px;
+      }
+
+      .app-feature {
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+
+      .app-download-btn {
+        font-size: 15px;
+        padding: 16px 28px;
+      }
+
+      .app-stats {
+        gap: 15px;
+        padding: 15px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+      }
+    }
+  </style>
 
   <!-- ✅ SCRIPTS -->
+  <script src="critical.js"></script>
+
   <script>
+    // App Download Modal
+    window.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('appDownloadModal');
+      
+      // Show modal on page load
+      setTimeout(function() {
+        modal.style.display = 'flex';
+      }, 500);
+      
+      // Auto-close after 5 seconds
+      setTimeout(function() {
+        closeAppModal();
+      }, 5500);
+    });
+
+    function closeAppModal() {
+      const modal = document.getElementById('appDownloadModal');
+      modal.style.animation = 'appFadeOut 0.3s ease';
+      setTimeout(function() {
+        modal.style.display = 'none';
+      }, 300);
+    }
+
+    // Close on overlay click
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('appDownloadModal');
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeAppModal();
+          }
+        });
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeAppModal();
+      }
+    });
+  </script>
+
+  <script>
+    // Enhanced Animation System
+    document.addEventListener('DOMContentLoaded', function() {
+      // Scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate');
+          }
+        });
+      }, observerOptions);
+
+      // Observe all animation elements
+      document.querySelectorAll('.vrb-anim').forEach(el => {
+        observer.observe(el);
+      });
+
+      // Button click animations
+      document.querySelectorAll('button, .vrb-btn, .vrb-btn-primary, .vrb-btn-orange').forEach(btn => {
+        btn.addEventListener('click', function() {
+          this.classList.add('bounce-on-click');
+          setTimeout(() => {
+            this.classList.remove('bounce-on-click');
+          }, 600);
+        });
+      });
+
+      // Card stagger animation on load
+      setTimeout(() => {
+        document.querySelectorAll('.vrb-card, .resort-card').forEach((card, index) => {
+          setTimeout(() => {
+            card.classList.add('fade-in-up');
+          }, index * 100);
+        });
+      }, 500);
+
+      // Smooth scroll for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+
+      // Add pulse animation to important buttons
+      document.querySelectorAll('.vrb-btn-nav, .book-btn').forEach(btn => {
+        btn.classList.add('pulse');
+      });
+    });
+
     function vrbToggleMenu() {
       document.getElementById("vrbNavLinks").classList.toggle("open");
     }
@@ -524,102 +1830,220 @@
       if (type === "resort") {
         document.querySelectorAll(".vrb-tab-btn")[0].classList.add("active");
         document.getElementById("vrb-resort").classList.add("active");
-      } else {
+      } 
+      else if (type === "food") {
         document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
-        document.getElementById("vrb-cab").classList.add("active");
+        document.getElementById("vrb-food").classList.add("active");
       }
     }
 
-    function openBookingPopup(name, location, price) {
-      document.getElementById("modalResortName").innerText = name;
-      document.getElementById("modalResortLocation").innerText = location;
-      document.getElementById("modalResortPrice").innerText = "₹" + price;
+    /* ======================================================
+       ✅ FIXED: Hero Location search with clear functionality
+       ====================================================== */
+    function filterResortsByHeroLocation() {
+      const locationSelect = document.getElementById("locationSelect");
+      if (!locationSelect) return;
+      
+      const selectedLocation = locationSelect.value.trim();
+      const selectedText = locationSelect.options[locationSelect.selectedIndex].text;
+      
+      console.log('🔍 Hero search - Selected:', selectedLocation, 'Text:', selectedText);
 
-      document.getElementById("subtotalAmount").innerText = "₹" + price;
-      document.getElementById("discountAmount").innerText = "-₹0";
-      document.getElementById("finalAmount").innerText = "₹" + price;
+      // Handle "All Locations" selection
+      if (!selectedLocation || selectedLocation === "All Locations" || selectedText === "All Locations") {
+        console.log('📍 Showing all resorts');
+        if (window.resorts && typeof renderResorts === "function") {
+          renderResorts(window.resorts);
+          document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
+          showCriticalNotification(`Showing all ${window.resorts.length} resorts`, 'success');
+        }
+        return;
+      }
 
-      document.getElementById("bookingModal").classList.add("show");
-      document.body.style.overflow = "hidden";
+      // Filter by selected location
+      if (window.resorts && typeof renderResorts === "function") {
+        const filtered = window.resorts.filter(r => 
+          r.location && r.location.trim().toLowerCase() === selectedLocation.toLowerCase()
+        );
+        console.log('📍 Filtered resorts:', filtered.length, 'for location:', selectedLocation);
+        
+        if (filtered.length === 0) {
+          showCriticalNotification(`No resorts found in ${selectedLocation}`, 'error');
+          return;
+        }
+        
+        renderResorts(filtered);
+        document.getElementById("resorts")?.scrollIntoView({ behavior: "smooth" });
+        showCriticalNotification(`Found ${filtered.length} resorts in ${selectedLocation}`, 'success');
+      }
     }
 
-    function closeBookingPopup() {
-      document.getElementById("bookingModal").classList.remove("show");
-      document.body.style.overflow = "auto";
+    function clearHeroSearch() {
+      // Force hard refresh to reset everything
+      location.reload(true);
     }
 
-    function applyCouponCode(){
-      const code = document.getElementById("couponCode").value.trim().toUpperCase();
-      const priceText = document.getElementById("modalResortPrice").innerText.replace("₹","");
-      const price = parseInt(priceText) || 0;
+    document.addEventListener("DOMContentLoaded", () => {
+      const heroBtn = document.getElementById("heroSearchBtn");
+      const clearBtn = document.getElementById("heroClearBtn");
+      const locationSelect = document.getElementById("locationSelect");
 
-      let discount = 0;
-      if(code === "VIZAG10") discount = Math.floor(price * 0.10);
-      if(code === "VIZAG20") discount = Math.floor(price * 0.20);
+      if (heroBtn) {
+        heroBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          filterResortsByHeroLocation();
+        });
+      }
 
-      document.getElementById("subtotalAmount").innerText = "₹" + price;
-      document.getElementById("discountAmount").innerText = "-₹" + discount;
-      document.getElementById("finalAmount").innerText = "₹" + (price - discount);
-    }
+      if (clearBtn) {
+        clearBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          clearHeroSearch();
+        });
+      }
 
-    document.getElementById("bookingForm").addEventListener("submit", function(e){
-      e.preventDefault();
-      alert("✅ Booking popup working! Connect Razorpay here.");
-      closeBookingPopup();
-    });
-
-    // Chat widget
-    const chatFab = document.getElementById("vrbChatFab");
-    const chatBox = document.getElementById("vrbChatBox");
-    const chatClose = document.getElementById("vrbChatClose");
-    const chatSend = document.getElementById("vrbChatSend");
-    const chatInput = document.getElementById("vrbChatInput");
-    const chatBody = document.getElementById("vrbChatBody");
-
-    function toggleChat(){ chatBox.classList.toggle("open"); }
-    chatFab.addEventListener("click", toggleChat);
-    chatClose.addEventListener("click", toggleChat);
-
-    function addMsg(text, type){
-      const div = document.createElement("div");
-      div.className = "vrb-msg " + type;
-      div.innerText = text;
-      chatBody.appendChild(div);
-      chatBody.scrollTop = chatBody.scrollHeight;
-    }
-
-    function sendMsg(){
-      const msg = chatInput.value.trim();
-      if(!msg) return;
-      addMsg(msg, "vrb-user");
-      chatInput.value = "";
-      setTimeout(()=> addMsg("✅ Thanks! Please share check-in date, guests & budget.", "vrb-bot"), 500);
-    }
-
-    chatSend.addEventListener("click", sendMsg);
-    chatInput.addEventListener("keypress", (e)=>{ if(e.key==="Enter") sendMsg(); });
-
-    document.querySelectorAll(".vrb-q").forEach((btn)=>{
-      btn.addEventListener("click", ()=>{
-        chatInput.value = btn.getAttribute("data-msg");
-        sendMsg();
-      });
-    });
-
-    // ✅ Scroll animation replay (up/down)
-    const items = document.querySelectorAll(".vrb-anim");
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add("vrb-show");
-        else entry.target.classList.remove("vrb-show");
-      });
-    }, { threshold: 0.15 });
-
-    items.forEach((el) => {
-      el.classList.add("vrb-hide");
-      observer.observe(el);
+      // Remove auto-filter on dropdown change
+      // Location will only filter when Search button is clicked
     });
   </script>
 
 </body>
 </html>
+  <script>
+/* =========================================================
+   ✅ OFFERS & DEALS COUPON SLIDER (DB Driven)
+   - Fetches coupons from /api/coupons
+   - Shows each coupon in premium mini container
+   - Auto rotation slide + manual arrows
+========================================================= */
+
+async function loadOffersCoupons() {
+  const slider = document.getElementById("couponSlider");
+  if (!slider) return;
+
+  slider.innerHTML = `<div class="vrb-coupon-loading">Loading coupons...</div>`;
+
+  try {
+    // ✅ Fetch coupons
+    const couponsRes = await fetch("/api/coupons");
+    const coupons = await couponsRes.json();
+
+    if (!coupons || coupons.length === 0) {
+      slider.innerHTML = `<div class="vrb-coupon-empty">No offers available right now.</div>`;
+      return;
+    }
+
+    // ✅ Fetch resorts if available (already loaded in window.resorts by critical.js)
+    let resorts = window.resorts || [];
+    if (!resorts || resorts.length === 0) {
+      // fallback fetch resorts (if offers loads earlier)
+      const resortsRes = await fetch("/api/resorts");
+      resorts = await resortsRes.json();
+      window.resorts = resorts;
+    }
+
+    // ✅ Build coupon cards
+    slider.innerHTML = coupons.map(c => {
+      const resort = resorts.find(r => r.id == c.resort_id) || null;
+
+      const resortName = resort ? resort.name : "All Resorts";
+      const resortImg = resort?.image || "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200";
+
+      const discountText =
+        c.type === "percentage"
+          ? `${c.discount}% OFF`
+          : `₹${c.discount} OFF`;
+
+      const dayLabel =
+        c.day_type === "weekday" ? "Weekdays (Mon-Thu)" :
+        c.day_type === "friday" ? "Friday Only" :
+        c.day_type === "weekend" ? "Weekend (Sat-Sun)" :
+        "All Days";
+
+      return `
+        <div class="vrb-coupon-card">
+          <div class="vrb-coupon-img">
+            <img src="${resortImg}" alt="${resortName}">
+            <span class="vrb-coupon-badge">${discountText}</span>
+          </div>
+
+          <div class="vrb-coupon-body">
+            <h3>${resortName}</h3>
+            <p class="vrb-coupon-day">✅ Valid: <b>${dayLabel}</b></p>
+
+            <div class="vrb-coupon-code">
+              <span class="label">Coupon Code</span>
+              <div class="code-row">
+                <code>${c.code}</code>
+                <button class="copy-btn" onclick="copyCouponCode('${c.code}')">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // ✅ Initialize slider rotation after rendering
+    initCouponSlider();
+
+  } catch (err) {
+    console.error("❌ Coupons load failed:", err);
+    slider.innerHTML = `<div class="vrb-coupon-empty">Failed to load coupons. Please refresh.</div>`;
+  }
+}
+
+/* ✅ Copy coupon button */
+function copyCouponCode(code) {
+  navigator.clipboard.writeText(code);
+  alert("✅ Coupon copied: " + code);
+}
+
+/* ✅ Slider logic */
+let couponIndex = 0;
+let couponInterval;
+
+function initCouponSlider() {
+  const slider = document.getElementById("couponSlider");
+  const cards = slider?.querySelectorAll(".vrb-coupon-card");
+
+  if (!cards || cards.length === 0) return;
+
+  function showCoupon(i) {
+    couponIndex = i;
+    slider.scrollTo({
+      left: cards[i].offsetLeft - slider.offsetLeft,
+      behavior: "smooth"
+    });
+  }
+
+  function nextCoupon() {
+    couponIndex = (couponIndex + 1) % cards.length;
+    showCoupon(couponIndex);
+  }
+
+  function prevCoupon() {
+    couponIndex = (couponIndex - 1 + cards.length) % cards.length;
+    showCoupon(couponIndex);
+  }
+
+  // ✅ Auto rotate
+  clearInterval(couponInterval);
+  couponInterval = setInterval(nextCoupon, 4000);
+
+  // ✅ Buttons
+  const nextBtn = document.getElementById("couponNextBtn");
+  const prevBtn = document.getElementById("couponPrevBtn");
+
+  if (nextBtn) nextBtn.onclick = () => { nextCoupon(); };
+  if (prevBtn) prevBtn.onclick = () => { prevCoupon(); };
+
+  // ✅ Pause on hover
+  slider.addEventListener("mouseenter", () => clearInterval(couponInterval));
+  slider.addEventListener("mouseleave", () => {
+    couponInterval = setInterval(nextCoupon, 4000);
+  });
+}
+
+/* ✅ Load when page ready */
+document.addEventListener("DOMContentLoaded", loadOffersCoupons);
+  </script>
