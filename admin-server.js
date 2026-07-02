@@ -800,6 +800,56 @@ app.delete('/api/owners/:id', async (req, res) => {
     }
 });
 
+// Partner applications endpoints
+app.get('/api/partner-applications', async (req, res) => {
+    try {
+        const query = req.query.status ? `?status=${req.query.status}` : '';
+        const response = await fetch(`${DB_API_URL}/api/partner-applications${query}`);
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch partner applications' });
+    }
+});
+
+app.patch('/api/partner-applications/:id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/partner-applications/${req.params.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update partner application' });
+    }
+});
+
+app.get('/api/owner-bank-details/:application_id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/owner-bank-details/${req.params.application_id}`);
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch bank details' });
+    }
+});
+
+app.patch('/api/owner-bank-details/:id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/owner-bank-details/${req.params.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update bank details' });
+    }
+});
+
 // Event bookings (view & update status)
 app.get('/api/event-bookings', async (req, res) => {
     try {

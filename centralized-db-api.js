@@ -1456,3 +1456,174 @@ initDB().then(() => {
 }).catch(error => {
     console.error('Failed to initialize database:', error);
 });
+
+// PARTNER APPLICATIONS API
+
+// Submit partner application
+app.post('/api/partner-applications', async (req, res) => {
+    try {
+        const { owner_name, owner_email, owner_phone, resort_name, resort_location, resort_type, total_rooms, amenities, description } = req.body;
+        
+        if (!owner_name || !owner_email || !owner_phone || !resort_name || !resort_location) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        
+        // Generate reference ID
+        const referenceId = `PA-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 10000)}`;
+        
+        const result = await db.run(`
+            INSERT INTO partner_applications 
+            (reference_id, owner_name, owner_email, owner_phone, resort_name, resort_location, resort_type, total_rooms, amenities, description)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [referenceId, owner_name, owner_email, owner_phone, resort_name, resort_location, resort_type, total_rooms, amenities, description]);
+        
+        publishEvent('partner.application.submitted', { applicationId: result.lastID, referenceId });
+        res.json({ id: result.lastID, reference_id: referenceId, message: 'Application submitted successfully' });
+    } catch (error) {
+        console.error('Partner application submission error:', error);
+        res.status(500).json({ error: 'Failed to submit application' });
+    }
+});
+
+// Get partner application by reference
+app.get('/api/partner-applications/:reference_id', async (req, res) => {
+    try {
+        const application = await db.get(
+            'SELECT * FROM partner_applications WHERE reference_id = ?',
+            [req.params.reference_id]
+        );
+        
+        if (!application) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+        
+        res.json(application);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch application' });
+    }
+});
+
+// Get all partner applications (admin)
+app.get('/api/partner-applications', async (req, res) => {
+    try {
+        let query = 'SELECT * FROM partner_applications WHERE 1=1';
+        const params = [];
+        
+        if (req.query.status) {
+            query += ' AND status = ?';
+            params.push(req.query.status);
+        }
+        
+        query += ' ORDER BY submitted_at DESC LIMIT ?';
+        params.push(parseInt(req.query.limit) || 50);
+        
+        const applications = await db.all(query, params);
+        res.json(applications);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch applications' });
+    }
+});
+
+// Approve/Reject partner application (admin)
+app.patch('/api/partner-applications/:id', async (req, res) => {
+    try {
+        const { status, reviewed_by, rejection_reason } = req.body;
+        
+        if (!status || !['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+        
+        await db.run(`
+            UPDATE partner_applications 
+            SET status = ?, reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP, rejection_reason = ?
+            WHERE id = ?
+        `, [status, reviewed_by, rejection_reason || null, req.params.id]);
+        
+        publishEvent('partner.application.reviewed', { applicationId: req.params.id, status });
+        res.json({ message: `Application ${status} successfully` });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update application' });
+    }
+});
+
+// BANK DETAILS API
+
+// Save bank details
+app.post('/api/owner-bank-details', async (req, res) => {
+    try {
+        const { application_id, account_holder_name, account_number, ifsc_code, bank_name, upi_id, pan_number, aadhar_number, document_url } = req.body;
+        
+        if (!application_id || !account_holder_name || !account_number || !ifsc_code || !bank_name) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        
+        const result = await db.run(`
+            INSERT INTO owner_bank_details 
+            (application_id, account_holder_name, account_number, ifsc_code, bank_name, upi_id, pan_number, aadhar_number, document_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [application_id, account_holder_name, account_number, ifsc_code, bank_name, upi_id, pan_number, aadhar_number, document_url]);
+        
+        publishEvent('bank.details.submitted', { bankDetailsId: result.lastID, applicationId: application_id });
+        res.json({ id: result.lastID, message: 'Bank details saved successfully' });
+    } catch (error) {
+        console.error('Bank details save error:', error);
+        res.status(500).json({ error: 'Failed to save bank details' });
+    }
+});
+
+// Get bank details
+app.get('/api/owner-bank-details/:application_id', async (req, res) => {
+    try {
+        const bankDetails = await db.get(
+            'SELECT * FROM owner_bank_details WHERE application_id = ?',
+            [req.params.application_id]
+        );
+        
+        if (!bankDetails) {
+            return res.status(404).json({ error: 'Bank details not found' });
+        }
+        
+        res.json(bankDetails);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch bank details' });
+    }
+});
+
+// Verify bank details (admin)
+app.patch('/api/owner-bank-details/:id', async (req, res) => {
+    try {
+        const { status } = req.body;
+        
+        if (!status || !['verified', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+        
+        await db.run(`
+            UPDATE owner_bank_details 
+            SET status = ?, verified_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `, [status, req.params.id]);
+        
+        publishEvent('bank.details.verified', { bankDetailsId: req.params.id, status });
+        res.json({ message: `Bank details ${status} successfully` });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update bank details' });
+    }
+});
+
+
+// Get partner application by phone number
+app.get('/api/partner-applications/by-phone/:phone', async (req, res) => {
+    try {
+        const application = await db.get(
+            'SELECT * FROM partner_applications WHERE owner_phone = ? ORDER BY submitted_at DESC LIMIT 1',
+            [req.params.phone]
+        );
+        if (!application) {
+            return res.status(404).json({ error: 'No application found for this phone number' });
+        }
+        res.json(application);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch application' });
+    }
+});

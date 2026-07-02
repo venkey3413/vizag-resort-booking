@@ -7,206 +7,12 @@
 
   <link rel="icon" type="image/png" href="logo.png" />
 
-  <!-- ✅ Premium Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- ✅ Font Awesome CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
   <!-- ✅ Load your premium UI -->
   <link rel="stylesheet" href="premium-ui.css" />
-  <link rel="stylesheet" href="owner-premium.css" />
 
   <style>
+    /* Small fallback */
     html { scroll-behavior: smooth; }
-    
-    /* ✅ Partner Section Styles - NEW DESIGN */
-    .partner-section {
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-      border-radius: 24px;
-      padding: 34px 34px 28px;
-      background: linear-gradient(115deg, #061a3a 0%, #0a2f63 28%, #0c5f6b 55%, #0c4f55 70%, #061a3a 100%);
-      color: #fff;
-    }
-
-    .partner-section .photo {
-      position: absolute;
-      top: 0; right: 0;
-      width: 56%;
-      height: 230px;
-      background-image: url('https://images.unsplash.com/photo-1762254794468-1fb6fa893f73?fm=jpg&q=70&w=1400&auto=format&fit=crop');
-      background-size: cover;
-      background-position: center 60%;
-      -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,1) 100%);
-      mask-image: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,1) 100%);
-      z-index: 0;
-    }
-
-    .partner-section .streaks {
-      position: absolute;
-      top: 0; right: 0;
-      width: 60%;
-      height: 230px;
-      z-index: 1;
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    .partner-section .content { position: relative; z-index: 3; }
-
-    .partner-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid #f5c842;
-      color: #f5c842;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 7px 16px;
-      border-radius: 999px;
-      margin-bottom: 18px;
-    }
-
-    h1.partner-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 44px;
-      font-weight: 700;
-      line-height: 1.15;
-      margin-bottom: 14px;
-    }
-    h1.partner-title .gold { color: #f5c842; display: block; }
-
-    .partner-desc {
-      font-size: 15.5px;
-      line-height: 1.6;
-      color: #dce6f0;
-      max-width: 560px;
-      margin-bottom: 26px;
-    }
-
-    .phase-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 18px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(245,200,66,0.45);
-      border-radius: 16px;
-      padding: 18px 24px;
-      margin-bottom: 22px;
-    }
-    .phase-item { display: flex; align-items: center; gap: 14px; }
-    .phase-icon {
-      width: 46px; height: 46px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-    .phase-icon.gift { background: rgba(245,158,11,0.25); }
-    .phase-icon.bag { background: rgba(16,185,129,0.25); }
-    .phase-label {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      color: #b9c6d4;
-      margin-bottom: 3px;
-    }
-    .phase-value {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 700;
-    }
-    .phase-value span { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500; color: #dce6f0; }
-    .phase-then {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 700; letter-spacing: 0.5px;
-      color: #f5c842;
-    }
-
-    .feature-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 26px;
-    }
-    .feature-card {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      padding: 18px 18px 20px;
-    }
-    .feature-card .icon-circle {
-      width: 38px; height: 38px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-    .feature-card.blue .icon-circle { background: #2f6fe0; }
-    .feature-card.green .icon-circle { background: #16a673; }
-    .feature-card.purple .icon-circle { background: #5b4fe0; }
-    .feature-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-    .feature-card p { font-size: 13px; color: #c4d0dc; line-height: 1.5; }
-
-    .cta-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 18px;
-      background: linear-gradient(90deg, #0f9d6e, #14b886);
-      border-radius: 16px;
-      padding: 20px 26px;
-    }
-    .cta-bar .left { display: flex; align-items: center; gap: 16px; }
-    .cta-icon {
-      width: 50px; height: 50px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.18);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
-    }
-    .cta-bar h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 21px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-    .cta-bar h3 .gold { color: #fff7c2; }
-    .cta-bar p { font-size: 13px; color: #eafff5; }
-    .cta-bar p .gold { color: #ffe98a; font-weight: 600; }
-
-    .cta-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-    .whatsapp-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: #fff;
-      color: #0f9d6e;
-      font-weight: 700;
-      font-size: 14px;
-      padding: 10px 20px;
-      border-radius: 999px;
-      text-decoration: none;
-    }
-    .phone-line {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 13.5px; font-weight: 600;
-      color: #fff7c2;
-    }
-
-    @media (max-width: 900px) {
-      .partner-section .photo, .partner-section .streaks { display: none; }
-      h1.partner-title { font-size: 30px; }
-      .feature-row { grid-template-columns: 1fr; }
-      .phase-banner { flex-direction: column; align-items: flex-start; }
-      .cta-bar { flex-direction: column; align-items: flex-start; }
-      .cta-right { align-items: flex-start; }
-    }
   </style>
 </head>
 
@@ -218,12 +24,16 @@
 
       <a href="#home" class="vrb-logo">
         <img src="logo.png" alt="Logo">
-        <div class="logo-caption">
-          <span>Vizag Starts Here & Go</span>
-        </div>
+        <span>Vizag Resort Booking</span>
       </a>
 
       <nav class="vrb-nav-links" id="vrbNavLinks">
+        <a class="active" href="#home">Home</a>
+        <a href="#resorts">Resorts</a>
+        <a href="#travel">Cabs / Travel</a>
+        <a href="#events">Events</a>
+        <a href="#offers">Offers</a>
+        <a href="#contact">Contact</a>
       </nav>
 
       <div class="vrb-nav-actions">
@@ -234,38 +44,29 @@
     </div>
   </header>
 
-  <!-- ✅ ICON BUTTONS SECTION -->
-  <section class="vrb-icon-buttons">
-    <div class="vrb-icon-container">
-      <button class="vrb-icon-btn" onclick="window.location.href='/events'">
-        <span class="icon">🎉</span>
-        <span class="text">Events</span>
-      </button>
-      <button class="vrb-icon-btn" onclick="window.location.href='https://vshakago.in/vshinteriors/'">
-        <span class="icon">🏠</span>
-        <span class="text">Interior Works</span>
-      </button>
-    </div>
-  </section>
-
   <!-- ✅ HERO (HOME) -->
   <section id="home" class="vrb-hero">
-    <div class="bg"></div>
     <div class="vrb-overlay"></div>
 
     <div class="vrb-hero-content vrb-anim">
-      <h1>Book Resorts & Events in Vizag</h1>
-      <p>Resorts • Food • Events • Best Deals • 24/7 Support</p>
+      <h1>Book Resorts & Travel in Vizag</h1>
+      <p>Resorts • Cabs • Events • Best Deals • 24/7 Support</p>
 
+      <!-- Tabs -->
       <div class="vrb-tabs">
         <button class="vrb-tab-btn active" onclick="vrbShowTab('resort')">🏖 Resort Booking</button>
+        <button class="vrb-tab-btn" onclick="vrbShowTab('cab')">🚖 Cab / Travel</button>
       </div>
 
+      <!-- Resort Booking Form -->
       <div class="vrb-search-box vrb-tab-content active" id="vrb-resort">
         <div class="vrb-field">
           <label>Location</label>
-          <select id="locationSelect">
-            <option>Loading locations...</option>
+          <select>
+            <option>Visakhapatnam</option>
+            <option>Rushikonda</option>
+            <option>Araku</option>
+            <option>Yarada</option>
           </select>
         </div>
 
@@ -279,11 +80,46 @@
           <input type="date" />
         </div>
 
-        <button class="vrb-btn vrb-btn-orange" id="heroSearchBtn">Search Resorts</button>
+        <div class="vrb-field">
+          <label>Guests</label>
+          <select>
+            <option>2 Adults</option>
+            <option>3 Adults</option>
+            <option>4 Adults</option>
+            <option>Family (2+2)</option>
+          </select>
+        </div>
+
+        <button class="vrb-btn vrb-btn-orange">Search Resorts</button>
       </div>
-      
-      <div style="text-align: center; margin-top: 15px; margin-bottom: 10px;">
-        <button class="vrb-btn vrb-btn-light" id="heroClearBtn" style="font-size: 13px; padding: 10px 16px; background: rgba(255,255,255,0.9); color: #333; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; font-weight: 600;">🔄 Clear Search</button>
+
+      <!-- Cab / Travel Booking Form -->
+      <div class="vrb-search-box vrb-tab-content" id="vrb-cab">
+        <div class="vrb-field">
+          <label>Pickup</label>
+          <input type="text" placeholder="Enter pickup location" />
+        </div>
+
+        <div class="vrb-field">
+          <label>Drop</label>
+          <input type="text" placeholder="Enter drop location" />
+        </div>
+
+        <div class="vrb-field">
+          <label>Date</label>
+          <input type="date" />
+        </div>
+
+        <div class="vrb-field">
+          <label>Trip Type</label>
+          <select>
+            <option>One Way</option>
+            <option>Round Trip</option>
+            <option>Hourly Rental</option>
+          </select>
+        </div>
+
+        <button class="vrb-btn vrb-btn-orange">Book Cab</button>
       </div>
     </div>
   </section>
@@ -291,149 +127,499 @@
   <!-- ✅ RESORTS SECTION -->
   <section id="resorts" class="vrb-section">
     <div class="vrb-container">
-      <div class="vrb-grid" id="resortsGrid">
-        <div style="text-align:center;padding:2rem;color:#666;">
-          Loading resorts...
-        </div>
+      <div class="vrb-section-head vrb-anim">
+        <h2 class="vrb-title">Popular Resorts in Vizag</h2>
+        <p class="vrb-subtitle">
+          Verified listings • Best prices • Instant booking
+        </p>
       </div>
-    </div>
-  </section>
 
-  <!-- ✅ OFFERS SECTION -->
-  <section class="offers-section" id="offers">
-    <div class="inner">
-      <h2 class="offers-title">Offers <span class="accent">&amp; Deals</span></h2>
-      <p class="offers-sub">Trusted deals and exclusive offers just for you</p>
-      <div class="offers-card-outer">
-        <div class="coupon-card" id="couponSlider">
-          <div class="photo">
-            <span class="badge">&#8377;1000 OFF</span>
+      <div class="vrb-filters vrb-anim">
+        <button class="vrb-chip active">All</button>
+        <button class="vrb-chip">Beach</button>
+        <button class="vrb-chip">Family</button>
+        <button class="vrb-chip">Couple</button>
+        <button class="vrb-chip">Luxury</button>
+        <button class="vrb-chip">Budget</button>
+      </div>
+
+      <div class="vrb-grid">
+
+        <article class="vrb-card vrb-anim">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1400" alt="Resort">
+            <span class="vrb-badge">⭐ 4.6</span>
           </div>
-          <div class="body">
-            <h3>All Resorts</h3>
-            <div class="valid"><span class="check">&#10003;</span> Valid: Weekend (Sat&ndash;Sun)</div>
-            <div class="coupon-box">
-              <label>Coupon Code</label>
-              <div class="coupon-row">
-                <span class="code">SILVER10</span>
-                <button class="copy-btn">Copy</button>
+          <div class="vrb-body">
+            <h3>Silver Stay Resort</h3>
+            <p class="vrb-meta">📍 Rushikonda, Vizag • Beach view</p>
+
+            <div class="vrb-tags">
+              <span>Pool</span><span>AC</span><span>Couple</span><span>WiFi</span>
+            </div>
+
+            <div class="vrb-bottom">
+              <div>
+                <p class="vrb-price">₹3500 <span>/ night</span></p>
+                <p class="vrb-small">Free cancellation</p>
               </div>
+
+              <button class="vrb-btn vrb-btn-primary"
+                onclick="openBookingPopup('Silver Stay Resort','Rushikonda, Vizag','3500')">
+                Book Now
+              </button>
             </div>
           </div>
-        </div>
+        </article>
+
+        <article class="vrb-card vrb-anim">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1400" alt="Resort">
+            <span class="vrb-badge">⭐ 4.5</span>
+          </div>
+          <div class="vrb-body">
+            <h3>Royal Orchid</h3>
+            <p class="vrb-meta">📍 S.R Puram, Vizag • Premium stay</p>
+
+            <div class="vrb-tags">
+              <span>Luxury</span><span>Parking</span><span>Breakfast</span>
+            </div>
+
+            <div class="vrb-bottom">
+              <div>
+                <p class="vrb-price">₹5200 <span>/ night</span></p>
+                <p class="vrb-small">Instant confirmation</p>
+              </div>
+
+              <button class="vrb-btn vrb-btn-primary"
+                onclick="openBookingPopup('Royal Orchid','S.R Puram, Vizag','5200')">
+                Book Now
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="vrb-card vrb-anim">
+          <div class="vrb-img">
+            <img src="https://images.unsplash.com/photo-1501117716987-c8e1ecb210d1?w=1400" alt="Resort">
+            <span class="vrb-badge">⭐ 4.7</span>
+          </div>
+          <div class="vrb-body">
+            <h3>Sun Vacation Resort</h3>
+            <p class="vrb-meta">📍 Narava, Vizag • Family friendly</p>
+
+            <div class="vrb-tags">
+              <span>Family</span><span>Play Area</span><span>Pool</span>
+            </div>
+
+            <div class="vrb-bottom">
+              <div>
+                <p class="vrb-price">₹4100 <span>/ night</span></p>
+                <p class="vrb-small">Best price guarantee</p>
+              </div>
+
+              <button class="vrb-btn vrb-btn-primary"
+                onclick="openBookingPopup('Sun Vacation Resort','Narava, Vizag','4100')">
+                Book Now
+              </button>
+            </div>
+          </div>
+        </article>
+
       </div>
     </div>
   </section>
 
-  <!-- ✅ PARTNER POSTER SECTION -->
-  <section class="partner-section">
-    <div class="photo"></div>
-    <svg class="streaks" viewBox="0 0 800 230" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 40 C 200 10, 400 70, 800 20" stroke="#7fe0c8" stroke-width="1" fill="none" opacity="0.6"/>
-      <path d="M0 80 C 220 50, 420 110, 800 60" stroke="#7fe0c8" stroke-width="1" fill="none" opacity="0.4"/>
-    </svg>
+  <!-- ✅ WHY BOOK + LOCATIONS -->
+  <section class="vrb-section vrb-soft-bg">
 
-    <div class="content">
-      <div class="partner-badge">★ EXCLUSIVE PARTNER OFFER</div>
+    <div class="vrb-wrap vrb-anim">
+      <h2 class="vrb-heading">Why Book Resorts with Vizag Resort Booking?</h2>
+      <p class="vrb-desc">Premium stays • Verified listings • Instant support</p>
 
-      <h1 class="partner-title">List Your Resort.<span class="gold">Earn More.</span></h1>
-
-      <p class="partner-desc">
-        Join Vizag's fastest-growing resort &amp; event booking platform.<br>
-        Zero risk. Zero cost to start. Just more bookings at your doorstep.
-      </p>
-
-      <div class="phase-banner">
-        <div class="phase-item">
-          <div class="phase-icon gift">🎁</div>
-          <div>
-            <div class="phase-label">PHASE 1 – FREE PERIOD</div>
-            <div class="phase-value">3 Months <span>free listing</span></div>
-          </div>
+      <div class="vrb-feature-grid">
+        <div class="vrb-feature-card">
+          <div class="vrb-icon">🏖</div>
+          <h3>Beach Resorts</h3>
+          <p>Best beach stays near RK Beach, Rushikonda, Yarada and more.</p>
         </div>
 
-        <div class="phase-then">THEN →</div>
+        <div class="vrb-feature-card">
+          <div class="vrb-icon">👨‍👩‍👧‍👦</div>
+          <h3>Family Friendly</h3>
+          <p>Safe and comfortable resorts perfect for families with kids.</p>
+        </div>
 
-        <div class="phase-item">
-          <div class="phase-icon bag">💰</div>
-          <div>
-            <div class="phase-label">PHASE 2 – COMMISSION</div>
-            <div class="phase-value">Only 6% <span>per booking</span></div>
-          </div>
+        <div class="vrb-feature-card">
+          <div class="vrb-icon">🏢</div>
+          <h3>Corporate Stays</h3>
+          <p>Conference-friendly resorts for meetings, offsites & team outings.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="vrb-wrap vrb-anim" style="margin-top:35px;">
+      <h2 class="vrb-heading">Book Resorts by Location in Vizag</h2>
+      <p class="vrb-desc">Choose your area and explore best resorts instantly.</p>
+
+      <div class="vrb-location-grid">
+        <div class="vrb-location-card">
+          <h3>S.R Puram Resorts</h3>
+          <p>Premium resorts in S.R Puram area with modern amenities.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
+
+        <div class="vrb-location-card">
+          <h3>S Kota Resort</h3>
+          <p>Beachside resorts in S Kota with stunning sea views.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
+
+        <div class="vrb-location-card">
+          <h3>Narava Resort</h3>
+          <p>Peaceful retreat in Narava with natural surroundings.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
+
+        <div class="vrb-location-card">
+          <h3>Pinagadi Resort</h3>
+          <p>Best resorts near Araku & hill route for weekend stay.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
+
+        <div class="vrb-location-card">
+          <h3>Pendurthi Resort</h3>
+          <p>Comfort stay resorts with family-friendly amenities.</p>
+          <button class="vrb-mini-btn">Explore →</button>
+        </div>
+
+        <div class="vrb-location-card vrb-location-highlight">
+          <h3>All Resorts in Vizag</h3>
+          <p>Browse all available resorts in Vizag at best prices.</p>
+          <button class="vrb-mini-btn vrb-mini-btn-accent">View All →</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ✅ OFFERS & DEALS SECTION WITH HORIZONTAL COUPONS -->
+  <section id="offers" class="vrb-section">
+    <div class="vrb-container vrb-anim">
+      <div class="vrb-section-head">
+        <h2 class="vrb-title">Offers & Deals</h2>
+        <p class="vrb-subtitle">Apply coupon codes and save more on booking.</p>
+      </div>
+
+      <!-- ✅ HORIZONTAL COUPON SLIDER -->
+      <div class="vrb-coupon-slider-wrap">
+        <div class="vrb-coupon-slider" id="vrb-coupon-slider">
+          <!-- Coupons will be loaded dynamically from API -->
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="vrb-coupon-controls">
+          <button class="vrb-coupon-nav" onclick="scrollCouponLeft()">← Prev</button>
+          <button class="vrb-coupon-nav" onclick="scrollCouponRight()">Next →</button>
         </div>
       </div>
 
-      <div class="feature-row">
-        <div class="feature-card blue">
-          <div class="icon-circle">📱</div>
-          <h4>Instant Bookings</h4>
-          <p>Customers book &amp; pay online 24/7. You just confirm.</p>
-        </div>
-        <div class="feature-card green">
-          <div class="icon-circle">📢</div>
-          <h4>Free Marketing</h4>
-          <p>We promote your resort via WhatsApp, Google &amp; social media.</p>
-        </div>
-        <div class="feature-card purple">
-          <div class="icon-circle">🛡️</div>
-          <h4>Zero Risk</h4>
-          <p>No booking, no commission. Pay only when we deliver guests.</p>
-        </div>
-      </div>
+    </div>
+  </section>
 
-      <div class="cta-bar">
-        <div class="left">
-          <div class="cta-icon">🏨</div>
-          <div>
-            <h3>Ready to <span class="gold">Partner With Us?</span></h3>
-            <p>List your resort for <span class="gold">FREE</span> — start getting bookings this week</p>
-          </div>
-        </div>
-        <div class="cta-right">
-          <a href="https://wa.me/918341674465" class="whatsapp-btn">💬 WhatsApp Us</a>
-          <div class="phone-line">📞 +91 83416 74465</div>
-        </div>
+  <!-- ✅ EVENTS PLACEHOLDER -->
+  <section id="events" class="vrb-section">
+    <div class="vrb-container vrb-anim">
+      <div class="vrb-section-head">
+        <h2 class="vrb-title">Events & Party Bookings</h2>
+        <p class="vrb-subtitle">Birthday • Engagement • Corporate Parties</p>
       </div>
     </div>
   </section>
 
-  <!-- ✅ FOOTER -->
+  <!-- ✅ TRAVEL PLACEHOLDER -->
+  <section id="travel" class="vrb-section">
+    <div class="vrb-container vrb-anim">
+      <div class="vrb-section-head">
+        <h2 class="vrb-title">Cab / Travel Booking</h2>
+        <p class="vrb-subtitle">Airport pickup • City rides • Araku trip</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ✅ PREMIUM FOOTER -->
   <footer id="contact" class="vrb-footer">
     <div class="vrb-container vrb-footer-grid vrb-anim">
 
       <div>
-        <h3>Vizag Starts Here & Go</h3>
+        <h3>Vizag Resort Booking</h3>
         <p>
-          Resorts + Events booking in Vizag.<br>
+          Resorts + Cabs + Events booking in Vizag.<br>
           Premium verified listings with best deals.
         </p>
+
+        <div class="vrb-footer-badges">
+          <span>✅ Verified</span>
+          <span>⚡ Instant Booking</span>
+          <span>💰 Best Price</span>
+        </div>
       </div>
 
       <div>
         <h4>Quick Links</h4>
         <a href="#home">Home</a>
         <a href="#resorts">Resorts</a>
+        <a href="#travel">Cabs / Travel</a>
+        <a href="#events">Events</a>
         <a href="#offers">Offers</a>
-        <a href="/owner-dashboard">Owner Dashboard</a>
       </div>
 
       <div>
         <h4>Support</h4>
         <a href="tel:+918341674465">📞 +91 8341674465</a>
-        <a href="mailto:vizagresortbooking@gmail.com">✉️ vizagresortbooking@gmail.com</a>
+        <a href="mailto:support@vizagresortbooking.in">✉️ support@vizagresortbooking.in</a>
         <a href="https://wa.me/918341674465" target="_blank">💬 WhatsApp Support</a>
       </div>
 
     </div>
 
     <div class="vrb-footer-bottom">
-      © 2026 Vizag Starts Here & Go • Built with ❤️ in Vizag
+      © 2026 Vizag Resort Booking • Built with ❤️ in Vizag
     </div>
   </footer>
 
+  <!-- ✅ POLICY BUTTON -->
+  <a class="vrb-policy-btn" href="Cancellation & terms and conditions (1).pdf" target="_blank">
+    📄 Policy
+  </a>
+
+  <!-- ✅ BOOKING MODAL -->
+  <div class="vrb-modal" id="bookingModal">
+    <div class="vrb-modal-card">
+      <button class="vrb-close" onclick="closeBookingPopup()">✕</button>
+
+      <div class="vrb-modal-head">
+        <h2>Confirm Booking</h2>
+        <p>Secure booking with instant confirmation</p>
+      </div>
+
+      <div class="vrb-modal-summary">
+        <div>
+          <span class="label">Resort</span>
+          <b id="modalResortName">-</b>
+        </div>
+        <div>
+          <span class="label">Location</span>
+          <b id="modalResortLocation">-</b>
+        </div>
+        <div>
+          <span class="label">Base Price</span>
+          <b id="modalResortPrice">-</b>
+        </div>
+      </div>
+
+      <div class="vrb-coupon-row">
+        <input id="couponCode" type="text" placeholder="Enter Coupon Code" />
+        <button class="vrb-btn vrb-btn-light" onclick="applyCouponCode()">Apply</button>
+      </div>
+
+      <div class="vrb-price-box">
+        <div class="line">
+          <span>Subtotal</span>
+          <b id="subtotalAmount">₹0</b>
+        </div>
+        <div class="line">
+          <span>Discount</span>
+          <b id="discountAmount" class="green">-₹0</b>
+        </div>
+        <div class="line total">
+          <span>Total Pay</span>
+          <b id="finalAmount">₹0</b>
+        </div>
+      </div>
+
+      <form id="bookingForm" class="vrb-form">
+        <input id="customerName" type="text" placeholder="Full Name" required />
+        <input id="customerMobile" type="tel" placeholder="Mobile Number" required />
+
+        <div class="vrb-form-grid">
+          <input id="checkinDate" type="date" required />
+          <input id="checkoutDate" type="date" required />
+        </div>
+
+        <select id="guestCount" required>
+          <option value="2 Adults">2 Adults</option>
+          <option value="3 Adults">3 Adults</option>
+          <option value="4 Adults">4 Adults</option>
+          <option value="Family (2+2)">Family (2+2)</option>
+        </select>
+
+        <button type="submit" class="vrb-btn vrb-btn-primary">
+          Proceed to Payment
+        </button>
+
+        <button type="button" class="vrb-btn vrb-btn-light" onclick="closeBookingPopup()">
+          Cancel
+        </button>
+      </form>
+
+      <p class="vrb-note">
+        ✅ Coupon supported • ✅ Secure Payment • ✅ Instant Confirmation
+      </p>
+    </div>
+  </div>
+
+  <!-- ✅ CHAT WIDGET -->
+  <div class="vrb-chat-widget">
+    <button class="vrb-chat-fab" id="vrbChatFab">
+      <img src="logo.png" alt="Chat Logo">
+    </button>
+
+    <div class="vrb-chat-box" id="vrbChatBox">
+      <div class="vrb-chat-header">
+        <div class="vrb-chat-title">
+          <img src="logo.png" alt="Logo">
+          <div>
+            <h4>Vizag Support</h4>
+            <p>Online • Reply in minutes</p>
+          </div>
+        </div>
+        <button class="vrb-chat-close" id="vrbChatClose">✕</button>
+      </div>
+
+      <div class="vrb-chat-body" id="vrbChatBody">
+        <div class="vrb-msg vrb-bot">👋 Hi! Welcome to Vizag Resort Booking.</div>
+        <div class="vrb-msg vrb-bot">How can I help you today?</div>
+      </div>
+
+      <div class="vrb-chat-footer">
+        <input id="vrbChatInput" type="text" placeholder="Type your message..." />
+        <button class="vrb-chat-send" id="vrbChatSend">➤</button>
+      </div>
+
+      <div class="vrb-chat-quick">
+        <button class="vrb-q" data-msg="I want to book resort">🏖 Book Resort</button>
+        <button class="vrb-q" data-msg="I want cab booking">🚖 Book Cab</button>
+        <button class="vrb-q" data-msg="I want event booking">🎉 Book Event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ COUPON LOADER -->
+  <script src="coupons-loader.js"></script>
+
+  <!-- ✅ COUPON FUNCTIONS -->
+  <script src="coupon-functions.js"></script>
+
   <!-- ✅ SCRIPTS -->
-  <script src="critical.js"></script>
-  <script src="premium-ui.js"></script>
+  <script>
+    function vrbToggleMenu() {
+      document.getElementById("vrbNavLinks").classList.toggle("open");
+    }
+
+    function vrbShowTab(type) {
+      document.querySelectorAll(".vrb-tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".vrb-tab-content").forEach(c => c.classList.remove("active"));
+
+      if (type === "resort") {
+        document.querySelectorAll(".vrb-tab-btn")[0].classList.add("active");
+        document.getElementById("vrb-resort").classList.add("active");
+      } else {
+        document.querySelectorAll(".vrb-tab-btn")[1].classList.add("active");
+        document.getElementById("vrb-cab").classList.add("active");
+      }
+    }
+
+    function openBookingPopup(name, location, price) {
+      document.getElementById("modalResortName").innerText = name;
+      document.getElementById("modalResortLocation").innerText = location;
+      document.getElementById("modalResortPrice").innerText = "₹" + price;
+
+      document.getElementById("subtotalAmount").innerText = "₹" + price;
+      document.getElementById("discountAmount").innerText = "-₹0";
+      document.getElementById("finalAmount").innerText = "₹" + price;
+
+      document.getElementById("bookingModal").classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeBookingPopup() {
+      document.getElementById("bookingModal").classList.remove("show");
+      document.body.style.overflow = "auto";
+    }
+
+    function applyCouponCode(){
+      const code = document.getElementById("couponCode").value.trim().toUpperCase();
+      const priceText = document.getElementById("modalResortPrice").innerText.replace("₹","");
+      const price = parseInt(priceText) || 0;
+
+      let discount = 0;
+      if(code === "VIZAG10") discount = Math.floor(price * 0.10);
+      if(code === "VIZAG20") discount = Math.floor(price * 0.20);
+
+      document.getElementById("subtotalAmount").innerText = "₹" + price;
+      document.getElementById("discountAmount").innerText = "-₹" + discount;
+      document.getElementById("finalAmount").innerText = "₹" + (price - discount);
+    }
+
+    document.getElementById("bookingForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      alert("✅ Booking popup working! Connect Razorpay here.");
+      closeBookingPopup();
+    });
+
+    // Chat widget
+    const chatFab = document.getElementById("vrbChatFab");
+    const chatBox = document.getElementById("vrbChatBox");
+    const chatClose = document.getElementById("vrbChatClose");
+    const chatSend = document.getElementById("vrbChatSend");
+    const chatInput = document.getElementById("vrbChatInput");
+    const chatBody = document.getElementById("vrbChatBody");
+
+    function toggleChat(){ chatBox.classList.toggle("open"); }
+    chatFab.addEventListener("click", toggleChat);
+    chatClose.addEventListener("click", toggleChat);
+
+    function addMsg(text, type){
+      const div = document.createElement("div");
+      div.className = "vrb-msg " + type;
+      div.innerText = text;
+      chatBody.appendChild(div);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function sendMsg(){
+      const msg = chatInput.value.trim();
+      if(!msg) return;
+      addMsg(msg, "vrb-user");
+      chatInput.value = "";
+      setTimeout(()=> addMsg("✅ Thanks! Please share check-in date, guests & budget.", "vrb-bot"), 500);
+    }
+
+    chatSend.addEventListener("click", sendMsg);
+    chatInput.addEventListener("keypress", (e)=>{ if(e.key==="Enter") sendMsg(); });
+
+    document.querySelectorAll(".vrb-q").forEach((btn)=>{
+      btn.addEventListener("click", ()=>{
+        chatInput.value = btn.getAttribute("data-msg");
+        sendMsg();
+      });
+    });
+
+    // ✅ Scroll animation replay (up/down)
+    const items = document.querySelectorAll(".vrb-anim");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add("vrb-show");
+        else entry.target.classList.remove("vrb-show");
+      });
+    }, { threshold: 0.15 });
+
+    items.forEach((el) => {
+      el.classList.add("vrb-hide");
+      observer.observe(el);
+    });
+  </script>
 
 </body>
 </html>

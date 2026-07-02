@@ -17,6 +17,12 @@ const { sendInvoiceEmail } = require('./email-service');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Input sanitization function
+function sanitizeInput(input) {
+    if (!input) return '';
+    return String(input).replace(/[<>"']/g, '');
+}
+
 // Temporarily disable Razorpay CSP headers
 // app.use(helmet({
 //     contentSecurityPolicy: {
@@ -314,6 +320,16 @@ app.post('/api/check-availability', async (req, res) => {
     }
 });
 
+// Helper function for input validation
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function validatePhone(phone) {
+    return /^\+91[0-9]{10}$/.test(phone);
+}
+
 app.post('/api/bookings', async (req, res) => {
     try {
         console.log('🎯 Booking request received:', req.body);
@@ -337,13 +353,12 @@ app.post('/api/bookings', async (req, res) => {
         }
         
         // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(sanitizedData.email)) {
+        if (!validateEmail(sanitizedData.email)) {
             return res.status(400).json({ error: 'Invalid email format' });
         }
         
         // Phone validation
-        if (!sanitizedData.phone.match(/^\+91[0-9]{10}$/)) {
+        if (!validatePhone(sanitizedData.phone)) {
             return res.status(400).json({ error: 'Invalid phone number format' });
         }
 
@@ -715,6 +730,62 @@ app.get('/api/coupons', async (req, res) => {
     } catch (error) {
         console.error('❌ Coupon fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch coupons' });
+    }
+});
+
+// Partner applications - check status by reference ID
+app.get('/api/partner-applications/:reference_id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/partner-applications/${req.params.reference_id}`);
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Partner application fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch application' });
+    }
+});
+
+// Partner applications - check status by phone number
+app.get('/api/partner-applications/by-phone/:phone', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/partner-applications/by-phone/${req.params.phone}`);
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Partner application phone fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch application' });
+    }
+});
+
+// Partner applications - submit new application
+app.post('/api/partner-applications', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/partner-applications`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Partner application submit error:', error);
+        res.status(500).json({ error: 'Failed to submit application' });
+    }
+});
+
+// Bank details - save
+app.post('/api/owner-bank-details', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/owner-bank-details`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Bank details save error:', error);
+        res.status(500).json({ error: 'Failed to save bank details' });
     }
 });
 

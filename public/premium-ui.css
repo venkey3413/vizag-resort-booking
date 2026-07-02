@@ -4018,14 +4018,14 @@ button[onclick*="Book"]:hover,
 .resort-banner {
   position: relative;
   width: 100%;
-  min-height: 210px;
+  min-height: 105px;
   overflow: hidden;
   background: linear-gradient(180deg, #ffffff 0%, #eef6fc 55%, #dceefb 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 30px 20px;
+  padding: 15px 20px;
 }
 
 /* ---- Wavy bottom layer ---- */
@@ -4132,12 +4132,12 @@ button[onclick*="Book"]:hover,
 }
 
 h1.headline {
-  font-size: 56px;
+  font-size: 32px;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.5px;
   color: #0b2e6b;
-  margin-bottom: 18px;
+  margin-bottom: 8px;
 }
 
 h1.headline .accent {
@@ -4145,13 +4145,13 @@ h1.headline .accent {
 }
 
 .resort-banner .subtitle {
-  font-size: 19px;
+  font-size: 12px;
   font-weight: 500;
   color: #5b6b7d;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -4166,8 +4166,8 @@ h1.headline .accent {
 /* Mobile Responsive */
 @media (max-width: 640px) {
   .resort-banner {
-    min-height: 320px;
-    padding: 40px 20px;
+    min-height: 160px;
+    padding: 20px 20px;
   }
   
   h1.headline {

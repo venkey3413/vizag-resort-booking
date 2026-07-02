@@ -972,6 +972,98 @@ async function loadOwners() {
         owners = [];
         displayOwners();
     }
+    loadPartnerApplications();
+}
+
+async function loadPartnerApplications() {
+    try {
+        const response = await fetch('/api/partner-applications');
+        const data = await response.json();
+        displayPartnerApplications(Array.isArray(data) ? data : []);
+    } catch (error) {
+        console.error('Error loading partner applications:', error);
+        displayPartnerApplications([]);
+    }
+}
+
+function displayPartnerApplications(applications) {
+    const grid = document.getElementById('partnerApplicationsGrid');
+    if (!grid) return;
+
+    if (applications.length === 0) {
+        grid.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">No partner applications submitted yet.</div>';
+        return;
+    }
+
+    grid.innerHTML = applications.map(app => {
+        const statusColor = app.status === 'approved' ? '#16a34a' : app.status === 'rejected' ? '#dc2626' : '#d97706';
+        const statusBg = app.status === 'approved' ? '#dcfce7' : app.status === 'rejected' ? '#fee2e2' : '#fef3c7';
+        return `
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                    <div>
+                        <h4 style="margin:0 0 4px;font-size:16px;color:#111;">${app.resort_name}</h4>
+                        <p style="margin:0;font-size:13px;color:#6b7280;">Ref: ${app.reference_id}</p>
+                    </div>
+                    <span style="background:${statusBg};color:${statusColor};padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;">${app.status}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:#374151;margin-bottom:12px;">
+                    <p><strong>Owner:</strong> ${app.owner_name}</p>
+                    <p><strong>Email:</strong> ${app.owner_email}</p>
+                    <p><strong>Phone:</strong> ${app.owner_phone}</p>
+                    <p><strong>Location:</strong> ${app.resort_location}</p>
+                    <p><strong>Type:</strong> ${app.resort_type || 'N/A'}</p>
+                    <p><strong>Rooms:</strong> ${app.total_rooms || 'N/A'}</p>
+                    <p><strong>Submitted:</strong> ${new Date(app.submitted_at).toLocaleDateString()}</p>
+                    ${app.reviewed_at ? `<p><strong>Reviewed:</strong> ${new Date(app.reviewed_at).toLocaleDateString()}</p>` : ''}
+                </div>
+                ${app.description ? `<p style="font-size:13px;color:#6b7280;margin-bottom:12px;">${app.description}</p>` : ''}
+                ${app.rejection_reason ? `<p style="font-size:13px;color:#dc2626;margin-bottom:12px;"><strong>Rejection Reason:</strong> ${app.rejection_reason}</p>` : ''}
+                ${app.status === 'pending' ? `
+                    <div style="display:flex;gap:10px;">
+                        <button onclick="reviewApplication(${app.id},'approved')" style="background:#16a34a;color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:700;">✓ Approve</button>
+                        <button onclick="promptReject(${app.id})" style="background:#dc2626;color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:700;">✕ Reject</button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+async function reviewApplication(id, status, rejection_reason) {
+    try {
+        const response = await fetch(`/api/partner-applications/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, reviewed_by: 'admin', rejection_reason: rejection_reason || null })
+        });
+        if (response.ok) {
+            alert(`Application ${status} successfully`);
+            loadPartnerApplications();
+        } else {
+            alert('Failed to update application');
+        }
+    } catch (error) {
+        alert('Network error');
+    }
+}
+
+function promptReject(id) {
+    const reason = prompt('Enter rejection reason (optional):');
+    if (reason !== null) {
+        reviewApplication(id, 'rejected', reason);
+    }
+}
+
+async function filterApplications(status) {
+    try {
+        const url = status ? `/api/partner-applications?status=${status}` : '/api/partner-applications';
+        const response = await fetch(url);
+        const data = await response.json();
+        displayPartnerApplications(Array.isArray(data) ? data : []);
+    } catch (error) {
+        console.error('Error filtering applications:', error);
+    }
 }
 
 function displayOwners() {
