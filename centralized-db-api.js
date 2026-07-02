@@ -1485,6 +1485,23 @@ app.post('/api/partner-applications', async (req, res) => {
     }
 });
 
+
+// Get partner application by phone number
+app.get('/api/partner-applications/by-phone/:phone', async (req, res) => {
+    try {
+        const application = await db.get(
+            'SELECT * FROM partner_applications WHERE owner_phone = ? ORDER BY submitted_at DESC LIMIT 1',
+            [req.params.phone]
+        );
+        if (!application) {
+            return res.status(404).json({ error: 'No application found for this phone number' });
+        }
+        res.json(application);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch application' });
+    }
+});
+
 // Get partner application by reference
 app.get('/api/partner-applications/:reference_id', async (req, res) => {
     try {
@@ -1609,21 +1626,4 @@ app.patch('/api/owner-bank-details/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to update bank details' });
     }
-});
-
-
-// Get partner application by phone number
-app.get('/api/partner-applications/by-phone/:phone', async (req, res) => {
-    try {
-        const application = await db.get(
-            'SELECT * FROM partner_applications WHERE owner_phone = ? ORDER BY submitted_at DESC LIMIT 1',
-            [req.params.phone]
-        );
-        if (!application) {
-            return res.status(404).json({ error: 'No application found for this phone number' });
-        }
-        res.json(application);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch application' });
-    }
-});
+});

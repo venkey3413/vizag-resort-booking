@@ -733,18 +733,6 @@ app.get('/api/coupons', async (req, res) => {
     }
 });
 
-// Partner applications - check status by reference ID
-app.get('/api/partner-applications/:reference_id', async (req, res) => {
-    try {
-        const response = await fetch(`${DB_API_URL}/api/partner-applications/${req.params.reference_id}`);
-        const data = await response.json();
-        res.status(response.status).json(data);
-    } catch (error) {
-        console.error('Partner application fetch error:', error);
-        res.status(500).json({ error: 'Failed to fetch application' });
-    }
-});
-
 // Partner applications - check status by phone number
 app.get('/api/partner-applications/by-phone/:phone', async (req, res) => {
     try {
@@ -753,6 +741,18 @@ app.get('/api/partner-applications/by-phone/:phone', async (req, res) => {
         res.status(response.status).json(data);
     } catch (error) {
         console.error('Partner application phone fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch application' });
+    }
+});
+
+// Partner applications - check status by reference ID
+app.get('/api/partner-applications/:reference_id', async (req, res) => {
+    try {
+        const response = await fetch(`${DB_API_URL}/api/partner-applications/${req.params.reference_id}`);
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Partner application fetch error:', error);
         res.status(500).json({ error: 'Failed to fetch application' });
     }
 });
