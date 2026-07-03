@@ -2054,6 +2054,25 @@ function restoreUploadedImages(){
   });
 }
 
+
+async function uploadPartnerImages(){
+  const input=document.getElementById("partnerImages");
+  if(input.files.length==0){
+    showToast("Select Images","error");
+    return;
+  }
+  const formData=new FormData();
+  Array.from(input.files).forEach(file=>{ formData.append("images",file); });
+  showLoading();
+  const response=await fetch("/api/partner/upload",{ method:"POST", body:formData });
+  hideLoading();
+  const data=await response.json();
+  if(!data.success){ showToast("Upload Failed","error"); return; }
+  partnerForm.photos=data.photos;
+  showToast("Images Uploaded","success");
+  restoreUploadedImages();
+}
+
 function step4Previous(){
   currentPartnerStep=3;
   showStep3();
