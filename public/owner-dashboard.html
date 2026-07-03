@@ -1845,6 +1845,16 @@ async function refreshResorts() {
 // ── PARTNER REGISTRATION ──
 let currentPartnerStep = 1;
 
+const partnerForm = {
+  owner_name: '', owner_email: '', owner_phone: '', password: '',
+  resort_name: '', resort_type: '', total_rooms: '', address: '', district: '', pincode: '',
+  amenities: [], description: '',
+  photos: [], videos: [],
+  bank_name: '', account_holder: '', account_number: '', ifsc_code: '', upi_id: '',
+  pan_number: '', aadhar_number: '', documents: [],
+  agree: false
+};
+
 function showPartnerRegistration() {
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('partnerRegistrationPage').style.display = 'block';
@@ -1857,15 +1867,28 @@ function hidePartnerRegistration() {
 
 function nextStep(){
   if(currentPartnerStep == 1){
-    showStep2();
+    partnerForm.owner_name = document.getElementById('partnerOwnerName').value;
+    partnerForm.owner_phone = document.getElementById('partnerPhone').value;
+    partnerForm.owner_email = document.getElementById('partnerEmail').value;
+    partnerForm.password = document.getElementById('partnerPassword').value;
+    if(partnerForm.owner_name == ''){ showToast('Owner Name Required','error'); return; }
+    if(partnerForm.owner_phone == ''){ showToast('Mobile Number Required','error'); return; }
+    if(partnerForm.password == ''){ showToast('Password Required','error'); return; }
     currentPartnerStep = 2;
+    showStep2();
     return;
   }
   if(currentPartnerStep == 2){
-    showStep3();
-    currentPartnerStep = 3;
-    return;
+    partnerForm.resort_name = document.getElementById('partnerResortName').value;
+    partnerForm.resort_type = document.getElementById('partnerResortType').value;
+    partnerForm.total_rooms = document.getElementById('partnerRooms').value;
+    partnerForm.address = document.getElementById('partnerAddress').value;
+    partnerForm.district = document.getElementById('partnerDistrict').value;
+    partnerForm.pincode = document.getElementById('partnerPincode').value;
+    if(partnerForm.resort_name == ''){ showToast('Resort Name Required','error'); return; }
+    showToast('Step 3 Coming Next','success');
   }
+}
 }
 
 function showStep2(){
@@ -1874,7 +1897,7 @@ function showStep2(){
 
     <div class="field-group">
       <label>Resort Name</label>
-      <input type="text" id="partnerResortName" placeholder="Ex: Sea Breeze Resort">
+      <input type="text" id="partnerResortName" value="${partnerForm.resort_name}" placeholder="Ex: Sea Breeze Resort">
     </div>
 
     <div class="field-row">
@@ -1882,24 +1905,24 @@ function showStep2(){
         <label>Resort Type</label>
         <select id="partnerResortType">
           <option value="">Select</option>
-          <option>Resort</option>
-          <option>Villa</option>
-          <option>Hotel</option>
-          <option>Cottage</option>
-          <option>Farm House</option>
-          <option>Beach House</option>
-          <option>Guest House</option>
+          <option ${partnerForm.resort_type=='Resort'?'selected':''}>Resort</option>
+          <option ${partnerForm.resort_type=='Villa'?'selected':''}>Villa</option>
+          <option ${partnerForm.resort_type=='Hotel'?'selected':''}>Hotel</option>
+          <option ${partnerForm.resort_type=='Cottage'?'selected':''}>Cottage</option>
+          <option ${partnerForm.resort_type=='Farm House'?'selected':''}>Farm House</option>
+          <option ${partnerForm.resort_type=='Beach House'?'selected':''}>Beach House</option>
+          <option ${partnerForm.resort_type=='Guest House'?'selected':''}>Guest House</option>
         </select>
       </div>
       <div class="field-group">
         <label>Total Rooms</label>
-        <input type="number" id="partnerRooms" placeholder="10">
+        <input type="number" id="partnerRooms" value="${partnerForm.total_rooms}" placeholder="10">
       </div>
     </div>
 
     <div class="field-group">
       <label>Address</label>
-      <textarea id="partnerAddress" rows="4" placeholder="Complete Address"></textarea>
+      <textarea id="partnerAddress" rows="4" placeholder="Complete Address">${partnerForm.address}</textarea>
     </div>
 
     <div class="field-row">
@@ -1915,7 +1938,7 @@ function showStep2(){
       </div>
       <div class="field-group">
         <label>Pincode</label>
-        <input type="text" id="partnerPincode">
+        <input type="text" id="partnerPincode" value="${partnerForm.pincode}">
       </div>
     </div>
 
@@ -1934,23 +1957,23 @@ function previousStep(){
 
       <div class="field-group">
         <label>Owner Name</label>
-        <input type="text" id="partnerOwnerName">
+        <input type="text" id="partnerOwnerName" value="${partnerForm.owner_name}">
       </div>
 
       <div class="field-row">
         <div class="field-group">
           <label>Mobile Number</label>
-          <input type="text" id="partnerPhone">
+          <input type="text" id="partnerPhone" value="${partnerForm.owner_phone}">
         </div>
         <div class="field-group">
           <label>Email</label>
-          <input type="email" id="partnerEmail">
+          <input type="email" id="partnerEmail" value="${partnerForm.owner_email}">
         </div>
       </div>
 
       <div class="field-group">
         <label>Password</label>
-        <input type="password" id="partnerPassword">
+        <input type="password" id="partnerPassword" value="${partnerForm.password}">
       </div>
 
       <div style="display:flex;justify-content:space-between;margin-top:30px;">
@@ -1959,6 +1982,7 @@ function previousStep(){
       </div>
     `;
   }
+}
 }
 
 </script>
