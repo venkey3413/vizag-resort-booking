@@ -417,7 +417,51 @@ async function initDB() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
-    
+
+    // ==========================================
+    // PARTNER APPLICATIONS TABLE
+    // ==========================================
+
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS partner_applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            reference_id TEXT UNIQUE NOT NULL,
+            owner_name TEXT NOT NULL,
+            owner_email TEXT,
+            owner_phone TEXT NOT NULL,
+            password TEXT,
+            resort_name TEXT NOT NULL,
+            resort_location TEXT NOT NULL,
+            resort_type TEXT,
+            total_rooms INTEGER DEFAULT 0,
+            amenities TEXT,
+            description TEXT,
+            photos TEXT,
+            videos TEXT,
+            documents TEXT,
+            bank_name TEXT,
+            account_holder TEXT,
+            account_number TEXT,
+            ifsc_code TEXT,
+            upi_id TEXT,
+            pan_number TEXT,
+            aadhar_number TEXT,
+            status TEXT DEFAULT 'Pending',
+            admin_comments TEXT,
+            reviewed_by TEXT,
+            reviewed_at DATETIME,
+            submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // ==========================================
+    // INDEXES
+    // ==========================================
+
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_partner_phone ON partner_applications(owner_phone)`);
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_partner_status ON partner_applications(status)`);
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_partner_reference ON partner_applications(reference_id)`);
+
     // Push notification tokens table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS device_tokens (
@@ -1459,29 +1503,71 @@ initDB().then(() => {
 
 // PARTNER APPLICATIONS API
 
-// Submit partner application
+// ==========================================
+// SUBMIT PARTNER APPLICATION
+// ==========================================
+
 app.post('/api/partner-applications', async (req, res) => {
     try {
-        const { owner_name, owner_email, owner_phone, resort_name, resort_location, resort_type, total_rooms, amenities, description } = req.body;
-        
-        if (!owner_name || !owner_email || !owner_phone || !resort_name || !resort_location) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        const {
+            owner_name, owner_email, owner_phone, password,
+            resort_name, resort_location, resort_type, total_rooms,
+            amenities, description,
+            photos, videos, documents,
+            bank_name, account_holder, account_number, ifsc_code, upi_id,
+            pan_number, aadhar_number
+        } = req.body;
+
+        if (!owner_name) return res.status(400).json({ error: 'Owner name is required' });
+        if (!owner_phone) return res.status(400).json({ error: 'Mobile number is required' });
+        if (!password) return res.status(400).json({ error: 'Password is required' });
+        if (!resort_name) return res.status(400).json({ error: 'Resort name is required' });
+        if (!resort_location) return res.status(400).json({ error: 'Resort location is required' });
+
+        const existing = await db.get(
+            'SELECT id FROM partner_applications WHERE owner_phone = ?',
+            [owner_phone]
+        );
+        if (existing) {
+            return res.status(400).json({ error: 'Application already submitted with this mobile number.' });
         }
-        
-        // Generate reference ID
-        const referenceId = `PA-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 10000)}`;
-        
+
+        const total = await db.get('SELECT COUNT(*) as total FROM partner_applications');
+        const referenceId = 'APP' + String(total.total + 1).padStart(6, '0');
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
         const result = await db.run(`
-            INSERT INTO partner_applications 
-            (reference_id, owner_name, owner_email, owner_phone, resort_name, resort_location, resort_type, total_rooms, amenities, description)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [referenceId, owner_name, owner_email, owner_phone, resort_name, resort_location, resort_type, total_rooms, amenities, description]);
-        
-        publishEvent('partner.application.submitted', { applicationId: result.lastID, referenceId });
-        res.json({ id: result.lastID, reference_id: referenceId, message: 'Application submitted successfully' });
-    } catch (error) {
-        console.error('Partner application submission error:', error);
-        res.status(500).json({ error: 'Failed to submit application' });
+            INSERT INTO partner_applications (
+                reference_id, owner_name, owner_email, owner_phone, password,
+                resort_name, resort_location, resort_type, total_rooms,
+                amenities, description,
+                photos, videos, documents,
+                bank_name, account_holder, account_number, ifsc_code, upi_id,
+                pan_number, aadhar_number, status
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        `, [
+            referenceId, owner_name, owner_email, owner_phone, hashedPassword,
+            resort_name, resort_location, resort_type, total_rooms,
+            JSON.stringify(amenities || []), description,
+            JSON.stringify(photos || []), JSON.stringify(videos || []), JSON.stringify(documents || []),
+            bank_name, account_holder, account_number, ifsc_code, upi_id,
+            pan_number, aadhar_number, 'Pending'
+        ]);
+
+        publishEvent('partner.application.submitted', { id: result.lastID, referenceId });
+
+        res.json({
+            success: true,
+            applicationId: result.lastID,
+            referenceId,
+            status: 'Pending',
+            message: 'Partner application submitted successfully.'
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to submit application.' });
     }
 });
 
