@@ -1886,7 +1886,9 @@ function nextStep(){
     partnerForm.district = document.getElementById('partnerDistrict').value;
     partnerForm.pincode = document.getElementById('partnerPincode').value;
     if(partnerForm.resort_name == ''){ showToast('Resort Name Required','error'); return; }
-    showToast('Step 3 Coming Next','success');
+    currentPartnerStep = 3;
+    showStep3();
+    return;
   }
 }
 }
@@ -1947,6 +1949,61 @@ function showStep2(){
       <button class="btn btn-primary" onclick="nextStep()">Next →</button>
     </div>
   `;
+}
+
+function showStep3(){
+  document.getElementById('wizardContent').innerHTML = `
+    <h3 style="margin-bottom:25px;">Step 3 of 7</h3>
+
+    <h4 style="margin-bottom:15px;">Resort Amenities</h4>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+      <label><input type="checkbox" value="Swimming Pool"> Swimming Pool</label>
+      <label><input type="checkbox" value="AC Rooms"> AC Rooms</label>
+      <label><input type="checkbox" value="WiFi"> WiFi</label>
+      <label><input type="checkbox" value="Parking"> Parking</label>
+      <label><input type="checkbox" value="Restaurant"> Restaurant</label>
+      <label><input type="checkbox" value="Camp Fire"> Camp Fire</label>
+      <label><input type="checkbox" value="Kids Play Area"> Kids Play Area</label>
+      <label><input type="checkbox" value="Pet Friendly"> Pet Friendly</label>
+      <label><input type="checkbox" value="Power Backup"> Power Backup</label>
+      <label><input type="checkbox" value="TV"> TV</label>
+      <label><input type="checkbox" value="Hot Water"> Hot Water</label>
+      <label><input type="checkbox" value="Security"> Security</label>
+    </div>
+
+    <div class="field-group" style="margin-top:25px;">
+      <label>Resort Description</label>
+      <textarea id="partnerDescription" rows="6" placeholder="Describe your resort...">${partnerForm.description}</textarea>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:30px;">
+      <button class="btn btn-outline" onclick="step3Previous()">← Previous</button>
+      <button class="btn btn-primary" onclick="step3Next()">Next →</button>
+    </div>
+  `;
+  restoreAmenities();
+}
+
+function restoreAmenities(){
+  document.querySelectorAll('#wizardContent input[type=checkbox]').forEach(cb => {
+    cb.checked = partnerForm.amenities.includes(cb.value);
+  });
+}
+
+function step3Next(){
+  partnerForm.description = document.getElementById('partnerDescription').value;
+  partnerForm.amenities = [];
+  document.querySelectorAll('#wizardContent input[type=checkbox]:checked').forEach(cb => {
+    partnerForm.amenities.push(cb.value);
+  });
+  currentPartnerStep = 4;
+  showToast('Step 4 Coming Next','success');
+}
+
+function step3Previous(){
+  currentPartnerStep = 2;
+  showStep2();
 }
 
 function previousStep(){
