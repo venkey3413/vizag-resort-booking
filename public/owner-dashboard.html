@@ -340,6 +340,16 @@ tr:hover td{background:#f8fafc}
       <input type="password" id="loginPass" placeholder="Enter your password" autocomplete="current-password">
     </div>
     <button class="btn-login" id="loginBtn" onclick="doLogin()">Login to Dashboard</button>
+
+    <div style="text-align:center;margin:20px 0;position:relative;">
+      <hr>
+      <span style="background:white;padding:0 15px;position:relative;top:-12px;color:#666;font-size:14px;">OR</span>
+    </div>
+
+    <button class="btn-login" style="background:linear-gradient(135deg,#0a7a5a,#14c88c);margin-bottom:15px;" onclick="showPartnerRegistration()">
+      🏨 Become a Partner
+    </button>
+
     <a href="/" class="back-link">← Back to VshakaGo</a>
 
     <!-- Application Status Check -->
@@ -351,6 +361,49 @@ tr:hover td{background:#f8fafc}
       </div>
       <div id="appStatusResult" style="margin-top:.75rem"></div>
     </div>
+  </div>
+</div>
+
+
+<!-- ==========================================
+     PARTNER REGISTRATION
+=========================================== -->
+<div id="partnerRegistrationPage" style="display:none;min-height:100vh;background:#f8fafc;padding:40px;">
+  <div style="max-width:900px;margin:auto;background:white;border-radius:20px;padding:40px;box-shadow:0 10px 30px rgba(0,0,0,.1);">
+
+    <h2 style="text-align:center;color:#1a5fa8;">Become a VshakaGo Partner</h2>
+    <p style="text-align:center;color:#666;margin-bottom:40px;">Complete the 7-step application.</p>
+
+    <div id="wizardContent">
+      <h3>Step 1 of 7</h3>
+
+      <div class="field-group">
+        <label>Owner Name</label>
+        <input type="text" id="partnerOwnerName">
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Mobile Number</label>
+          <input type="text" id="partnerPhone">
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input type="email" id="partnerEmail">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" id="partnerPassword">
+      </div>
+
+      <div style="margin-top:30px;display:flex;justify-content:space-between;">
+        <button class="btn btn-outline" onclick="hidePartnerRegistration()">Back</button>
+        <button class="btn btn-primary" onclick="nextStep()">Next →</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1788,6 +1841,24 @@ async function refreshResorts() {
     console.error('Failed to refresh resorts:', error);
   }
 }
+
+// ── PARTNER REGISTRATION ──
+let currentPartnerStep = 1;
+
+function showPartnerRegistration() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('partnerRegistrationPage').style.display = 'block';
+}
+
+function hidePartnerRegistration() {
+  document.getElementById('partnerRegistrationPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+}
+
+function nextStep() {
+  alert('Step 2 Coming Next');
+}
+
 </script>
 </body>
 </html>
