@@ -1519,7 +1519,7 @@ app.post("/api/partner/upload", upload.array("images", 20), async (req, res) => 
         for (const file of req.files) {
             const result = await new Promise((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream(
-                    { folder: "vshakago/partners" },
+                    { folder: "vshakago/partner", resource_type: "image" },
                     (error, result) => { if (error) reject(error); else resolve(result); }
                 );
                 streamifier.createReadStream(file.buffer).pipe(stream);
