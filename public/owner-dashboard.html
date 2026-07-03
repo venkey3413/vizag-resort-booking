@@ -1855,8 +1855,110 @@ function hidePartnerRegistration() {
   document.getElementById('loginPage').style.display = 'flex';
 }
 
-function nextStep() {
-  alert('Step 2 Coming Next');
+function nextStep(){
+  if(currentPartnerStep == 1){
+    showStep2();
+    currentPartnerStep = 2;
+    return;
+  }
+  if(currentPartnerStep == 2){
+    showStep3();
+    currentPartnerStep = 3;
+    return;
+  }
+}
+
+function showStep2(){
+  document.getElementById('wizardContent').innerHTML = `
+    <h3 style="margin-bottom:25px;">Step 2 of 7</h3>
+
+    <div class="field-group">
+      <label>Resort Name</label>
+      <input type="text" id="partnerResortName" placeholder="Ex: Sea Breeze Resort">
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label>Resort Type</label>
+        <select id="partnerResortType">
+          <option value="">Select</option>
+          <option>Resort</option>
+          <option>Villa</option>
+          <option>Hotel</option>
+          <option>Cottage</option>
+          <option>Farm House</option>
+          <option>Beach House</option>
+          <option>Guest House</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Total Rooms</label>
+        <input type="number" id="partnerRooms" placeholder="10">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Address</label>
+      <textarea id="partnerAddress" rows="4" placeholder="Complete Address"></textarea>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label>District</label>
+        <select id="partnerDistrict">
+          <option>Visakhapatnam</option>
+          <option>Vizianagaram</option>
+          <option>Srikakulam</option>
+          <option>East Godavari</option>
+          <option>West Godavari</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Pincode</label>
+        <input type="text" id="partnerPincode">
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:30px;">
+      <button class="btn btn-outline" onclick="previousStep()">← Previous</button>
+      <button class="btn btn-primary" onclick="nextStep()">Next →</button>
+    </div>
+  `;
+}
+
+function previousStep(){
+  if(currentPartnerStep == 2){
+    currentPartnerStep = 1;
+    document.getElementById('wizardContent').innerHTML = `
+      <h3>Step 1 of 7</h3>
+
+      <div class="field-group">
+        <label>Owner Name</label>
+        <input type="text" id="partnerOwnerName">
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Mobile Number</label>
+          <input type="text" id="partnerPhone">
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input type="email" id="partnerEmail">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" id="partnerPassword">
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:30px;">
+        <button class="btn btn-outline" onclick="hidePartnerRegistration()">Back</button>
+        <button class="btn btn-primary" onclick="nextStep()">Next →</button>
+      </div>
+    `;
+  }
 }
 
 </script>
