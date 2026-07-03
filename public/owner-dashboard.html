@@ -1998,7 +1998,74 @@ function step3Next(){
     partnerForm.amenities.push(cb.value);
   });
   currentPartnerStep = 4;
-  showToast('Step 4 Coming Next','success');
+  showStep4();
+  return;
+}
+
+
+function showStep4(){
+  document.getElementById("wizardContent").innerHTML=`
+    <h3 style="margin-bottom:20px;">Step 4 of 7</h3>
+    <h4>Upload Resort Photos</h4>
+    <p style="color:#666;">Minimum 5 Photos</p>
+    <div id="uploadArea" style="border:2px dashed #3b82f6;padding:50px;text-align:center;border-radius:12px;cursor:pointer;">
+      <h2>📷</h2>
+      <p>Click to Select Images</p>
+      <input type="file" id="partnerImages" multiple accept="image/*" style="display:none;">
+    </div>
+    <div id="imagePreview" style="display:grid;grid-template-columns:repeat(auto-fill,150px);gap:15px;margin-top:25px;"></div>
+    <div style="margin-top:25px;display:flex;justify-content:space-between;">
+      <button class="btn btn-outline" onclick="step4Previous()">← Previous</button>
+      <button class="btn btn-success" onclick="uploadPartnerImages()">Upload Images</button>
+      <button class="btn btn-primary" onclick="step4Next()">Next →</button>
+    </div>
+  `;
+  document.getElementById("uploadArea").onclick=function(){
+    document.getElementById("partnerImages").click();
+  };
+  document.getElementById("partnerImages").onchange=previewPartnerImages;
+  restoreUploadedImages();
+}
+
+function previewPartnerImages(e){
+  const preview=document.getElementById("imagePreview");
+  preview.innerHTML="";
+  partnerForm.photos=[];
+  Array.from(e.target.files).forEach(file=>{
+    partnerForm.photos.push(file);
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      const div=document.createElement("div");
+      div.innerHTML=`<img src="${ev.target.result}" style="width:150px;height:120px;object-fit:cover;border-radius:10px;border:1px solid #ddd;">`;
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function restoreUploadedImages(){
+  if(partnerForm.photos.length==0) return;
+  const preview=document.getElementById("imagePreview");
+  preview.innerHTML="";
+  partnerForm.photos.forEach(photo=>{
+    if(photo.url){
+      preview.innerHTML+=`<img src="${photo.url}" style="width:150px;height:120px;object-fit:cover;border-radius:10px;">`;
+    }
+  });
+}
+
+function step4Previous(){
+  currentPartnerStep=3;
+  showStep3();
+}
+
+function step4Next(){
+  if(partnerForm.photos.length==0){
+    showToast("Please upload at least one image","error");
+    return;
+  }
+  currentPartnerStep=5;
+  showToast("Step 5 Coming Next","success");
 }
 
 function step3Previous(){
