@@ -1846,6 +1846,7 @@ async function refreshResorts() {
 let currentPartnerStep = 1;
 
 const partnerForm = {
+  pendingFiles: [],
   owner_name: '', owner_email: '', owner_phone: '', password: '',
   resort_name: '', resort_type: '', total_rooms: '', address: '', district: '', pincode: '',
   amenities: [], description: '',
@@ -2005,72 +2006,177 @@ function step3Next(){
 
 function showStep4(){
   document.getElementById("wizardContent").innerHTML=`
-    <h3 style="margin-bottom:20px;">Step 4 of 7</h3>
-    <h4>Upload Resort Photos</h4>
-    <p style="color:#666;">Minimum 5 Photos</p>
-    <div id="uploadArea" style="border:2px dashed #3b82f6;padding:50px;text-align:center;border-radius:12px;cursor:pointer;">
-      <h2>📷</h2>
-      <p>Click to Select Images</p>
+    <h3 style="margin-bottom:8px;">Step 4 of 7 — Resort Photos</h3>
+    <p style="color:#64748b;font-size:.85rem;margin-bottom:18px;">Upload at least 3 clear photos. Good photos get 3x more bookings.</p>
+
+    <div id="uploadArea" style="border:2px dashed #3b82f6;padding:40px 20px;text-align:center;border-radius:12px;cursor:pointer;background:#f0f7ff;transition:background .2s;"
+      onclick="document.getElementById('partnerImages').click()"
+      ondrop="handleImageDrop(event)" ondragover="event.preventDefault();this.style.background='#dbeafe'" ondragleave="this.style.background='#f0f7ff'">
+      <div style="font-size:2.5rem;margin-bottom:8px;">📷</div>
+      <p style="font-weight:600;color:#1a5fa8;">Click to select images</p>
+      <p style="font-size:.8rem;color:#94a3b8;margin-top:4px;">or drag & drop here • JPG, PNG, WEBP • Max 10MB each</p>
       <input type="file" id="partnerImages" multiple accept="image/*" style="display:none;">
     </div>
-    <div id="imagePreview" style="display:grid;grid-template-columns:repeat(auto-fill,150px);gap:15px;margin-top:25px;"></div>
-    <div style="margin-top:25px;display:flex;justify-content:space-between;">
+
+    <div id="uploadStatus" style="display:none;margin-top:14px;padding:12px 16px;background:#eff6ff;border-radius:10px;font-size:.85rem;color:#1a5fa8;display:none;align-items:center;gap:10px;">
+      <div style="width:16px;height:16px;border:2px solid rgba(26,95,168,.3);border-top-color:#1a5fa8;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div>
+      <span id="uploadStatusText">Uploading to Cloudinary...</span>
+    </div>
+
+    <div id="uploadSuccess" style="display:none;margin-top:14px;padding:12px 16px;background:#f0fdf4;border-radius:10px;font-size:.85rem;color:#16a34a;border:1px solid #bbf7d0;">
+      ✅ <span id="uploadSuccessText">Images uploaded successfully!</span>
+    </div>
+
+    <div id="imagePreview" style="display:grid;grid-template-columns:repeat(auto-fill,140px);gap:12px;margin-top:18px;"></div>
+
+    <div style="margin-top:25px;display:flex;justify-content:space-between;align-items:center;">
       <button class="btn btn-outline" onclick="step4Previous()">← Previous</button>
-      <button class="btn btn-success" onclick="uploadPartnerImages()">Upload Images</button>
-      <button class="btn btn-primary" onclick="step4Next()">Next →</button>
+      <div style="display:flex;gap:10px;">
+        <button id="uploadBtn" class="btn btn-success" onclick="uploadPartnerImages()" style="display:none;">☁️ Upload to Cloud</button>
+        <button id="step4NextBtn" class="btn btn-primary" onclick="step4Next()">Next →</button>
+      </div>
     </div>
   `;
-  document.getElementById("uploadArea").onclick=function(){
-    document.getElementById("partnerImages").click();
-  };
-  document.getElementById("partnerImages").onchange=previewPartnerImages;
+  document.getElementById("partnerImages").onchange = previewPartnerImages;
   restoreUploadedImages();
 }
 
+function handleImageDrop(e){
+  e.preventDefault();
+  document.getElementById("uploadArea").style.background = "#f0f7ff";
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+  if(!files.length){ showToast("Only image files are allowed","error"); return; }
+  const dt = new DataTransfer();
+  files.forEach(f => dt.items.add(f));
+  document.getElementById("partnerImages").files = dt.files;
+  previewPartnerImages({ target: { files: dt.files } });
+}
+
 function previewPartnerImages(e){
-  const preview=document.getElementById("imagePreview");
-  preview.innerHTML="";
-  partnerForm.photos=[];
-  Array.from(e.target.files).forEach(file=>{
-    partnerForm.photos.push(file);
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      const div=document.createElement("div");
-      div.innerHTML=`<img src="${ev.target.result}" style="width:150px;height:120px;object-fit:cover;border-radius:10px;border:1px solid #ddd;">`;
+  const preview = document.getElementById("imagePreview");
+  preview.innerHTML = "";
+  // Keep already-uploaded cloud photos
+  const cloudPhotos = partnerForm.photos.filter(p => p.url);
+  partnerForm.pendingFiles = Array.from(e.target.files);
+
+  // Show cloud photos first
+  cloudPhotos.forEach((photo, i) => {
+    const div = document.createElement("div");
+    div.style.position = "relative";
+    div.innerHTML = `
+      <img src="${photo.url}" style="width:140px;height:110px;object-fit:cover;border-radius:10px;border:2px solid #16a34a;">
+      <div style="position:absolute;top:4px;right:4px;background:#16a34a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;" onclick="removeCloudPhoto(${i})" title="Remove">×</div>
+      <div style="position:absolute;bottom:4px;left:4px;background:#16a34a;color:#fff;border-radius:4px;padding:1px 5px;font-size:.65rem;">✅ Uploaded</div>`;
+    preview.appendChild(div);
+  });
+
+  // Show pending file previews
+  partnerForm.pendingFiles.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const div = document.createElement("div");
+      div.style.position = "relative";
+      div.id = "pending_" + i;
+      div.innerHTML = `
+        <img src="${ev.target.result}" style="width:140px;height:110px;object-fit:cover;border-radius:10px;border:2px dashed #3b82f6;opacity:.8;">
+        <div style="position:absolute;bottom:4px;left:4px;background:#3b82f6;color:#fff;border-radius:4px;padding:1px 5px;font-size:.65rem;">Pending upload</div>`;
       preview.appendChild(div);
     };
     reader.readAsDataURL(file);
   });
+
+  // Show upload button if there are pending files
+  const uploadBtn = document.getElementById("uploadBtn");
+  if (uploadBtn) uploadBtn.style.display = partnerForm.pendingFiles.length > 0 ? "inline-flex" : "none";
+
+  const successDiv = document.getElementById("uploadSuccess");
+  if (successDiv) successDiv.style.display = "none";
+}
+
+function removeCloudPhoto(index){
+  partnerForm.photos = partnerForm.photos.filter(p => p.url);
+  partnerForm.photos.splice(index, 1);
+  restoreUploadedImages();
 }
 
 function restoreUploadedImages(){
-  if(partnerForm.photos.length==0) return;
-  const preview=document.getElementById("imagePreview");
-  preview.innerHTML="";
-  partnerForm.photos.forEach(photo=>{
-    if(photo.url){
-      preview.innerHTML+=`<img src="${photo.url}" style="width:150px;height:120px;object-fit:cover;border-radius:10px;">`;
-    }
+  const preview = document.getElementById("imagePreview");
+  if(!preview) return;
+  preview.innerHTML = "";
+  const cloudPhotos = (partnerForm.photos || []).filter(p => p.url);
+  if(cloudPhotos.length === 0 && !(partnerForm.pendingFiles && partnerForm.pendingFiles.length)){
+    preview.innerHTML = "<p style=\"font-size:.82rem;color:#94a3b8;margin-top:8px\">No images selected yet.</p>";
+    return;
+  }
+  cloudPhotos.forEach((photo, i) => {
+    const div = document.createElement("div");
+    div.style.position = "relative";
+    div.innerHTML = `
+      <img src="${photo.url}" style="width:140px;height:110px;object-fit:cover;border-radius:10px;border:2px solid #16a34a;">
+      <div style="position:absolute;top:4px;right:4px;background:#dc2626;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.75rem;cursor:pointer;line-height:1" onclick="removeCloudPhoto(${i})">×</div>
+      <div style="position:absolute;bottom:4px;left:4px;background:#16a34a;color:#fff;border-radius:4px;padding:1px 5px;font-size:.65rem;">✅ Uploaded</div>`;
+    preview.appendChild(div);
   });
+  // Update success message
+  const successDiv = document.getElementById("uploadSuccess");
+  const successText = document.getElementById("uploadSuccessText");
+  if(successDiv && cloudPhotos.length > 0){
+    successDiv.style.display = "block";
+    if(successText) successText.textContent = cloudPhotos.length + " image(s) uploaded to Cloudinary ✅";
+  }
 }
 
 
 async function uploadPartnerImages(){
-  const input=document.getElementById("partnerImages");
-  if(input.files.length==0){
-    showToast("Select Images","error");
+  const pendingFiles = partnerForm.pendingFiles || [];
+  if(pendingFiles.length === 0){
+    showToast("Select images first","error");
     return;
   }
-  const formData=new FormData();
-  Array.from(input.files).forEach(file=>{ formData.append("images",file); });
-  showLoading();
-  const response=await fetch("/api/partner/upload",{ method:"POST", body:formData });
-  hideLoading();
-  const data=await response.json();
-  if(!data.success){ showToast("Upload Failed","error"); return; }
-  partnerForm.photos=data.photos;
-  showToast("Images Uploaded","success");
-  restoreUploadedImages();
+
+  // Show loading state
+  const statusDiv = document.getElementById("uploadStatus");
+  const statusText = document.getElementById("uploadStatusText");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const nextBtn = document.getElementById("step4NextBtn");
+  if(statusDiv){ statusDiv.style.display = "flex"; }
+  if(uploadBtn){ uploadBtn.disabled = true; uploadBtn.innerHTML = "⏳ Uploading..."; }
+  if(nextBtn){ nextBtn.disabled = true; }
+
+  try {
+    const formData = new FormData();
+    pendingFiles.forEach(file => formData.append("images", file));
+    // Pass phone for Cloudinary folder organisation
+    formData.append("phone", partnerForm.owner_phone || "unknown");
+
+    const response = await fetch("/api/partner/upload", { method: "POST", body: formData });
+    const data = await response.json();
+
+    if(!data.success){ throw new Error(data.error || "Upload failed"); }
+
+    // Merge with any already-uploaded cloud photos
+    const existing = partnerForm.photos.filter(p => p.url);
+    partnerForm.photos = [...existing, ...data.photos];
+    partnerForm.pendingFiles = [];
+
+    // Update UI
+    if(statusDiv){ statusDiv.style.display = "none"; }
+    const successDiv = document.getElementById("uploadSuccess");
+    const successText = document.getElementById("uploadSuccessText");
+    if(successDiv){ successDiv.style.display = "block"; }
+    if(successText){ successText.textContent = partnerForm.photos.length + " image(s) uploaded to Cloudinary ✅"; }
+    if(uploadBtn){ uploadBtn.style.display = "none"; }
+    if(nextBtn){ nextBtn.disabled = false; }
+
+    showToast(data.photos.length + " image(s) uploaded!", "success");
+    restoreUploadedImages();
+
+  } catch(err) {
+    if(statusDiv){ statusDiv.style.display = "none"; }
+    if(uploadBtn){ uploadBtn.disabled = false; uploadBtn.innerHTML = "☁️ Upload to Cloud"; }
+    if(nextBtn){ nextBtn.disabled = false; }
+    showToast("Upload failed: " + err.message, "error");
+  }
 }
 
 function step4Previous(){
@@ -2079,12 +2185,19 @@ function step4Previous(){
 }
 
 function step4Next(){
-  if(partnerForm.photos.length==0){
-    showToast("Please upload at least one image","error");
+  const cloudPhotos = (partnerForm.photos || []).filter(p => p.url);
+  const pending = (partnerForm.pendingFiles || []).length;
+
+  if(pending > 0){
+    showToast("Please click 'Upload to Cloud' before continuing", "error");
     return;
   }
-  currentPartnerStep=5;
-  showToast("Step 5 Coming Next","success");
+  if(cloudPhotos.length === 0){
+    showToast("Please upload at least 1 image to continue", "error");
+    return;
+  }
+  currentPartnerStep = 5;
+  showStep5();
 }
 
 function step3Previous(){
