@@ -1536,17 +1536,6 @@ app.post("/api/partner/upload", upload.array("images", 20), async (req, res) => 
         res.status(500).json({ success: false, message: err.message });
     }
 });
-
-            uploaded.push({ url: result.secure_url, public_id: result.public_id });
-        }
-
-        res.json({ success: true, photos: uploaded });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: "Upload Failed" });
-    }
-});
-
 // PARTNER APPLICATIONS API
 
 // ==========================================
