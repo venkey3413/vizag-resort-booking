@@ -1088,7 +1088,8 @@ app.post('/api/partner/upload', upload.array('images', 15), async (req, res) => 
 
         const uploadPromises = req.files.map((file) => {
             return new Promise((resolve, reject) => {
-                const folder = 'partner-applications/' + (req.body.phone || 'unknown');
+                const subFolder = req.body.folder === 'documents' ? 'documents' : 'images';
+        const folder = 'partner-applications/' + (req.body.phone || 'unknown') + '/' + subFolder;
                 const uploadStream = cloudinary.uploader.upload_stream(
                     {
                         folder,
@@ -1120,7 +1121,8 @@ app.post('/api/partner/upload-single', upload.single('image'), async (req, res) 
         if (!req.file) {
             return res.status(400).json({ success: false, error: 'No image received' });
         }
-        const folder = 'partner-applications/' + (req.body.phone || 'unknown');
+        const subFolder = req.body.folder === 'documents' ? 'documents' : 'images';
+        const folder = 'partner-applications/' + (req.body.phone || 'unknown') + '/' + subFolder;
         const result = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 { folder, transformation: [{ width: 800, height: 600, crop: 'limit', quality: 'auto' }] },
