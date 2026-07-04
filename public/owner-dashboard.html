@@ -1852,7 +1852,7 @@ const partnerForm = {
   amenities: [], description: '',
   photos: [], videos: [],
   bank_name: '', account_holder: '', account_number: '', ifsc_code: '', upi_id: '',
-  pan_number: '', aadhar_number: '', documents: [],
+  pan_number: '', aadhar_number: '', gst_number: '', documents: [], pendingDocFiles: [],
   agree: false
 };
 
@@ -2203,6 +2203,509 @@ function step4Next(){
 function step3Previous(){
   currentPartnerStep = 2;
   showStep2();
+}
+
+// ────────────────────────────────────────────────
+// STEP 5 – Bank Details
+// ────────────────────────────────────────────────
+function showStep5(){
+  document.getElementById("wizardContent").innerHTML=`
+    <h3 style="margin-bottom:8px;">Step 5 of 7 — Bank Details</h3>
+    <p style="color:#64748b;font-size:.85rem;margin-bottom:20px;">Your payout details. Required for receiving commission payments.</p>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label>Account Holder Name <span style="color:#e53e3e">*</span></label>
+        <input type="text" id="partnerAccountHolder" placeholder="As on bank account" value="${partnerForm.account_holder || ''}">
+      </div>
+      <div class="field-group">
+        <label>Bank Name <span style="color:#e53e3e">*</span></label>
+        <input type="text" id="partnerBankName" placeholder="e.g. SBI, HDFC, ICICI" value="${partnerForm.bank_name || ''}">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Account Number <span style="color:#e53e3e">*</span></label>
+      <input type="text" id="partnerAccountNumber" placeholder="Enter your account number" value="${partnerForm.account_number || ''}">
+    </div>
+
+    <div class="field-group">
+      <label>Confirm Account Number <span style="color:#e53e3e">*</span></label>
+      <input type="text" id="partnerAccountNumberConfirm" placeholder="Re-enter account number" value="${partnerForm.account_number || ''}">
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label>IFSC Code <span style="color:#e53e3e">*</span></label>
+        <input type="text" id="partnerIFSC" placeholder="e.g. SBIN0001234" value="${partnerForm.ifsc_code || ''}" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        <small style="color:#64748b">11-character IFSC code on your cheque book</small>
+      </div>
+      <div class="field-group">
+        <label>Branch Name</label>
+        <input type="text" id="partnerBranch" placeholder="e.g. Rushikonda Branch" value="${partnerForm.branch_name || ''}">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>UPI ID (Optional)</label>
+      <input type="text" id="partnerUPI" placeholder="yourname@bank" value="${partnerForm.upi_id || ''}">
+    </div>
+
+    <div style="background:#eff6ff;border-radius:10px;padding:12px 16px;font-size:.82rem;color:#1a5fa8;margin-top:8px;">
+      🔒 Your bank details are stored securely and used only for payout transfers.
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:28px;">
+      <button class="btn btn-outline" onclick="step5Previous()">← Previous</button>
+      <button class="btn btn-primary" onclick="step5Next()">Next →</button>
+    </div>
+  `;
+}
+
+function step5Previous(){
+  currentPartnerStep = 4;
+  showStep4();
+}
+
+function step5Next(){
+  const accountHolder = document.getElementById('partnerAccountHolder').value.trim();
+  const bankName      = document.getElementById('partnerBankName').value.trim();
+  const accountNum    = document.getElementById('partnerAccountNumber').value.trim();
+  const confirmNum    = document.getElementById('partnerAccountNumberConfirm').value.trim();
+  const ifsc          = document.getElementById('partnerIFSC').value.trim().toUpperCase();
+  const branch        = document.getElementById('partnerBranch').value.trim();
+  const upi           = document.getElementById('partnerUPI').value.trim();
+
+  if(!accountHolder){ showToast('Account holder name is required','error'); return; }
+  if(!bankName)      { showToast('Bank name is required','error'); return; }
+  if(!accountNum)    { showToast('Account number is required','error'); return; }
+  if(accountNum !== confirmNum){ showToast('Account numbers do not match','error'); return; }
+  if(!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)){ showToast('Enter a valid 11-character IFSC code','error'); return; }
+
+  partnerForm.account_holder = accountHolder;
+  partnerForm.bank_name      = bankName;
+  partnerForm.account_number = accountNum;
+  partnerForm.ifsc_code      = ifsc;
+  partnerForm.branch_name    = branch;
+  partnerForm.upi_id         = upi;
+
+  currentPartnerStep = 6;
+  showStep6();
+}
+
+// ────────────────────────────────────────────────
+// STEP 6 – KYC & Documents
+// ────────────────────────────────────────────────
+function showStep6(){
+  document.getElementById("wizardContent").innerHTML=`
+    <h3 style="margin-bottom:8px;">Step 6 of 7 — KYC & Documents</h3>
+    <p style="color:#64748b;font-size:.85rem;margin-bottom:20px;">Required for identity verification and compliance.</p>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label>PAN Number <span style="color:#e53e3e">*</span></label>
+        <input type="text" id="partnerPAN" placeholder="ABCDE1234F" maxlength="10"
+          value="${partnerForm.pan_number || ''}" style="text-transform:uppercase"
+          oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="field-group">
+        <label>Aadhaar Number <span style="color:#e53e3e">*</span></label>
+        <input type="text" id="partnerAadhaar" placeholder="123412341234" maxlength="12"
+          value="${partnerForm.aadhar_number || ''}">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>GST Number (Optional)</label>
+      <input type="text" id="partnerGST" placeholder="22AAAAA0000A1Z5"
+        value="${partnerForm.gst_number || ''}" style="text-transform:uppercase"
+        oninput="this.value=this.value.toUpperCase()">
+    </div>
+
+    <div class="field-group">
+      <label>Upload Government ID / Resort Registration <span style="color:#e53e3e">*</span></label>
+      <div id="docUploadArea" style="border:2px dashed #3b82f6;padding:30px 20px;text-align:center;border-radius:12px;cursor:pointer;background:#f0f7ff;transition:background .2s;"
+        onclick="document.getElementById('partnerDocuments').click()"
+        ondrop="handleDocDrop(event)" ondragover="event.preventDefault();this.style.background='#dbeafe'" ondragleave="this.style.background='#f0f7ff'">
+        <div style="font-size:2rem;margin-bottom:6px;">📄</div>
+        <p style="font-weight:600;color:#1a5fa8;">Click to select documents</p>
+        <p style="font-size:.78rem;color:#94a3b8;margin-top:4px;">PDF, JPG, PNG • Max 10MB each • PAN, Aadhaar, Trade License, Registration</p>
+        <input type="file" id="partnerDocuments" multiple accept=".pdf,.jpg,.jpeg,.png" style="display:none;">
+      </div>
+    </div>
+
+    <div id="docUploadStatus" style="display:none;margin-top:12px;padding:12px 16px;background:#eff6ff;border-radius:10px;font-size:.85rem;color:#1a5fa8;align-items:center;gap:10px;">
+      <div style="width:16px;height:16px;border:2px solid rgba(26,95,168,.3);border-top-color:#1a5fa8;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div>
+      <span id="docUploadStatusText">Uploading documents...</span>
+    </div>
+
+    <div id="docUploadSuccess" style="display:none;margin-top:12px;padding:12px 16px;background:#f0fdf4;border-radius:10px;font-size:.85rem;color:#16a34a;border:1px solid #bbf7d0;">
+      ✅ <span id="docUploadSuccessText">Documents uploaded!</span>
+    </div>
+
+    <div id="documentPreview" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+
+    <div style="margin-top:20px;display:flex;justify-content:flex-end;">
+      <button id="docUploadBtn" class="btn btn-success" onclick="uploadPartnerDocuments()" style="display:none;">☁️ Upload Documents</button>
+    </div>
+
+    <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
+
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.88rem;">
+      <input type="checkbox" id="agreeTerms" ${partnerForm.agree ? 'checked' : ''} style="margin-top:3px;accent-color:#1a5fa8;">
+      <span>I certify that all information provided is true and accurate. I agree to VshakaGo's <a href="#" style="color:#1a5fa8">Partner Terms & Conditions</a>.</span>
+    </label>
+
+    <div style="display:flex;justify-content:space-between;margin-top:28px;">
+      <button class="btn btn-outline" onclick="step6Previous()">← Previous</button>
+      <button class="btn btn-primary" onclick="step6Next()">Next →</button>
+    </div>
+  `;
+  document.getElementById("partnerDocuments").onchange = previewDocuments;
+  restoreDocuments();
+}
+
+function handleDocDrop(e){
+  e.preventDefault();
+  document.getElementById("docUploadArea").style.background = "#f0f7ff";
+  const files = Array.from(e.dataTransfer.files).filter(f =>
+    f.type.startsWith('image/') || f.type === 'application/pdf'
+  );
+  if(!files.length){ showToast("Only PDF/image files allowed","error"); return; }
+  const dt = new DataTransfer();
+  files.forEach(f => dt.items.add(f));
+  document.getElementById("partnerDocuments").files = dt.files;
+  previewDocuments({ target: { files: dt.files } });
+}
+
+function previewDocuments(e){
+  const preview = document.getElementById("documentPreview");
+  preview.innerHTML = "";
+  partnerForm.pendingDocFiles = Array.from(e.target.files);
+
+  // Show already-uploaded cloud docs
+  const cloudDocs = (partnerForm.documents || []).filter(d => d.url);
+  cloudDocs.forEach((doc, i) => {
+    preview.insertAdjacentHTML('beforeend', `
+      <div style="padding:10px 14px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:space-between;">
+        <span>✅ ${doc.name || 'Document ' + (i+1)}</span>
+        <button onclick="removeCloudDoc(${i})" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:.8rem;">✕</button>
+      </div>`);
+  });
+
+  // Show pending files
+  partnerForm.pendingDocFiles.forEach((file, i) => {
+    const icon = file.type === 'application/pdf' ? '📄' : '🖼️';
+    const size = (file.size / 1024).toFixed(0);
+    preview.insertAdjacentHTML('beforeend', `
+      <div style="padding:10px 14px;background:#f8fafc;border-radius:8px;border:1.5px dashed #3b82f6;display:flex;align-items:center;justify-content:space-between;">
+        <span>${icon} ${file.name} <small style="color:#94a3b8">(${size} KB — pending upload)</small></span>
+      </div>`);
+  });
+
+  const btn = document.getElementById("docUploadBtn");
+  if(btn) btn.style.display = partnerForm.pendingDocFiles.length > 0 ? "inline-flex" : "none";
+  const succ = document.getElementById("docUploadSuccess");
+  if(succ) succ.style.display = "none";
+}
+
+function restoreDocuments(){
+  const preview = document.getElementById("documentPreview");
+  if(!preview) return;
+  const cloudDocs = (partnerForm.documents || []).filter(d => d.url);
+  if(!cloudDocs.length){ preview.innerHTML = ""; return; }
+  preview.innerHTML = cloudDocs.map((doc, i) => `
+    <div style="padding:10px 14px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:space-between;">
+      <span>✅ ${doc.name || 'Document ' + (i+1)}</span>
+      <button onclick="removeCloudDoc(${i})" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:.8rem;">✕</button>
+    </div>`).join('');
+  const succ = document.getElementById("docUploadSuccess");
+  if(succ && cloudDocs.length > 0){
+    succ.style.display = "block";
+    document.getElementById("docUploadSuccessText").textContent = cloudDocs.length + " document(s) uploaded ✅";
+  }
+}
+
+function removeCloudDoc(index){
+  const cloudDocs = (partnerForm.documents || []).filter(d => d.url);
+  cloudDocs.splice(index, 1);
+  partnerForm.documents = cloudDocs;
+  restoreDocuments();
+}
+
+async function uploadPartnerDocuments(){
+  const pending = partnerForm.pendingDocFiles || [];
+  if(!pending.length){ showToast("Select documents first","error"); return; }
+
+  const statusDiv  = document.getElementById("docUploadStatus");
+  const statusText = document.getElementById("docUploadStatusText");
+  const uploadBtn  = document.getElementById("docUploadBtn");
+  const nextBtn    = document.querySelector('#wizardContent button.btn-primary:last-of-type');
+
+  if(statusDiv){ statusDiv.style.display = "flex"; }
+  if(uploadBtn){ uploadBtn.disabled = true; uploadBtn.innerHTML = "⏳ Uploading..."; }
+
+  try {
+    const formData = new FormData();
+    pending.forEach(f => formData.append("images", f));
+    formData.append("phone", partnerForm.owner_phone || "unknown");
+    formData.append("folder", "documents");
+
+    const res  = await fetch("/api/partner/upload", { method:"POST", body:formData });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || "Upload failed");
+
+    // Merge names into returned photos
+    const uploaded = data.photos.map((p, i) => ({
+      url: p.url,
+      public_id: p.public_id,
+      name: pending[i]?.name || ("doc_" + (i+1))
+    }));
+
+    const existing = (partnerForm.documents || []).filter(d => d.url);
+    partnerForm.documents    = [...existing, ...uploaded];
+    partnerForm.pendingDocFiles = [];
+
+    if(statusDiv){ statusDiv.style.display = "none"; }
+    const succDiv = document.getElementById("docUploadSuccess");
+    if(succDiv){ succDiv.style.display = "block"; }
+    document.getElementById("docUploadSuccessText").textContent =
+      partnerForm.documents.length + " document(s) uploaded to Cloudinary ✅";
+    if(uploadBtn){ uploadBtn.style.display = "none"; }
+
+    showToast(uploaded.length + " document(s) uploaded!","success");
+    restoreDocuments();
+  } catch(err) {
+    if(statusDiv){ statusDiv.style.display = "none"; }
+    if(uploadBtn){ uploadBtn.disabled = false; uploadBtn.innerHTML = "☁️ Upload Documents"; }
+    showToast("Upload failed: " + err.message,"error");
+  }
+}
+
+function step6Previous(){
+  currentPartnerStep = 5;
+  showStep5();
+}
+
+function step6Next(){
+  const pan     = document.getElementById("partnerPAN").value.trim().toUpperCase();
+  const aadhaar = document.getElementById("partnerAadhaar").value.trim();
+  const gst     = document.getElementById("partnerGST").value.trim().toUpperCase();
+  const agree   = document.getElementById("agreeTerms").checked;
+
+  if(!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)){
+    showToast("Enter a valid PAN number (e.g. ABCDE1234F)","error"); return;
+  }
+  if(!/^[0-9]{12}$/.test(aadhaar)){
+    showToast("Enter a valid 12-digit Aadhaar number","error"); return;
+  }
+  if((partnerForm.pendingDocFiles || []).length > 0){
+    showToast("Please click 'Upload Documents' before continuing","error"); return;
+  }
+  if((partnerForm.documents || []).filter(d => d.url).length === 0){
+    showToast("Please upload at least one government ID document","error"); return;
+  }
+  if(!agree){
+    showToast("Please accept the Terms & Conditions","error"); return;
+  }
+
+  partnerForm.pan_number    = pan;
+  partnerForm.aadhar_number = aadhaar;
+  partnerForm.gst_number    = gst;
+  partnerForm.agree         = agree;
+
+  currentPartnerStep = 7;
+  showStep7();
+}
+
+// ────────────────────────────────────────────────
+// STEP 7 – Review & Submit
+// ────────────────────────────────────────────────
+function showStep7(){
+  const amenitiesList = Array.isArray(partnerForm.amenities)
+    ? partnerForm.amenities.join(', ') : (partnerForm.amenities || '—');
+  const cloudPhotos = (partnerForm.photos   || []).filter(p => p.url).length;
+  const cloudDocs   = (partnerForm.documents|| []).filter(d => d.url).length;
+
+  document.getElementById("wizardContent").innerHTML=`
+    <h3 style="margin-bottom:8px;">Step 7 of 7 — Review & Submit</h3>
+    <p style="color:#64748b;font-size:.85rem;margin-bottom:20px;">Please review all details before submitting your application.</p>
+
+    <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:16px;">
+      <div style="background:#eff6ff;padding:10px 16px;font-size:.8rem;font-weight:700;color:#1a5fa8;text-transform:uppercase;letter-spacing:.5px;">👤 Owner Information</div>
+      <table style="width:100%;border-collapse:collapse;">
+        ${reviewRow('Full Name', partnerForm.owner_name)}
+        ${reviewRow('Mobile',    partnerForm.owner_phone)}
+        ${reviewRow('Email',     partnerForm.owner_email)}
+      </table>
+    </div>
+
+    <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:16px;">
+      <div style="background:#f0fdf4;padding:10px 16px;font-size:.8rem;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.5px;">🏨 Resort Details</div>
+      <table style="width:100%;border-collapse:collapse;">
+        ${reviewRow('Resort Name',  partnerForm.resort_name)}
+        ${reviewRow('Type',         partnerForm.resort_type)}
+        ${reviewRow('Total Rooms',  partnerForm.total_rooms)}
+        ${reviewRow('Address',      partnerForm.address)}
+        ${reviewRow('District',     partnerForm.district)}
+        ${reviewRow('Amenities',    amenitiesList)}
+      </table>
+    </div>
+
+    <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:16px;">
+      <div style="background:#fffbeb;padding:10px 16px;font-size:.8rem;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.5px;">💰 Bank Details</div>
+      <table style="width:100%;border-collapse:collapse;">
+        ${reviewRow('Account Holder', partnerForm.account_holder)}
+        ${reviewRow('Bank Name',      partnerForm.bank_name)}
+        ${reviewRow('Account No.',    '••••' + (partnerForm.account_number || '').slice(-4))}
+        ${reviewRow('IFSC Code',      partnerForm.ifsc_code)}
+        ${reviewRow('UPI ID',         partnerForm.upi_id || '—')}
+      </table>
+    </div>
+
+    <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:16px;">
+      <div style="background:#fdf4ff;padding:10px 16px;font-size:.8rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;">🪪 KYC Details</div>
+      <table style="width:100%;border-collapse:collapse;">
+        ${reviewRow('PAN Number',   partnerForm.pan_number)}
+        ${reviewRow('Aadhaar',      partnerForm.aadhar_number.slice(0,4) + ' •••• •••• ' + partnerForm.aadhar_number.slice(-4))}
+        ${reviewRow('GST Number',   partnerForm.gst_number || '—')}
+        ${reviewRow('Photos Uploaded', cloudPhotos + ' image(s)')}
+        ${reviewRow('Docs Uploaded',   cloudDocs + ' document(s)')}
+      </table>
+    </div>
+
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.88rem;margin-top:8px;">
+      <input type="checkbox" id="finalAgree" style="margin-top:3px;accent-color:#1a5fa8;">
+      <span>I confirm that all information submitted is accurate. I understand that VshakaGo will manually verify my application before approval.</span>
+    </label>
+
+    <div style="display:flex;justify-content:space-between;margin-top:28px;">
+      <button class="btn btn-outline" onclick="step7Previous()">← Previous</button>
+      <button class="btn btn-success" onclick="submitPartnerApplication()" style="font-size:.95rem;padding:.7rem 1.8rem;">🚀 Submit Application</button>
+    </div>
+  `;
+}
+
+function reviewRow(label, value){
+  return `<tr style="border-bottom:1px solid #f0f2f7;">
+    <td style="padding:9px 16px;font-size:.82rem;font-weight:600;color:#64748b;width:45%">${label}</td>
+    <td style="padding:9px 16px;font-size:.88rem;color:#1e293b;font-weight:500">${value || '—'}</td>
+  </tr>`;
+}
+
+function step7Previous(){
+  currentPartnerStep = 6;
+  showStep6();
+}
+
+async function submitPartnerApplication(){
+  if(!document.getElementById("finalAgree").checked){
+    showToast("Please confirm before submitting","error"); return;
+  }
+
+  const btn = document.querySelector('#wizardContent .btn-success');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle"></span> Submitting...'; }
+
+  try {
+    const payload = {
+      owner_name:      partnerForm.owner_name,
+      owner_email:     partnerForm.owner_email,
+      owner_phone:     partnerForm.owner_phone,
+      password:        partnerForm.password,
+      resort_name:     partnerForm.resort_name,
+      resort_location: partnerForm.address + (partnerForm.district ? ', ' + partnerForm.district : ''),
+      resort_type:     partnerForm.resort_type,
+      total_rooms:     partnerForm.total_rooms,
+      amenities:       Array.isArray(partnerForm.amenities) ? partnerForm.amenities.join(',') : partnerForm.amenities,
+      description:     partnerForm.description,
+      photos:          (partnerForm.photos    || []).filter(p => p.url).map(p => p.url).join(','),
+      documents:       (partnerForm.documents || []).filter(d => d.url).map(d => d.url).join(','),
+      bank_name:       partnerForm.bank_name,
+      account_holder:  partnerForm.account_holder,
+      account_number:  partnerForm.account_number,
+      ifsc_code:       partnerForm.ifsc_code,
+      upi_id:          partnerForm.upi_id,
+      pan_number:      partnerForm.pan_number,
+      aadhar_number:   partnerForm.aadhar_number,
+      gst_number:      partnerForm.gst_number,
+      status:          'pending',
+      submitted_at:    new Date().toISOString()
+    };
+
+    const response = await fetch("/api/partner-applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+
+    if(!response.ok || result.error){
+      throw new Error(result.error || "Submission failed");
+    }
+
+    showSubmissionSuccess(result);
+
+  } catch(err) {
+    if(btn){ btn.disabled = false; btn.innerHTML = "🚀 Submit Application"; }
+    showToast("Submission failed: " + err.message, "error");
+    console.error(err);
+  }
+}
+
+function showSubmissionSuccess(result){
+  const refId = result.reference_id || result.referenceId || result.id || ('VSG-' + Date.now());
+  document.getElementById("wizardContent").innerHTML=`
+    <div style="text-align:center;padding:40px 20px;">
+      <div style="font-size:4rem;margin-bottom:16px;">🎉</div>
+      <h2 style="font-size:1.4rem;font-weight:800;color:#1e293b;margin-bottom:8px;">Application Submitted!</h2>
+      <p style="color:#64748b;font-size:.9rem;margin-bottom:24px;">
+        Your partner application has been received. Our team will review it within <strong>24–48 hours</strong> and contact you on your registered mobile.
+      </p>
+      <div style="background:#f0f7ff;border:2px dashed #3b82f6;border-radius:12px;padding:18px;margin-bottom:20px;">
+        <div style="font-size:.75rem;font-weight:700;color:#64748b;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;">Your Application Reference ID</div>
+        <div style="font-size:1.4rem;font-weight:800;color:#1a5fa8;letter-spacing:2px;">${refId}</div>
+        <div style="font-size:.78rem;color:#94a3b8;margin-top:6px;">Save this ID to track your application status</div>
+      </div>
+      <div style="background:#fef9c3;border-radius:10px;padding:12px 16px;font-size:.83rem;color:#92400e;margin-bottom:24px;text-align:left;">
+        📋 <strong>Status:</strong> <span style="color:#d97706;font-weight:700;">Pending Review</span><br>
+        📱 We will contact you on <strong>${partnerForm.owner_phone}</strong><br>
+        📧 Confirmation sent to <strong>${partnerForm.owner_email}</strong>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px;" onclick="checkStatusAfterSubmit('${partnerForm.owner_phone}')">
+        📊 Check Application Status
+      </button>
+      <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="hidePartnerRegistration()">
+        ← Back to Login
+      </button>
+    </div>
+  `;
+}
+
+function checkStatusAfterSubmit(phone){
+  // Pre-fill the phone and switch to status check
+  hidePartnerRegistration();
+  document.getElementById('appPhoneInput').value = phone;
+  checkApplicationStatus();
+}
+
+// ────────────────────────────────────────────────
+// LOADING helpers (used by upload + submit)
+// ────────────────────────────────────────────────
+function showLoading(){
+  let overlay = document.getElementById('loadingOverlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:14px;padding:28px 36px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#1a5fa8;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px"></div><p style="font-size:.9rem;font-weight:600;color:#1e293b">Please wait...</p></div>';
+    document.body.appendChild(overlay);
+  } else {
+    overlay.style.display = 'flex';
+  }
+}
+function hideLoading(){
+  const overlay = document.getElementById('loadingOverlay');
+  if(overlay) overlay.style.display = 'none';
 }
 
 function previousStep(){
