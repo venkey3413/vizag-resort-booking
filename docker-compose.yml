@@ -20,6 +20,9 @@ services:
       - BOOKING_API_URL=http://booking-service:3002
       - EMAIL_USER=vizagresortbooking@gmail.com
       - EMAIL_PASS=pcvclorjnrxdlnku
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     volumes:
       - .:/app
       - /app/node_modules
