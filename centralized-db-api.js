@@ -476,6 +476,24 @@ async function initDB() {
     await db.exec(`CREATE INDEX IF NOT EXISTS idx_partner_status ON partner_applications(status)`);
     await db.exec(`CREATE INDEX IF NOT EXISTS idx_partner_reference ON partner_applications(reference_id)`);
 
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS owner_bank_details (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            application_id INTEGER NOT NULL,
+            account_holder_name TEXT NOT NULL,
+            account_number TEXT NOT NULL,
+            ifsc_code TEXT NOT NULL,
+            bank_name TEXT NOT NULL,
+            upi_id TEXT,
+            pan_number TEXT,
+            aadhar_number TEXT,
+            document_url TEXT,
+            status TEXT DEFAULT 'pending',
+            verified_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     // Push notification tokens table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS device_tokens (
@@ -1516,26 +1534,6 @@ initDB().then(() => {
 });
 
 
-// ==========================================
-// PARTNER IMAGE UPLOAD
-// ==========================================
-app.post("/api/partner/upload", upload.array("images", 20), async (req, res) => {
-    try {
-        if (!req.files) {
-            return res.status(400).json({ success: false, message: "No Images" });
-        }
-        const uploaded = [];
-        for (const file of req.files) {
-            const result = await cloudinary.uploader.upload(file.path, { folder: "vshakago/partners" });
-            uploaded.push({ url: result.secure_url, public_id: result.public_id });
-            fs.unlinkSync(file.path);
-        }
-        res.json({ success: true, photos: uploaded });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
 // PARTNER APPLICATIONS API
 
 // ==========================================
