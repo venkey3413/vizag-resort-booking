@@ -23,9 +23,6 @@ services:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       - redis
       - centralized-db-api
@@ -42,9 +39,6 @@ services:
       - DB_API_URL=http://centralized-db-api:3003
       - MAIN_API_URL=http://main-service:3000
       - BOOKING_API_URL=http://booking-service:3002
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       - redis
       - centralized-db-api
@@ -61,9 +55,6 @@ services:
       - DB_API_URL=http://centralized-db-api:3003
       - EMAIL_USER=vizagresortbooking@gmail.com
       - EMAIL_PASS=pcvclorjnrxdlnku
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       - redis
       - centralized-db-api
@@ -81,9 +72,7 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     volumes:
-      - .:/app                              # bind mount so live code is used
-      - /app/node_modules                   # keep node_modules from image
-      - ./resort_booking.db:/app/resort_booking.db  # persist the database
+      - ./resort_booking.db:/app/resort_booking.db
     depends_on:
       - redis
 
@@ -97,8 +86,6 @@ services:
       - NODE_ENV=production
       - REDIS_URL=redis://redis:6379
     volumes:
-      - .:/app
-      - /app/node_modules
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - redis
