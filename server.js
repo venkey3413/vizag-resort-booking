@@ -14,6 +14,24 @@ const redisPubSub = require('./redis-pubsub');
 const { sendTelegramNotification } = require('./telegram-service');
 const { sendInvoiceEmail } = require('./email-service');
 
+const cloudinary = require('./config/cloudinary');
+const multer = require('multer');
+const streamifier = require('streamifier');
+
+// Multer: memory storage (no disk write, stream direct to Cloudinary)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'), false);
+        }
+    }
+});
+
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -1061,6 +1079,62 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // Initialize and start server
+// ─── Partner Image Upload → Cloudinary ──────────────────────────────────────
+app.post('/api/partner/upload', upload.array('images', 15), async (req, res) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ success: false, error: 'No images received' });
+        }
+
+        const uploadPromises = req.files.map((file) => {
+            return new Promise((resolve, reject) => {
+                const folder = 'partner-applications/' + (req.body.phone || 'unknown');
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder,
+                        transformation: [
+                            { width: 1200, height: 900, crop: 'limit', quality: 'auto', fetch_format: 'auto' }
+                        ]
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve({ url: result.secure_url, public_id: result.public_id });
+                    }
+                );
+                streamifier.createReadStream(file.buffer).pipe(uploadStream);
+            });
+        });
+
+        const photos = await Promise.all(uploadPromises);
+        log.info('Partner images uploaded to Cloudinary', { count: photos.length });
+        res.json({ success: true, photos });
+    } catch (error) {
+        log.error('Partner image upload error:', error);
+        res.status(500).json({ success: false, error: 'Upload failed: ' + error.message });
+    }
+});
+
+// ─── Partner Single Image Upload (for cover/thumbnail) ───────────────────────
+app.post('/api/partner/upload-single', upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'No image received' });
+        }
+        const folder = 'partner-applications/' + (req.body.phone || 'unknown');
+        const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                { folder, transformation: [{ width: 800, height: 600, crop: 'limit', quality: 'auto' }] },
+                (error, result) => { if (error) reject(error); else resolve(result); }
+            );
+            streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+        });
+        res.json({ success: true, url: result.secure_url, public_id: result.public_id });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Upload failed: ' + error.message });
+    }
+});
+
+
 async function initServices() {
     console.log('✅ Main service initialized - using centralized database API');
 }
