@@ -5,14 +5,22 @@ const { open } = require('sqlite');
 const redisPubSub = require('./redis-pubsub');
 const bcrypt = require('bcrypt');
 const multer = require("multer");
+const fs = require("fs");
 const cloudinary = require("./config/cloudinary");
-const streamifier = require("streamifier");
 const rateLimit = require('express-rate-limit');
 const Joi = require('joi');
 const helmet = require('helmet');
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: function(req, file, cb){ cb(null, "uploads/partner-temp"); },
+        filename: function(req, file, cb){
+            const unique = Date.now() + "-" + Math.round(Math.random() * 100000);
+            cb(null, unique + "-" + file.originalname);
+        }
+    }),
+    limits: { fileSize: 10 * 1024 * 1024 }
+});
 
 const app = express();
 const PORT = 3003;
@@ -1508,22 +1516,26 @@ initDB().then(() => {
 });
 
 
+// ==========================================
+// PARTNER IMAGE UPLOAD
+// ==========================================
 app.post("/api/partner/upload", upload.array("images", 20), async (req, res) => {
     try {
-        if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ success: false, message: "No images" });
+        if (!req.files) {
+            return res.status(400).json({ success: false, message: "No Images" });
         }
-
         const uploaded = [];
-
         for (const file of req.files) {
-            const result = await new Promise((resolve, reject) => {
-                const stream = cloudinary.uploader.upload_stream(
-                    { folder: "vshakago/partner", resource_type: "image" },
-                    (error, result) => { if (error) reject(error); else resolve(result); }
-                );
-                streamifier.createReadStream(file.buffer).pipe(stream);
-            });
+            const result = await cloudinary.uploader.upload(file.path, { folder: "vshakago/partners" });
+            uploaded.push({ url: result.secure_url, public_id: result.public_id });
+            fs.unlinkSync(file.path);
+        }
+        res.json({ success: true, photos: uploaded });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
 
             uploaded.push({ url: result.secure_url, public_id: result.public_id });
         }

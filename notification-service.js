@@ -8,23 +8,10 @@ function initializeFirebase() {
     if (firebaseApp) return firebaseApp;
 
     try {
-        // Option 1: Using service account JSON file
-        const serviceAccount = require('./firebase-service-account.json');
-        
-        firebaseApp = admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
-
-        console.log('✅ Firebase Admin SDK initialized');
-        return firebaseApp;
-    } catch (error) {
-        console.error('❌ Firebase initialization failed:', error);
-        
-        // Option 2: Using environment variables
-        if (process.env.FIREBASE_PROJECT_ID && 
-            process.env.FIREBASE_PRIVATE_KEY && 
+        if (process.env.FIREBASE_PROJECT_ID &&
+            process.env.FIREBASE_PRIVATE_KEY &&
             process.env.FIREBASE_CLIENT_EMAIL) {
-            
+
             firebaseApp = admin.initializeApp({
                 credential: admin.credential.cert({
                     projectId: process.env.FIREBASE_PROJECT_ID,
@@ -32,12 +19,20 @@ function initializeFirebase() {
                     clientEmail: process.env.FIREBASE_CLIENT_EMAIL
                 })
             });
-            
             console.log('✅ Firebase Admin SDK initialized from env variables');
             return firebaseApp;
         }
-        
-        throw new Error('Firebase credentials not found');
+
+        // Try service account file as fallback
+        const serviceAccount = require('./firebase-service-account.json');
+        firebaseApp = admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+        console.log('✅ Firebase Admin SDK initialized from service account file');
+        return firebaseApp;
+    } catch (error) {
+        console.warn('⚠️ Firebase not configured — push notifications disabled');
+        return null;
     }
 }
 
@@ -50,6 +45,11 @@ async function sendNotificationToTokens(tokens, title, body, data = {}) {
     // Initialize Firebase if not already done
     if (!firebaseApp) {
         initializeFirebase();
+    }
+
+    if (!firebaseApp) {
+        console.warn('⚠️ Firebase not configured — skipping notification');
+        return { success: false, successCount: 0, failureCount: tokens.length };
     }
 
     const message = {

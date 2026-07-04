@@ -14,7 +14,10 @@ RUN npm install --production && npm cache clean --force
 # Copy application files
 COPY centralized-db-api.js ./
 COPY redis-pubsub.js ./
+COPY notification-service.js ./
 COPY resort_booking.db ./
+COPY config ./config
+COPY uploads ./uploads
 
 # Expose port
 EXPOSE 3003
