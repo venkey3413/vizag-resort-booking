@@ -44,468 +44,36 @@ function applyCouponImpl() {
         // Validate coupon for selected date
         const checkInDate = new Date(checkIn);
         const dayOfWeek = checkInDate.getDay();
-        // Mon-Fri = weekdays (1,2,3,4,5), Sat-Sun = weekends (6,0)
-        let dayType = 'weekday';
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-            dayType = 'weekend';
-        }
-        
-        console.log('📅 Date validation:', {
-            checkIn: checkIn,
-            dayOfWeek: dayOfWeek,
-            dayType: dayType,
-            couponDayType: coupon.day_type,
-            resortId: resortId
-        });
-        
-        // Check if coupon is valid for this day type
-        if (coupon.day_type && coupon.day_type !== 'all' && coupon.day_type !== dayType) {
-            let validDays;
-            if (coupon.day_type === 'weekday') {
-                validDays = 'weekdays (Mon-Thu)';
-            } else if (coupon.day_type === 'friday') {
-                validDays = 'Friday';
-            } else if (coupon.day_type === 'weekend') {
-                validDays = 'weekends (Sat-Sun)';
-            } else {
-                validDays = coupon.day_type;
-            }
-            messageDiv.innerHTML = `<span class="coupon-error">This coupon is only valid for ${validDays}</span>`;
-            return;
-        }
-        
-        appliedCoupon = couponCode;
-        
-        // Calculate discount
-        const baseAmountText = document.getElementById('baseAmount').textContent;
-        const baseAmount = parseInt(baseAmountText.replace('₹', '').replace(/,/g, ''));
-        
-        console.log('💰 Discount calculation:', {
-            baseAmountText: baseAmountText,
-            baseAmount: baseAmount,
-            couponType: coupon.type,
-            couponDiscount: coupon.discount
-        });
-        
-        if (coupon.type === 'percentage') {
-            discountAmount = Math.round(baseAmount * coupon.discount / 100);
-        } else {
-            discountAmount = coupon.discount;
-        }
-        
-        console.log('✅ Final discount amount:', discountAmount);
-        
-        // Update UI
-        document.getElementById('discountAmount').textContent = `-₹${discountAmount.toLocaleString()}`;
-        document.getElementById('discountRow').style.display = 'flex';
-        messageDiv.innerHTML = `<span class="coupon-success">Coupon applied! You saved ₹${discountAmount.toLocaleString()}</span>`;
-        
-        // Update total
-        updateTotalPrice();
-    } else {
-        console.log('❌ Coupon not found:', couponCode);
-        console.log('📝 Available coupons for this resort/date:', Object.keys(coupons));
-        
-        // Check if it's a resort-specific issue
-        const resortName = resorts.find(r => r.id == resortId)?.name || 'this resort';
-        messageDiv.innerHTML = `<span class="coupon-error">This coupon is not valid for ${resortName} on the selected date</span>`;
-    }
-}
-
-function updateTotalPrice() {
-    const baseAmountText = document.getElementById('baseAmount').textContent;
-    const baseAmount = parseInt(baseAmountText.replace('₹', '').replace(/,/g, ''));
-    const finalAmount = Math.max(0, baseAmount - discountAmount);
-    
-    console.log('🔄 Updating total price:', {
-        baseAmountText: baseAmountText,
-        baseAmount: baseAmount,
-        discountAmount: discountAmount,
-        finalAmount: finalAmount
-    });
-    
-    document.getElementById('totalAmount').textContent = `₹${finalAmount.toLocaleString()}`;
-}
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait a bit for critical.js to finish loading resorts
-    setTimeout(() => {
-        loadResorts();
-        loadCoupons();
-        setupEventListeners();
-        setMinDate();
-        setupLogoRotation();
-        setupRedisSync();
-        preloadQRCode();
-        
-        // Set fallback gallery function if critical.js didn't load
-        if (!window.openGallery) {
-            window.openGallery = openGalleryFallback;
-        }
-    }, 100);
-});
-
-
-
-
-
-async function loadCoupons(checkIn = null, resortId = null) {
-    try {
-        let url = `${SERVER_URL}/api/coupons`;
-        const params = new URLSearchParams();
-        if (checkIn) params.append('checkIn', checkIn);
-        if (resortId) params.append('resortId', resortId);
-        if (params.toString()) url += '?' + params.toString();
-        
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const couponList = await response.json();
-        coupons = {};
-        couponList.forEach(coupon => {
-            coupons[coupon.code] = {
-                discount: coupon.discount,
-                type: coupon.type,
-                day_type: coupon.day_type
-            };
-        });
-        
-        console.log('✅ Loaded coupons:', couponList.length);
-        
-    } catch (error) {
-        console.error('❌ Error loading coupons:', error);
-        coupons = {};
-    }
-}
-
-function preloadQRCode() {
-    const qrImage = new Image();
-    qrImage.src = 'qr-code.png.jpeg';
-    console.log('QR code preloaded for faster display');
-}
-
-function setupEventListeners() {
-    // Navigation - only handle internal anchor links, allow external links to work normally
-    document.querySelectorAll('nav a[href^="#"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const target = this.getAttribute('href').substring(1);
-            scrollToSection(target);
-        });
-    });
-    
-    // Ensure external navigation links work properly
-    document.querySelectorAll('nav a:not([href^="#"])').forEach(link => {
-        link.style.pointerEvents = 'auto';
-        link.style.cursor = 'pointer';
-    });
-    
-
-
-    // Modal close - check if exists
-    const closeBtn=document.querySelector('.close');
-    if(closeBtn&&!closeBtn.onclick)closeBtn.addEventListener('click',closeModal);
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('bookingModal');
-        const galleryModal = document.getElementById('galleryModal');
-        if (event.target === modal) {
-            closeModal();
-        }
-        if (event.target === galleryModal) {
-            closeGallery();
-        }
-    });
-
-    // Form submission
-    document.getElementById('bookingForm').addEventListener('submit', handleBooking);
-
-    // Date change events with debug logging
-    document.getElementById('checkIn').addEventListener('change', function() {
-        console.log('📅 Check-in date changed to:', this.value);
-        calculateTotal();
-    });
-    document.getElementById('checkOut').addEventListener('change', function() {
-        console.log('📅 Check-out date changed to:', this.value);
-        calculateTotal();
-    });
-    document.getElementById('checkIn').addEventListener('input', function() {
-        calculateTotal();
-    });
-    document.getElementById('checkOut').addEventListener('input', function() {
-        calculateTotal();
-    });
-    document.getElementById('guests').addEventListener('change', function() {
-        console.log('👥 Guests changed to:', this.value);
-        calculateTotal();
-    });
-    
-    // Email validation on blur
-    document.getElementById('email').addEventListener('blur', validateEmailField);
-    
-    // Coupon button event
-    document.getElementById('applyCouponBtn').addEventListener('click', applyCouponImpl);
-    
-    // Phone number validation - only if not already handled
-    const phoneInput=document.getElementById('phone');
-    if(phoneInput&&!phoneInput.dataset.handled){
-        phoneInput.dataset.handled='true';
-        phoneInput.addEventListener('input',function(e){
-            let value=e.target.value;
-            if(value&&!value.startsWith('+91')){
-                value='+91'+value.replace(/\D/g,'').substring(0,10);
-            }
-            if(value.startsWith('+91')){
-                value='+91'+value.substring(3).replace(/\D/g,'').substring(0,10);
-            }
-            e.target.value=value;
-        });
-    }
-}
-
-function scrollToSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-// Input sanitization function
-function sanitizeInput(input) {
-    if (typeof input !== 'string') return String(input || '');
-    return input.replace(/[<>"'&\/]/g, function(match) {
-        const map = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;', '/': '&#x2F;'};
-        return map[match];
-    });
-}
-
-async function loadResorts() {
-    // Prevent duplicate calls
-    if (isLoadingResorts) {
-        console.log('⏳ Resort loading already in progress, skipping...');
-        return;
-    }
-    
-    try {
-        isLoadingResorts = true;
-        // Add cache busting parameter to force fresh data
-        const cacheBuster = Date.now();
-        const url = `${SERVER_URL}/api/resorts?_cb=${cacheBuster}`;
-        console.log('🏝️ Loading resorts from admin server...');
-        
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Cache-Control': 'no-cache'
-            }
-        });
-        
-        console.log('📶 Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        resorts = data;
-        window.resorts = data; // Make available globally
-        console.log('✅ Loaded resorts:', resorts.length);
-        
-        displayResorts();
-        
-    } catch (error) {
-        console.error('❌ Error loading resorts:', error);
-        showNotification(`Failed to load resorts: ${error.message}`, 'error');
-    } finally {
-        isLoadingResorts = false;
-    }
-}
-
-function displayResorts() {
-    const grid = document.getElementById('resortsGrid');
-    if (!grid) {
-        console.error('❌ Resort grid element not found');
-        return;
-    }
-    
-    // Skip if critical.js already populated the grid
-    if (grid.innerHTML.trim() && grid.children.length > 0) {
-        console.log('✅ Resorts already displayed by critical.js');
-        return;
-    }
-    grid.innerHTML = resorts.map(resort => {
-        let pricingDisplay = `₹${resort.price.toLocaleString()}/night`;
-        
-        if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-            pricingDisplay = `From ₹${resort.price.toLocaleString()}/night`;
-            const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
-            const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
-            
-            if (weekdayPrice || weekendPrice) {
-                pricingDisplay += '<br><small>';
-                if (weekdayPrice) pricingDisplay += `Weekday: ₹${weekdayPrice.price.toLocaleString()}`;
-                if (weekdayPrice && weekendPrice) pricingDisplay += ' | ';
-                if (weekendPrice) pricingDisplay += `Weekend: ₹${weekendPrice.price.toLocaleString()}`;
-                pricingDisplay += '</small>';
-            }
-        }
-        
-        const safeId = parseInt(resort.id) || 0;
-        return `
-            <div class="resort-card">
-                <div class="resort-gallery">
-                    <img src="${sanitizeInput(resort.image)}" alt="${sanitizeInput(resort.name)}" class="resort-image main-image">
-                    <button class="view-more-btn" onclick="openGallery(${safeId})">
-                        📸 View More
-                    </button>
-                </div>
-                <div class="resort-info">
-                    <h3>${sanitizeInput(resort.name)}</h3>
-                    <p class="resort-location">
-                        📍 ${sanitizeInput(resort.location)}
-                        ${resort.map_link ? `<br><a href="${sanitizeInput(resort.map_link)}" target="_blank" rel="noopener" class="view-map-btn">🗺️ View Map</a>` : ''}
-                    </p>
-                    <p class="resort-price">${pricingDisplay}</p>
-                    <div class="description-container">
-                        <p class="description-short" id="desc-short-${safeId}">${resort.description.length > 100 ? sanitizeInput(resort.description).substring(0, 100) + '...' : sanitizeInput(resort.description)}</p>
-                        <p class="description-full" id="desc-full-${safeId}" style="display: none;">${sanitizeInput(resort.description)}</p>
-                        ${resort.description.length > 100 ? `<button class="view-more-desc" onclick="toggleDescription(${safeId})">View More</button>` : ''}
-                    </div>
-                    ${resort.amenities ? `
-                        <div class="resort-amenities">
-                            <h4>🏨 Amenities:</h4>
-                            <div class="amenities-list">
-                                ${resort.amenities.split('\n').filter(a => a.trim()).map(amenity => 
-                                    `<span class="amenity-tag">${sanitizeInput(amenity.trim())}</span>`
-                                ).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    <button class="book-btn" onclick="openBookingModal(${safeId})">
-                        Book Now
-                    </button>
-                    <div class="resort-footer">
-                        <div class="review-stars">
-                            <div class="rating-container" data-resort-id="${resort.id}">
-                                <span class="star" data-rating="1">☆</span>
-                                <span class="star" data-rating="2">☆</span>
-                                <span class="star" data-rating="3">☆</span>
-                                <span class="star" data-rating="4">☆</span>
-                                <span class="star" data-rating="5">☆</span>
-                            </div>
-                            <span class="review-text">Rate this resort</span>
-                        </div>
-                        <div class="cancellation-policy">
-                            <a href="Cancellation &amp; terms and conditions (1).pdf" target="_blank" class="policy-text">Cancellation Policy</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    // Setup rating functionality after DOM is updated
-    setTimeout(setupRatingStars, 100);
-}
-
-async function openBookingModal(resortId){
-    // Use critical.js function if available
-    if(window.bookNow&&window.resorts){
-        const resort=window.resorts.find(r=>r.id===resortId);
-        if(resort)return window.bookNow(resortId,resort.name);
-    }
-    
-    // Fallback implementation
-    const resort=resorts.find(r=>r.id===resortId);
-    if(!resort)return;
-    
-    console.log('🏨 Opening booking modal for resort:', {
-        id: resort.id,
-        name: resort.name,
-        basePrice: resort.price,
-        dynamicPricing: resort.dynamic_pricing
-    });
-    
-    document.getElementById('resortId').value=resortId;
-    document.getElementById('resortPrice').value=resort.price;
-    document.getElementById('modalResortName').textContent=`Book ${resort.name}`;
-    
-    // Set phone default
-    const phoneInput=document.getElementById('phone');
-    if(phoneInput)phoneInput.value='+91';
-    
-    await loadBlockedDates(resortId);
-    calculateTotal();
-    document.getElementById('bookingModal').style.display='block';
-}
-
-function closeModal() {
-    document.getElementById('bookingModal').style.display = 'none';
-    document.getElementById('bookingForm').reset();
-}
-
-function closeBookingModal() {
-    closeModal();
-}
-
-function calculateTotal() {
-    const resortId = parseInt(document.getElementById('resortId').value);
-    const checkIn = document.getElementById('checkIn').value;
-    const checkOut = document.getElementById('checkOut').value;
-    
-    if (!checkIn || !checkOut || !resortId) {
-        return;
-    }
-    
-    const startDate = new Date(checkIn);
-    const endDate = new Date(checkOut);
-    const nights = Math.max(1, Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)));
-    
-    const resort = resorts.find(r => r.id === resortId);
-    if (!resort) return;
-    
-    console.log('🔍 Dynamic pricing calculation:', {
-        resortId: resort.id,
-        resortName: resort.name,
-        checkIn: checkIn,
-        checkOut: checkOut,
-        basePriceFromResort: resort.price,
-        dynamicPricing: resort.dynamic_pricing,
-        nights: nights
-    });
-    
-    let totalBasePrice = 0;
-    
-    // Calculate price for each night individually
-    if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-        for (let i = 0; i < nights; i++) {
-            const currentNight = new Date(startDate);
-            currentNight.setDate(startDate.getDate() + i);
-            const dayOfWeek = currentNight.getDay(); // 0=Sunday, 6=Saturday
-            let nightlyRate = resort.price;
-            
-            // Mon-Fri = weekdays (1,2,3,4,5), Sat-Sun = weekends (6,0)
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
+            // Check day type: Friday (5), Weekend (0,6), Weekday (1-4)
+            if (dayOfWeek === 5) {
+                // Friday - check for friday price first
+                const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
+                if (fridayPrice) {
+                    nightlyRate = fridayPrice.price;
+                    console.log(`   Night ${i + 1} (Fri): ,1${nightlyRate} (Friday)`);
+                } else {
+                    // Fallback to weekday if no friday price
+                    const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+                    if (weekdayPrice) {
+                        nightlyRate = weekdayPrice.price;
+                        console.log(`   Night ${i + 1} (Fri): ,1${nightlyRate} (Weekday fallback)`);
+                    }
+                }
+            } else if (dayOfWeek === 0 || dayOfWeek === 6) {
                 // Weekend (Saturday=6, Sunday=0)
                 const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
                 if (weekendPrice) {
                     nightlyRate = weekendPrice.price;
-                    console.log(`   Night ${i + 1} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dayOfWeek]}): ₹${nightlyRate} (Weekend)`);
+                    console.log(`   Night ${i + 1} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dayOfWeek]}): ,1${nightlyRate} (Weekend)`);
                 }
             } else {
-                // Weekday (Monday=1 to Friday=5)
+                // Weekday (Monday=1 to Thursday=4)
                 const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
                 if (weekdayPrice) {
                     nightlyRate = weekdayPrice.price;
-                    console.log(`   Night ${i + 1} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dayOfWeek]}): ₹${nightlyRate} (Weekday)`);
+                    console.log(`   Night ${i + 1} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dayOfWeek]}): ,1${nightlyRate} (Weekday)`);
                 }
             }
-            
             totalBasePrice += nightlyRate;
         }
     } else {
@@ -649,28 +217,35 @@ async function handleBooking(e) {
         const checkOutDate = new Date(bookingData.checkOut);
         const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
         
-        // Get dynamic pricing based on check-in date
-        const checkInDayOfWeek = checkInDate.getDay();
-        let nightlyRate = resort.price;
+        // Calculate price for each night individually
+        let basePrice = 0;
         
         if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-            // Mon-Thu = weekdays (1,2,3,4), Fri = friday (5), Sat-Sun = weekends (6,0)
-            if (checkInDayOfWeek === 5) {
-                // Friday
-                const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
-                if (fridayPrice) nightlyRate = fridayPrice.price;
-            } else if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
-                // Weekend (Saturday=6, Sunday=0)
-                const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
-                if (weekendPrice) nightlyRate = weekendPrice.price;
-            } else {
-                // Weekday (Monday=1 to Thursday=4)
-                const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
-                if (weekdayPrice) nightlyRate = weekdayPrice.price;
+            for (let i = 0; i < nights; i++) {
+                const currentNight = new Date(checkInDate);
+                currentNight.setDate(checkInDate.getDate() + i);
+                const dayOfWeek = currentNight.getDay();
+                let nightlyRate = resort.price;
+                
+                if (dayOfWeek === 5) {
+                    // Friday
+                    const fridayPrice = resort.dynamic_pricing.find(p => p.day_type === 'friday');
+                    if (fridayPrice) nightlyRate = fridayPrice.price;
+                } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    // Weekend (Saturday=6, Sunday=0)
+                    const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
+                    if (weekendPrice) nightlyRate = weekendPrice.price;
+                } else {
+                    // Weekday (Monday=1 to Thursday=4)
+                    const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
+                    if (weekdayPrice) nightlyRate = weekdayPrice.price;
+                }
+                
+                basePrice += nightlyRate;
             }
+        } else {
+            basePrice = resort.price * nights;
         }
-        
-        const basePrice = nightlyRate * nights;
         const platformFee = Math.round(basePrice * 0.015);
         const totalPrice = basePrice + platformFee - discountAmount;
         
