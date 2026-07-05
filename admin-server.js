@@ -820,9 +820,13 @@ app.patch('/api/partner-applications/:id', async (req, res) => {
             body: JSON.stringify(req.body)
         });
         const data = await response.json();
+        if (!response.ok) {
+            console.error('❌ DB API rejected partner application update:', response.status, data);
+        }
         res.status(response.status).json(data);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update partner application' });
+        console.error('❌ Failed to reach DB API for partner application update:', error);
+        res.status(500).json({ error: 'Failed to update partner application', detail: error.message });
     }
 });
 
