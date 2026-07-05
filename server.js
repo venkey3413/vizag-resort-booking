@@ -1136,6 +1136,20 @@ app.post('/api/partner/upload-single', upload.single('image'), async (req, res) 
     }
 });
 
+// ─── Multer / upload error handler (must be after upload routes) ───────────
+// Without this, errors thrown inside multer (file too large, too many files,
+// wrong file type) skip the route's try/catch and fall through to Express's
+// default HTML error page, which breaks `response.json()` on the frontend.
+app.use((err, req, res, next) => {
+    if (err && err.name === 'MulterError') {
+        return res.status(400).json({ success: false, error: 'Upload error: ' + err.message });
+    }
+    if (err) {
+        log.error('Unhandled upload error:', err);
+        return res.status(500).json({ success: false, error: err.message || 'Upload failed' });
+    }
+    next();
+});
 
 async function initServices() {
     console.log('✅ Main service initialized - using centralized database API');
