@@ -487,6 +487,10 @@ async function initDB() {
         await db.exec(`ALTER TABLE partner_applications ADD COLUMN rejection_reason TEXT`);
         console.log('✅ Added missing rejection_reason column to partner_applications');
     }
+    if (!partnerAppColumns.some(col => col.name === 'map_link')) {
+        await db.exec(`ALTER TABLE partner_applications ADD COLUMN map_link TEXT`);
+        console.log('✅ Added missing map_link column to partner_applications');
+    }
 
     await db.exec(`
         CREATE TABLE IF NOT EXISTS owner_bank_details (
@@ -1555,8 +1559,8 @@ initDB().then(() => {
 app.post('/api/partner-applications', async (req, res) => {
     try {
         const {
-            owner_name, owner_email, owner_phone, password,
-            resort_name, resort_location, resort_type, total_rooms,
+            owner_name, owner_email, owner_phone,
+            resort_name, resort_location, resort_type, total_rooms, map_link,
             amenities, description,
             photos, videos, documents,
             bank_name, account_holder, account_number, ifsc_code, upi_id,
@@ -1565,7 +1569,6 @@ app.post('/api/partner-applications', async (req, res) => {
 
         if (!owner_name) return res.status(400).json({ error: 'Owner name is required' });
         if (!owner_phone) return res.status(400).json({ error: 'Mobile number is required' });
-        if (!password) return res.status(400).json({ error: 'Password is required' });
         if (!resort_name) return res.status(400).json({ error: 'Resort name is required' });
         if (!resort_location) return res.status(400).json({ error: 'Resort location is required' });
 
@@ -1580,20 +1583,21 @@ app.post('/api/partner-applications', async (req, res) => {
         const total = await db.get('SELECT COUNT(*) as total FROM partner_applications');
         const referenceId = 'APP' + String(total.total + 1).padStart(6, '0');
 
-        const hashedPassword = await bcrypt.hash(password, 12);
-
+        // Password is no longer collected from the applicant at this stage — the
+        // admin creates the owner login manually (with its own password) once the
+        // application is approved, so we simply store null here.
         const result = await db.run(`
             INSERT INTO partner_applications (
                 reference_id, owner_name, owner_email, owner_phone, password,
-                resort_name, resort_location, resort_type, total_rooms,
+                resort_name, resort_location, resort_type, total_rooms, map_link,
                 amenities, description,
                 photos, videos, documents,
                 bank_name, account_holder, account_number, ifsc_code, upi_id,
                 pan_number, aadhar_number, status
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         `, [
-            referenceId, owner_name, owner_email, owner_phone, hashedPassword,
-            resort_name, resort_location, resort_type, total_rooms,
+            referenceId, owner_name, owner_email, owner_phone, null,
+            resort_name, resort_location, resort_type, total_rooms, map_link || null,
             JSON.stringify(amenities || []), description,
             JSON.stringify(photos || []), JSON.stringify(videos || []), JSON.stringify(documents || []),
             bank_name, account_holder, account_number, ifsc_code, upi_id,
