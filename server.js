@@ -345,7 +345,7 @@ function validateEmail(email) {
 }
 
 function validatePhone(phone) {
-    return /^\+91[0-9]{10}$/.test(phone);
+    return /^[6-9]\d{9}$/.test(phone);
 }
 
 app.post('/api/bookings', async (req, res) => {
