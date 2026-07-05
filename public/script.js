@@ -232,6 +232,12 @@ function setupEventListeners() {
         console.log('📅 Check-out date changed to:', this.value);
         calculateTotal();
     });
+    document.getElementById('checkIn').addEventListener('input', function() {
+        calculateTotal();
+    });
+    document.getElementById('checkOut').addEventListener('input', function() {
+        calculateTotal();
+    });
     document.getElementById('guests').addEventListener('change', function() {
         console.log('👥 Guests changed to:', this.value);
         calculateTotal();
@@ -441,6 +447,10 @@ async function openBookingModal(resortId){
 function closeModal() {
     document.getElementById('bookingModal').style.display = 'none';
     document.getElementById('bookingForm').reset();
+}
+
+function closeBookingModal() {
+    closeModal();
 }
 
 function calculateTotal() {
