@@ -480,6 +480,14 @@ async function initDB() {
     // to lowercase so admin filters and approve/reject buttons match correctly.
     await db.exec(`UPDATE partner_applications SET status = LOWER(status) WHERE status != LOWER(status)`);
 
+    // One-time fix: the table was created without a rejection_reason column, but the
+    // approve/reject endpoint writes to it — add it if it isn't already present.
+    const partnerAppColumns = await db.all(`PRAGMA table_info(partner_applications)`);
+    if (!partnerAppColumns.some(col => col.name === 'rejection_reason')) {
+        await db.exec(`ALTER TABLE partner_applications ADD COLUMN rejection_reason TEXT`);
+        console.log('✅ Added missing rejection_reason column to partner_applications');
+    }
+
     await db.exec(`
         CREATE TABLE IF NOT EXISTS owner_bank_details (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
