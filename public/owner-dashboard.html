@@ -393,11 +393,6 @@ tr:hover td{background:#f8fafc}
         </div>
       </div>
 
-      <div class="field-group">
-        <label>Password</label>
-        <input type="password" id="partnerPassword">
-      </div>
-
       <div style="margin-top:30px;display:flex;justify-content:space-between;">
         <button class="btn btn-outline" onclick="hidePartnerRegistration()">Back</button>
         <button class="btn btn-primary" onclick="nextStep()">Next →</button>
@@ -1847,8 +1842,8 @@ let currentPartnerStep = 1;
 
 const partnerForm = {
   pendingFiles: [],
-  owner_name: '', owner_email: '', owner_phone: '', password: '',
-  resort_name: '', resort_type: '', total_rooms: '', address: '', district: '', pincode: '',
+  owner_name: '', owner_email: '', owner_phone: '',
+  resort_name: '', resort_type: '', total_rooms: '', address: '', district: '', pincode: '', map_link: '',
   amenities: [], description: '',
   photos: [], videos: [],
   bank_name: '', account_holder: '', account_number: '', ifsc_code: '', upi_id: '',
@@ -1871,10 +1866,8 @@ function nextStep(){
     partnerForm.owner_name = document.getElementById('partnerOwnerName').value;
     partnerForm.owner_phone = document.getElementById('partnerPhone').value;
     partnerForm.owner_email = document.getElementById('partnerEmail').value;
-    partnerForm.password = document.getElementById('partnerPassword').value;
     if(partnerForm.owner_name == ''){ showToast('Owner Name Required','error'); return; }
     if(partnerForm.owner_phone == ''){ showToast('Mobile Number Required','error'); return; }
-    if(partnerForm.password == ''){ showToast('Password Required','error'); return; }
     currentPartnerStep = 2;
     showStep2();
     return;
@@ -1886,6 +1879,7 @@ function nextStep(){
     partnerForm.address = document.getElementById('partnerAddress').value;
     partnerForm.district = document.getElementById('partnerDistrict').value;
     partnerForm.pincode = document.getElementById('partnerPincode').value;
+    partnerForm.map_link = document.getElementById('partnerMapLink').value;
     if(partnerForm.resort_name == ''){ showToast('Resort Name Required','error'); return; }
     currentPartnerStep = 3;
     showStep3();
@@ -1942,6 +1936,11 @@ function showStep2(){
         <label>Pincode</label>
         <input type="text" id="partnerPincode" value="${partnerForm.pincode}">
       </div>
+    </div>
+
+    <div class="field-group">
+      <label>Google Maps Link <span style="color:#94a3b8;font-weight:400;">(optional)</span></label>
+      <input type="text" id="partnerMapLink" value="${partnerForm.map_link}" placeholder="Paste the resort's Google Maps share link here">
     </div>
 
     <div style="display:flex;justify-content:space-between;margin-top:30px;">
@@ -2610,15 +2609,15 @@ async function submitPartnerApplication(){
       owner_name:      partnerForm.owner_name,
       owner_email:     partnerForm.owner_email,
       owner_phone:     partnerForm.owner_phone,
-      password:        partnerForm.password,
       resort_name:     partnerForm.resort_name,
       resort_location: partnerForm.address + (partnerForm.district ? ', ' + partnerForm.district : ''),
       resort_type:     partnerForm.resort_type,
       total_rooms:     partnerForm.total_rooms,
+      map_link:        partnerForm.map_link,
       amenities:       Array.isArray(partnerForm.amenities) ? partnerForm.amenities.join(',') : partnerForm.amenities,
       description:     partnerForm.description,
-      photos:          (partnerForm.photos    || []).filter(p => p.url).map(p => p.url).join(','),
-      documents:       (partnerForm.documents || []).filter(d => d.url).map(d => d.url).join(','),
+      photos:          (partnerForm.photos    || []).filter(p => p.url).map(p => p.url),
+      documents:       (partnerForm.documents || []).filter(d => d.url).map(d => d.url),
       bank_name:       partnerForm.bank_name,
       account_holder:  partnerForm.account_holder,
       account_number:  partnerForm.account_number,
@@ -2727,11 +2726,6 @@ function previousStep(){
           <label>Email</label>
           <input type="email" id="partnerEmail" value="${partnerForm.owner_email}">
         </div>
-      </div>
-
-      <div class="field-group">
-        <label>Password</label>
-        <input type="password" id="partnerPassword" value="${partnerForm.password}">
       </div>
 
       <div style="display:flex;justify-content:space-between;margin-top:30px;">
