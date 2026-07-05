@@ -125,8 +125,8 @@ const bookingSchema = Joi.object({
     phone: Joi.string().pattern(/^[6-9]\d{9}$/).required().messages({
         'string.pattern.base': 'Phone must be a valid 10-digit Indian mobile number'
     }),
-    checkIn: Joi.date().iso().min('now').required(),
-    checkOut: Joi.date().iso().greater(Joi.ref('checkIn')).required(),
+    checkIn: Joi.string().required(),
+    checkOut: Joi.string().required(),
     guests: Joi.number().integer().min(1).max(50).required(),
     totalPrice: Joi.number().positive().max(10000000).required(),
     bookingReference: Joi.string().max(50).optional(),
