@@ -1182,14 +1182,15 @@ async function reviewApplication(id, status, rejection_reason) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status, reviewed_by: 'admin', rejection_reason: rejection_reason || null })
         });
+        const data = await response.json().catch(() => ({}));
         if (response.ok) {
             alert(`Application ${status} successfully`);
             loadPartnerApplications();
         } else {
-            alert('Failed to update application');
+            alert('Failed to update application: ' + (data.detail || data.error || `HTTP ${response.status}`));
         }
     } catch (error) {
-        alert('Network error');
+        alert('Network error: ' + error.message);
     }
 }
 
