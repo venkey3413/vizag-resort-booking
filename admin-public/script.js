@@ -986,6 +986,10 @@ async function loadPartnerApplications() {
     }
 }
 
+// Keep the raw application list around so the detail/print modal can look
+// up an application by id without a second network round-trip.
+window._partnerApplicationsCache = window._partnerApplicationsCache || {};
+
 function displayPartnerApplications(applications) {
     const grid = document.getElementById('partnerApplicationsGrid');
     if (!grid) return;
@@ -996,8 +1000,13 @@ function displayPartnerApplications(applications) {
     }
 
     grid.innerHTML = applications.map(app => {
-        const statusColor = app.status === 'approved' ? '#16a34a' : app.status === 'rejected' ? '#dc2626' : '#d97706';
-        const statusBg = app.status === 'approved' ? '#dcfce7' : app.status === 'rejected' ? '#fee2e2' : '#fef3c7';
+        // Normalize status casing defensively (older rows may still say 'Pending' etc.
+        // until the one-time DB migration has run on the backend).
+        const status = (app.status || 'pending').toLowerCase();
+        window._partnerApplicationsCache[app.id] = app;
+
+        const statusColor = status === 'approved' ? '#16a34a' : status === 'rejected' ? '#dc2626' : '#d97706';
+        const statusBg = status === 'approved' ? '#dcfce7' : status === 'rejected' ? '#fee2e2' : '#fef3c7';
         return `
             <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:16px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
@@ -1005,11 +1014,11 @@ function displayPartnerApplications(applications) {
                         <h4 style="margin:0 0 4px;font-size:16px;color:#111;">${app.resort_name}</h4>
                         <p style="margin:0;font-size:13px;color:#6b7280;">Ref: ${app.reference_id}</p>
                     </div>
-                    <span style="background:${statusBg};color:${statusColor};padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;">${app.status}</span>
+                    <span style="background:${statusBg};color:${statusColor};padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;">${status}</span>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:#374151;margin-bottom:12px;">
                     <p><strong>Owner:</strong> ${app.owner_name}</p>
-                    <p><strong>Email:</strong> ${app.owner_email}</p>
+                    <p><strong>Email:</strong> ${app.owner_email || 'N/A'}</p>
                     <p><strong>Phone:</strong> ${app.owner_phone}</p>
                     <p><strong>Location:</strong> ${app.resort_location}</p>
                     <p><strong>Type:</strong> ${app.resort_type || 'N/A'}</p>
@@ -1019,15 +1028,151 @@ function displayPartnerApplications(applications) {
                 </div>
                 ${app.description ? `<p style="font-size:13px;color:#6b7280;margin-bottom:12px;">${app.description}</p>` : ''}
                 ${app.rejection_reason ? `<p style="font-size:13px;color:#dc2626;margin-bottom:12px;"><strong>Rejection Reason:</strong> ${app.rejection_reason}</p>` : ''}
-                ${app.status === 'pending' ? `
-                    <div style="display:flex;gap:10px;">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button onclick="openApplicationDetail(${app.id})" style="background:#0066ff;color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:700;">📋 View & Print</button>
+                    ${status === 'pending' ? `
                         <button onclick="reviewApplication(${app.id},'approved')" style="background:#16a34a;color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:700;">✓ Approve</button>
                         <button onclick="promptReject(${app.id})" style="background:#dc2626;color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:700;">✕ Reject</button>
-                    </div>
-                ` : ''}
+                    ` : ''}
+                </div>
             </div>
         `;
     }).join('');
+}
+
+// Safely parse a JSON column (photos/videos/documents may be stored as a
+// JSON string, already-parsed array, null, or empty string).
+function _safeParseJsonArray(value) {
+    if (Array.isArray(value)) return value;
+    if (!value) return [];
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function _fileUrl(item) {
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') return item.url || item.secure_url || '';
+    return '';
+}
+
+function openApplicationDetail(id) {
+    const app = window._partnerApplicationsCache[id];
+    if (!app) { alert('Application data not found — try refreshing the list.'); return; }
+
+    const status = (app.status || 'pending').toLowerCase();
+    const statusColor = status === 'approved' ? '#16a34a' : status === 'rejected' ? '#dc2626' : '#d97706';
+
+    const photos = _safeParseJsonArray(app.photos);
+    const videos = _safeParseJsonArray(app.videos);
+    const documents = _safeParseJsonArray(app.documents);
+    const amenities = _safeParseJsonArray(app.amenities);
+
+    const photosHtml = photos.length
+        ? `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
+             ${photos.map(p => `<img src="${_fileUrl(p)}" style="width:110px;height:85px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;" />`).join('')}
+           </div>`
+        : '<p style="color:#9ca3af;font-size:13px;">No photos uploaded</p>';
+
+    const docsHtml = documents.length
+        ? `<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;">
+             ${documents.map((d,i) => `<li><a href="${_fileUrl(d)}" target="_blank" rel="noopener">Document ${i+1}</a></li>`).join('')}
+           </ul>`
+        : '<p style="color:#9ca3af;font-size:13px;">No documents uploaded</p>';
+
+    const videosHtml = videos.length
+        ? `<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;">
+             ${videos.map((v,i) => `<li><a href="${_fileUrl(v)}" target="_blank" rel="noopener">Video ${i+1}</a></li>`).join('')}
+           </ul>`
+        : '';
+
+    const modal = document.createElement('div');
+    modal.id = 'applicationDetailModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 16px;';
+    modal.innerHTML = `
+        <div id="applicationPrintArea" style="background:#fff;border-radius:14px;max-width:820px;width:100%;padding:32px;position:relative;">
+            <button onclick="closeApplicationDetail()" class="no-print" style="position:absolute;top:16px;right:16px;background:#f3f4f6;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-weight:700;font-size:16px;">✕</button>
+
+            <div style="border-bottom:2px solid #0066ff;padding-bottom:14px;margin-bottom:20px;">
+                <h2 style="margin:0 0 4px;color:#111;">VshakaGo — Partner Application</h2>
+                <p style="margin:0;color:#6b7280;font-size:13px;">Reference: <strong>${app.reference_id}</strong> &nbsp;•&nbsp; Status:
+                    <span style="color:${statusColor};font-weight:700;text-transform:uppercase;">${status}</span>
+                </p>
+            </div>
+
+            <h3 style="color:#0066ff;font-size:15px;margin:0 0 8px;">Owner Details</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;color:#374151;margin-bottom:18px;">
+                <p><strong>Name:</strong> ${app.owner_name || 'N/A'}</p>
+                <p><strong>Phone:</strong> ${app.owner_phone || 'N/A'}</p>
+                <p><strong>Email:</strong> ${app.owner_email || 'N/A'}</p>
+                <p><strong>Submitted:</strong> ${app.submitted_at ? new Date(app.submitted_at).toLocaleString() : 'N/A'}</p>
+            </div>
+
+            <h3 style="color:#0066ff;font-size:15px;margin:0 0 8px;">Resort Details</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;color:#374151;margin-bottom:12px;">
+                <p><strong>Resort Name:</strong> ${app.resort_name || 'N/A'}</p>
+                <p><strong>Location:</strong> ${app.resort_location || 'N/A'}</p>
+                <p><strong>Type:</strong> ${app.resort_type || 'N/A'}</p>
+                <p><strong>Total Rooms:</strong> ${app.total_rooms || 'N/A'}</p>
+            </div>
+            ${amenities.length ? `<p style="font-size:13px;color:#374151;margin-bottom:8px;"><strong>Amenities:</strong> ${amenities.join(', ')}</p>` : ''}
+            ${app.description ? `<p style="font-size:13px;color:#374151;margin-bottom:18px;"><strong>Description:</strong> ${app.description}</p>` : ''}
+
+            <h3 style="color:#0066ff;font-size:15px;margin:0 0 8px;">Bank & KYC Details</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;color:#374151;margin-bottom:18px;">
+                <p><strong>Account Holder:</strong> ${app.account_holder || 'N/A'}</p>
+                <p><strong>Bank Name:</strong> ${app.bank_name || 'N/A'}</p>
+                <p><strong>Account Number:</strong> ${app.account_number || 'N/A'}</p>
+                <p><strong>IFSC Code:</strong> ${app.ifsc_code || 'N/A'}</p>
+                <p><strong>UPI ID:</strong> ${app.upi_id || 'N/A'}</p>
+                <p><strong>PAN Number:</strong> ${app.pan_number || 'N/A'}</p>
+                <p><strong>Aadhar Number:</strong> ${app.aadhar_number || 'N/A'}</p>
+            </div>
+
+            <h3 style="color:#0066ff;font-size:15px;margin:0 0 8px;">Resort Photos</h3>
+            ${photosHtml}
+
+            ${documents.length ? `<h3 style="color:#0066ff;font-size:15px;margin:18px 0 0;">Uploaded Documents</h3>${docsHtml}` : ''}
+            ${videos.length ? `<h3 style="color:#0066ff;font-size:15px;margin:18px 0 0;">Uploaded Videos</h3>${videosHtml}` : ''}
+
+            ${app.rejection_reason ? `<p style="font-size:13px;color:#dc2626;margin-top:18px;"><strong>Rejection Reason:</strong> ${app.rejection_reason}</p>` : ''}
+            ${app.reviewed_at ? `<p style="font-size:12px;color:#9ca3af;margin-top:6px;">Reviewed on ${new Date(app.reviewed_at).toLocaleString()}${app.reviewed_by ? ' by ' + app.reviewed_by : ''}</p>` : ''}
+
+            <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:26px;border-top:1px solid #e5e7eb;padding-top:18px;">
+                <button onclick="window.print()" style="background:#111;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;">🖨️ Print</button>
+                ${status === 'pending' ? `
+                    <button onclick="reviewApplication(${app.id},'approved'); closeApplicationDetail();" style="background:#16a34a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;">✓ Approve</button>
+                    <button onclick="promptReject(${app.id}); closeApplicationDetail();" style="background:#dc2626;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;">✕ Reject</button>
+                ` : ''}
+                <button onclick="closeApplicationDetail()" style="background:#f3f4f6;color:#111;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;">Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Print-only stylesheet: when printing, hide everything except the
+    // application detail card, and drop buttons/close icon from the printout.
+    if (!document.getElementById('applicationPrintStyle')) {
+        const style = document.createElement('style');
+        style.id = 'applicationPrintStyle';
+        style.textContent = `
+            @media print {
+                body * { visibility: hidden; }
+                #applicationPrintArea, #applicationPrintArea * { visibility: visible; }
+                #applicationPrintArea { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+                .no-print { display: none !important; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+function closeApplicationDetail() {
+    const modal = document.getElementById('applicationDetailModal');
+    if (modal) modal.remove();
 }
 
 async function reviewApplication(id, status, rejection_reason) {
