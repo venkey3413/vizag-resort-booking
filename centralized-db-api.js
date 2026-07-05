@@ -1682,7 +1682,8 @@ app.patch('/api/partner-applications/:id', async (req, res) => {
         publishEvent('partner.application.reviewed', { applicationId: req.params.id, status });
         res.json({ message: `Application ${status} successfully` });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update application' });
+        console.error('❌ Failed to update partner application:', error);
+        res.status(500).json({ error: 'Failed to update application', detail: error.message });
     }
 });
 
