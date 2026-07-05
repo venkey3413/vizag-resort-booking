@@ -1069,3 +1069,46 @@ function setupRedisSync() {
     
     connectEventSource();
 }
+// ==========================================
+// BOOKING MODAL MANAGEMENT
+// ==========================================
+
+function openBookingModal(resortId) {
+    const resort = resorts.find(r => r.id === resortId);
+    if (!resort) return;
+    
+    // Set resort ID
+    document.getElementById('resortId').value = resortId;
+    document.getElementById('resortPrice').value = resort.price;
+    document.getElementById('modalResortName').textContent = `Book ${resort.name}`;
+    
+    // Set phone default
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) phoneInput.value = '+91';
+    
+    // Load blocked dates
+    loadBlockedDates(resortId);
+    
+    // Re-attach event listeners for date inputs
+    const checkInInput = document.getElementById('checkIn');
+    const checkOutInput = document.getElementById('checkOut');
+    
+    // Remove old listeners
+    checkInInput.removeEventListener('input', validateCheckInDate);
+    checkOutInput.removeEventListener('input', validateCheckOutDate);
+    
+    // Add new listeners
+    checkInInput.addEventListener('input', validateCheckInDate);
+    checkOutInput.addEventListener('input', validateCheckOutDate);
+    
+    // Show modal
+    document.getElementById('bookingModal').style.display = 'block';
+}
+
+function closeBookingModal() {
+    const modal = document.getElementById('bookingModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    // Don't reset the form - keep the data for next time
+}
