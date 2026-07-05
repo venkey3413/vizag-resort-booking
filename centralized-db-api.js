@@ -460,7 +460,7 @@ async function initDB() {
             upi_id TEXT,
             pan_number TEXT,
             aadhar_number TEXT,
-            status TEXT DEFAULT 'Pending',
+            status TEXT DEFAULT 'pending',
             admin_comments TEXT,
             reviewed_by TEXT,
             reviewed_at DATETIME,
@@ -475,6 +475,10 @@ async function initDB() {
     await db.exec(`CREATE INDEX IF NOT EXISTS idx_partner_phone ON partner_applications(owner_phone)`);
     await db.exec(`CREATE INDEX IF NOT EXISTS idx_partner_status ON partner_applications(status)`);
     await db.exec(`CREATE INDEX IF NOT EXISTS idx_partner_reference ON partner_applications(reference_id)`);
+
+    // One-time fix: normalize legacy mixed-case status values ('Pending' / 'Approved' / 'Rejected')
+    // to lowercase so admin filters and approve/reject buttons match correctly.
+    await db.exec(`UPDATE partner_applications SET status = LOWER(status) WHERE status != LOWER(status)`);
 
     await db.exec(`
         CREATE TABLE IF NOT EXISTS owner_bank_details (
@@ -1585,7 +1589,7 @@ app.post('/api/partner-applications', async (req, res) => {
             JSON.stringify(amenities || []), description,
             JSON.stringify(photos || []), JSON.stringify(videos || []), JSON.stringify(documents || []),
             bank_name, account_holder, account_number, ifsc_code, upi_id,
-            pan_number, aadhar_number, 'Pending'
+            pan_number, aadhar_number, 'pending'
         ]);
 
         publishEvent('partner.application.submitted', { id: result.lastID, referenceId });
@@ -1594,7 +1598,7 @@ app.post('/api/partner-applications', async (req, res) => {
             success: true,
             applicationId: result.lastID,
             referenceId,
-            status: 'Pending',
+            status: 'pending',
             message: 'Partner application submitted successfully.'
         });
 
@@ -1646,7 +1650,7 @@ app.get('/api/partner-applications', async (req, res) => {
         const params = [];
         
         if (req.query.status) {
-            query += ' AND status = ?';
+            query += ' AND LOWER(status) = LOWER(?)';
             params.push(req.query.status);
         }
         
@@ -1745,4 +1749,4 @@ app.patch('/api/owner-bank-details/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to update bank details' });
     }
-});
+});
