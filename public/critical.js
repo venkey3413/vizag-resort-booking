@@ -504,6 +504,22 @@ if(!sessionStorage.getItem('cache_cleared_v7')){sessionStorage.setItem('cache_cl
 window.bookNow=function(resortId,resortName){
     const modal=document.getElementById('bookingModal');
     if(modal){
+        // Restore the original booking-form HTML if a previous booking attempt
+        // reached the payment step: updateBookingModalToPayment() overwrites
+        // .vrb-modal-card's entire innerHTML with the payment/UTR screen, and
+        // closeBookingModal() only hides the modal — it never restores the form.
+        // Without this, reopening after a cancelled payment leaves #resortId,
+        // #checkIn, #guestName etc. missing, which silently breaks this
+        // function (no error shown to the user) until the page is refreshed.
+        const modalCard = modal.querySelector('.vrb-modal-card');
+        if (modalCard) {
+            if (!window._originalBookingModalHTML) {
+                window._originalBookingModalHTML = modalCard.innerHTML;
+            } else {
+                modalCard.innerHTML = window._originalBookingModalHTML;
+            }
+        }
+
         const resort=window.resorts.find(r=>r.id==resortId);
         if(resort){
             document.getElementById('resortId').value=resortId;
