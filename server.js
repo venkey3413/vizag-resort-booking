@@ -354,11 +354,17 @@ app.post('/api/bookings', async (req, res) => {
         const { resortId, guestName, email, phone, checkIn, checkOut, guests, couponCode, discountAmount, transactionId, paymentStatus } = req.body;
 
         // Enhanced input sanitization
+        // Note: the booking form always sends phone as "+91XXXXXXXXXX" (13 chars),
+        // but downstream storage/validation expects a plain 10-digit number —
+        // strip the leading +91 so everything after this point is consistent.
+        const rawPhone = sanitizeInput(phone).substring(0, 20);
+        const normalizedPhone = rawPhone.startsWith('+91') ? rawPhone.slice(3) : rawPhone;
+
         const sanitizedData = {
             resortId: parseInt(resortId) || 0,
             guestName: sanitizeInput(guestName).substring(0, 100),
             email: sanitizeInput(email).substring(0, 100),
-            phone: sanitizeInput(phone).substring(0, 20),
+            phone: normalizedPhone,
             checkIn: sanitizeInput(checkIn).substring(0, 10),
             checkOut: sanitizeInput(checkOut).substring(0, 10),
             guests: Math.max(1, Math.min(20, parseInt(guests) || 1)),
