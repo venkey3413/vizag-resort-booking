@@ -321,6 +321,28 @@ async function initDB() {
             FOREIGN KEY (resort_id) REFERENCES resorts (id)
         )
     `);
+
+    // One-time fix: this table's schema evolved over time, but CREATE TABLE IF NOT EXISTS
+    // never alters an already-existing table — so older deployments can be missing
+    // columns the INSERT/UPDATE statements below rely on. Backfill anything missing.
+    const bookingsColumns = await db.all(`PRAGMA table_info(bookings)`);
+    const bookingsColumnNames = bookingsColumns.map(col => col.name);
+    const requiredBookingsColumns = [
+        ['booking_reference', 'TEXT'],
+        ['transaction_id', 'TEXT'],
+        ['coupon_code', 'TEXT'],
+        ['discount_amount', 'INTEGER DEFAULT 0'],
+        ['status', "TEXT DEFAULT 'pending'"],
+        ['payment_status', "TEXT DEFAULT 'pending'"],
+        ['qr_code', 'TEXT'],
+        ['checked_in', 'INTEGER DEFAULT 0']
+    ];
+    for (const [colName, colDef] of requiredBookingsColumns) {
+        if (!bookingsColumnNames.includes(colName)) {
+            await db.exec(`ALTER TABLE bookings ADD COLUMN ${colName} ${colDef}`);
+            console.log(`✅ Added missing ${colName} column to bookings`);
+        }
+    }
     
     await db.exec(`
         CREATE TABLE IF NOT EXISTS coupons (
