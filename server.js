@@ -271,25 +271,9 @@ app.post('/api/check-availability', async (req, res) => {
             });
         }
         
-        // Calculate correct pricing
-        const checkInDate = new Date(checkIn);
-        const checkOutDate = new Date(checkOut);
-        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-        const checkInDayOfWeek = checkInDate.getDay();
-        let nightlyRate = resort.price;
-        
-        // Apply dynamic pricing
-        if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-            if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
-                const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
-                if (weekendPrice) nightlyRate = weekendPrice.price;
-            } else {
-                const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
-                if (weekdayPrice) nightlyRate = weekdayPrice.price;
-            }
-        }
-        
-        const basePrice = nightlyRate * nights;
+        // Calculate correct pricing (priced night-by-night so weekend/weekday/friday
+        // rates apply correctly across mixed stays, not just the check-in day's rate)
+        const { basePrice } = calculateStayPricing(checkIn, checkOut, resort);
         const platformFee = Math.round(basePrice * 0.015);
         const correctTotalPrice = basePrice + platformFee;
         
@@ -346,6 +330,54 @@ function validateEmail(email) {
 
 function validatePhone(phone) {
     return /^[6-9]\d{9}$/.test(phone);
+}
+
+// Calculates the total base price for a stay by pricing EACH night individually
+// according to that night's own day of week — not just the check-in day's rate
+// applied to the whole stay. This is what lets a Sun-in/Tue-out booking correctly
+// charge the weekend rate for the Saturday/Sunday night(s) and the weekday rate
+// for the rest, when the owner has set dynamic pricing in the admin panel.
+//
+// "Night N" of a stay is the night of the date (checkIn + N), for N = 0..nights-1
+// (the night of the checkout date itself is never charged, since the guest leaves
+// that morning).
+function calculateStayPricing(checkIn, checkOut, resort) {
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const nights = Math.round((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+
+    const dynamicPricing = resort.dynamic_pricing || [];
+    const weekdayEntry = dynamicPricing.find(p => p.day_type === 'weekday');
+    const fridayEntry = dynamicPricing.find(p => p.day_type === 'friday');
+    const weekendEntry = dynamicPricing.find(p => p.day_type === 'weekend');
+
+    const breakdown = [];
+    let basePrice = 0;
+
+    for (let i = 0; i < nights; i++) {
+        const nightDate = new Date(checkInDate);
+        nightDate.setDate(nightDate.getDate() + i);
+        const dow = nightDate.getDay(); // 0=Sun ... 5=Fri, 6=Sat
+
+        let rate = resort.price;
+        let dayType = 'weekday';
+
+        if (dow === 5 && fridayEntry) {
+            rate = fridayEntry.price;
+            dayType = 'friday';
+        } else if ((dow === 0 || dow === 6) && weekendEntry) {
+            rate = weekendEntry.price;
+            dayType = 'weekend';
+        } else if (weekdayEntry) {
+            rate = weekdayEntry.price;
+            dayType = 'weekday';
+        }
+
+        basePrice += rate;
+        breakdown.push({ date: nightDate.toISOString().split('T')[0], dayType, rate });
+    }
+
+    return { nights, basePrice, breakdown };
 }
 
 app.post('/api/bookings', async (req, res) => {
@@ -407,23 +439,9 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(404).json({ error: 'Resort not found' });
         }
 
-        // Calculate pricing
-        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-        const checkInDayOfWeek = checkInDate.getDay();
-        let nightlyRate = resort.price;
-        
-        // Use dynamic pricing from resort data
-        if (resort.dynamic_pricing && resort.dynamic_pricing.length > 0) {
-            if (checkInDayOfWeek === 0 || checkInDayOfWeek === 6) {
-                const weekendPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekend');
-                if (weekendPrice) nightlyRate = weekendPrice.price;
-            } else {
-                const weekdayPrice = resort.dynamic_pricing.find(p => p.day_type === 'weekday');
-                if (weekdayPrice) nightlyRate = weekdayPrice.price;
-            }
-        }
-        
-        const basePrice = nightlyRate * nights;
+        // Calculate pricing (priced night-by-night so weekend/weekday/friday rates
+        // apply correctly across mixed stays, not just the check-in day's rate)
+        const { basePrice } = calculateStayPricing(checkIn, checkOut, resort);
         const platformFee = Math.round(basePrice * 0.015);
         const subtotal = basePrice + platformFee;
         const discount = discountAmount || 0;
