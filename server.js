@@ -113,11 +113,12 @@ app.get('/api/resorts', async (req, res) => {
 app.get('/api/events', async (req, res) => {
     try {
         console.log('🎉 Main: Fetching events from DB API:', DB_API_URL);
-        
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
-        const response = await fetch(`${DB_API_URL}/api/events`, {
+
+        const type = req.query.type ? `?type=${encodeURIComponent(req.query.type)}` : '';
+        const response = await fetch(`${DB_API_URL}/api/events${type}`, {
             signal: controller.signal
         });
         clearTimeout(timeoutId);
