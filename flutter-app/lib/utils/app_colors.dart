@@ -1,34 +1,36 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Bootstrap-style colors matching website
-  static const primary = Color(0xFF0D6EFD);
+  // Matches the actual website's brand colors (public/index.html)
+  static const primary = Color(0xFF2F8FE0);       // website's link/accent blue
+  static const primaryDark = Color(0xFF1E5F74);   // website's teal-blue gradient start
+  static const primaryDarker = Color(0xFF2D7A92); // website's teal-blue gradient end
   static const secondary = Color(0xFF6C757D);
-  static const success = Color(0xFF198754);
+  static const success = Color(0xFF10B981);       // website's green (offers badge)
   static const danger = Color(0xFFDC3545);
   static const warning = Color(0xFFFFC107);
   static const info = Color(0xFF0DCAF0);
-  
+
   // Background colors with gradient
   static const background = Color(0xFFF8F9FA);
   static const cardBackground = Colors.white;
-  
-  // Gradient colors from website
-  static const gradientStart = Color(0xFF667EEA);
-  static const gradientEnd = Color(0xFF764BA2);
-  
-  // Orange gradient for buttons
-  static const orangeStart = Color(0xFFFF6F00);
-  static const orangeEnd = Color(0xFFFF9A3C);
-  
+
+  // Website header/hero gradient (teal-blue), used instead of any photo background
+  static const gradientStart = Color(0xFF1E5F74);
+  static const gradientEnd = Color(0xFF2D7A92);
+
+  // Orange gradient for buttons (matches website's CTA/offer banner orange)
+  static const orangeStart = Color(0xFFFF5E3A);
+  static const orangeEnd = Color(0xFFFF9D3D);
+
   // Text colors
   static const textDark = Color(0xFF212529);
   static const textLight = Color(0xFF6C757D);
   static const textMuted = Color(0xFF868E96);
-  
+
   // Shadow
   static const cardShadow = Color(0x14000000);
-  
+
   // Border
   static const border = Color(0xFFDEE2E6);
 }
