@@ -93,8 +93,11 @@ class ApiService {
     }
   }
 
-  static Future<List<Event>> getEvents() async {
-    final response = await _makeRequest('GET', '/api/events');
+  static Future<List<Event>> getEvents({String? type}) async {
+    final endpoint = type != null
+        ? '/api/events?type=${Uri.encodeComponent(type)}'
+        : '/api/events';
+    final response = await _makeRequest('GET', endpoint);
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
