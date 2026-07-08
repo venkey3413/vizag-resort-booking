@@ -1714,10 +1714,7 @@ function setupMainWebsiteRedisSync() {
 // Start Redis sync immediately
 setupMainWebsiteRedisSync();
 
-// Load main script immediately
-const script=document.createElement('script');
-script.src='script.js?v=1.0.5';
-document.head.appendChild(script);
+// script.js functionality now in critical.js - no need to load separately
 
 // Preload Razorpay for card payments
 window.loadRazorpay=function(){
