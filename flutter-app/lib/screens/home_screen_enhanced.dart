@@ -7,6 +7,8 @@ import '../services/websocket_service.dart';
 import '../models/resort.dart';
 import '../utils/app_colors.dart';
 import '../widgets/custom_header.dart';
+import '../widgets/category_grid.dart';
+import '../widgets/birthday_section.dart';
 import '../widgets/resort_card_enhanced.dart';
 import 'details_screen_enhanced.dart';
 import 'events_screen.dart';
@@ -21,6 +23,7 @@ class HomeScreenEnhanced extends StatefulWidget {
 class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBindingObserver {
   // Key to refresh the FutureBuilder
   int _refreshKey = 0;
+  int _selectedNavIndex = 0;
   StreamSubscription? _wsSubscription;
   bool _isScreenVisible = true;
   bool _hasPendingUpdate = false;
@@ -132,9 +135,9 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
             // Custom Header
             SliverToBoxAdapter(
               child: CustomHeader(
-                onSearchTap: () {
+                onNotificationTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Search feature coming soon')),
+                    const SnackBar(content: Text('Notifications coming soon')),
                   );
                 },
                 onProfileTap: () {
@@ -142,172 +145,34 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
                     const SnackBar(content: Text('Profile feature coming soon')),
                   );
                 },
+                onLocationTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Change location coming soon')),
+                  );
+                },
               ),
             ),
 
-            // Hero Section with Search Box (Reduced Size)
+            // Category Grid (Resorts, Offers, Destinations, Near Me, Support,
+            // Interior Works/Repairs, Pest Control, Events, Cabs & Travel, Food Orders)
             SliverToBoxAdapter(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&q=80',
-                    ),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        const Color(0xFF001237).withOpacity(0.65),
-                        const Color(0xFF001237).withOpacity(0.30),
-                        Colors.black.withOpacity(0.10),
-                      ],
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Book Resorts in Vizag',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: 0.2,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black26,
-                              offset: Offset(0, 4),
-                              blurRadius: 12,
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Best Deals • 24/7 Support',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.white.withOpacity(0.92),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      
-                      // Icon Buttons (Events & Hotels)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 15,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(12),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const EventsScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                          '🎉',
-                                          style: TextStyle(fontSize: 22),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Events',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.grey[800],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 15,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(12),
-                                  onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Hotel feature coming soon'),
-                                        duration: Duration(seconds: 2),
-                                      ),
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                          '🏨',
-                                          style: TextStyle(fontSize: 22),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Hotel',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.grey[800],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+              child: Transform.translate(
+                offset: const Offset(0, -18),
+                child: CategoryGrid(
+                  onResortsTap: () {
+                    // Already on the resorts list — just scroll feedback.
+                  },
+                  onEventsTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const EventsScreen()),
+                    );
+                  },
+                  onOffersTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Offers coming soon')),
+                    );
+                  },
                 ),
               ),
             ),
@@ -527,6 +392,14 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
                   ),
                 );
               },
+            ),
+
+            // Birthday Celebrations
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: BirthdaySection(),
+              ),
             ),
 
             // Owner Pitch Section
@@ -934,6 +807,72 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
           ],
         ),
       ),
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    final items = [
+      {'icon': Icons.home, 'label': 'Home'},
+      {'icon': Icons.calendar_today_outlined, 'label': 'Bookings'},
+      {'icon': Icons.favorite_border, 'label': 'Favorites'},
+      {'icon': Icons.sell_outlined, 'label': 'Offers'},
+      {'icon': Icons.menu, 'label': 'Menu'},
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, -4)),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(items.length, (index) {
+              final selected = _selectedNavIndex == index;
+              final color = selected ? AppColors.primary : AppColors.textMuted;
+              return InkWell(
+                onTap: () {
+                  setState(() => _selectedNavIndex = index);
+                  if (index == 1) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Bookings coming soon')),
+                    );
+                  } else if (index == 2) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Favorites coming soon')),
+                    );
+                  } else if (index == 3) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Offers coming soon')),
+                    );
+                  } else if (index == 4) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Menu coming soon')),
+                    );
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(items[index]['icon'] as IconData, color: color, size: 22),
+                    const SizedBox(height: 3),
+                    Text(
+                      items[index]['label'] as String,
+                      style: TextStyle(fontSize: 10.5, color: color, fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ),
       ),
     );
   }
