@@ -81,7 +81,12 @@ const apiLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 
 // API Key authentication middleware
-const MOBILE_API_KEY = process.env.MOBILE_API_KEY || 'vshakago-mobile-2026-secure-key';
+if (!process.env.MOBILE_API_KEY) {
+    console.error('❌ FATAL: MOBILE_API_KEY is not set in .env — refusing to start with an insecure default.');
+    console.error('   Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    process.exit(1);
+}
+const MOBILE_API_KEY = process.env.MOBILE_API_KEY;
 
 function authenticateAPIKey(req, res, next) {
     // Skip auth for health check and owner login
@@ -705,7 +710,16 @@ app.delete('/api/resorts/:id', async (req, res) => {
 // EVENTS API
 app.get('/api/events', async (req, res) => {
     try {
-        const events = await db.all('SELECT * FROM events WHERE available = 1 ORDER BY sort_order ASC, id ASC');
+        let query = 'SELECT * FROM events WHERE available = 1';
+        const params = [];
+        if (req.query.type) {
+            // Case-insensitive partial match so 'birthday' also matches
+            // an event_type like 'Birthday Party' set by the admin.
+            query += ' AND LOWER(event_type) LIKE LOWER(?)';
+            params.push(`%${req.query.type}%`);
+        }
+        query += ' ORDER BY sort_order ASC, id ASC';
+        const events = await db.all(query, params);
         res.json(events);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch events' });
