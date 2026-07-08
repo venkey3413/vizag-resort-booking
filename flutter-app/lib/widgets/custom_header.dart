@@ -1,185 +1,265 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../utils/app_colors.dart';
 
 class CustomHeader extends StatelessWidget {
-  final VoidCallback? onSearchTap;
+  final VoidCallback? onNotificationTap;
   final VoidCallback? onProfileTap;
+  final VoidCallback? onLocationTap;
+  final String location;
 
   const CustomHeader({
     super.key,
-    this.onSearchTap,
+    this.onNotificationTap,
     this.onProfileTap,
+    this.onLocationTap,
+    this.location = 'Visakhapatnam, Andhra Pradesh',
   });
+
+  Future<void> _openOwnerDashboard() async {
+    const url = 'https://vshakago.in/owner-dashboard';
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      width: double.infinity,
+      // Website's teal-blue brand gradient — matches public/index.html,
+      // instead of a photo background.
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFF0A74DA).withOpacity(0.92),
-            const Color(0xFF1AA3FF).withOpacity(0.82),
-            const Color(0xFF764BA2).withOpacity(0.78),
-          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.gradientStart, AppColors.gradientEnd],
         ),
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.18),
-            blurRadius: 50,
-            offset: const Offset(0, 16),
-          ),
-        ],
       ),
-      child: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ---- Top row: logo + brand, notifications + account ----
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Logo and Brand
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
+                  Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.35),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.24),
-                              blurRadius: 30,
-                              offset: const Offset(0, 14),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.asset(
-                            'assets/logo.png',
-                            width: 45,
-                            height: 45,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: 45,
-                                height: 45,
-                                color: Colors.white,
-                                child: const Icon(
-                                  Icons.villa,
-                                  color: Color(0xFF0A74DA),
-                                  size: 26,
-                                ),
-                              );
-                            },
-                          ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.asset(
+                          'assets/logo.png',
+                          width: 34,
+                          height: 34,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.villa, color: Colors.white, size: 30),
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'VshakaGo',
-                        style: TextStyle(
-                          fontSize: 7,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.9),
-                          letterSpacing: 0.3,
-                        ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'VshakaGo',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          Text(
+                            'Resorts for every moment',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white.withOpacity(0.85),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-
-                  // Action Buttons
                   Row(
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(25),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(25),
-                            onTap: onSearchTap ?? () {},
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              child: Text(
-                                'WhatsApp',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      _HeaderIconButton(
+                        icon: Icons.notifications_outlined,
+                        showBadge: true,
+                        onTap: onNotificationTap ?? () {},
+                        label: 'Notifications',
                       ),
                       const SizedBox(width: 10),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFF6F00), Color(0xFFFF9A3C)],
-                          ),
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFFF6F00).withOpacity(0.35),
-                              blurRadius: 40,
-                              offset: const Offset(0, 18),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(25),
-                            onTap: onProfileTap ?? () {},
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              child: Text(
-                                'Book Now',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      _HeaderIconButton(
+                        icon: Icons.person_outline,
+                        onTap: onProfileTap ?? () {},
+                        label: 'My Account',
                       ),
                     ],
                   ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 14),
+
+              // ---- Location row ----
+              InkWell(
+                onTap: onLocationTap ?? () {},
+                borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.white, size: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      location,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 18),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // ---- Partner promo headline ----
+              const Text(
+                'Partner with VshakaGo',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              const Text(
+                'Grow Your Resort Business',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.success,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'More bookings. More visibility. More revenue.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // ---- Become a Partner / Partner Login buttons ----
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _openOwnerDashboard,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.success,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        elevation: 0,
+                      ),
+                      icon: const Text('🤝', style: TextStyle(fontSize: 16)),
+                      label: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Become a Partner',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                          SizedBox(width: 4),
+                          Icon(Icons.arrow_forward, size: 15),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _openOwnerDashboard,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white, width: 1.4),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                      icon: const Icon(Icons.login, size: 16),
+                      label: const Text('Partner Login',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _HeaderIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool showBadge;
+  final String label;
+
+  const _HeaderIconButton({
+    required this.icon,
+    required this.onTap,
+    required this.label,
+    this.showBadge = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Material(
+          color: Colors.white,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(9),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(icon, color: AppColors.primaryDark, size: 20),
+                  if (showBadge)
+                    Positioned(
+                      right: -1,
+                      top: -1,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
