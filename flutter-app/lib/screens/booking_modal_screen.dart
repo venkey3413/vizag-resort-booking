@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../models/resort.dart';
-import '../services/api_service.dart';
+import 'payment_screen.dart';
 
 class BookingModalScreen extends StatefulWidget {
   final Resort resort;
@@ -21,7 +21,6 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
   
   DateTime? checkInDate;
   DateTime? checkOutDate;
-  bool isLoading = false;
 
   @override
   void initState() {
@@ -102,7 +101,25 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
       
       // Apply dynamic pricing based on each night's day of week
       if (widget.resort.dynamicPricing.isNotEmpty) {
-        if (dayOfWeek == 6 || dayOfWeek == 7) {
+        if (dayOfWeek == 5) {
+          // Friday (Dart weekday: Monday=1 ... Friday=5)
+          final fridayPrice = widget.resort.dynamicPricing.firstWhere(
+            (p) => p.dayType == 'friday',
+            orElse: () => DynamicPricing(dayType: '', price: 0),
+          );
+          if (fridayPrice.price > 0) {
+            nightlyRate = fridayPrice.price;
+            print('   Night ${i + 1} (${_getDayName(dayOfWeek)}): ₹$nightlyRate (Friday)');
+          } else {
+            // No specific Friday rate set — fall back to weekday rate
+            final weekdayPrice = widget.resort.dynamicPricing.firstWhere(
+              (p) => p.dayType == 'weekday',
+              orElse: () => DynamicPricing(dayType: '', price: 0),
+            );
+            if (weekdayPrice.price > 0) nightlyRate = weekdayPrice.price;
+            print('   Night ${i + 1} (${_getDayName(dayOfWeek)}): ₹$nightlyRate (Weekday - no Friday rate set)');
+          }
+        } else if (dayOfWeek == 6 || dayOfWeek == 7) {
           // Weekend (Saturday=6, Sunday=7)
           final weekendPrice = widget.resort.dynamicPricing.firstWhere(
             (p) => p.dayType == 'weekend',
@@ -113,7 +130,7 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
           }
           print('   Night ${i + 1} (${_getDayName(dayOfWeek)}): ₹$nightlyRate (Weekend)');
         } else {
-          // Weekday (Monday=1 to Friday=5)
+          // Weekday (Monday=1 to Thursday=4)
           final weekdayPrice = widget.resort.dynamicPricing.firstWhere(
             (p) => p.dayType == 'weekday',
             orElse: () => DynamicPricing(dayType: '', price: 0),
@@ -143,7 +160,7 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
     return days[weekday];
   }
 
-  Future<void> _submitBooking() async {
+  Future<void> _proceedToPayment() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -153,102 +170,23 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    final checkIn = "${checkInDate!.year}-${checkInDate!.month.toString().padLeft(2, '0')}-${checkInDate!.day.toString().padLeft(2, '0')}";
+    final checkOut = "${checkOutDate!.year}-${checkOutDate!.month.toString().padLeft(2, '0')}-${checkOutDate!.day.toString().padLeft(2, '0')}";
+    final totalPrice = _calculateTotalPrice();
 
-    try {
-      final checkIn = "${checkInDate!.year}-${checkInDate!.month.toString().padLeft(2, '0')}-${checkInDate!.day.toString().padLeft(2, '0')}";
-      final checkOut = "${checkOutDate!.year}-${checkOutDate!.month.toString().padLeft(2, '0')}-${checkOutDate!.day.toString().padLeft(2, '0')}";
-
-      final totalPrice = _calculateTotalPrice();
-
-      final bookingData = {
-        "resortId": widget.resort.id,
-        "guestName": nameController.text.trim(),
-        "email": emailController.text.trim(),
-        "phone": phoneController.text.trim(),
-        "checkIn": checkIn,
-        "checkOut": checkOut,
-        "guests": int.parse(guestsController.text),
-        "totalPrice": totalPrice,
-      };
-
-      final response = await ApiService.bookResort(bookingData);
-
-      setState(() {
-        isLoading = false;
-      });
-
-      if (response['bookingReference'] != null) {
-        _showSuccessDialog(response['bookingReference']);
-      } else {
-        _showErrorDialog("Booking created but no reference received");
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
-    }
-  }
-
-  void _showSuccessDialog(String bookingReference) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green[600], size: 32),
-            const SizedBox(width: 12),
-            const Text("Booking Confirmed!"),
-          ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentScreen(
+          resort: widget.resort,
+          guestName: nameController.text.trim(),
+          email: emailController.text.trim(),
+          phone: phoneController.text.trim(),
+          checkIn: checkIn,
+          checkOut: checkOut,
+          guests: int.parse(guestsController.text),
+          totalPrice: totalPrice,
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Your booking has been confirmed successfully."),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Booking Reference:",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    bookingReference,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.blue[700],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: const Text("OK"),
-          ),
-        ],
       ),
     );
   }
@@ -616,10 +554,8 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                     elevation: 0,
                                   ),
-                                  onPressed: isLoading ? null : _submitBooking,
-                                  child: isLoading
-                                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                      : const Text('Confirm Booking', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
+                                  onPressed: _proceedToPayment,
+                                  child: const Text('Proceed to Payment', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
                                 ),
                               ),
                               const SizedBox(height: 8),
