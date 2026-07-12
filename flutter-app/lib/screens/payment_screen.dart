@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/resort.dart';
 import '../services/api_service.dart';
@@ -204,9 +205,79 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
             const SizedBox(height: 20),
             const Text('Pay via UPI', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-            const SizedBox(height: 4),
-            Text('UPI ID: $_upiId', style: const TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
             const SizedBox(height: 12),
+
+            // QR code — same static merchant QR used on the website
+            Center(
+              child: Column(
+                children: [
+                  const Text('Scan QR Code', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4)),
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/upi-qr-code.png',
+                      width: 190,
+                      height: 190,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 190,
+                        height: 190,
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.qr_code_2, size: 60, color: AppColors.textMuted),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Copyable UPI ID
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.account_balance_wallet_outlined, size: 18, color: AppColors.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('UPI ID', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                        Text(_upiId, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Clipboard.setData(const ClipboardData(text: _upiId));
+                      _showMessage('UPI ID copied to clipboard');
+                    },
+                    icon: const Icon(Icons.copy, size: 15),
+                    label: const Text('Copy', style: TextStyle(fontSize: 12.5)),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            const Text('Or Pay with an App', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+            const SizedBox(height: 10),
 
             Row(
               children: [
