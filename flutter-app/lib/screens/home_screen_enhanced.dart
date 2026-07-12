@@ -2,14 +2,12 @@ import 'dart:ui';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../services/api_service.dart';
 import '../services/websocket_service.dart';
-import '../models/resort.dart';
 import '../utils/app_colors.dart';
 import '../widgets/custom_header.dart';
 import '../widgets/category_grid.dart';
 import '../widgets/birthday_section.dart';
-import '../widgets/resort_card_enhanced.dart';
+import 'resorts_list_screen.dart';
 import 'details_screen_enhanced.dart';
 import 'events_screen.dart';
 
@@ -160,7 +158,10 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
                 offset: const Offset(0, -18),
                 child: CategoryGrid(
                   onResortsTap: () {
-                    // Already on the resorts list — just scroll feedback.
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ResortsListScreen()),
+                    );
                   },
                   onEventsTap: () {
                     Navigator.push(
@@ -175,223 +176,6 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
                   },
                 ),
               ),
-            ),
-
-            // Section Title
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                child: Column(
-                  children: [
-                    ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [Color(0xFF0066FF), Color(0xFF00A8FF)],
-                      ).createShader(bounds),
-                      child: const Text(
-                        'Popular Resorts in Vizag',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Verified listings • Best prices',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF64748B),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Content with Pull-to-Refresh
-            FutureBuilder<List<Resort>>(
-              key: ValueKey(_refreshKey), // Forces rebuild when key changes
-              future: ApiService.getResorts(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return SliverFillRemaining(
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 30,
-                            ),
-                          ],
-                        ),
-                        child: const CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return SliverFillRemaining(
-                    child: Center(
-                      child: Container(
-                        margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.95),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 30,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              size: 50,
-                              color: AppColors.danger,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Error: ${snapshot.error}',
-                              style: const TextStyle(
-                                color: AppColors.textLight,
-                                fontSize: 13,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFFFF6F00), Color(0xFFFF9A3C)],
-                                ),
-                                borderRadius: BorderRadius.circular(25),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFFFF6F00).withOpacity(0.3),
-                                    blurRadius: 20,
-                                  ),
-                                ],
-                              ),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {});
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 10,
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Retry',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return SliverFillRemaining(
-                    child: Center(
-                      child: Container(
-                        margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.95),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 30,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.villa_outlined,
-                              size: 60,
-                              color: AppColors.textLight,
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'No resorts available',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textLight,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                final resorts = snapshot.data!;
-
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final resort = resorts[index];
-
-                      return ResortCardEnhanced(
-                        resort: resort,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (context, animation, secondaryAnimation) =>
-                                  DetailsScreenEnhanced(resort: resort),
-                              transitionsBuilder:
-                                  (context, animation, secondaryAnimation, child) {
-                                const begin = Offset(1.0, 0.0);
-                                const end = Offset.zero;
-                                const curve = Curves.easeInOut;
-                                var tween = Tween(begin: begin, end: end)
-                                    .chain(CurveTween(curve: curve));
-                                var offsetAnimation = animation.drive(tween);
-                                return SlideTransition(
-                                  position: offsetAnimation,
-                                  child: child,
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    childCount: resorts.length,
-                  ),
-                );
-              },
             ),
 
             // Birthday Celebrations
