@@ -131,13 +131,19 @@ class CategoryGrid extends StatelessWidget {
           ),
         ],
       ),
-      child: GridView.count(
-        crossAxisCount: 5,
+      child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 14,
-        childAspectRatio: 0.72,
-        children: items.map((item) => _CategoryTile(item: item)).toList(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 5,
+          mainAxisSpacing: 14,
+          // Fixed height per row (instead of aspectRatio) so tiles never
+          // depend on screen width — avoids "RenderFlex overflowed" on
+          // narrow phones or when the system font-scale setting is increased.
+          mainAxisExtent: 92,
+        ),
+        itemCount: items.length,
+        itemBuilder: (context, index) => _CategoryTile(item: items[index]),
       ),
     );
   }
@@ -153,7 +159,8 @@ class _CategoryTile extends StatelessWidget {
       onTap: item.onTap,
       borderRadius: BorderRadius.circular(12),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 46,
@@ -165,18 +172,20 @@ class _CategoryTile extends StatelessWidget {
             child: Icon(item.icon, color: item.iconColor, size: 22),
           ),
           const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Text(
-              item.label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF37474F),
-                height: 1.15,
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Text(
+                item.label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF37474F),
+                  height: 1.15,
+                ),
               ),
             ),
           ),
