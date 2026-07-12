@@ -115,12 +115,16 @@ class CustomHeader extends StatelessWidget {
                   children: [
                     const Icon(Icons.location_on, color: Colors.white, size: 18),
                     const SizedBox(width: 4),
-                    Text(
-                      location,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                    Expanded(
+                      child: Text(
+                        location,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 18),
@@ -167,20 +171,26 @@ class CustomHeader extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.success,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 4),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),
                         ),
                         elevation: 0,
                       ),
-                      icon: const Text('🤝', style: TextStyle(fontSize: 16)),
-                      label: const Row(
+                      icon: const Text('🤝', style: TextStyle(fontSize: 15)),
+                      label: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Become a Partner',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                          SizedBox(width: 4),
-                          Icon(Icons.arrow_forward, size: 15),
+                          Flexible(
+                            child: Text(
+                              'Become a Partner',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          const Icon(Icons.arrow_forward, size: 14),
                         ],
                       ),
                     ),
@@ -192,14 +202,16 @@ class CustomHeader extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Colors.white, width: 1.4),
-                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 4),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),
                         ),
                       ),
-                      icon: const Icon(Icons.login, size: 16),
+                      icon: const Icon(Icons.login, size: 15),
                       label: const Text('Partner Login',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],
