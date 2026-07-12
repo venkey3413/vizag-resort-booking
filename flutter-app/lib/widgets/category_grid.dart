@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../screens/offers_screen.dart';
-import '../screens/destinations_screen.dart';
 
 class CategoryItem {
   final String label;
@@ -59,15 +57,14 @@ class CategoryGrid extends StatelessWidget {
         icon: Icons.sell_outlined,
         iconColor: const Color(0xFF10B981),
         bgColor: const Color(0xFFE3F8EE),
-        onTap: onOffersTap ??
-            () => Navigator.push(context, MaterialPageRoute(builder: (context) => const OffersScreen())),
+        onTap: onOffersTap ?? () => _comingSoon(context, 'Offers'),
       ),
       CategoryItem(
         label: 'Destinations',
         icon: Icons.place_outlined,
         iconColor: const Color(0xFFFF7A45),
         bgColor: const Color(0xFFFFEDE3),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DestinationsScreen())),
+        onTap: () => _comingSoon(context, 'Destinations'),
       ),
       CategoryItem(
         label: 'Near Me',

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/resort.dart';
-import 'booking_screen_razorpay.dart';
+import 'booking_modal_screen.dart';
 import 'debug_pricing_screen.dart';
 
 class DetailsScreen extends StatelessWidget {
@@ -199,7 +199,7 @@ class DetailsScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => BookingScreen(resort: resort),
+                            builder: (_) => BookingModalScreen(resort: resort),
                           ),
                         );
                       },

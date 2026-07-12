@@ -6,7 +6,7 @@
     
     <application
         android:label="VshakaGo"
-        android:name="${applicationName}"
+        android:name=".MyApplication"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
         <activity

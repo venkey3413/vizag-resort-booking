@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../models/resort.dart';
 import '../services/api_service.dart';
 
@@ -23,8 +22,6 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
   DateTime? checkInDate;
   DateTime? checkOutDate;
   bool isLoading = false;
-  late Razorpay _razorpay;
-  String? razorpayKey;
 
   @override
   void initState() {
@@ -38,26 +35,6 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
       }
     }
     print('   👉 Select a check-in date to see dynamic pricing in action\n');
-    _initializeRazorpay();
-    _fetchRazorpayKey();
-  }
-
-  void _initializeRazorpay() {
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-  }
-
-  Future<void> _fetchRazorpayKey() async {
-    try {
-      final key = await ApiService.getRazorpayKey();
-      setState(() {
-        razorpayKey = key;
-      });
-    } catch (e) {
-      print('Failed to fetch Razorpay key: $e');
-    }
   }
 
   @override
@@ -66,7 +43,6 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
     emailController.dispose();
     phoneController.dispose();
     guestsController.dispose();
-    _razorpay.clear();
     super.dispose();
   }
 
@@ -167,7 +143,7 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
     return days[weekday];
   }
 
-  void _openRazorpayPayment() {
+  Future<void> _submitBooking() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -177,81 +153,6 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
       return;
     }
 
-    if (razorpayKey == null || razorpayKey!.isEmpty) {
-      _showErrorDialog("Payment system not configured. Please contact support.");
-      return;
-    }
-
-    final totalPrice = _calculateTotalPrice();
-
-    var options = {
-      'key': razorpayKey,
-      'amount': totalPrice * 100,
-      'name': 'Vizag Resort Booking',
-      'description': '${widget.resort.name} - Resort Booking',
-      'prefill': {
-        'contact': phoneController.text.trim(),
-        'email': emailController.text.trim(),
-      },
-      'theme': {
-        'color': '#28a745'
-      }
-    };
-
-    try {
-      _razorpay.open(options);
-    } catch (e) {
-      _showErrorDialog('Error: $e');
-    }
-  }
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            const Text('Verifying payment...'),
-          ],
-        ),
-      ),
-    );
-
-    Future.delayed(const Duration(seconds: 3), () async {
-      try {
-        final verifyResponse = await ApiService.verifyPayment(
-          response.paymentId!,
-          response.orderId,
-          response.signature!,
-        );
-
-        Navigator.of(context).pop();
-
-        if (verifyResponse['verified'] == true) {
-          _submitBooking(response.paymentId);
-        } else {
-          _showErrorDialog('Payment verification failed. Please contact support with payment ID: ${response.paymentId}');
-        }
-      } catch (e) {
-        Navigator.of(context).pop();
-        _showErrorDialog('Payment verification failed: $e');
-      }
-    });
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    _showErrorDialog('Payment failed: ${response.message}');
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    _showErrorDialog('External wallet: ${response.walletName}');
-  }
-
-  Future<void> _submitBooking(String? transactionId) async {
     setState(() {
       isLoading = true;
     });
@@ -271,8 +172,6 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
         "checkOut": checkOut,
         "guests": int.parse(guestsController.text),
         "totalPrice": totalPrice,
-        "transactionId": transactionId,
-        "paymentStatus": "paid",
       };
 
       final response = await ApiService.bookResort(bookingData);
@@ -717,10 +616,10 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                     elevation: 0,
                                   ),
-                                  onPressed: isLoading ? null : _openRazorpayPayment,
+                                  onPressed: isLoading ? null : _submitBooking,
                                   child: isLoading
                                       ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                      : const Text('Proceed to Payment', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
+                                      : const Text('Confirm Booking', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
                                 ),
                               ),
                               const SizedBox(height: 8),
