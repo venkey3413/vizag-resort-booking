@@ -81,24 +81,26 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
     return "${date.day}/${date.month}/${date.year}";
   }
 
-  int _calculateTotalPrice() {
-    if (checkInDate == null || checkOutDate == null) return 0;
-    
+  Map<String, int> _calculatePriceBreakdown() {
+    if (checkInDate == null || checkOutDate == null) {
+      return {'basePrice': 0, 'platformFee': 0, 'total': 0};
+    }
+
     final nights = checkOutDate!.difference(checkInDate!).inDays;
     int totalBasePrice = 0;
-    
+
     print('🔍 Calculating price for ${widget.resort.name}');
     print('   Check-in: ${checkInDate!.day}/${checkInDate!.month}/${checkInDate!.year}');
     print('   Check-out: ${checkOutDate!.day}/${checkOutDate!.month}/${checkOutDate!.year}');
     print('   Total nights: $nights');
     print('   Dynamic pricing available: ${widget.resort.dynamicPricing.isNotEmpty}');
-    
+
     // Calculate price for each night individually
     for (int i = 0; i < nights; i++) {
       final currentNight = checkInDate!.add(Duration(days: i));
       final dayOfWeek = currentNight.weekday; // 1=Monday, 7=Sunday
       int nightlyRate = widget.resort.price;
-      
+
       // Apply dynamic pricing based on each night's day of week
       if (widget.resort.dynamicPricing.isNotEmpty) {
         if (dayOfWeek == 5) {
@@ -143,16 +145,20 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
       } else {
         print('   Night ${i + 1} (${_getDayName(dayOfWeek)}): ₹$nightlyRate (Base rate)');
       }
-      
+
       totalBasePrice += nightlyRate;
     }
-    
+
     final platformFee = (totalBasePrice * 0.015).round();
     final total = totalBasePrice + platformFee;
-    
+
     print('   💰 Total base: ₹$totalBasePrice + Platform fee: ₹$platformFee = Total: ₹$total\n');
-    
-    return total;
+
+    return {'basePrice': totalBasePrice, 'platformFee': platformFee, 'total': total};
+  }
+
+  int _calculateTotalPrice() {
+    return _calculatePriceBreakdown()['total']!;
   }
   
   String _getDayName(int weekday) {
@@ -219,7 +225,8 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
     final nights = (checkInDate != null && checkOutDate != null)
         ? checkOutDate!.difference(checkInDate!).inDays
         : 0;
-    final totalPrice = _calculateTotalPrice();
+    final priceBreakdown = _calculatePriceBreakdown();
+    final totalPrice = priceBreakdown['total']!;
 
     return Scaffold(
       backgroundColor: Colors.black.withOpacity(0.6),
@@ -520,7 +527,7 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           const Text("Base Amount", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
-                                          Text("₹${totalPrice - (totalPrice * 0.015).round()}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
+                                          Text("₹${priceBreakdown['basePrice']}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
                                         ],
                                       ),
                                       const SizedBox(height: 4),
@@ -528,7 +535,7 @@ class _BookingModalScreenState extends State<BookingModalScreen> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           const Text("Platform Fee", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
-                                          Text("₹${(totalPrice * 0.015).round()}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
+                                          Text("₹${priceBreakdown['platformFee']}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
                                         ],
                                       ),
                                       const Divider(height: 16),
