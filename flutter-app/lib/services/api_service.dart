@@ -167,12 +167,16 @@ class ApiService {
     if (data['checkIn'] != null && data['checkOut'] != null) {
       DateTime checkIn = DateTime.parse(data['checkIn']);
       DateTime checkOut = DateTime.parse(data['checkOut']);
-      DateTime today = DateTime.now();
-      
+      DateTime now = DateTime.now();
+      // Compare dates only (strip time-of-day) — otherwise a same-day
+      // check-in (parsed as midnight) is always "before" the current
+      // time of day, incorrectly rejecting valid same-day bookings.
+      DateTime today = DateTime(now.year, now.month, now.day);
+
       if (checkIn.isBefore(today)) {
         throw Exception('Check-in date cannot be in the past');
       }
-      
+
       if (checkOut.isBefore(checkIn) || checkOut.isAtSameMomentAs(checkIn)) {
         throw Exception('Check-out must be after check-in date');
       }
