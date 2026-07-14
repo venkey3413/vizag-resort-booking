@@ -140,6 +140,31 @@ class ApiService {
     }
   }
 
+  // Uploads a payment screenshot (UTR proof) to Cloudinary via the backend
+  // and returns the hosted URL to attach to the booking.
+  static Future<String> uploadPaymentScreenshot(File imageFile, {String? bookingReference, String? phone}) async {
+    final uri = Uri.parse('$baseUrl/api/upload-payment-screenshot');
+    final request = http.MultipartRequest('POST', uri);
+    request.headers.addAll(headers);
+    if (bookingReference != null) request.fields['bookingReference'] = bookingReference;
+    if (phone != null) request.fields['phone'] = phone;
+    request.files.add(await http.MultipartFile.fromPath('screenshot', imageFile.path));
+
+    final streamedResponse = await request.send().timeout(timeout);
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] == true && data['url'] != null) {
+        return data['url'];
+      }
+      throw Exception(data['error'] ?? 'Screenshot upload failed');
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['error'] ?? 'Screenshot upload failed');
+    }
+  }
+
   static Future<Map<String, dynamic>> bookResort(Map<String, dynamic> data) async {
     // Validate required fields
     if (data['guestName'] == null || data['email'] == null || data['phone'] == null) {
@@ -197,6 +222,33 @@ class ApiService {
     } else {
       final error = jsonDecode(response.body);
       throw Exception(error['error'] ?? "Failed to create booking");
+    }
+  }
+
+  // Uploads a payment screenshot to Cloudinary via the existing
+  // /api/upload-payment-screenshot endpoint and returns the hosted URL.
+  static Future<String> uploadPaymentScreenshot(File imageFile, String bookingReference) async {
+    final uri = Uri.parse("$baseUrl/api/upload-payment-screenshot");
+    final request = http.MultipartRequest('POST', uri);
+    request.headers.addAll({
+      "X-API-Key": apiKey,
+      "Accept": "application/json",
+    });
+    request.fields['bookingReference'] = bookingReference;
+    request.files.add(await http.MultipartFile.fromPath('screenshot', imageFile.path));
+
+    final streamedResponse = await request.send().timeout(timeout);
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] == true && data['url'] != null) {
+        return data['url'];
+      }
+      throw Exception(data['error'] ?? 'Screenshot upload failed');
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['error'] ?? 'Screenshot upload failed');
     }
   }
 
