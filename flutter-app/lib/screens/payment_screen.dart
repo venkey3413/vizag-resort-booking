@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/resort.dart';
 import '../services/api_service.dart';
@@ -38,6 +40,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   late final String _pendingReference;
   final _utrController = TextEditingController();
   bool _isSubmitting = false;
+  File? _screenshotFile;
+  bool _isUploadingScreenshot = false;
 
   static const String _upiId = 'vshakago@ybl';
   static const String _merchantName = 'VshakaGo';
@@ -75,20 +79,83 @@ class _PaymentScreenState extends State<PaymentScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _pickScreenshot(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: source, imageQuality: 85);
+      if (picked != null) {
+        setState(() => _screenshotFile = File(picked.path));
+      }
+    } catch (e) {
+      _showMessage('Could not pick image: $e');
+    }
+  }
+
+  void _showScreenshotSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickScreenshot(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+              title: const Text('Take a Photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickScreenshot(ImageSource.camera);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _confirmPaymentAndBook() async {
     final utr = _utrController.text.trim();
     if (utr.isEmpty) {
       _showMessage('Please enter the UTR / Transaction ID from your payment.');
       return;
     }
-    if (utr.length < 6) {
-      _showMessage('That doesn\'t look like a valid UTR. Please check and re-enter.');
+    if (!RegExp(r'^\d{12}$').hasMatch(utr)) {
+      _showMessage('UTR must be exactly 12 digits. Please check your payment confirmation and re-enter.');
       return;
     }
 
     setState(() => _isSubmitting = true);
 
     try {
+      String? screenshotUrl;
+
+      // Upload the payment screenshot to Cloudinary first, if one was picked.
+      if (_screenshotFile != null) {
+        setState(() => _isUploadingScreenshot = true);
+        try {
+          screenshotUrl = await ApiService.uploadPaymentScreenshot(_screenshotFile!, _pendingReference);
+        } catch (e) {
+          if (!mounted) return;
+          setState(() {
+            _isSubmitting = false;
+            _isUploadingScreenshot = false;
+          });
+          _showMessage('Screenshot upload failed: ${e.toString().replaceAll('Exception: ', '')}. Please try again.');
+          return;
+        }
+        if (!mounted) return;
+        setState(() => _isUploadingScreenshot = false);
+      }
+
       final bookingData = {
         "resortId": widget.resort.id,
         "guestName": widget.guestName,
@@ -99,6 +166,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         "guests": widget.guests,
         "totalPrice": widget.totalPrice,
         "transactionId": utr,
+        if (screenshotUrl != null) "paymentScreenshotUrl": screenshotUrl,
       };
 
       final response = await ApiService.bookResort(bookingData);
@@ -306,14 +374,84 @@ class _PaymentScreenState extends State<PaymentScreen> {
             TextField(
               controller: _utrController,
               decoration: InputDecoration(
-                labelText: 'UTR / Transaction ID',
+                labelText: 'UTR / Transaction ID (12 digits)',
                 hintText: 'e.g. 123456789012',
+                counterText: '',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
                 fillColor: Colors.white,
               ),
-              keyboardType: TextInputType.text,
+              keyboardType: TextInputType.number,
+              maxLength: 12,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
             ),
+
+            const SizedBox(height: 20),
+            const Text('Upload Payment Screenshot', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+            const SizedBox(height: 4),
+            const Text(
+              'Optional but recommended — helps us verify your payment faster.',
+              style: TextStyle(fontSize: 12.5, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 10),
+            _screenshotFile == null
+                ? InkWell(
+                    onTap: _showScreenshotSourceSheet,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 22),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border, style: BorderStyle.solid),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.add_a_photo_outlined, color: AppColors.primary, size: 26),
+                          SizedBox(height: 6),
+                          Text('Tap to add screenshot', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                        ],
+                      ),
+                    ),
+                  )
+                : Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(
+                          _screenshotFile!,
+                          width: double.infinity,
+                          height: 180,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: InkWell(
+                          onTap: () => setState(() => _screenshotFile = null),
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                            child: const Icon(Icons.close, color: Colors.white, size: 16),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 6,
+                        bottom: 6,
+                        child: TextButton.icon(
+                          onPressed: _showScreenshotSourceSheet,
+                          style: TextButton.styleFrom(backgroundColor: Colors.black54, foregroundColor: Colors.white),
+                          icon: const Icon(Icons.refresh, size: 15),
+                          label: const Text('Change', style: TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                    ],
+                  ),
 
             const SizedBox(height: 20),
             SizedBox(
@@ -327,7 +465,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
                 onPressed: _isSubmitting ? null : _confirmPaymentAndBook,
                 child: _isSubmitting
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+                          const SizedBox(width: 10),
+                          Text(_isUploadingScreenshot ? 'Uploading screenshot...' : 'Booking...', style: const TextStyle(fontSize: 13)),
+                        ],
+                      )
                     : const Text('Confirm Payment & Book', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
               ),
             ),
