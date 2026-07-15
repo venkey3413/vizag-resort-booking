@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/websocket_service.dart';
+import '../services/api_service.dart';
 import '../utils/app_colors.dart';
 import '../widgets/custom_header.dart';
 import '../widgets/birthday_section.dart';
-import '../widgets/what_you_looking_for.dart';
+import '../widgets/enhanced_services_grid.dart';
 import 'resorts_list_screen.dart';
-import 'details_screen_enhanced.dart';
 import 'events_screen.dart';
 
 class HomeScreenEnhanced extends StatefulWidget {
@@ -19,7 +19,6 @@ class HomeScreenEnhanced extends StatefulWidget {
 }
 
 class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBindingObserver {
-  // Key to refresh the FutureBuilder
   int _refreshKey = 0;
   int _selectedNavIndex = 0;
   StreamSubscription? _wsSubscription;
@@ -31,12 +30,10 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     
-    // Listen for WebSocket real-time updates
     _wsSubscription = WebSocketService.updateStream.listen((data) {
       final type = data['type'];
       print('🔄 Home screen received update: $type');
       
-      // Auto-refresh UI for relevant updates
       if (type == 'booking.created' || 
           type == 'booking.updated' || 
           type == 'booking.deleted' ||
@@ -45,7 +42,6 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
           type == 'resort.date.blocked' ||
           type == 'resort.date.unblocked') {
         
-        // Only refresh if screen is visible, otherwise queue the update
         if (_isScreenVisible && mounted) {
           print('✅ Auto-refreshing resort list (screen visible)...');
           setState(() {
@@ -63,11 +59,9 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     
-    // Track if app is in foreground
     if (state == AppLifecycleState.resumed) {
       _isScreenVisible = true;
       
-      // Apply queued updates when returning to screen
       if (_hasPendingUpdate && mounted) {
         print('✅ Applying queued updates...');
         setState(() {
@@ -87,12 +81,10 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
     super.dispose();
   }
 
-  // Refresh function
   Future<void> _refreshResorts() async {
     setState(() {
       _refreshKey++;
     });
-    // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Row(
@@ -103,6 +95,17 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
           ],
         ),
         backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _showComingSoon(String service) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$service coming soon'),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -129,492 +132,535 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
             ),
           ),
           child: CustomScrollView(
-          slivers: [
-            // Custom Header
-            SliverToBoxAdapter(
-              child: CustomHeader(
-                onNotificationTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notifications coming soon')),
-                  );
-                },
-                onProfileTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Profile feature coming soon')),
-                  );
-                },
-                onLocationTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Change location coming soon')),
-                  );
-                },
-              ),
-            ),
-
-            // What are you looking for? - New Enhanced Category Grid
-            SliverToBoxAdapter(
-              child: Transform.translate(
-                offset: const Offset(0, -18),
-                child: WhatYouLookingFor(
-                  onResortTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ResortsListScreen()),
-                    );
+            slivers: [
+              // Custom Header
+              SliverToBoxAdapter(
+                child: CustomHeader(
+                  onNotificationTap: () {
+                    _showComingSoon('Notifications');
                   },
-                  onBirthdayTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Birthday packages coming soon')),
-                    );
+                  onProfileTap: () {
+                    _showComingSoon('Profile');
                   },
-                  onEventsTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const EventsScreen()),
-                    );
-                  },
-                  onPartiesTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Party packages coming soon')),
-                    );
-                  },
-                  onPhotoshootTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Photoshoot packages coming soon')),
-                    );
-                  },
-                  onDiningTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Dining packages coming soon')),
-                    );
-                  },
-                  onDecorationsTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Decoration services coming soon')),
-                    );
-                  },
-                  onSurpriseTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Surprise packages coming soon')),
-                    );
+                  onLocationTap: () {
+                    _showComingSoon('Location change');
                   },
                 ),
               ),
-            ),
 
-            // Birthday Celebrations
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: BirthdaySection(),
-              ),
-            ),
-
-            // Owner Pitch Section
-            SliverToBoxAdapter(
-              child: Container(
-                margin: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF0d3b6e), Color(0xFF1a5fa8), Color(0xFF0a7a5a)],
+              // Enhanced Services Grid
+              SliverToBoxAdapter(
+                child: Transform.translate(
+                  offset: const Offset(0, -18),
+                  child: EnhancedServicesGrid(
+                    onResortsTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ResortsListScreen()),
+                      );
+                    },
+                    onNearMeTap: () async {
+                      try {
+                        final services = await ApiService.getNearbyServices();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Found ${services.length} nearby services')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          _showComingSoon('Near Me');
+                        }
+                      }
+                    },
+                    onSupportTap: () async {
+                      try {
+                        final support = await ApiService.getSupport();
+                        if (mounted) {
+                          final phone = support['phone'] ?? '+918341674465';
+                          await launchUrl(Uri.parse('https://wa.me/$phone'));
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          _showComingSoon('Support');
+                        }
+                      }
+                    },
+                    onInteriorTap: () async {
+                      try {
+                        final services = await ApiService.getInteriorServices();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Found ${services.length} interior services')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          _showComingSoon('Interior Works');
+                        }
+                      }
+                    },
+                    onPestControlTap: () async {
+                      try {
+                        final services = await ApiService.getPestControlServices();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Found ${services.length} pest control services')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          _showComingSoon('Pest Control');
+                        }
+                      }
+                    },
+                    onEventsTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const EventsScreen()),
+                      );
+                    },
+                    onCabsTap: () async {
+                      try {
+                        final services = await ApiService.getCabsServices();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Found ${services.length} cab services')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          _showComingSoon('Cabs & Travel');
+                        }
+                      }
+                    },
+                    onFoodTap: () async {
+                      try {
+                        final orders = await ApiService.getFoodOrders();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Found ${orders.length} food items')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          _showComingSoon('Food Orders');
+                        }
+                      }
+                    },
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 30,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white.withOpacity(0.1),
-                            Colors.white.withOpacity(0.05),
-                          ],
-                        ),
+              ),
+
+              // Birthday Celebrations
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: BirthdaySection(),
+                ),
+              ),
+
+              // Owner Pitch Section
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF0d3b6e), Color(0xFF1a5fa8), Color(0xFF0a7a5a)],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
                       ),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFf5a623).withOpacity(0.2),
-                              border: Border.all(
-                                color: const Color(0xFFf5a623).withOpacity(0.4),
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              '🎁 EXCLUSIVE PARTNER OFFER',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFf5c842),
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'List Your Resort.\nEarn More.',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              height: 1.2,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Join Vizag\'s fastest-growing resort booking platform',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.7),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.2),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      const Text(
-                                        '🎁',
-                                        style: TextStyle(fontSize: 20),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      const Text(
-                                        '3 Months',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Text(
-                                        'free listing',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.white.withOpacity(0.6),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Text(
-                                '→',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.white54,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.2),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      const Text(
-                                        '💰',
-                                        style: TextStyle(fontSize: 20),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      const Text(
-                                        'Only 6%',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Text(
-                                        'per booking',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.white.withOpacity(0.6),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.white.withOpacity(0.1),
+                              Colors.white.withOpacity(0.05),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF14c88c), Color(0xFF0a7a5a)],
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
                               ),
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF14c88c).withOpacity(0.3),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFf5a623).withOpacity(0.2),
+                                border: Border.all(
+                                  color: const Color(0xFFf5a623).withOpacity(0.4),
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text(
+                                '🎁 EXCLUSIVE PARTNER OFFER',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFf5c842),
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'List Your Resort.\nEarn More.',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                height: 1.2,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Join Vizag\'s fastest-growing resort booking platform',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withOpacity(0.7),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.2),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          '🎁',
+                                          style: TextStyle(fontSize: 20),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        const Text(
+                                          '3 Months',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Text(
+                                          'free listing',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white.withOpacity(0.6),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  '→',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white54,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.2),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          '💰',
+                                          style: TextStyle(fontSize: 20),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        const Text(
+                                          'Only 6%',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Text(
+                                          'per booking',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white.withOpacity(0.6),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                const url = 'https://wa.me/918341674465';
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Opening WhatsApp...'),
-                                    duration: Duration(seconds: 1),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                            const SizedBox(height: 16),
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF14c88c), Color(0xFF0a7a5a)],
                                 ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF14c88c).withOpacity(0.3),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
                               ),
-                              child: const Text(
-                                '💬 WhatsApp Us',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  const url = 'https://wa.me/918341674465';
+                                  if (await canLaunchUrl(Uri.parse(url))) {
+                                    await launchUrl(Uri.parse(url));
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  '💬 WhatsApp Us',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
 
-            // Footer
-            SliverToBoxAdapter(
-              child: Container(
-                margin: const EdgeInsets.only(top: 16),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFF0d3b6e),
-                      const Color(0xFF0a1628),
+              // Footer
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF0d3b6e),
+                        const Color(0xFF0a1628),
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF1a5fa8), Color(0xFF0a7a5a)],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF1a5fa8).withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            const url = 'https://vshakago.in/owner-dashboard';
+                            if (await canLaunchUrl(Uri.parse(url))) {
+                              await launchUrl(
+                                Uri.parse(url),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.dashboard_outlined,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          label: const Text(
+                            'Owner Dashboard',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      const Text(
+                        'Vizag Starts Here & Go',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Resorts + Events booking in Vizag.\nPremium verified listings with best deals.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.7),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              '✅ Verified',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              '⚡ Instant Booking',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              '💰 Best Price',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      const Divider(color: Colors.white24),
+                      const SizedBox(height: 12),
+                      Text(
+                        '📞 +91 8341674465',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '✉️ vizagresortbooking@gmail.com',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: Text(
+                          '© 2026 Vizag Starts Here & Go • Built with ❤️ in Vizag',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.white.withOpacity(0.5),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Owner Dashboard Button
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF1a5fa8), Color(0xFF0a7a5a)],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF1a5fa8).withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          const url = 'https://vshakago.in/owner-dashboard';
-                          if (await canLaunchUrl(Uri.parse(url))) {
-                            await launchUrl(
-                              Uri.parse(url),
-                              mode: LaunchMode.externalApplication,
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        icon: const Icon(
-                          Icons.dashboard_outlined,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        label: const Text(
-                          'Owner Dashboard',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    const Text(
-                      'Vizag Starts Here & Go',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Resorts + Events booking in Vizag.\nPremium verified listings with best deals.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.7),
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            '✅ Verified',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            '⚡ Instant Booking',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            '💰 Best Price',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    const Divider(color: Colors.white24),
-                    const SizedBox(height: 12),
-                    Text(
-                      '📞 +91 8341674465',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '✉️ vizagresortbooking@gmail.com',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: Text(
-                        '© 2026 Vizag Starts Here & Go • Built with ❤️ in Vizag',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.white.withOpacity(0.5),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            ),
 
-            // Bottom Padding
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 16),
-            ),
-          ],
+              // Bottom Padding
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 16),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
       bottomNavigationBar: _buildBottomNav(),
     );
@@ -648,22 +694,8 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
               return InkWell(
                 onTap: () {
                   setState(() => _selectedNavIndex = index);
-                  if (index == 1) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Bookings coming soon')),
-                    );
-                  } else if (index == 2) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Favorites coming soon')),
-                    );
-                  } else if (index == 3) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Offers coming soon')),
-                    );
-                  } else if (index == 4) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Menu coming soon')),
-                    );
+                  if (index != 0) {
+                    _showComingSoon(items[index]['label'] as String);
                   }
                 },
                 child: Column(

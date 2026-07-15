@@ -346,3 +346,168 @@ class ApiService {
     }
   }
 }
+
+  // Get nearby resorts/services
+  static Future<List<dynamic>> getNearbyServices({double? latitude, double? longitude, String? type}) async {
+    String endpoint = '/api/nearby-services';
+    final params = <String>[];
+    if (latitude != null) params.add('lat=$latitude');
+    if (longitude != null) params.add('lon=$longitude');
+    if (type != null) params.add('type=${Uri.encodeComponent(type)}');
+    if (params.isNotEmpty) endpoint += '?${params.join('&')}';
+
+    final response = await _makeRequest('GET', endpoint);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load nearby services");
+    }
+  }
+
+  // Get support/help information
+  static Future<Map<String, dynamic>> getSupport() async {
+    final response = await _makeRequest('GET', '/api/support');
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load support information");
+    }
+  }
+
+  // Get interior works/repairs services
+  static Future<List<dynamic>> getInteriorServices() async {
+    final response = await _makeRequest('GET', '/api/interior-services');
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load interior services");
+    }
+  }
+
+  // Get pest control services
+  static Future<List<dynamic>> getPestControlServices() async {
+    final response = await _makeRequest('GET', '/api/pest-control-services');
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load pest control services");
+    }
+  }
+
+  // Book interior/pest control service
+  static Future<Map<String, dynamic>> bookService(Map<String, dynamic> data) async {
+    // Validate required fields
+    if (data['guestName'] == null || data['email'] == null || data['phone'] == null) {
+      throw Exception('Missing required fields');
+    }
+
+    // Sanitize inputs
+    data['guestName'] = sanitizeInput(data['guestName']);
+    data['email'] = sanitizeInput(data['email']);
+    data['phone'] = sanitizeInput(data['phone']);
+
+    // Validate email
+    if (!isValidEmail(data['email'])) {
+      throw Exception('Invalid email format');
+    }
+
+    // Validate phone
+    String phone = data['phone'].replaceAll('+91', '').replaceAll(' ', '');
+    if (!isValidPhone(phone)) {
+      throw Exception('Invalid phone number. Must be 10 digits starting with 6-9');
+    }
+    data['phone'] = '+91$phone';
+
+    final response = await _makeRequest('POST', '/api/service-bookings', body: data);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['error'] ?? "Failed to book service");
+    }
+  }
+
+  // Get cabs/travel services
+  static Future<List<dynamic>> getCabsServices() async {
+    final response = await _makeRequest('GET', '/api/cabs-services');
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load cabs services");
+    }
+  }
+
+  // Book cab/travel service
+  static Future<Map<String, dynamic>> bookCab(Map<String, dynamic> data) async {
+    // Validate required fields
+    if (data['guestName'] == null || data['phone'] == null || data['pickupLocation'] == null) {
+      throw Exception('Missing required fields');
+    }
+
+    // Sanitize inputs
+    data['guestName'] = sanitizeInput(data['guestName']);
+    data['phone'] = sanitizeInput(data['phone']);
+    data['pickupLocation'] = sanitizeInput(data['pickupLocation']);
+
+    // Validate phone
+    String phone = data['phone'].replaceAll('+91', '').replaceAll(' ', '');
+    if (!isValidPhone(phone)) {
+      throw Exception('Invalid phone number. Must be 10 digits starting with 6-9');
+    }
+    data['phone'] = '+91$phone';
+
+    final response = await _makeRequest('POST', '/api/cab-bookings', body: data);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['error'] ?? "Failed to book cab");
+    }
+  }
+
+  // Get food orders
+  static Future<List<dynamic>> getFoodOrders() async {
+    final response = await _makeRequest('GET', '/api/food-orders');
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load food orders");
+    }
+  }
+
+  // Place food order
+  static Future<Map<String, dynamic>> placeFoodOrder(Map<String, dynamic> data) async {
+    // Validate required fields
+    if (data['guestName'] == null || data['phone'] == null || data['items'] == null) {
+      throw Exception('Missing required fields');
+    }
+
+    // Sanitize inputs
+    data['guestName'] = sanitizeInput(data['guestName']);
+    data['phone'] = sanitizeInput(data['phone']);
+
+    // Validate phone
+    String phone = data['phone'].replaceAll('+91', '').replaceAll(' ', '');
+    if (!isValidPhone(phone)) {
+      throw Exception('Invalid phone number. Must be 10 digits starting with 6-9');
+    }
+    data['phone'] = '+91$phone';
+
+    final response = await _makeRequest('POST', '/api/food-orders', body: data);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['error'] ?? "Failed to place food order");
+    }
+  }
+}
