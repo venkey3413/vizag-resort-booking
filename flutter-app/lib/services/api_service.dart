@@ -8,10 +8,8 @@ class ApiService {
   static const String baseUrl = "https://vshakago.in";
   static const String apiKey = "vshakago-mobile-2026-secure-key";
   
-  // Timeout duration for API calls
   static const Duration timeout = Duration(seconds: 30);
 
-  // Common headers with API key and security headers
   static Map<String, String> get headers => {
     "Content-Type": "application/json",
     "X-API-Key": apiKey,
@@ -19,22 +17,18 @@ class ApiService {
     "User-Agent": "VshakaGo-Mobile/1.0.0",
   };
 
-  // Input validation helper
   static String sanitizeInput(String input) {
     return input.trim().replaceAll(RegExp(r'[<>"]'), '');
   }
 
-  // Email validation
   static bool isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+    return RegExp(r'^\w-\.+@(\w-+\.)+\w-{2,4}$').hasMatch(email);
   }
 
-  // Phone validation (Indian format)
   static bool isValidPhone(String phone) {
     return RegExp(r'^[6-9]\d{9}$').hasMatch(phone);
   }
 
-  // Generic API call with error handling and timeout
   static Future<http.Response> _makeRequest(
     String method,
     String endpoint,
@@ -59,12 +53,10 @@ class ApiService {
           throw Exception('Unsupported HTTP method: $method');
       }
 
-      // Check for rate limiting
       if (response.statusCode == 429) {
         throw Exception('Too many requests. Please try again later.');
       }
 
-      // Check for authentication errors
       if (response.statusCode == 401) {
         throw Exception('Authentication failed. Please update the app.');
       }
@@ -108,22 +100,18 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> bookEvent(Map<String, dynamic> data) async {
-    // Validate required fields
     if (data['guestName'] == null || data['email'] == null || data['phone'] == null) {
       throw Exception('Missing required fields');
     }
 
-    // Sanitize inputs
     data['guestName'] = sanitizeInput(data['guestName']);
     data['email'] = sanitizeInput(data['email']);
     data['phone'] = sanitizeInput(data['phone']);
 
-    // Validate email
     if (!isValidEmail(data['email'])) {
       throw Exception('Invalid email format');
     }
 
-    // Validate phone (remove +91 prefix if present)
     String phone = data['phone'].replaceAll('+91', '').replaceAll(' ', '');
     if (!isValidPhone(phone)) {
       throw Exception('Invalid phone number. Must be 10 digits starting with 6-9');
@@ -140,8 +128,6 @@ class ApiService {
     }
   }
 
-  // Uploads a payment screenshot (UTR proof) to Cloudinary via the backend
-  // and returns the hosted URL to attach to the booking.
   static Future<String> uploadPaymentScreenshot(File imageFile, {String? bookingReference, String? phone}) async {
     final uri = Uri.parse('$baseUrl/api/upload-payment-screenshot');
     final request = http.MultipartRequest('POST', uri);
@@ -166,36 +152,28 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> bookResort(Map<String, dynamic> data) async {
-    // Validate required fields
     if (data['guestName'] == null || data['email'] == null || data['phone'] == null) {
       throw Exception('Missing required fields');
     }
 
-    // Sanitize inputs
     data['guestName'] = sanitizeInput(data['guestName']);
     data['email'] = sanitizeInput(data['email']);
     data['phone'] = sanitizeInput(data['phone']);
 
-    // Validate email
     if (!isValidEmail(data['email'])) {
       throw Exception('Invalid email format');
     }
 
-    // Validate phone
     String phone = data['phone'].replaceAll('+91', '').replaceAll(' ', '');
     if (!isValidPhone(phone)) {
       throw Exception('Invalid phone number. Must be 10 digits starting with 6-9');
     }
     data['phone'] = '+91$phone';
 
-    // Validate dates
     if (data['checkIn'] != null && data['checkOut'] != null) {
       DateTime checkIn = DateTime.parse(data['checkIn']);
       DateTime checkOut = DateTime.parse(data['checkOut']);
       DateTime now = DateTime.now();
-      // Compare dates only (strip time-of-day) — otherwise a same-day
-      // check-in (parsed as midnight) is always "before" the current
-      // time of day, incorrectly rejecting valid same-day bookings.
       DateTime today = DateTime(now.year, now.month, now.day);
 
       if (checkIn.isBefore(today)) {
@@ -207,7 +185,6 @@ class ApiService {
       }
     }
 
-    // Validate guests
     if (data['guests'] != null) {
       int guests = data['guests'] is int ? data['guests'] : int.parse(data['guests'].toString());
       if (guests < 1 || guests > 20) {
@@ -225,33 +202,6 @@ class ApiService {
     }
   }
 
-  // Uploads a payment screenshot to Cloudinary via the existing
-  // /api/upload-payment-screenshot endpoint and returns the hosted URL.
-  static Future<String> uploadPaymentScreenshot(File imageFile, String bookingReference) async {
-    final uri = Uri.parse("$baseUrl/api/upload-payment-screenshot");
-    final request = http.MultipartRequest('POST', uri);
-    request.headers.addAll({
-      "X-API-Key": apiKey,
-      "Accept": "application/json",
-    });
-    request.fields['bookingReference'] = bookingReference;
-    request.files.add(await http.MultipartFile.fromPath('screenshot', imageFile.path));
-
-    final streamedResponse = await request.send().timeout(timeout);
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['success'] == true && data['url'] != null) {
-        return data['url'];
-      }
-      throw Exception(data['error'] ?? 'Screenshot upload failed');
-    } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['error'] ?? 'Screenshot upload failed');
-    }
-  }
-
   static Future<Map<String, dynamic>> checkAvailability(Map<String, dynamic> data) async {
     final response = await _makeRequest('POST', '/api/check-availability', body: data);
 
@@ -263,7 +213,6 @@ class ApiService {
     }
   }
 
-  // Get Razorpay Key
   static Future<String> getRazorpayKey() async {
     final response = await _makeRequest('GET', '/api/razorpay-key');
 
@@ -275,7 +224,6 @@ class ApiService {
     }
   }
 
-  // Get Coupons
   static Future<List<dynamic>> getCoupons({int? resortId}) async {
     String endpoint = "/api/coupons";
     if (resortId != null) {
@@ -291,17 +239,13 @@ class ApiService {
     }
   }
 
-  // Owner Login with validation
   static Future<Map<String, dynamic>> ownerLogin(String email, String password) async {
-    // Sanitize inputs
     email = sanitizeInput(email);
     
-    // Validate email
     if (!isValidEmail(email) && !isValidPhone(email.replaceAll('+91', ''))) {
       throw Exception('Invalid email or phone format');
     }
 
-    // Validate password
     if (password.isEmpty || password.length < 8) {
       throw Exception('Password must be at least 8 characters');
     }
@@ -323,7 +267,6 @@ class ApiService {
     }
   }
 
-  // Verify Razorpay Payment
   static Future<Map<String, dynamic>> verifyPayment(
     String paymentId,
     String? orderId,
@@ -345,7 +288,6 @@ class ApiService {
       throw Exception("Payment verification failed");
     }
   }
-}
 
   // Get nearby resorts/services
   static Future<List<dynamic>> getNearbyServices({double? latitude, double? longitude, String? type}) async {
@@ -400,22 +342,18 @@ class ApiService {
 
   // Book interior/pest control service
   static Future<Map<String, dynamic>> bookService(Map<String, dynamic> data) async {
-    // Validate required fields
     if (data['guestName'] == null || data['email'] == null || data['phone'] == null) {
       throw Exception('Missing required fields');
     }
 
-    // Sanitize inputs
     data['guestName'] = sanitizeInput(data['guestName']);
     data['email'] = sanitizeInput(data['email']);
     data['phone'] = sanitizeInput(data['phone']);
 
-    // Validate email
     if (!isValidEmail(data['email'])) {
       throw Exception('Invalid email format');
     }
 
-    // Validate phone
     String phone = data['phone'].replaceAll('+91', '').replaceAll(' ', '');
     if (!isValidPhone(phone)) {
       throw Exception('Invalid phone number. Must be 10 digits starting with 6-9');
@@ -445,17 +383,14 @@ class ApiService {
 
   // Book cab/travel service
   static Future<Map<String, dynamic>> bookCab(Map<String, dynamic> data) async {
-    // Validate required fields
     if (data['guestName'] == null || data['phone'] == null || data['pickupLocation'] == null) {
       throw Exception('Missing required fields');
     }
 
-    // Sanitize inputs
     data['guestName'] = sanitizeInput(data['guestName']);
     data['phone'] = sanitizeInput(data['phone']);
     data['pickupLocation'] = sanitizeInput(data['pickupLocation']);
 
-    // Validate phone
     String phone = data['phone'].replaceAll('+91', '').replaceAll(' ', '');
     if (!isValidPhone(phone)) {
       throw Exception('Invalid phone number. Must be 10 digits starting with 6-9');
@@ -485,16 +420,13 @@ class ApiService {
 
   // Place food order
   static Future<Map<String, dynamic>> placeFoodOrder(Map<String, dynamic> data) async {
-    // Validate required fields
     if (data['guestName'] == null || data['phone'] == null || data['items'] == null) {
       throw Exception('Missing required fields');
     }
 
-    // Sanitize inputs
     data['guestName'] = sanitizeInput(data['guestName']);
     data['phone'] = sanitizeInput(data['phone']);
 
-    // Validate phone
     String phone = data['phone'].replaceAll('+91', '').replaceAll(' ', '');
     if (!isValidPhone(phone)) {
       throw Exception('Invalid phone number. Must be 10 digits starting with 6-9');
