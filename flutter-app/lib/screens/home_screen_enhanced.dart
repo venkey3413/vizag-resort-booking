@@ -5,8 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../services/websocket_service.dart';
 import '../utils/app_colors.dart';
 import '../widgets/custom_header.dart';
-import '../widgets/category_grid.dart';
 import '../widgets/birthday_section.dart';
+import '../widgets/what_you_looking_for.dart';
 import 'resorts_list_screen.dart';
 import 'details_screen_enhanced.dart';
 import 'events_screen.dart';
@@ -151,16 +151,20 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
               ),
             ),
 
-            // Category Grid (Resorts, Offers, Destinations, Near Me, Support,
-            // Interior Works/Repairs, Pest Control, Events, Cabs & Travel, Food Orders)
+            // What are you looking for? - New Enhanced Category Grid
             SliverToBoxAdapter(
               child: Transform.translate(
                 offset: const Offset(0, -18),
-                child: CategoryGrid(
-                  onResortsTap: () {
+                child: WhatYouLookingFor(
+                  onResortTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ResortsListScreen()),
+                    );
+                  },
+                  onBirthdayTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Birthday packages coming soon')),
                     );
                   },
                   onEventsTap: () {
@@ -169,9 +173,29 @@ class _HomeScreenEnhancedState extends State<HomeScreenEnhanced> with WidgetsBin
                       MaterialPageRoute(builder: (context) => const EventsScreen()),
                     );
                   },
-                  onOffersTap: () {
+                  onPartiesTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Offers coming soon')),
+                      const SnackBar(content: Text('Party packages coming soon')),
+                    );
+                  },
+                  onPhotoshootTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Photoshoot packages coming soon')),
+                    );
+                  },
+                  onDiningTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Dining packages coming soon')),
+                    );
+                  },
+                  onDecorationsTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Decoration services coming soon')),
+                    );
+                  },
+                  onSurpriseTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Surprise packages coming soon')),
                     );
                   },
                 ),
